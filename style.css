@@ -1312,7 +1312,9 @@ body.party {
 
 /* 勢いよく着地されたボタンはへこむ（アニメーションと取り合わないよう transform で） */
 .pixel-btn.bumped,
-.coin-slot.bumped {
+.coin-slot.bumped,
+.omikuji-btn.bumped,
+.about-btn.bumped {
   transform: translateY(var(--px));
 }
 

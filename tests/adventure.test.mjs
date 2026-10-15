@@ -4,7 +4,7 @@ const heroInfo = (p) => p.ev(`(() => {
   if (!h) return null;
   const r = h.getBoundingClientRect();
   const feetY = r.bottom + scrollY, feetX = r.left + r.width / 2;
-  const plats = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot")];
+  const plats = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn")];
   const on = plats.find((el) => { const b = el.getBoundingClientRect(); return Math.abs(b.top + scrollY - feetY) < 3 && feetX > b.left && feetX < b.right; });
   const coin = document.querySelector(".coin-slot").getBoundingClientRect();
   return { x: Math.round(r.left + scrollX), feetY: Math.round(feetY), on: on ? on.className.split(" ")[0] + ":" + on.textContent.trim().slice(0, 10) : null, coinX: Math.round(coin.left + coin.width / 2) };
@@ -31,7 +31,89 @@ async function quickClear(t, p) {
 }
 const coinSpots = (p) => p.ev(`[...document.querySelectorAll(".adv-coin")].map((c) => c.style.translate).sort().join("|")`);
 
+// ピクセを、ある足場の真下（の x）まで歩かせて、ジャンプする
+async function walkUnderAndJump(t, p, selector) {
+  for (let i = 0; i < 80; i++) {
+    const w = await heroInfo(p);
+    const tx = await p.ev(`(() => { const b = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect(); return Math.round(b.left + b.width / 2 + scrollX); })()`);
+    const dx = tx - (w.x + 16);
+    if (Math.abs(dx) < 6) break;
+    const k = dx > 0 ? "ArrowRight" : "ArrowLeft";
+    await p.key(k, "down"); await t.sleep(Math.min(250, Math.abs(dx) * 4)); await p.key(k, "up"); await t.sleep(100);
+  }
+  await p.key(" ", "down"); await t.sleep(400); await p.key(" ", "up");
+  await t.sleep(1200);
+  return heroInfo(p);
+}
+
 export default {
+  async "どの画面サイズでも、すべての足場からジャンプで 1 つ上の足場に届く"(t) {
+    // ジャンプで上がれるのは約 115px（JUMP_V = -11）。余裕をみて 110px 以内に 1 つ上の足場があること
+    const REACH = 110;
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    for (const [w, h] of [[360, 780], [390, 844], [430, 932], [768, 1024], [1280, 800], [1920, 1080]]) {
+      await p.size(w, h, w < 600);
+      await p.goto(server.url);
+      await p.boot({ readIntro: false });
+      await p.ev(`adventure.start()`);
+      await t.sleep(300);
+      const gaps = await p.ev(`(() => {
+        const els = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn")];
+        const plats = els.map((el) => { const b = el.getBoundingClientRect(); return { name: el.className.split(" ")[0] + ":" + el.textContent.trim().slice(0, 8), t: b.top + scrollY, l: b.left, r: b.right }; });
+        const ground = document.querySelector(".adv-ground").getBoundingClientRect().top + scrollY;
+        const top = Math.min(...plats.map((p) => p.t));
+        // 地面と、いちばん上以外の足場について：横に 200px 以内で、上に 0〜REACH px の足場があるか
+        const froms = [{ name: "地面", t: ground, l: 0, r: innerWidth }, ...plats.filter((p) => p.t > top + 1)];
+        return froms.map((f) => {
+          const ups = plats.filter((u) => u.t < f.t - 1 && u.r > f.l - 200 && u.l < f.r + 200).map((u) => f.t - u.t);
+          return { from: f.name, need: Math.round(Math.min(...ups)) };
+        }).filter((g) => !(g.need <= ${REACH}));
+      })()`);
+      for (const g of gaps) t.ok(false, `${w}x${h}：${g.from} から上の足場まで ${g.need}px（届かない）`);
+      await p.ev(`adventure.exit(false)`);
+    }
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "スマホで、いちばん下からフッターの足場を階段にして、リンクまで登れる"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser({ width: 390, height: 844 });
+    const p = await b.firstPage();
+    await p.size(390, 844, true);
+    await p.goto(server.url);
+    await p.boot({ readIntro: false });
+    await p.ev(`adventure.start()`);
+    await t.sleep(1500);
+    const dropToGround = async () => {
+      for (let i = 0; i < 12; i++) { await p.key("ArrowDown", "down"); await t.sleep(120); await p.key("ArrowDown", "up"); await t.sleep(300); }
+      await t.sleep(800);
+    };
+    // 目標の足場に乗るまで、その真下でジャンプをくり返す（とちゅうの足場を階段にしてよい）
+    const climbTo = async (selector, prefix, tries = 4) => {
+      const path = [];
+      for (let i = 0; i < tries; i++) {
+        const at = await walkUnderAndJump(t, p, selector);
+        path.push(at.on ?? "地面");
+        if (at.on?.startsWith(prefix)) return { ok: true, path };
+      }
+      return { ok: false, path };
+    };
+    await dropToGround();
+    t.eq((await heroInfo(p)).on, null, "いちばん下（地面）まで落ちていない");
+    const coin = await climbTo(".coin-slot", "coin-slot");
+    t.ok(coin.ok, `INSERT COIN まで登れない: ${coin.path.join(" → ")}`);
+    const link = await climbTo(".coin-slot", "pixel-btn", 2);
+    t.ok(link.ok, `INSERT COIN からリンクへ登れない: ${link.path.join(" → ")}`);
+    await dropToGround();
+    const omikuji = await climbTo(".omikuji-btn", "omikuji-btn");
+    t.ok(omikuji.ok, `おみくじに乗れない: ${omikuji.path.join(" → ")}`);
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "同じ日はコースが同じで、日がかわるとコースもかわる"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
