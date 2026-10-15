@@ -928,6 +928,8 @@ const simple = (() => {
     btn.addEventListener("focus", sound.sfx.hover);
     // リンクを押すとワープ（新しいタブで開くので、このページはそのまま）
     btn.addEventListener("click", (e) => {
+      // どのリンクに行ったかは、シンプルモードでも知らせる（お気に入りを覚えるため）
+      emit("link", { icon: btn.querySelector("[data-icon]")?.dataset.icon });
       if (simple.on) return; // シンプルモードでは、ふつうにリンクを開くだけ
       sound.sfx.select();
       stars.warp();

@@ -212,6 +212,7 @@ const grow = (() => {
           <dt>なまえ</dt><dd>${stage.name}</dd>
           <dt>であって</dt><dd>${age + 1}にちめ</dd>
           <dt>あえた ひ</dt><dd>${state.days.length}にち</dd>
+          <dt>よく いく せかい</dt><dd>${typeof favorite !== "undefined" && favorite.fav() ? `${favorite.fav().label}（${favorite.fav().n}かい）` : "まだ ない"}</dd>
           <dt>つぎの せいちょう</dt><dd>${STAGES[state.stage + 1] ? `あと ${STAGES[state.stage + 1].days - state.days.length}にち` : "もう さいこう！"}</dd>
         </dl>
       </div>
@@ -254,5 +255,5 @@ const grow = (() => {
   cheats.add("diary", open);
   renderBadge();
 
-  return { state, open, stageName: () => STAGES[state.stage].name };
+  return { state, open, write, stageName: () => STAGES[state.stage].name };
 })();

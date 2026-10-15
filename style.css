@@ -2357,3 +2357,31 @@ body.party {
 .dozing .stars {
   opacity: 0.55;
 }
+
+/* =====================================================================
+   お気に入りのリンク（v1.7）
+   ===================================================================== */
+.pixel-btn .fav-mark {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 21px;
+  height: 18px;
+  translate: 0 -50%;
+}
+
+.pixel-btn .fav-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 画面には出さず、スクリーンリーダーにだけ読ませる文字 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
