@@ -113,6 +113,7 @@ const wardrobe = (() => {
       apply();
     },
     hats: () => HATS,
+    opened: (id) => !!HATS[id] && isOpen(HATS[id]),
     currentId: () => current ?? seasonal,
   };
 })();
@@ -215,6 +216,7 @@ const favicon = (() => {
     [Infinity, "しんげつ"],
   ];
   const name = NAMES.find(([max]) => age < max)[1];
+  el.dataset.phase = name; // 図鑑が「きょう見た月」として読む
   el.setAttribute("aria-label", `きょうの つき：${name}`);
 
   el.addEventListener("click", () => {
@@ -280,6 +282,7 @@ const favicon = (() => {
   // となりから来たピクセ（お客さん）
   function showGuest(from, hat) {
     if (guest) return;
+    emit("seen", { id: "guest" });
     const el = document.createElement("button");
     el.type = "button";
     el.className = "npc-guest";

@@ -879,6 +879,7 @@ const ufo = (() => {
     el.setAttribute("aria-label", "UFOをうつ");
     el.style.top = `${40 + Math.floor(Math.random() * 160)}px`;
     el.innerHTML = pixelSvg(ufoLook);
+    emit("seen", { id: ufoLook === UFO ? "ufo" : "bat" });
 
     el.addEventListener("click", (e) => {
       // 飛んでいた位置で止めてから爆発させる

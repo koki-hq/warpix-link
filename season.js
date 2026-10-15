@@ -204,5 +204,5 @@ const season = (() => {
   }
 
   // 季節の曲（クリスマスはジングルベル）。作曲画面の「もとの BGM に もどす」で使う
-  return { current, song: current === "christmas" ? JINGLE : null };
+  return { current, song: current === "christmas" ? JINGLE : null, bat: BAT };
 })();

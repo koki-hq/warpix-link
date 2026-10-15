@@ -95,10 +95,16 @@
 
   <dialog class="diary" id="diary" aria-labelledby="diary-title">
     <div class="diary-top">
-      <h2 id="diary-title">ピクセの にっき</h2>
+      <h2 id="diary-title">ピクセの ノート</h2>
       <button class="diary-close" id="diary-close" type="button" aria-label="閉じる">✕</button>
     </div>
-    <div class="diary-body" id="diary-body"></div>
+    <div class="diary-tabs" role="tablist" aria-label="ノートの ページ">
+      <button type="button" class="diary-tab" role="tab" id="tab-diary" data-tab="diary" aria-selected="true" aria-controls="diary-body">にっき</button>
+      <button type="button" class="diary-tab" role="tab" id="tab-zukan" data-tab="zukan" aria-selected="false" aria-controls="zukan-body">ずかん</button>
+    </div>
+    <!-- ページは長くてスクロールするので、キーボードでも選んでスクロールできるよう tabindex をつける -->
+    <div class="diary-body" id="diary-body" role="tabpanel" aria-labelledby="tab-diary" tabindex="0"></div>
+    <div class="diary-body zukan-body" id="zukan-body" role="tabpanel" aria-labelledby="tab-zukan" tabindex="0" hidden></div>
   </dialog>
 
   <div class="game" id="game" role="dialog" aria-label="ミニゲーム PIXE INVADERS" hidden>
@@ -250,6 +256,7 @@
   <script src="favorite.js"></script>
   <script src="compose.js"></script>
   <script src="omikuji.js"></script>
+  <script src="zukan.js"></script>
   <script src="about.js"></script>
 </body>
 </html>

@@ -53,8 +53,9 @@ const grow = (() => {
   function write(type, text, { force = false } = {}) {
     const todays = state.diary.filter((e) => e.date === ymd);
     if (todays.some((e) => e.type === type)) return;
-    if (!force && todays.length >= MAX_PER_DAY) return;
-    state.diary.push({ date: ymd, type, text });
+    // 上限の外で書いた行（force）は、ほかのできごとの行の枠を使わない
+    if (!force && todays.filter((e) => !e.free).length >= MAX_PER_DAY) return;
+    state.diary.push(force ? { date: ymd, type, text, free: true } : { date: ymd, type, text });
     if (state.diary.length > 500) state.diary.splice(0, state.diary.length - 500);
     save();
     renderBadge();

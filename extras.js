@@ -92,6 +92,7 @@ const achievements = (() => {
     { id: "omikuji", name: "おみくじ", desc: "ピクセの おみくじを ひいた", hint: "いちばん したに なにか ある" },
     { id: "daikichi", name: "だいきち！", desc: "おみくじで だいきちを ひいた", hint: "まいにち ひいていれば いつか……" },
     { id: "ghost", name: "ゴーストに かて", desc: "ぼうけんで きょうの ゴーストに かった", hint: "おなじ ひに 2かい ぼうけんすると……" },
+    { id: "zukan-half", name: "ずかん はんぶん", desc: "ピクセの ずかんを はんぶん うめた", hint: "いろいろな ものに であうと……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
@@ -377,6 +378,7 @@ const cheats = (() => {
 // ---------- マザーシップ（10発で撃沈） ----------
 function mothership() {
   if (document.querySelector(".mothership")) return;
+  emit("seen", { id: "mothership" });
   const HP = 10;
   let hp = HP;
   const el = document.createElement("button");
@@ -432,6 +434,7 @@ function mothership() {
     const el = document.createElement("button");
     el.type = "button";
     el.className = "shooting-star";
+    emit("seen", { id: "star" });
     el.setAttribute("aria-label", "ながれぼしをつかまえる");
     el.style.top = `${Math.floor(innerHeight * (0.05 + Math.random() * 0.25))}px`;
     el.style.left = `${Math.floor(innerWidth * (0.5 + Math.random() * 0.45))}px`;

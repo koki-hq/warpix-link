@@ -107,6 +107,7 @@ async function axe(p, label, setup = "") {
   await axe(p, "実績画面", `document.getElementById("trophy-btn").click()`);
   await p.ev(`document.getElementById("trophies").close()`);
   await axe(p, "日記", `document.getElementById("diary-btn").click()`);
+  await axe(p, "ずかん", `document.querySelector('.diary-tab[data-tab="zukan"]').click()`);
   await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "このページについて", `document.getElementById("about-btn").click()`);
   await p.ev(`document.getElementById("about").close()`);

@@ -136,6 +136,7 @@ const omikuji = (() => {
       grow.write("omikuji", `おみくじは ${result.fortune.name}。ラッキーリンクは ${result.label}。`);
     }
     show(result, fresh);
+    emit("omikuji", { name: result.fortune.name });
     if (!fresh && npc.ready()) npc.say(["きょうは もう ひいたよ。\nあしたまた ひいてね。"]);
   }
 

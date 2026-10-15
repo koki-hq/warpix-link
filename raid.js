@@ -70,6 +70,7 @@ const raid = (() => {
 
   // ---------- 始まり・終わり ----------
   function join(slot) {
+    emit("seen", { id: "raid" });
     cur = { slot, hp: null, max: null, owner: null, hits: 0, players: new Set([online.me]), el: build() };
     render();
     sound.sfx.rumble();

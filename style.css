@@ -2945,3 +2945,127 @@ a,
     visibility: hidden;
   }
 }
+
+/* =====================================================================
+   ピクセの ずかん（v1.9）：日記のノートのタブ
+   ===================================================================== */
+.diary-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  background: #fffaf0;
+  border-bottom: 2px solid #e6dcc6;
+}
+
+.diary-tab {
+  padding: 6px 14px;
+  border: 0;
+  background: #efe6d2;
+  color: #8a7f68;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.diary-tab[aria-selected="true"] {
+  background: var(--accent);
+  color: #fffaf0;
+}
+
+.diary-tab:focus-visible {
+  outline: 2px solid #1a1433;
+  outline-offset: 2px;
+}
+
+.diary-body[hidden] {
+  display: none;
+}
+
+.diary-body:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+
+.zukan-head p {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.zukan-head b {
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--accent);
+}
+
+.zukan-bar {
+  height: 8px;
+  background: #efe6d2;
+  outline: 2px solid #1a1433;
+}
+
+.zukan-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.zukan-section h3 {
+  margin: 16px 0 6px;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--accent);
+}
+
+.zukan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zukan-grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.zukan-pic {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 8px;
+  background: #1a1433;
+}
+
+.zukan-pic svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.zukan-text {
+  font-family: "DotGothic16", monospace;
+  font-size: 18px;
+  color: #ff6b6b;
+}
+
+.unknown .zukan-text {
+  color: #3d3460;
+}
+
+.zukan-name {
+  font-size: 11px;
+  line-height: 1.3;
+  color: #1a1433;
+}
+
+.unknown .zukan-name {
+  color: #b3a88f;
+}

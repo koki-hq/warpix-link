@@ -83,6 +83,7 @@ const online = (() => {
         el = document.createElement("button");
         el.type = "button";
         el.className = "ghost";
+        emit("seen", { id: "visitor" });
         el.setAttribute("aria-label", "ほかの ひとの ピクセに てを ふる");
         const { left, top } = spot(id);
         el.style.left = left;

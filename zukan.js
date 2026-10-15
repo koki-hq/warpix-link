@@ -1,0 +1,167 @@
+// ---------- ピクセの ずかん：これまでに出会ったものを、日記のノートに集めていく ----------
+// 記録はこのブラウザの中だけ。まだ出会っていないものは、黒いシルエットと「？？？」。
+const zukan = (() => {
+  const KEY = "warpix-zukan";
+  const preview = new URLSearchParams(location.search).has("date");
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const ymd = (() => { const d = today(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; })();
+  const state = store.get(KEY, null) ?? { seen: {} }; // { "sky:ufo": "2026-10-16", ... }
+  const save = () => !preview && store.set(KEY, state);
+
+  // ---------- 絵 ----------
+  const STAR = [
+    "............",
+    ".....yy.....",
+    ".....yy.....",
+    "....yyyy....",
+    "yyyyywwyyyyy",
+    ".yyyywwyyyy.",
+    "..yyyyyyyy..",
+    "..yyyyyyyy..",
+    ".yyyy..yyyy.",
+    ".yyy....yyy.",
+    ".y........y.",
+    "............",
+  ];
+  const WEATHER = {
+    clear: ["............", ".....yy.....", ".y..yyyy..y.", "..yyyyyyyy..", "..yyyyyyyy..", ".yyyyyyyyyy.", ".yyyyyyyyyy.", "..yyyyyyyy..", "..yyyyyyyy..", ".y..yyyy..y.", ".....yy.....", "............"],
+    cloudy: ["............", "............", "....wwww....", "..wwwwwwww..", ".wwwwwwwwww.", "wwwwwwwwwwww", "wwwwwwwwwwww", ".wwwwwwwwww.", "............", "............", "............", "............"],
+    fog: ["............", "............", "wwwwwwww....", "............", "...wwwwwwwww", "............", "wwwwwwwww...", "............", "...wwwwwwww.", "............", "wwwwwww.....", "............"],
+    rain: ["....wwww....", "..wwwwwwww..", ".wwwwwwwwww.", "wwwwwwwwwwww", ".wwwwwwwwww.", "............", "..c...c...c.", "..c...c...c.", "............", ".c...c...c..", ".c...c...c..", "............"],
+    snow: ["............", ".w....w....w", "............", "....w....w..", "..w.........", ".......w....", ".w.........w", "....w.......", ".........w..", "..w....w....", "............", ".....w....w."],
+    thunder: ["....wwww....", "..wwwwwwww..", ".wwwwwwwwww.", "wwwwwwwwwwww", ".wwwwyywwww.", ".....yy.....", "....yy......", "...yyyyy....", ".....yy.....", "....yy......", "...yy.......", "............"],
+  };
+  function moonRows(phase) {
+    return Array.from({ length: 16 }, (_, y) => {
+      let row = "";
+      for (let x = 0; x < 16; x++) {
+        const dx = (x + 0.5 - 8) / 7.5;
+        const dy = (y + 0.5 - 8) / 7.5;
+        if (dx * dx + dy * dy > 1) { row += "."; continue; }
+        const w = Math.sqrt(1 - dy * dy);
+        const lit = phase < 0.5 ? dx >= w * Math.cos(2 * Math.PI * phase) : dx <= w * Math.cos(2 * Math.PI * (phase - 0.5));
+        row += lit ? "y" : "n";
+      }
+      return row;
+    });
+  }
+  const pixeIn = (palette) => (rows) => pixelSvg(rows, { ...PALETTE, ...palette });
+  const hatOn = (id) => () => pixelSvg(dress(NPC.idle, wardrobe.hats()[id] ?? null, []));
+
+  // ---------- 図鑑の中身 ----------
+  const SECTIONS = [
+    {
+      id: "sky", title: "そらで であった もの",
+      entries: [
+        { id: "ufo", name: "UFO", draw: () => pixelSvg(UFO) },
+        { id: "bat", name: "コウモリ", draw: () => pixelSvg(season.bat) },
+        { id: "mothership", name: "マザーシップ", draw: () => pixelSvg(MOTHERSHIP) },
+        { id: "star", name: "ながれぼし", draw: () => pixelSvg(STAR) },
+        { id: "raid", name: "みんなの マザーシップ", draw: () => pixelSvg(MOTHERSHIP, { ...PALETTE, c: "var(--accent)" }) },
+        { id: "visitor", name: "だれかの ピクセ", draw: () => pixeIn({ w: "var(--muted)" })(NPC.idle) },
+        { id: "guest", name: "となりの タブの ぼく", draw: () => pixelSvg(NPC.idle) },
+        { id: "adv-ghost", name: "ぼうけんの ゴースト", draw: () => pixeIn({ o: "var(--accent-2)", w: "var(--accent-2)", p: "var(--accent-2)", c: "var(--bg)" })(NPC.idle) },
+      ],
+    },
+    {
+      id: "moon", title: "みた つき",
+      entries: [
+        ["しんげつ", 0.02], ["みかづき", 0.12], ["じょうげんの つき", 0.25], ["まんげつ ちょっと まえ", 0.4],
+        ["まんげつ", 0.5], ["ちょっと かけた つき", 0.6], ["かげんの つき", 0.75], ["ありあけの つき", 0.88],
+      ].map(([name, ph]) => ({ id: name, name, draw: () => pixelSvg(moonRows(ph), { ...PALETTE, n: "var(--btn)" }) })),
+    },
+    {
+      id: "weather", title: "そっちの てんき",
+      entries: [["clear", "はれ"], ["cloudy", "くもり"], ["fog", "きり"], ["rain", "あめ"], ["snow", "ゆき"], ["thunder", "かみなり"]]
+        .map(([id, name]) => ({ id, name, draw: () => pixelSvg(WEATHER[id]) })),
+    },
+    {
+      id: "season", title: "きせつ",
+      entries: [["halloween", "ハロウィン", "pumpkin"], ["christmas", "クリスマス", "santa"], ["newyear", "おしょうがつ", "hachimaki"], ["tanabata", "たなばた", "tanzaku"]]
+        .map(([id, name, hat]) => ({ id, name, draw: hatOn(hat), has: () => store.get("warpix-season-hats", []).includes(`season:${id}`) })),
+    },
+    {
+      id: "fortune", title: "おみくじ",
+      entries: [["だいきち", "大吉"], ["ちゅうきち", "中吉"], ["しょうきち", "小吉"], ["きち", "吉"], ["すえきち", "末吉"]].map(([name, text]) => ({ id: name, name, text })),
+    },
+    {
+      id: "hat", title: "ぼうし",
+      entries: Object.entries(wardrobe.hats()).map(([id, hat]) => ({ id, name: hat.name, draw: hatOn(id), has: () => wardrobe.opened(id) })),
+    },
+  ];
+  // 帽子は季節・天気の帽子があとから足されるので、ひらくたびに作り直す
+  function hatSection() {
+    const s = SECTIONS.find((x) => x.id === "hat");
+    s.entries = Object.entries(wardrobe.hats()).map(([id, hat]) => ({ id, name: hat.name, draw: hatOn(id), has: () => wardrobe.opened(id) }));
+  }
+
+  const has = (section, entry) => (entry.has ? entry.has() : !!state.seen[`${section.id}:${entry.id}`]);
+  function counts() {
+    hatSection();
+    let got = 0;
+    let total = 0;
+    for (const s of SECTIONS) for (const e of s.entries) { total++; if (has(s, e)) got++; }
+    return { got, total };
+  }
+
+  // ---------- 記録する ----------
+  function mark(section, id) {
+    const key = `${section}:${id}`;
+    if (state.seen[key]) return;
+    state.seen[key] = ymd;
+    save();
+    const s = SECTIONS.find((x) => x.id === section);
+    const e = s?.entries.find((x) => x.id === id);
+    // 1 日 1 行だけなので、日記の 1 日の上限（できごとの行）には数えない
+    if (e) grow.write("zukan", `ずかんに「${e.name}」が ふえた。`, { force: true });
+    const { got, total } = counts();
+    if (got * 2 >= total) achievements.unlock("zukan-half");
+  }
+  on("seen", ({ id }) => mark("sky", id));
+  on("weather", ({ kind }) => mark("weather", kind));
+  on("omikuji", ({ name }) => mark("fortune", name));
+  on("boot", () => {
+    const phase = document.getElementById("moon").dataset.phase;
+    if (phase) mark("moon", phase);
+  });
+
+  // ---------- 画面（日記のノートの「ずかん」タブ） ----------
+  const body = document.getElementById("zukan-body");
+  function render() {
+    const { got, total } = counts();
+    const silhouette = (svg) => svg.replace(/style="fill:[^"]+"/g, 'style="fill:#3d3460"'); // 暗いマスの上で、形だけうっすら見える
+    body.innerHTML = `
+      <div class="zukan-head">
+        <p>あつめた かず <b>${got}</b> / ${total}</p>
+        <div class="zukan-bar"><span style="width:${Math.round((got / total) * 100)}%"></span></div>
+      </div>
+      ${SECTIONS.map((s) => `
+        <section class="zukan-section">
+          <h3>${s.title}</h3>
+          <ul class="zukan-grid">
+            ${s.entries.map((e) => {
+              const ok = has(s, e);
+              const pic = e.text ? `<span class="zukan-text">${ok ? e.text : "？"}</span>` : ok ? e.draw() : silhouette(e.draw());
+              return `<li class="${ok ? "got" : "unknown"}"><span class="zukan-pic">${pic}</span><span class="zukan-name">${ok ? e.name : "？？？"}</span></li>`;
+            }).join("")}
+          </ul>
+        </section>`).join("")}`;
+  }
+
+  // タブの切りかえ
+  const tabs = [...document.querySelectorAll(".diary-tab")];
+  function show(which) {
+    for (const t of tabs) t.setAttribute("aria-selected", String(t.dataset.tab === which));
+    document.getElementById("diary-body").hidden = which !== "diary";
+    body.hidden = which !== "zukan";
+    if (which === "zukan") render();
+  }
+  tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.tab)));
+  document.getElementById("diary-btn").addEventListener("click", () => show("diary"));
+  cheats.add("zukan", () => {
+    grow.open();
+    show("zukan");
+  });
+
+  return { mark, counts, show, state };
+})();

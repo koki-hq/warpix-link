@@ -532,6 +532,7 @@ const adventure = (() => {
       const plain = (rows) => pixelSvg(rows, { o: "var(--accent-2)", w: "var(--accent-2)", p: "var(--accent-2)", c: "var(--bg)" });
       ghostSvgs = { idle: plain(FRAMES.idle), walk: plain(FRAMES.walk), jump: plain(FRAMES.jump) };
       ghostEl = sprite("adv-ghost", `<span class="ghost-tag">BEST</span><span class="ghost-body"></span>`);
+      emit("seen", { id: "adv-ghost" });
     }
     spawnCoins();
     spawnEnemies();
