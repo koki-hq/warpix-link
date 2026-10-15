@@ -555,6 +555,7 @@ const npc = (() => {
   let shown = 0;
   let typing = null;
   let lastChatter = -1;
+  let introStarted = false;
 
   function render() {
     box.classList.toggle("more", !typing && queue.length > 0);
@@ -642,8 +643,13 @@ const npc = (() => {
   return {
     say,
     jump,
-    intro: () => say(INTRO),
+    intro() {
+      introStarted = true;
+      say(INTRO);
+    },
     busy: () => !!typing || queue.length > 0,
+    // あいさつを最後まで言い終えたか
+    ready: () => introStarted && !typing && queue.length === 0,
     sleep(on) {
       asleep = on;
       sprite.classList.toggle("asleep", on);
@@ -748,7 +754,7 @@ const ufo = (() => {
 
   document.querySelectorAll(".pixel-btn").forEach((btn, i) => {
     btn.style.setProperty("--i", i);
-    btn.addEventListener("mouseenter", sound.sfx.hover);
+    btn.addEventListener("mouseenter", () => pointerMoved && sound.sfx.hover());
     btn.addEventListener("focus", sound.sfx.hover);
     // リンクを押すとワープ（新しいタブで開くので、このページはそのまま）
     btn.addEventListener("click", (e) => {
@@ -787,10 +793,22 @@ const ufo = (() => {
     }
   });
 
+  // スタートをクリックした位置にボタンが滑り込んでくると、マウスを動かしていなくても
+  // mouseenter が起きてしまう。実際にマウスが動くまではホバー音を鳴らさない
+  let pointerMoved = false;
+  let startX = null;
+  let startY = null;
+  addEventListener("pointermove", (e) => {
+    if (startX === null || e.clientX !== startX || e.clientY !== startY) pointerMoved = true;
+  });
+
   let started = false;
-  function start() {
+  function start(e) {
     if (started) return;
     started = true;
+    pointerMoved = false;
+    startX = e?.clientX ?? null;
+    startY = e?.clientY ?? null;
     sound.sfx.start();
     if (bgmOn) sound.bgmPlay(0.8);
     startScreen.classList.add("leaving");

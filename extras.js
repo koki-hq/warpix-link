@@ -464,7 +464,8 @@ function mothership() {
   document.querySelectorAll(".pixel-btn").forEach((btn) => {
     const icon = btn.querySelector("[data-icon]")?.dataset.icon;
     const show = () => {
-      if (icon === lastIcon || npc.busy() || !COMMENTS[icon]) return;
+      // あいさつより先に紹介しない（スタート直後にカーソルの下へボタンが出てきたときなど）
+      if (icon === lastIcon || !npc.ready() || !COMMENTS[icon]) return;
       lastIcon = icon;
       npc.say([COMMENTS[icon]]);
     };
