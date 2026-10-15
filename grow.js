@@ -162,7 +162,7 @@ const grow = (() => {
     master: "じっせきを ぜんぶ あつめた！ でんせつだ。",
   };
   // ほかの行で書いている実績は、二重に書かない
-  const COVERED = new Set(["postcard", "raid", "night-owl", "growup", "adventure", "speedrun", "reunion", "diary", "ufo", "weather", "season", "invader", "invader-pro"]);
+  const COVERED = new Set(["boss", "postcard", "raid", "night-owl", "growup", "adventure", "speedrun", "reunion", "diary", "ufo", "weather", "season", "invader", "invader-pro"]);
   on("achievement", ({ id, name }) => {
     if (NOTABLE[id]) write(`ach-${id}`, NOTABLE[id]);
     else if (!COVERED.has(id)) write("ach", `じっせき「${name}」を とった。`); // ふつうの実績は 1日 1行まで
@@ -170,6 +170,7 @@ const grow = (() => {
   on("adventure-clear", ({ time }) => write("adventure", `いっしょに ぼうけんした。タイムは ${adventure.fmtTime(time)}。`));
   on("game-over", ({ score: s }) => s >= 300 && write("invaders", `インベーダーで ${s}てん とった。`));
   on("ufo-down", () => write("ufo", "UFOを うちおとしてくれた。"));
+  on("game-boss", ({ wave }) => write("boss", `ミニゲームの ボスを たおした！（ウェーブ ${wave}）`));
   on("raid-win", ({ players }) => write("raid", `みんなで マザーシップを たおした。${players}にんの ヒーロー。`));
   on("wear", ({ id, name }) => write("wear", id ? `${name}を かぶせてもらった。` : "ぼうしを ぬいだ。"));
   on("tab-travel", ({ role }) => write("tab", role === "visit" ? "となりの タブに あそびに いった。" : "となりの タブから ぼくが きた。"));

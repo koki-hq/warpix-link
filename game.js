@@ -84,6 +84,7 @@ const game = (() => {
       invader: INVADER.map(make),
       burst: make(BURST),
       heart: make(HEART),
+      boss: make(MOTHERSHIP),
     };
   }
 
@@ -125,6 +126,7 @@ const game = (() => {
       bullets: [],
       ebullets: [],
       enemies: spawnWave(1),
+      boss: null,
       dir: 1,
       stepTimer: 0,
       anim: 0,
@@ -156,7 +158,10 @@ const game = (() => {
       if (--st.phaseTimer <= 0) {
         if (st.phase === "clear") {
           st.wave++;
-          st.enemies = spawnWave(st.wave);
+          // 3 ウェーブごとに、ふつうの敵の代わりにボス
+          const bossWave = st.wave % 3 === 0;
+          st.enemies = bossWave ? [] : spawnWave(st.wave);
+          st.boss = bossWave ? { x: 56, y: 16, w: 48, h: 20, hp: 20 + st.wave * 2, max: 20 + st.wave * 2, dir: 1, fireCd: 70, flash: 0 } : null;
           st.dir = 1;
           st.ebullets = [];
           st.phase = "ready";
@@ -192,10 +197,22 @@ const game = (() => {
       sfx("shoot");
     }
 
+    // ボス：左右に動きながら、扇形に 3 発ずつ撃つ
+    const boss = st.boss;
+    if (boss) {
+      boss.x += boss.dir * (0.5 + st.wave * 0.05);
+      if (boss.x < 4 || boss.x + boss.w > W - 4) boss.dir *= -1;
+      if (boss.flash > 0) boss.flash--;
+      if (--boss.fireCd <= 0) {
+        boss.fireCd = Math.max(36, 80 - st.wave * 4);
+        for (const vx of [-0.6, 0, 0.6]) st.ebullets.push({ x: boss.x + boss.w / 2, y: boss.y + boss.h, v: 1.1 + st.wave * 0.05, vx });
+      }
+    }
+
     // 敵の行進（残りが少ないほど速くなる）
     const alive = st.enemies.filter((e) => e.alive);
     const interval = Math.max(3, 28 - (18 - alive.length) * 1.4 - st.wave * 2);
-    if (++st.stepTimer >= interval) {
+    if (alive.length && ++st.stepTimer >= interval) {
       st.stepTimer = 0;
       st.anim ^= 1;
       const minX = Math.min(...alive.map((e) => e.x));
@@ -215,6 +232,20 @@ const game = (() => {
     // 自機の弾
     for (const b of st.bullets) {
       b.y -= 3;
+      if (boss && boss.hp > 0 && hit(b.x, b.y, 1, 3, boss.x, boss.y, boss.w, boss.h)) {
+        b.y = -10;
+        boss.hp--;
+        boss.flash = 6;
+        st.score += 10 * st.wave;
+        sfx("hit");
+        if (boss.hp <= 0) {
+          for (let i = 0; i < 5; i++) st.bursts.push({ x: boss.x + i * 10, y: boss.y + (i % 2) * 8, t: 24 });
+          st.score += 500 * st.wave;
+          sfx("boom");
+          if (!demo) emit("game-boss", { wave: st.wave });
+        }
+        continue;
+      }
       for (const e of alive) {
         if (e.alive && hit(b.x, b.y, 1, 3, e.x, e.y, 8, 6)) {
           e.alive = false;
@@ -231,6 +262,7 @@ const game = (() => {
     // 敵の弾
     for (const b of st.ebullets) {
       b.y += b.v;
+      b.x += b.vx ?? 0;
       if (st.inv === 0 && hit(b.x, b.y, 1, 3, st.px, PLAYER_Y, 8, 8)) {
         b.y = H + 10;
         st.lives--;
@@ -244,7 +276,8 @@ const game = (() => {
 
     if (alive.some((e) => e.alive && e.y + 6 >= PLAYER_Y)) return gameOver();
 
-    if (st.enemies.every((e) => !e.alive)) {
+    if (boss ? boss.hp <= 0 : st.enemies.every((e) => !e.alive)) {
+      st.boss = null;
       st.score += 100 * st.wave;
       st.phase = "clear";
       st.phaseTimer = 100;
@@ -260,6 +293,10 @@ const game = (() => {
     const danger = st.ebullets.find((b) => b.y > PLAYER_Y - 40 && Math.abs(b.x - center) < 7);
     if (danger) {
       target = st.px + (danger.x < center ? 20 : -20);
+      return;
+    }
+    if (st.boss) {
+      target = st.boss.x + st.boss.w / 2 - 4 + Math.sin(performance.now() / 300) * 6;
       return;
     }
     const alive = st.enemies.filter((e) => e.alive);
@@ -294,6 +331,15 @@ const game = (() => {
     for (const e of st.enemies) {
       if (e.alive) c.drawImage(sprites.invader[st.anim], e.x, e.y);
     }
+    if (st.boss) {
+      const b = st.boss;
+      if (!(b.flash && b.flash % 2)) c.drawImage(sprites.boss, Math.round(b.x), b.y, b.w, b.h);
+      // HP バー
+      c.fillStyle = colors.muted;
+      c.fillRect(30, 12, 100, 2);
+      c.fillStyle = colors.p;
+      c.fillRect(30, 12, Math.round((100 * b.hp) / b.max), 2);
+    }
     c.fillStyle = colors.c;
     for (const b of st.bullets) c.fillRect(b.x, b.y, 1, 3);
     c.fillStyle = colors.p;
@@ -311,7 +357,7 @@ const game = (() => {
     text(String(st.score).padStart(6, "0"), 2, 2);
     text(`W${st.wave}`, W - 2, 2, colors.c, "right");
 
-    if (st.phase === "ready") text(`WAVE ${st.wave}`, W / 2, 64, colors.w, "center");
+    if (st.phase === "ready") text(st.boss ? "BOSS WAVE!" : `WAVE ${st.wave}`, W / 2, 64, st.boss ? colors.p : colors.w, "center");
     if (st.phase === "clear") text("WAVE CLEAR!", W / 2, 64, colors.c, "center");
     if (demo && Math.floor(performance.now() / 600) % 2) {
       text("DEMO PLAY", W / 2, 88, colors.p, "center");
@@ -427,5 +473,5 @@ const game = (() => {
     }
   });
 
-  return { open, close, isOpen: () => running, isDemo: () => running && demo };
+  return { open, close, isOpen: () => running, isDemo: () => running && demo, state: () => st };
 })();

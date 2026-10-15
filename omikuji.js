@@ -52,7 +52,7 @@ const omikuji = (() => {
     let y = r() * weights.reduce((a, b) => a + b, 0);
     const link = links.find((_, i) => (y -= weights[i]) < 0) ?? links[0];
     const color = COLORS[Math.floor(r() * COLORS.length)];
-    return { fortune, link, label: link.textContent.replace("▶", "").replace("（よく いく せかい）", "").trim(), color };
+    return { fortune, link, label: linkLabel(link), color };
   }
 
   // ---------- 画面 ----------

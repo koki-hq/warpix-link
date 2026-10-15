@@ -178,6 +178,9 @@ function dress(frame, hat = currentHat, layers = growthLayers) {
 // 放っておかれて、ページごと眠っているとき（星も点滅も止めて、電池をつかわない）
 const dozing = () => document.body.classList.contains("dozing");
 
+// リンクボタンの名前（YOUTUBE など）。▶・アイコン・読み上げ用の文字・ハートは除いて、ボタン自身の文字だけ
+const linkLabel = (el) => [...el.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).map((n) => n.textContent).join("").trim();
+
 // ミニゲーム・ぼうけん中など、キー入力をページ側で使わないとき
 const playing = () =>
   document.body.classList.contains("gaming") || document.body.classList.contains("adventuring");

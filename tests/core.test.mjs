@@ -105,4 +105,16 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "リンクは 読み上げで「あたらしい タブで ひらく」と伝え、名前は そのまま"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url);
+    const r = await p.ev(`[...document.querySelectorAll(".pixel-btn:not(.secret)")].map((a) => [linkLabel(a), a.target === "_blank" ? a.querySelector(".sr-only")?.textContent : "-"])`);
+    t.eq(r.map(([l]) => l), ["YOUTUBE", "TWITTER", "INSTAGRAM", "BOOTH", "TUMBLR", "SPOTIFY"], "リンクの名前");
+    for (const [l, sr] of r) t.eq(sr, "（あたらしい タブで ひらく）", `${l} の読み上げ`);
+    t.noErrors(p);
+    await server.close();
+  },
 };

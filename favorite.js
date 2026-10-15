@@ -21,7 +21,7 @@ const favorite = (() => {
   const links = [...document.querySelectorAll(".pixel-btn:not(.secret)")].map((el) => ({
     el,
     icon: el.querySelector("[data-icon]")?.dataset.icon,
-    label: el.textContent.replace("▶", "").trim(),
+    label: linkLabel(el),
   }));
   const byIcon = (icon) => links.find((l) => l.icon === icon);
 

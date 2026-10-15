@@ -65,6 +65,35 @@ export default {
     await server.close();
   },
 
+  async "3 ウェーブめは ボス。たおすと 実績と にっき"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url);
+    await p.ev(`localStorage.clear()`);
+    await p.goto(server.url);
+    await p.boot();
+    await p.ev(`document.getElementById("coin-slot").click()`);
+    await t.sleep(800);
+    // ウェーブ 2 をクリアしたところから始める
+    await p.ev(`(() => { const s = game.state(); s.wave = 2; s.phase = "clear"; s.phaseTimer = 1; })()`);
+    await t.sleep(1500);
+    const s = await p.ev(`(() => { const s = game.state(); return { wave: s.wave, boss: !!s.boss, hp: s.boss?.hp, enemies: s.enemies.length }; })()`);
+    t.eq(s.wave, 3, "ウェーブ");
+    t.ok(s.boss && s.hp > 20, `ボスが出ない: ${JSON.stringify(s)}`);
+    t.eq(s.enemies, 0, "ボスのウェーブに ふつうの敵がいる");
+    await p.shot("arcade-boss.png");
+    // あと 1 発で たおせるようにして、真下から当てる
+    await p.ev(`(() => { const s = game.state(); s.lives = 99; s.boss.hp = 1; s.bullets.push({ x: s.boss.x + 24, y: s.boss.y + 12 }); })()`);
+    await t.sleep(800);
+    t.ok(await p.ev(`achievements.has("boss")`), "実績「ボス げきは」がない");
+    t.ok(await p.ev(`game.state().boss === null && game.state().phase === "clear"`), "ボスを たおしても クリアにならない");
+    t.ok(await p.ev(`JSON.stringify(grow.state).includes("ボスを たおした")`), "にっきに ボスのことが ない");
+    await p.key("Escape");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "実績画面と CHEAT CODE 欄、コンソールの pixe()"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

@@ -94,6 +94,7 @@ const achievements = (() => {
     { id: "ghost", name: "ゴーストに かて", desc: "ぼうけんで きょうの ゴーストに かった", hint: "おなじ ひに 2かい ぼうけんすると……" },
     { id: "zukan-half", name: "ずかん はんぶん", desc: "ピクセの ずかんを はんぶん うめた", hint: "いろいろな ものに であうと……" },
     { id: "postcard", name: "ポストカード", desc: "ピクセの ポストカードを つくった", hint: "ノートの うえの ほうに……" },
+    { id: "boss", name: "ボス げきは", desc: "ミニゲームの ボスを たおした", hint: "ミニゲームで 3ウェーブめまで いくと……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
@@ -363,6 +364,7 @@ const cheats = (() => {
     if (!bgmOn) achievements.unlock("silence");
   });
   on("game-wave", () => achievements.unlock("invader"));
+  on("game-boss", () => achievements.unlock("boss"));
   on("game-over", ({ score: s }) => {
     if (s >= 1000) achievements.unlock("invader-pro");
   });
