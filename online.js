@@ -31,11 +31,20 @@ const online = (() => {
     });
   }
 
-  // 番号から、空のどこに浮かぶかを決める（だれの画面でも同じ人は同じ場所）
+  // 番号から、空のどこに浮かぶかを決める（同じ人はいつも同じ場所）。
+  // リンクボタンの上にかぶらないよう、広い画面では左右の余白、せまい画面ではタイトルの上の帯に浮かべる
   function spot(id) {
     let h = 0;
-    for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-    return { x: 4 + (h % 84), y: 18 + ((h >> 8) % 60) };
+    for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0; // >>> で符号なしのまま
+    const r1 = (h % 1000) / 1000;
+    const r2 = ((h >>> 10) % 1000) / 1000;
+    const margin = (innerWidth - 480) / 2;
+    if (margin > 72) {
+      const x = 16 + r1 * (margin - 72);
+      return { left: `${h & 1 ? x : innerWidth - x - 32}px`, top: `${15 + r2 * 70}vh` };
+    }
+    // HUD（左上、幅 112px まで）と月・BGM ボタン（右上）のあいだ
+    return { left: `${128 + r1 * Math.max(0, innerWidth - 128 - 128)}px`, top: `${20 + r2 * 64}px` };
   }
 
   function ghostSvg(hatId) {
@@ -70,10 +79,10 @@ const online = (() => {
         el.type = "button";
         el.className = "ghost";
         el.setAttribute("aria-label", "ほかの ひとの ピクセに てを ふる");
-        const { x, y } = spot(id);
-        el.style.left = `${x}vw`;
-        el.style.top = `${y}vh`;
-        el.style.animationDelay = `${-(x % 7) / 3}s`;
+        const { left, top } = spot(id);
+        el.style.left = left;
+        el.style.top = top;
+        el.style.animationDelay = `${-(parseFloat(left) % 7) / 3}s`;
         el.addEventListener("click", (e) => wave(id, el, e));
         document.body.append(el);
         ghosts.set(id, el);
