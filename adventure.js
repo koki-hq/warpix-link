@@ -59,6 +59,28 @@ const adventure = (() => {
     "............",
   ];
 
+  // きょうのコース：コインと UFO の置き場所は日付で決まる（同じ日はだれでも同じ）
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const courseId = () => { const d = today(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  function seeded(text) {
+    let h = 2166136261;
+    for (const ch of text) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => {
+      h += 0x6d2b79f5;
+      let t = Math.imul(h ^ (h >>> 15), 1 | h);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  let rand = Math.random;
+
+  // ゴースト：その日のベストの走りを、足場からの位置で 2 フレームごとに記録して、次の走りで再生する
+  const GHOST_KEY = "warpix-adv-ghost";
+  const GHOST_MAX = 2700; // 記録は 3 分（2 フレームごと）まで
+  let rec = null; // いまの走りの記録
+  let ghost = null; // 再生するゴースト
+  let ghostEl = null;
+
   let active = false;
   let raf = 0;
   let last = 0;
@@ -111,6 +133,18 @@ const adventure = (() => {
     return r ? [r.x + a.dx, r.y + a.dy] : null;
   }
 
+  function keyOf(el) {
+    if (el === screenRect?.el) return "s";
+    if (el.matches(".pixel-btn")) return `b:${el.querySelector("[data-icon]")?.dataset.icon}`;
+    return el.matches(".dialog") ? "d" : el.matches(".npc-sprite") ? "n" : el.matches(".title") ? "t" : el.matches(".subtitle") ? "u" : "c";
+  }
+  function rectOfKey(key) {
+    if (key === "s") return screenRect;
+    const sel = key.startsWith("b:") ? `.pixel-btn [data-icon="${key.slice(2)}"]` : { d: ".dialog", n: ".npc-sprite", t: ".title", u: ".subtitle", c: ".coin-slot" }[key];
+    const el = document.querySelector(sel)?.closest(".pixel-btn, .dialog, .npc-sprite, .title, .subtitle, .coin-slot");
+    return el ? rectFor(el) : null;
+  }
+
   // 足場を測り直して、ピクセ・コイン・UFO・ゴールを付け直す
   function relayout() {
     collectPlatforms();
@@ -146,15 +180,16 @@ const adventure = (() => {
 
   // ---------- 準備 ----------
   function spawnCoins() {
-    const spots = plats.filter((p) => !p.el.matches(".npc-sprite"));
+    // ひみつのワープゾーンが開いているかどうかで、コースが変わらないようにする
+    const spots = plats.filter((p) => !p.el.matches(".npc-sprite, .secret"));
     // 足場をシャッフルして、上に1枚ずつ置いていく
     for (let i = spots.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(rand() * (i + 1));
       [spots[i], spots[j]] = [spots[j], spots[i]];
     }
     coins = Array.from({ length: COIN_COUNT }, (_, i) => {
       const p = spots[i % spots.length];
-      const x = p.x + 16 + Math.random() * Math.max(0, p.w - 48);
+      const x = p.x + 16 + rand() * Math.max(0, p.w - 48);
       const y = p.y - 44;
       const el = sprite("adv-coin", `<span>${pixelSvg(COIN[0])}</span><span>${pixelSvg(COIN[1])}</span>`);
       place(el, x, y);
@@ -163,12 +198,12 @@ const adventure = (() => {
   }
 
   function spawnEnemies() {
-    const spots = plats.filter((p) => p.el.matches(".pixel-btn") && p.w > 120);
+    const spots = plats.filter((p) => p.el.matches(".pixel-btn:not(.secret)") && p.w > 120);
     enemies = [];
     for (let i = 0; i < 2 && spots.length; i++) {
-      const p = spots.splice(Math.floor(Math.random() * spots.length), 1)[0];
+      const p = spots.splice(Math.floor(rand() * spots.length), 1)[0];
       const el = sprite("adv-enemy", pixelSvg(ufoLook));
-      enemies.push({ el, p, x: p.x + p.w / 2, y: p.y - 12, w: 24, h: 12, dir: Math.random() < 0.5 ? -1 : 1, alive: true });
+      enemies.push({ el, p, x: p.x + p.w / 2, y: p.y - 12, w: 24, h: 12, dir: rand() < 0.5 ? -1 : 1, alive: true });
     }
   }
 
@@ -186,7 +221,7 @@ const adventure = (() => {
   function buildHud() {
     hud = document.createElement("div");
     hud.className = "adv-hud";
-    hud.innerHTML = `<span class="adv-coins"></span><span class="adv-time"></span><button type="button" class="adv-exit">✕ もどる</button>`;
+    hud.innerHTML = `<span class="adv-coins"></span><span class="adv-time"></span>${ghost ? `<span class="adv-ghost-time">GHOST ${fmtTime(ghost.time)}</span>` : ""}<button type="button" class="adv-exit">✕ もどる</button>`;
     hud.querySelector(".adv-exit").addEventListener("click", () => exit(false));
     document.body.append(hud);
 
@@ -339,8 +374,39 @@ const adventure = (() => {
     if (goal && overlap(box, goal)) return clear();
     // 今いる足場（空中なら中身の枠）からの位置を覚えておく
     h.anchor = anchorOf(h.x, h.y, h.standing ?? screenRect);
+    record();
+    playGhost();
     follow();
   }
+
+  // 2 フレームごとに [足場の番号, x, y, 姿勢] を記録する（姿勢＝ 0 立つ 1 歩く 2 ジャンプ、＋向きで ×2）
+  function record() {
+    if (!rec || frames % 2) return;
+    if (rec.frames.length >= GHOST_MAX) return void (rec.tooLong = true);
+    const h = hero;
+    const key = keyOf(h.anchor.el);
+    let k = rec.keys.indexOf(key);
+    if (k < 0) k = rec.keys.push(key) - 1;
+    const pose = !h.onGround ? 2 : h.vx && Math.floor(frames / 8) % 2 ? 1 : 0;
+    rec.frames.push([k, Math.round(h.anchor.dx), Math.round(h.anchor.dy), pose * 2 + (h.facing < 0 ? 1 : 0)]);
+  }
+
+  function playGhost() {
+    if (!ghost || !ghostEl) return;
+    const i = Math.min(Math.floor(frames / 2), ghost.frames.length - 1);
+    const [k, dx, dy, code] = ghost.frames[i];
+    const r = rectOfKey(ghost.keys[k]);
+    if (!r) return;
+    const pose = ["idle", "walk", "jump"][code >> 1];
+    if (ghostEl.dataset.pose !== pose) {
+      ghostEl.dataset.pose = pose;
+      ghostEl.querySelector(".ghost-body").innerHTML = ghostSvgs[pose];
+    }
+    place(ghostEl, r.x + dx, r.y + dy);
+    ghostEl.querySelector(".ghost-body").style.scale = code & 1 ? "-1 1" : "1 1";
+    ghostEl.classList.toggle("done", i === ghost.frames.length - 1);
+  }
+  let ghostSvgs = {};
 
   function jumpSound() {
     // 専用の音がないので、短い上昇音で代用
@@ -454,13 +520,23 @@ const adventure = (() => {
     got = 0;
     frames = 0;
     goal = null;
+    const course = courseId();
+    rand = seeded(`warpix-course-${course}`);
+    const saved = store.get(GHOST_KEY, null);
+    ghost = saved && saved.course === course && saved.frames?.length ? saved : null;
+    rec = { course, keys: [], frames: [] };
+    if (ghost) {
+      const plain = (rows) => pixelSvg(rows, { o: "var(--accent-2)", w: "var(--accent-2)", p: "var(--accent-2)", c: "var(--bg)" });
+      ghostSvgs = { idle: plain(FRAMES.idle), walk: plain(FRAMES.walk), jump: plain(FRAMES.jump) };
+      ghostEl = sprite("adv-ghost", `<span class="ghost-tag">BEST</span><span class="ghost-body"></span>`);
+    }
     spawnCoins();
     spawnEnemies();
     buildHud();
     jumpSound();
     const touch = matchMedia("(pointer: coarse)").matches;
     npc.say([
-      "いってきまーす！",
+      ghost ? `いってきまーす！ きょうの コースには\nゴーストが いるよ（${fmtTime(ghost.time)}）。` : "いってきまーす！",
       touch
         ? "コインを 8まい あつめてね！\nしたの ボタンで うごかしてね。"
         : "コインを 8まい あつめてね！\n←→で いどう、スペースで ジャンプ。",
@@ -475,8 +551,9 @@ const adventure = (() => {
   function cleanup() {
     active = false;
     cancelAnimationFrame(raf);
-    [hero?.el, hud, pad, groundEl, goal?.el, ...coins.map((c) => c.el), ...enemies.map((e) => e.el)].forEach((el) => el?.remove());
+    [hero?.el, hud, pad, groundEl, ghostEl, goal?.el, ...coins.map((c) => c.el), ...enemies.map((e) => e.el)].forEach((el) => el?.remove());
     groundEl = null;
+    ghostEl = null;
     coins = [];
     enemies = [];
     goal = null;
@@ -496,6 +573,10 @@ const adventure = (() => {
     const best = store.get("warpix-adv-best", null);
     const isBest = best === null || time < best;
     if (isBest) store.set("warpix-adv-best", time);
+    // きょうのゴーストより速ければ（またはまだいなければ）、この走りを新しいゴーストにする
+    const rival = ghost;
+    if (rec && !rec.tooLong && (!rival || time < rival.time)) store.set(GHOST_KEY, { ...rec, time });
+    const vsGhost = rival ? time - rival.time : null;
     cleanup();
     sound.sfx.fanfare();
     stars.warp(1500);
@@ -503,11 +584,16 @@ const adventure = (() => {
     const bonus = 3000 + Math.max(0, Math.round((60 - time) * 50));
     score.add(bonus, innerWidth / 2, innerHeight / 3);
     npc.jump();
-    npc.say([
-      `ゴール！ タイム ${fmtTime(time)}`,
-      isBest ? "じこベスト こうしん！\nぼうけんって たのしいね！" : `ベストは ${fmtTime(best)}。\nつぎは もっと はやく いけるかも！`,
-    ]);
-    emit("adventure-clear", { time, best: isBest });
+    const lines = [`ゴール！ タイム ${fmtTime(time)}`];
+    if (vsGhost !== null && vsGhost < 0) lines.push(`ゴーストに かった！\n${(-vsGhost).toFixed(1)}びょう はやい！`);
+    else if (vsGhost !== null) lines.push(`ゴーストまで あと ${vsGhost.toFixed(1)}びょう。\nくやしい……！`);
+    lines.push(isBest ? "じこベスト こうしん！\nぼうけんって たのしいね！" : `ベストは ${fmtTime(best)}。\nつぎは もっと はやく いけるかも！`);
+    npc.say(lines);
+    if (vsGhost !== null && vsGhost < 0) {
+      achievements.unlock("ghost");
+      grow.write("ghost", `ゴーストに ${(-vsGhost).toFixed(1)}びょう かった。`);
+    }
+    emit("adventure-clear", { time, best: isBest, vsGhost });
   }
 
   return { start, exit, isActive: () => active, fmtTime };

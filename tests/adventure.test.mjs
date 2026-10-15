@@ -10,7 +10,83 @@ const heroInfo = (p) => p.ev(`(() => {
   return { x: Math.round(r.left + scrollX), feetY: Math.round(feetY), on: on ? on.className.split(" ")[0] + ":" + on.textContent.trim().slice(0, 10) : null, coinX: Math.round(coin.left + coin.width / 2) };
 })()`);
 
+// テストだけの近道：デバッガで冒険の中に止まり、式を実行する（製品のコードには何も足さない）
+async function insideAdventure(t, p, expr) {
+  const line = (await import("node:fs")).readFileSync(t.ROOT + "/adventure.js", "utf8").split("\n").findIndex((l) => l.includes("const box = { x: h.x + 6"));
+  const bp = await p.send("Debugger.setBreakpointByUrl", { lineNumber: line, urlRegex: "adventure\\.js$" });
+  const paused = await p.waitFor("Debugger.paused");
+  const out = await p.send("Debugger.evaluateOnCallFrame", { callFrameId: paused.callFrames[0].callFrameId, expression: expr, returnByValue: true });
+  await p.send("Debugger.removeBreakpoint", { breakpointId: bp.result.breakpointId });
+  await p.send("Debugger.resume");
+  return out.result?.result?.value;
+}
+// コインとゴールをピクセのところへ寄せて、クリアさせる
+async function quickClear(t, p) {
+  await p.send("Debugger.enable");
+  await insideAdventure(t, p, `coins.forEach((c) => { c.x = h.x + 8; c.y = h.y + 8; }); coins.length`);
+  await t.sleep(700);
+  await insideAdventure(t, p, `goal && (goal.x = h.x + 4, goal.y = h.y + 4)`);
+  await p.send("Debugger.disable");
+  await t.sleep(700);
+}
+const coinSpots = (p) => p.ev(`[...document.querySelectorAll(".adv-coin")].map((c) => c.style.translate).sort().join("|")`);
+
 export default {
+  async "同じ日はコースが同じで、日がかわるとコースもかわる"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    const spotsOn = async (date) => {
+      await p.goto(`${server.url}?date=${date}`);
+      await p.boot({ readIntro: false });
+      await p.ev(`adventure.start()`);
+      await t.sleep(300);
+      const s = await coinSpots(p);
+      await p.ev(`adventure.exit(false)`);
+      return s;
+    };
+    const a1 = await spotsOn("2026-11-01");
+    const a2 = await spotsOn("2026-11-01");
+    const bDay = await spotsOn("2026-11-02");
+    t.eq(a2, a1, "同じ日なのにコインの場所がちがう");
+    t.ok(bDay !== a1, "日がかわってもコインの場所が同じ");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "クリアした走りがゴーストになり、次の冒険でいっしょに走る"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url);
+    await p.ev(`localStorage.clear()`);
+    await p.goto(server.url);
+    await p.boot();
+    await p.ev(`adventure.start()`);
+    await t.sleep(1500);
+    await p.key("ArrowRight", "down");
+    await t.sleep(500);
+    await p.key("ArrowRight", "up");
+    await quickClear(t, p);
+    const ghost = await p.ev(`JSON.parse(localStorage.getItem("warpix-adv-ghost"))`);
+    t.ok(ghost && ghost.frames.length > 20, "ゴーストが保存されない");
+    t.ok(ghost && ghost.keys.length >= 1, "足場の名前が記録されない");
+    await p.ev(`document.querySelector(".credits")?.click()`);
+    await t.sleep(4500);
+    await p.ev(`document.querySelector(".credits")?.click()`);
+    await p.ev(`adventure.start()`);
+    await t.sleep(200);
+    t.ok(await p.ev(`!!document.querySelector(".adv-ghost")`), "2 回目にゴーストが出ない");
+    t.ok((await p.ev(`document.querySelector(".adv-hud").textContent`)).includes("GHOST"), "HUD にゴーストのタイムがない");
+    const pos1 = await p.ev(`document.querySelector(".adv-ghost").style.translate`);
+    await t.sleep(900);
+    const pos2 = await p.ev(`document.querySelector(".adv-ghost").style.translate`);
+    t.ok(pos1 && pos2 && pos1 !== pos2, `ゴーストが動かない: ${pos1} → ${pos2}`);
+    await p.shot("adventure-ghost.png");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ピクセのおさそいに「いいよ」で冒険が始まる"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

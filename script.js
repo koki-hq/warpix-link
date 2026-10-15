@@ -380,18 +380,24 @@ const sound = (() => {
   // BGM：Am → F → C → G の4小節ループ（8分音符刻み、null は休符）
   const BPM = 140;
   const STEP = 60 / BPM / 2;
-  let LEAD = [
-    76, null, 72, 69, 72, 76, 81, null,
-    77, null, 76, 72, 69, 72, 77, null,
-    79, null, 76, 72, 76, 79, 84, null,
-    83, 81, 79, 74, 71, 74, 79, null,
-  ];
-  let BASS = [45, 41, 48, 43];
+  const DEFAULT_SONG = {
+    lead: [
+      76, null, 72, 69, 72, 76, 81, null,
+      77, null, 76, 72, 69, 72, 77, null,
+      79, null, 76, 72, 76, 79, 84, null,
+      83, 81, 79, 74, 71, 74, 79, null,
+    ],
+    bass: [45, 41, 48, 43],
+  };
+  let LEAD = DEFAULT_SONG.lead;
+  let BASS = DEFAULT_SONG.bass;
+  let lastPlayed = -1; // いま鳴っている 8分音符の番号（作曲画面の再生位置の表示用）
 
   let timer = null;
   let step = 0;
   let nextTime = 0;
   let stepDur = STEP; // setTempo でテンポを変えられる
+  let baseMult = 1; // 自分の曲のテンポ（setBpm）。setTempo の倍率はこれにかける
 
   function scheduleStep(i, t) {
     const n = LEAD[i];
@@ -411,6 +417,8 @@ const sound = (() => {
       if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.05;
       while (nextTime < ctx.currentTime + 0.12) {
         scheduleStep(step, nextTime);
+        const at = step;
+        setTimeout(() => (lastPlayed = at), Math.max(0, (nextTime - ctx.currentTime) * 1000));
         nextTime += stepDur;
         step = (step + 1) % LEAD.length;
       }
@@ -427,17 +435,37 @@ const sound = (() => {
   const pause = () => ctx?.suspend();
   const resume = () => ctx?.resume();
 
-  // 1 = ふつう、1.5 = 1.5倍速
-  const setTempo = (mult) => (stepDur = STEP / mult);
+  // 1 = ふつう、1.5 = 1.5倍速（パーティーやスタッフロールで一時的に変える。自分の曲のテンポにかけ算する）
+  let tempoMult = 1;
+  const applyTempo = () => (stepDur = STEP / (baseMult * tempoMult));
+  const setTempo = (mult) => {
+    tempoMult = mult;
+    applyTempo();
+  };
+  // 曲そのもののテンポ（BPM）。作曲した曲で使う
+  const setBpm = (bpm) => {
+    baseMult = bpm / BPM;
+    applyTempo();
+  };
 
-  // 曲を差しかえる（季節イベント用）。lead は 8分音符ごと、bass は 1小節ごと（lead の長さ ÷ 8 個）
+  // 曲を差しかえる（季節イベント・作曲）。lead は 8分音符ごと、bass は 1小節ごと（lead の長さ ÷ 8 個）
   function setSong({ lead, bass }) {
     LEAD = lead;
     BASS = bass;
     step = step % LEAD.length;
   }
 
-  return { sfx, bgmPlay, bgmStop, pause, resume, setTempo, setSong };
+  return {
+    sfx, bgmPlay, bgmStop, pause, resume, setTempo, setBpm, setSong,
+    defaultSong: DEFAULT_SONG,
+    song: () => ({ lead: LEAD, bass: BASS }),
+    playing: () => !!timer,
+    position: () => (timer ? lastPlayed : -1),
+    // 作曲画面で音を確かめる（1 音だけ鳴らす）
+    preview(n) {
+      if (ensure()) tone({ freq: midi(n), start: ctx.currentTime, dur: 0.18, vol: 0.06 });
+    },
+  };
 })();
 
 // ---------- 流れる星（縦スクロールのシューティング風） ----------

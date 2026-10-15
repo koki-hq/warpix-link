@@ -112,6 +112,7 @@
 
   <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
   <button class="simple-toggle" id="simple-toggle" type="button"></button>
+  <button class="compose-btn" id="compose-btn" type="button" aria-label="ピクセと さっきょく">♪</button>
 
   <button class="moon" id="moon" type="button" aria-label="きょうの つき"></button>
 
@@ -156,9 +157,40 @@
     <footer class="footer">
       © 2026 WARPIX
       <button class="coin-slot" id="coin-slot" type="button">INSERT COIN</button>
+      <button class="omikuji-btn" id="omikuji-btn" type="button">おみくじ</button>
       <button class="about-btn" id="about-btn" type="button">このページについて</button>
     </footer>
   </main>
+
+  <dialog class="composer" id="composer" aria-labelledby="composer-title">
+    <div class="composer-top">
+      <h2 id="composer-title">ピクセと さっきょく</h2>
+      <button class="composer-close" id="composer-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="composer-body">
+      <canvas class="roll" id="roll" tabindex="0" role="application" aria-label="ピアノロール。やじるしキーで うごかして、スペースで おとを おく・けす" aria-describedby="roll-status"></canvas>
+      <p class="roll-status" id="roll-status" aria-live="polite"></p>
+      <div class="composer-row">
+        <button type="button" class="c-btn c-main" id="compose-play">▶ きく</button>
+        <button type="button" class="c-btn" id="compose-pixe">ピクセに まかせる</button>
+        <button type="button" class="c-btn" id="compose-clear">けす</button>
+      </div>
+      <div class="composer-row">
+        <label class="c-label">コード <select id="compose-chord"></select></label>
+        <span class="c-label">テンポ
+          <button type="button" class="c-btn c-small" id="compose-slower" aria-label="おそく">−</button>
+          <b id="compose-bpm">140</b>
+          <button type="button" class="c-btn c-small" id="compose-faster" aria-label="はやく">＋</button>
+        </span>
+      </div>
+      <p class="composer-msg" id="composer-msg" aria-live="polite"></p>
+      <div class="composer-row">
+        <button type="button" class="c-btn c-save" id="compose-save">これを BGM に する</button>
+        <button type="button" class="c-btn" id="compose-share">シェア</button>
+        <button type="button" class="c-btn" id="compose-reset">もとの BGM に もどす</button>
+      </div>
+    </div>
+  </dialog>
 
   <dialog class="about" id="about" aria-labelledby="about-title">
     <div class="about-top">
@@ -209,6 +241,8 @@
   <script src="raid.js"></script>
   <script src="grow.js"></script>
   <script src="favorite.js"></script>
+  <script src="compose.js"></script>
+  <script src="omikuji.js"></script>
   <script src="about.js"></script>
 </body>
 </html>
