@@ -229,7 +229,9 @@ document.querySelectorAll("[data-icon]").forEach((el) => {
   if (rows) el.innerHTML = pixelSvg(rows);
 });
 
-const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// 動きを減らす：OS の設定か、このサイトの「せってい」で選んだとき（<head> で html に reduce-motion クラスがつく）
+const reduceMotion =
+  matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduce-motion");
 
 // きょうの日付。?date=2026-10-31 のように付けると、その日のページを先取りできる（季節イベントの確認用）
 const today = (() => {
@@ -256,6 +258,10 @@ const sound = (() => {
       bgmGain = ctx.createGain();
       bgmGain.gain.value = 0;
       bgmGain.connect(ctx.destination);
+      // 効果音はまとめてこのつまみを通す（せっていの「こうかおん」の音量）
+      sfxGain = ctx.createGain();
+      sfxGain.gain.value = seVol;
+      sfxGain.connect(ctx.destination);
 
       noiseBuffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
       const data = noiseBuffer.getChannelData(0);
@@ -263,6 +269,18 @@ const sound = (() => {
     }
     if (ctx.state === "suspended") ctx.resume();
     return true;
+  }
+
+  // 音量（0〜1）。せっていで変えられる
+  let sfxGain = null;
+  let bgmVol = 1;
+  let seVol = 1;
+  function setVolumes({ bgm = bgmVol, se = seVol }) {
+    bgmVol = bgm;
+    seVol = se;
+    if (!ctx) return;
+    sfxGain.gain.setValueAtTime(seVol, ctx.currentTime);
+    if (timer) bgmGain.gain.setValueAtTime(bgmVol, ctx.currentTime);
   }
 
   const midi = (n) => 440 * 2 ** ((n - 69) / 12);
@@ -275,7 +293,7 @@ const sound = (() => {
     if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, start + dur);
     gain.gain.setValueAtTime(vol, start);
     gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-    osc.connect(gain).connect(dest ?? ctx.destination);
+    osc.connect(gain).connect(dest ?? sfxGain);
     osc.start(start);
     osc.stop(start + dur);
   }
@@ -321,7 +339,7 @@ const sound = (() => {
     boom() {
       if (!ensure()) return;
       const t = ctx.currentTime;
-      noise(t, 0.4, 0.15, ctx.destination);
+      noise(t, 0.4, 0.15, sfxGain);
       tone({ freq: 220, start: t, dur: 0.4, type: "triangle", vol: 0.2, slideTo: 40 });
     },
     // パワーアップ（駆け上がるアルペジオ）
@@ -338,13 +356,13 @@ const sound = (() => {
     },
     // 敵に当たった（短いノイズ）
     hit() {
-      if (ctx) noise(ctx.currentTime, 0.12, 0.08, ctx.destination);
+      if (ctx) noise(ctx.currentTime, 0.12, 0.08, sfxGain);
     },
     // 自機がやられた
     damage() {
       if (!ctx) return;
       const t = ctx.currentTime;
-      noise(t, 0.5, 0.12, ctx.destination);
+      noise(t, 0.5, 0.12, sfxGain);
       tone({ freq: 440, start: t, dur: 0.5, vol: 0.06, slideTo: 55 });
     },
     // 実績解除のファンファーレ（ソ・ソ・ソ・ド〜）
@@ -365,7 +383,7 @@ const sound = (() => {
     rumble() {
       if (!ctx) return;
       const t = ctx.currentTime;
-      noise(t, 1.2, 0.05, ctx.destination);
+      noise(t, 1.2, 0.05, sfxGain);
       tone({ freq: 70, start: t, dur: 1.2, type: "triangle", vol: 0.15, slideTo: 35 });
     },
     // ゲームオーバー（下がっていくメロディ）
@@ -411,7 +429,7 @@ const sound = (() => {
     if (!ensure() || timer) return;
     step = 0;
     nextTime = ctx.currentTime + delay;
-    bgmGain.gain.setValueAtTime(1, ctx.currentTime);
+    bgmGain.gain.setValueAtTime(bgmVol, ctx.currentTime);
     timer = setInterval(() => {
       // タブが裏に回って遅れたときは、まとめて鳴らさず今から再開する
       if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.05;
@@ -456,7 +474,8 @@ const sound = (() => {
   }
 
   return {
-    sfx, bgmPlay, bgmStop, pause, resume, setTempo, setBpm, setSong,
+    sfx, bgmPlay, bgmStop, pause, resume, setTempo, setBpm, setSong, setVolumes,
+    volumes: () => ({ bgm: bgmVol, se: seVol }),
     defaultSong: DEFAULT_SONG,
     song: () => ({ lead: LEAD, bass: BASS }),
     playing: () => !!timer,

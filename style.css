@@ -1332,7 +1332,8 @@ body.party {
 .pixel-btn.bumped,
 .coin-slot.bumped,
 .omikuji-btn.bumped,
-.about-btn.bumped {
+.about-btn.bumped,
+.settings-btn.bumped {
   transform: translateY(var(--px));
 }
 
@@ -2409,7 +2410,8 @@ body.party {
 /* =====================================================================
    このページについて（v1.7.1）
    ===================================================================== */
-.about-btn {
+.about-btn,
+.settings-btn {
   padding: 6px 4px;
   border: 0;
   background: none;
@@ -2422,7 +2424,9 @@ body.party {
 }
 
 .about-btn:hover,
-.about-btn:focus-visible {
+.about-btn:focus-visible,
+.settings-btn:hover,
+.settings-btn:focus-visible {
   color: var(--fg);
   outline: none;
 }
@@ -3068,4 +3072,82 @@ a,
 
 .unknown .zukan-name {
   color: #b3a88f;
+}
+
+/* =====================================================================
+   せってい（v1.10）
+   ===================================================================== */
+.set-row {
+  display: grid;
+  grid-template-columns: 1fr 130px 2.5em;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.set-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.set-row output {
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  text-align: right;
+}
+
+.set-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 6px 0;
+  cursor: pointer;
+}
+
+.set-check input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.keys dt {
+  color: var(--accent-2);
+  white-space: nowrap;
+}
+
+.keys dd {
+  margin: 0;
+}
+
+/* うごきを へらす（このサイトの せってい）：アニメーションを すぐ終わらせる。
+   OS の「動きを減らす」は @media で別に止めているので、ここは html.reduce-motion のときだけ */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 1ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition: none !important;
+}
+
+/* よみやすい もじ：ドットの もじを、端末の ふつうの もじに */
+.plain-font,
+.plain-font * {
+  font-family: system-ui, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif !important;
+  letter-spacing: normal !important;
+  -webkit-font-smoothing: auto;
+}
+
+.plain-font .title {
+  font-weight: 800;
 }

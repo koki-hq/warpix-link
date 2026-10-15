@@ -33,6 +33,10 @@
       if (new URLSearchParams(location.search).has("simple") || localStorage.getItem("warpix-simple") === "on") {
         document.documentElement.classList.add("simple");
       }
+      // せってい：動きを減らす・よみやすい もじ（描く前に切りかえる）
+      const settings = JSON.parse(localStorage.getItem("warpix-settings") || "{}");
+      if (settings.motion === "reduce") document.documentElement.classList.add("reduce-motion");
+      if (settings.font === "plain") document.documentElement.classList.add("plain-font");
     } catch {}
   </script>
 </head>
@@ -170,6 +174,8 @@
       <div class="footer-info">
         <button class="about-btn" id="about-btn" type="button">このページについて</button>
         <span aria-hidden="true">・</span>
+        <button class="settings-btn" id="settings-btn" type="button">せってい</button>
+        <span aria-hidden="true">・</span>
         <span class="copyright">© 2026 WARPIX</span>
       </div>
     </footer>
@@ -202,6 +208,40 @@
         <button type="button" class="c-btn" id="compose-share">シェア</button>
         <button type="button" class="c-btn" id="compose-reset">もとの BGM に もどす</button>
       </div>
+    </div>
+  </dialog>
+
+  <dialog class="about settings" id="settings" aria-labelledby="settings-title">
+    <div class="about-top">
+      <h2 id="settings-title">せってい</h2>
+      <button class="about-close" id="settings-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <h3>おと</h3>
+      <label class="set-row" for="set-bgm"><span>BGM の おおきさ</span>
+        <input type="range" id="set-bgm" min="0" max="100" step="10"><output id="set-bgm-out" for="set-bgm">100</output></label>
+      <label class="set-row" for="set-se"><span>こうかおんの おおきさ</span>
+        <input type="range" id="set-se" min="0" max="100" step="10"><output id="set-se-out" for="set-se">100</output></label>
+      <p class="about-note">BGM を けすだけなら、みぎうえの「BGM ON」でも できます。</p>
+
+      <h3>みやすさ</h3>
+      <label class="set-check"><input type="checkbox" id="set-motion"> うごきを へらす（ほしや UFO を とめて、てんめつも しない）</label>
+      <label class="set-check"><input type="checkbox" id="set-font"> よみやすい もじに する（ドットの もじを ふつうの もじに）</label>
+      <p class="about-note" id="settings-note"></p>
+      <p class="about-note">きりかえると、ページを よみなおします。</p>
+
+      <h3>キーそうさ</h3>
+      <dl class="keys">
+        <dt>Tab ／ Shift+Tab</dt><dd>ボタンや リンクを えらぶ</dd>
+        <dt>Enter ／ スペース</dt><dd>えらんだ ものを おす（さいしょの PRESS START も）</dd>
+        <dt>Esc</dt><dd>まどを とじる・ミニゲームや ぼうけんを やめる</dd>
+        <dt>← → ／ A D</dt><dd>ミニゲームと ぼうけんで いどう</dd>
+        <dt>スペース ／ ↑ ／ W ／ Z</dt><dd>ぼうけんで ジャンプ</dd>
+        <dt>↓ ／ S</dt><dd>ぼうけんで あしばから おりる</dd>
+        <dt>やじるし ＋ スペース</dt><dd>さっきょくの ピアノロールで おとを おく</dd>
+        <dt>コントローラー</dt><dd>じゅうじキーで えらぶ・A で おす・B で とじる・START で じっせき</dd>
+      </dl>
+      <p class="about-note">ひみつの コマンドは……じぶんで さがしてね。</p>
     </div>
   </dialog>
 
@@ -257,6 +297,7 @@
   <script src="compose.js"></script>
   <script src="omikuji.js"></script>
   <script src="zukan.js"></script>
+  <script src="settings.js"></script>
   <script src="about.js"></script>
 </body>
 </html>

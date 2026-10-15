@@ -16,7 +16,7 @@ const adventure = (() => {
   // 地面は「いちばん下の足場のすぐ下」。ジャンプ（約 115px）で、すぐ上の段にも届くように。
   // ピクセ（32px）が地面に立っても、頭の上に 12px あく
   const GROUND_GAP = 44;
-  const PLATFORMS = ".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn, .copyright";
+  const PLATFORMS = ".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn, .settings-btn, .copyright";
 
   // ピクセの歩き・ジャンプのコマ（足だけ変える）
   const withFeet = (feet) => [...NPC.idle.slice(0, 14), feet, NPC.idle[15]];
@@ -139,12 +139,12 @@ const adventure = (() => {
   function keyOf(el) {
     if (el === screenRect?.el) return "s";
     if (el.matches(".pixel-btn")) return `b:${el.querySelector("[data-icon]")?.dataset.icon}`;
-    return el.matches(".dialog") ? "d" : el.matches(".npc-sprite") ? "n" : el.matches(".title") ? "t" : el.matches(".subtitle") ? "u" : el.matches(".omikuji-btn") ? "o" : el.matches(".about-btn") ? "a" : el.matches(".copyright") ? "r" : "c";
+    return el.matches(".dialog") ? "d" : el.matches(".npc-sprite") ? "n" : el.matches(".title") ? "t" : el.matches(".subtitle") ? "u" : el.matches(".omikuji-btn") ? "o" : el.matches(".about-btn") ? "a" : el.matches(".copyright") ? "r" : el.matches(".settings-btn") ? "g" : "c";
   }
   function rectOfKey(key) {
     if (key === "s") return screenRect;
-    const sel = key.startsWith("b:") ? `.pixel-btn [data-icon="${key.slice(2)}"]` : { d: ".dialog", n: ".npc-sprite", t: ".title", u: ".subtitle", c: ".coin-slot", o: ".omikuji-btn", a: ".about-btn", r: ".copyright" }[key];
-    const el = document.querySelector(sel)?.closest(".pixel-btn, .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn, .copyright");
+    const sel = key.startsWith("b:") ? `.pixel-btn [data-icon="${key.slice(2)}"]` : { d: ".dialog", n: ".npc-sprite", t: ".title", u: ".subtitle", c: ".coin-slot", o: ".omikuji-btn", a: ".about-btn", r: ".copyright", g: ".settings-btn" }[key];
+    const el = document.querySelector(sel)?.closest(".pixel-btn, .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn, .settings-btn, .copyright");
     return el ? rectFor(el) : null;
   }
 
@@ -418,7 +418,7 @@ const adventure = (() => {
 
   // 勢いよく着地したボタンはへこむ
   function bump(p) {
-    if (!p.el.matches(".pixel-btn, .coin-slot, .omikuji-btn, .about-btn")) return;
+    if (!p.el.matches(".pixel-btn, .coin-slot, .omikuji-btn, .about-btn, .settings-btn")) return;
     p.el.classList.add("bumped");
     sound.sfx.hover();
     setTimeout(() => p.el.classList.remove("bumped"), 120);
