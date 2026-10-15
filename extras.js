@@ -88,6 +88,7 @@ const achievements = (() => {
     { id: "raid", name: "きょうの ヒーローたち", desc: "みんなで マザーシップを たおした", hint: "5ふんおきに みんなの そらに……" },
     { id: "regular", name: "いつもの せかい", desc: "おなじ リンクへ 10かい ワープした", hint: "おなじ せかいに なんども……" },
     { id: "composer", name: "さっきょくか", desc: "じぶんの きょくを BGM に した", hint: "みぎうえの ♪ で……" },
+    { id: "collector", name: "レコード コレクター", desc: "レコードだなに きょくを 3まい ならべた", hint: "つくった きょくは、たなに しまえる……" },
     { id: "listener", name: "とどいた きょく", desc: "だれかが つくった きょくを きいた", hint: "きょくの リンクを もらったら……" },
     { id: "omikuji", name: "おみくじ", desc: "ピクセの おみくじを ひいた", hint: "いちばん したに なにか ある" },
     { id: "daikichi", name: "だいきち！", desc: "おみくじで だいきちを ひいた", hint: "まいにち ひいていれば いつか……" },

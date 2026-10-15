@@ -107,4 +107,45 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "レコードだなに しまって、名前がつき、ひらく・BGM・だす ができる（開き直しても残る）"(t) {
+    const { server, p } = await openComposer(t);
+    await p.click("#compose-btn");
+    await t.sleep(400);
+    t.ok(await p.ev(`!document.getElementById("shelf-empty").hidden`), "からっぽの説明が出ない");
+    // からっぽの曲は しまえない
+    await p.ev(`document.getElementById("compose-clear").click(); document.getElementById("shelf-add").click()`);
+    t.eq(await p.ev(`composer.shelf().length`), 0, "音のない曲が しまえた");
+    // 3 曲しまう（同じ曲は 2 回しまえない）
+    for (let i = 0; i < 3; i++) {
+      await p.ev(`document.getElementById("compose-clear").click()`);
+      await clickCell(p, i, i);
+      await p.ev(`document.getElementById("shelf-add").click(); document.getElementById("shelf-add").click()`);
+    }
+    t.eq(await p.ev(`composer.shelf().length`), 3, "たなの まいすう");
+    t.ok(await p.ev(`achievements.has("collector")`), "実績「レコード コレクター」がない");
+    const names = await p.ev(`[...document.querySelectorAll(".shelf-name")].map((e) => e.firstChild.textContent)`);
+    t.eq(names.length, 3, "たなの行");
+    t.ok(names.every((n) => /^\S+ \S+$/.test(n)), `曲の名前: ${names}`);
+    t.eq(await p.ev(`composer.titleOf(composer.shelf()[0])`), names[0], "同じ曲は同じ名前");
+    t.ok(await p.ev(`[...document.querySelectorAll("#shelf-list button")].every((b) => b.getAttribute("aria-label").includes(b.closest("li").querySelector(".shelf-name").firstChild.textContent))`), "ボタンの読み上げに曲名がない");
+    await p.shot("compose-shelf.png");
+    // 1 まいめを ひらくと、ピアノロールが その曲になる
+    const shelf = await p.ev(`composer.shelf()`);
+    await p.ev(`document.querySelector("#shelf-list li:nth-child(1) button").click(); document.getElementById("compose-save").click()`);
+    t.eq(await p.ev(`composer.encode(composer.current())`), shelf[0], "ひらいた曲が ピアノロールに ない");
+    // 2 まいめを BGM に → その行に ♪BGM
+    await p.ev(`document.querySelectorAll("#shelf-list li")[1].querySelectorAll("button")[1].click()`);
+    t.eq(await p.ev(`JSON.parse(localStorage.getItem("warpix-song"))`), shelf[1], "BGM に ならない");
+    t.eq(await p.ev(`[...document.querySelectorAll("#shelf-list li")].map((li) => !!li.querySelector(".shelf-now"))`), [false, true, false], "♪BGM の しるし");
+    // 3 まいめを だす
+    await p.ev(`document.querySelectorAll("#shelf-list li")[2].querySelectorAll("button")[2].click()`);
+    t.eq(await p.ev(`composer.shelf()`), shelf.slice(0, 2), "たなから だせない");
+    await p.key("Escape");
+    await p.goto(server.url);
+    await p.boot({ readIntro: false });
+    t.eq(await p.ev(`composer.shelf()`), shelf.slice(0, 2), "開き直すと たなが きえる");
+    t.noErrors(p);
+    await server.close();
+  },
 };

@@ -263,6 +263,7 @@ const composer = (() => {
     say("ピクセ「BGM に したよ！ いい きょく。」");
     achievements.unlock("composer");
     grow.write("song", "いっしょに きょくを つくった。");
+    renderShelf();
   });
   document.getElementById("compose-reset").addEventListener("click", () => {
     saved = null;
@@ -273,6 +274,7 @@ const composer = (() => {
     sound.setBpm(140);
     say("ピクセ「もとの BGM に もどしたよ。」");
     renderControls();
+    renderShelf();
   });
   document.getElementById("compose-share").addEventListener("click", async () => {
     const url = new URL(location.href);
@@ -316,6 +318,87 @@ const composer = (() => {
   document.getElementById("compose-btn").addEventListener("click", open);
   cheats.add("compose", open);
 
+  // ---------- レコードだな：つくった曲を 6 まいまで しまっておける ----------
+  // 曲の名前は、ピクセが曲の中身から つける（同じ曲なら いつも同じ名前）
+  const SHELF_KEY = "warpix-shelf";
+  const SHELF_MAX = 6;
+  const WORDS_A = ["ほしの", "よるの", "ピコピコ", "まよなかの", "ちいさな", "ワープする", "ねむい", "ひかる", "ドットの", "とおくの"];
+  const WORDS_B = ["マーチ", "ワルツ", "ブルース", "ララバイ", "テーマ", "ポルカ", "ファンファーレ", "うた", "ダンス", "ソナタ"];
+  function titleOf(code) {
+    let h = 7;
+    for (const ch of code) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return `${WORDS_A[h % WORDS_A.length]} ${WORDS_B[Math.floor(h / WORDS_A.length) % WORDS_B.length]}`;
+  }
+  let shelf = (store.get(SHELF_KEY, []) ?? []).filter((c) => decode(c)).slice(0, SHELF_MAX);
+  const shelfList = document.getElementById("shelf-list");
+  const shelfEmpty = document.getElementById("shelf-empty");
+  const saveShelf = () => store.set(SHELF_KEY, shelf);
+
+  function renderShelf() {
+    shelfList.replaceChildren(...shelf.map((code, i) => {
+      const s = decode(code);
+      const li = document.createElement("li");
+      const name = document.createElement("span");
+      name.className = "shelf-name";
+      name.textContent = `${titleOf(code)}`;
+      const info = document.createElement("small");
+      info.textContent = ` ${CHORDS[s.chord].name.split(" → ")[0]}・${s.bpm}`;
+      name.append(info);
+      if (saved && encode(saved) === code) {
+        const now = document.createElement("b");
+        now.className = "shelf-now";
+        now.textContent = " ♪BGM";
+        name.append(now);
+      }
+      const btn = (label, aria, fn) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "c-btn c-small";
+        b.textContent = label;
+        b.setAttribute("aria-label", `${titleOf(code)}を ${aria}`);
+        b.addEventListener("click", fn);
+        return b;
+      };
+      li.append(
+        name,
+        btn("ひらく", "ひらく", () => {
+          draft = { ...s, steps: [...s.steps] };
+          if (sound.playing()) apply(draft);
+          renderControls();
+          say(`ピクセ「『${titleOf(code)}』を ひらいたよ。」`);
+        }),
+        btn("BGM", "BGM に する", () => {
+          draft = { ...s, steps: [...s.steps] };
+          document.getElementById("compose-save").click();
+          renderControls();
+        }),
+        btn("✕", "たなから だす", () => {
+          shelf.splice(i, 1);
+          saveShelf();
+          renderShelf();
+          say(`ピクセ「『${titleOf(code)}』を たなから だしたよ。」`);
+          shelfList.querySelector("button")?.focus() ?? document.getElementById("shelf-add").focus();
+        }),
+      );
+      return li;
+    }));
+    shelfEmpty.hidden = shelf.length > 0;
+  }
+
+  document.getElementById("shelf-add").addEventListener("click", () => {
+    const code = encode(draft);
+    if (draft.steps.every((n) => !n)) return say("ピクセ「まだ おとが ひとつも ないよ。」");
+    if (shelf.includes(code)) return say(`ピクセ「その きょくは もう たなに あるよ。『${titleOf(code)}』。」`);
+    if (shelf.length >= SHELF_MAX) return say(`ピクセ「たなが いっぱい（${SHELF_MAX}まい）。✕ で ひとつ だしてね。」`);
+    shelf.push(code);
+    saveShelf();
+    renderShelf();
+    say(`ピクセ「『${titleOf(code)}』って なまえに したよ。たなに しまった！」`);
+    grow.write("shelf", `きょく『${titleOf(code)}』を たなに しまった。`);
+    if (shelf.length >= 3) achievements.unlock("collector");
+  });
+  renderShelf();
+
   // ---------- だれかから届いた曲（?song=◯◯） ----------
   let received = null;
   const code = new URLSearchParams(location.search).get("song");
@@ -338,5 +421,5 @@ const composer = (() => {
     setTimeout(wait, 1200);
   });
 
-  return { encode, decode, open, current: () => current };
+  return { encode, decode, open, titleOf, current: () => current, shelf: () => [...shelf] };
 })();

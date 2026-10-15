@@ -113,6 +113,8 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("about").close()`);
   await axe(p, "せってい", `document.getElementById("settings-btn").click()`);
   await p.ev(`document.getElementById("settings").close()`);
+  await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); document.getElementById("compose-btn").click()`);
+  await p.ev(`document.getElementById("composer").close()`);
   await p.goto(`${server.url}?simple=1`);
   await axe(p, "シンプルモード");
   await closeAll();

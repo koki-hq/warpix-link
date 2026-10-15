@@ -2750,6 +2750,68 @@ a,
   word-break: break-all;
 }
 
+/* レコードだな（v1.15） */
+.shelf {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--btn);
+}
+
+.shelf-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.shelf-top h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--accent-2);
+}
+
+.shelf-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shelf-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.shelf-name {
+  flex: 1 1 10em;
+  font-size: 13px;
+}
+
+.shelf-name::before {
+  content: "◉ ";
+  color: var(--accent);
+}
+
+.shelf-name small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.shelf-now {
+  color: var(--gold);
+  font-weight: normal;
+  font-size: 11px;
+}
+
+.shelf-empty {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* =====================================================================
    ピクセの おみくじ（v1.8）
    ===================================================================== */
