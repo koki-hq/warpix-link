@@ -66,6 +66,16 @@ const achievements = (() => {
     { id: "night-owl", name: "よふかし", desc: "しんや 0〜5じに あそんだ", hint: "よる おそくに きてみて" },
     { id: "silence", name: "しずかな よる", desc: "BGMを けした", hint: "たまには しずかに" },
     { id: "hacker", name: "ハッカー", desc: "コンソールで ピクセを よんだ", hint: "かいはつしゃツールを のぞくと……" },
+    { id: "adventure", name: "ぼうけんの はじまり", desc: "PIXE ADVENTURE を クリアした", hint: "ピクセの おねがいに 「いいよ」と こたえると……" },
+    { id: "speedrun", name: "スピードランナー", desc: "ぼうけんを 30びょう いないで クリアした", hint: "ぼうけんを もっと はやく" },
+    { id: "stomp", name: "ふみつけ", desc: "ぼうけんで UFOを ふんづけた", hint: "ぼうけんちゅうの UFOは うえから" },
+    { id: "parallel", name: "パラレルワールド", desc: "べつの タブにも ピクセが いた", hint: "このページを もうひとつ ひらくと……" },
+    { id: "tab-travel", name: "タブを こえて", desc: "ピクセが タブの あいだを いききした", hint: "タブが ふたつ あるとき ピクセを ダブルクリック" },
+    { id: "moon", name: "つきみ", desc: "きょうの つきを ながめた", hint: "そらの すみっこに なにか うかんでる" },
+    { id: "print", name: "かみに のこす", desc: "このページを いんさつ しようとした", hint: "かみに いんさつ すると……？" },
+    { id: "credits", name: "エンディング", desc: "スタッフロールを さいごまで みた", hint: "ぼうけんの さきに……" },
+    { id: "demo", name: "だれも いない ゲームセンター", desc: "デモプレイを みた", hint: "ピクセが ねたあとも ほうっておくと……" },
+    { id: "fashion", name: "おしゃれさん", desc: "ピクセに ぼうしを かぶせた", hint: "じっせきの ごほうびで きせかえ" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
@@ -161,7 +171,15 @@ const achievements = (() => {
   });
 
   render();
-  return { unlock, has: (id) => unlocked.has(id), randomHint };
+  return {
+    unlock,
+    has: (id) => unlocked.has(id),
+    randomHint,
+    count: () => unlocked.size,
+    total: LIST.length,
+    unlockedNames: () => LIST.filter((a) => unlocked.has(a.id)).map((a) => a.name),
+    nameOf: (id) => LIST.find((a) => a.id === id)?.name ?? id,
+  };
 })();
 
 // ---------- 隠しコマンド（キーボードで打つ or 実績画面の CHEAT CODE 欄） ----------
@@ -238,7 +256,7 @@ const cheats = (() => {
   // キーボードで直接タイプしたとき（最後に打った文字の並びでチェック）
   let buffer = "";
   document.addEventListener("keydown", (e) => {
-    if (!document.body.classList.contains("booted") || game.isOpen()) return;
+    if (!document.body.classList.contains("booted") || playing()) return;
     if (e.target.closest?.("input, textarea, dialog")) return;
     if (!/^[a-z]$/i.test(e.key)) return;
     buffer = (buffer + e.key.toLowerCase()).slice(-12);
@@ -290,7 +308,10 @@ const cheats = (() => {
     }
   }
 
-  return { run };
+  // ほかのファイルからコマンドを足す
+  const add = (word, fn) => (COMMANDS[word] = fn);
+
+  return { run, add };
 })();
 
 // ---------- できごと → 実績 ----------
@@ -390,7 +411,7 @@ function mothership() {
   ];
 
   function spawn() {
-    if (document.hidden || game.isOpen()) return;
+    if (document.hidden || playing()) return;
     const el = document.createElement("button");
     el.type = "button";
     el.className = "shooting-star";
@@ -423,11 +444,14 @@ function mothership() {
 // ---------- ほうっておくとピクセが寝る ----------
 (() => {
   const IDLE_MS = 40000;
+  const DEMO_MS = 20000; // 寝てからデモプレイが始まるまで
   let lastInput = performance.now();
   let sleeping = false;
+  let sleptAt = 0;
 
   function wake() {
     lastInput = performance.now();
+    if (game.isDemo()) game.close();
     if (!sleeping) return;
     sleeping = false;
     npc.sleep(false);
@@ -439,10 +463,19 @@ function mothership() {
   );
 
   setInterval(() => {
-    if (sleeping || document.hidden || game.isOpen()) return;
-    if (!document.body.classList.contains("booted")) return;
-    if (performance.now() - lastInput < IDLE_MS) return;
+    if (document.hidden || !document.body.classList.contains("booted")) return;
+    const now = performance.now();
+    // ゲームセンターの筐体みたいに、だれもいないとデモプレイが始まる
+    if (sleeping) {
+      if (!reduceMotion && !playing() && now - sleptAt > DEMO_MS) {
+        game.open({ demo: true });
+        emit("demo");
+      }
+      return;
+    }
+    if (playing() || npc.isAway() || now - lastInput < IDLE_MS) return;
     sleeping = true;
+    sleptAt = now;
     npc.sleep(true);
     npc.say(["ふあぁ……\nちょっと ねむく なってきた。", "すやすや……"]);
     achievements.unlock("sleepy");

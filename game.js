@@ -95,6 +95,9 @@ const game = (() => {
   let last = 0;
   let acc = 0;
   let paid = false;
+  let demo = false; // だれも操作しないデモプレイ
+  // デモ中は効果音を鳴らさない
+  const sfx = (name) => !demo && sound.sfx[name]();
 
   const bgStars = Array.from({ length: 40 }, () => ({
     x: Math.floor(Math.random() * W),
@@ -136,7 +139,7 @@ const game = (() => {
   const hit = (ax, ay, aw, ah, bx, by, bw, bh) => ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 
   function payout() {
-    if (paid || !st || st.score === 0) return;
+    if (demo || paid || !st || st.score === 0) return;
     paid = true;
     emit("game-over", { score: st.score, wave: st.wave });
     score.add(st.score, innerWidth / 2, innerHeight / 3);
@@ -166,8 +169,11 @@ const game = (() => {
     }
     if (st.phase === "over") {
       st.phaseTimer--;
+      if (demo && st.phaseTimer < -90) reset();
       return;
     }
+
+    if (demo) autopilot();
 
     // 自機の移動
     if (keys.has("left")) st.px -= 1.6;
@@ -183,7 +189,7 @@ const game = (() => {
     if (--st.fireCd <= 0 && st.bullets.length < 3) {
       st.bullets.push({ x: Math.round(st.px) + 3, y: PLAYER_Y - 3 });
       st.fireCd = 16;
-      sound.sfx.shoot();
+      sfx("shoot");
     }
 
     // 敵の行進（残りが少ないほど速くなる）
@@ -215,7 +221,7 @@ const game = (() => {
           b.y = -10;
           st.score += (3 - e.row) * 10 * st.wave;
           st.bursts.push({ x: e.x, y: e.y - 1, t: 12 });
-          sound.sfx.hit();
+          sfx("hit");
           break;
         }
       }
@@ -230,7 +236,7 @@ const game = (() => {
         st.lives--;
         st.inv = 90;
         st.bursts.push({ x: st.px, y: PLAYER_Y, t: 20 });
-        sound.sfx.damage();
+        sfx("damage");
         if (st.lives <= 0) return gameOver();
       }
     }
@@ -243,15 +249,29 @@ const game = (() => {
       st.phase = "clear";
       st.phaseTimer = 100;
       st.bullets = [];
-      sound.sfx.powerup();
-      emit("game-wave", { wave: st.wave });
+      sfx("powerup");
+      if (!demo) emit("game-wave", { wave: st.wave });
     }
+  }
+
+  // デモ用：いちばん近い敵の下へ向かい、真上から来る弾はよける
+  function autopilot() {
+    const center = st.px + 4;
+    const danger = st.ebullets.find((b) => b.y > PLAYER_Y - 40 && Math.abs(b.x - center) < 7);
+    if (danger) {
+      target = st.px + (danger.x < center ? 20 : -20);
+      return;
+    }
+    const alive = st.enemies.filter((e) => e.alive);
+    if (!alive.length) return;
+    const near = alive.reduce((a, e) => (Math.abs(e.x - st.px) < Math.abs(a.x - st.px) ? e : a));
+    target = near.x + Math.sin(performance.now() / 300) * 3;
   }
 
   function gameOver() {
     st.phase = "over";
     st.phaseTimer = 60;
-    sound.sfx.gameover();
+    sfx("gameover");
     payout();
   }
 
@@ -293,6 +313,10 @@ const game = (() => {
 
     if (st.phase === "ready") text(`WAVE ${st.wave}`, W / 2, 64, colors.w, "center");
     if (st.phase === "clear") text("WAVE CLEAR!", W / 2, 64, colors.c, "center");
+    if (demo && Math.floor(performance.now() / 600) % 2) {
+      text("DEMO PLAY", W / 2, 88, colors.p, "center");
+      text("PRESS ANY KEY", W / 2, 100, colors.w, "center");
+    }
     if (st.phase === "over") {
       text("GAME OVER", W / 2, 56, colors.p, "center");
       if (st.phaseTimer <= 0 && Math.floor(performance.now() / 500) % 2) {
@@ -328,8 +352,10 @@ const game = (() => {
     return false;
   }
 
-  function open() {
+  function open({ demo: isDemo = false } = {}) {
     if (running) return;
+    demo = isDemo;
+    overlay.classList.toggle("demo", demo);
     buildSprites();
     reset();
     fit();
@@ -341,13 +367,16 @@ const game = (() => {
     keys.clear();
     target = null;
     raf = requestAnimationFrame(loop);
-    canvas.focus();
-    emit("game-start");
+    if (!demo) {
+      canvas.focus();
+      emit("game-start");
+    }
   }
 
   function close() {
     if (!running) return;
     if (st.phase !== "over") payout();
+    demo = false;
     running = false;
     cancelAnimationFrame(raf);
     overlay.hidden = true;
@@ -398,5 +427,5 @@ const game = (() => {
     }
   });
 
-  return { open, close, isOpen: () => running };
+  return { open, close, isOpen: () => running, isDemo: () => running && demo };
 })();

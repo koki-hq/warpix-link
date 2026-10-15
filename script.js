@@ -156,6 +156,21 @@ const NPC = {
   ],
 };
 
+// ピクセに帽子などを重ねる。hat = { top: 何行目から, rows: [...] }、"." は透明
+let currentHat = null;
+function dress(frame, hat = currentHat) {
+  if (!hat) return frame;
+  return frame.map((row, y) => {
+    const over = hat.rows[y - hat.top];
+    if (!over) return row;
+    return [...row].map((ch, x) => (over[x] && over[x] !== "." ? over[x] : ch)).join("");
+  });
+}
+
+// ミニゲーム・ぼうけん中など、キー入力をページ側で使わないとき
+const playing = () =>
+  document.body.classList.contains("gaming") || document.body.classList.contains("adventuring");
+
 const UFO = [
   "....cccc....",
   "...cccccc...",
@@ -556,6 +571,7 @@ const npc = (() => {
   let typing = null;
   let lastChatter = -1;
   let introStarted = false;
+  const extraIntro = [];
 
   function render() {
     box.classList.toggle("more", !typing && queue.length > 0);
@@ -566,6 +582,10 @@ const npc = (() => {
     typing = null;
     textEl.textContent = full;
     render();
+    if (pending && !pending.shown && queue.length === 0) {
+      pending.shown = true;
+      showChoices();
+    }
   }
 
   function type(line) {
@@ -587,7 +607,46 @@ const npc = (() => {
     if (line) type(line);
   }
 
+  // 選択肢つきの質問。答えの番号で解決する（ほかのセリフに割りこまれたら -1）
+  let pending = null;
+  function cancelAsk() {
+    if (!pending) return;
+    box.querySelector(".dialog-choices")?.remove();
+    const p = pending;
+    pending = null;
+    p.resolve(-1);
+  }
+  function showChoices() {
+    const wrap = document.createElement("div");
+    wrap.className = "dialog-choices";
+    pending.choices.forEach((label, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        wrap.remove();
+        const p = pending;
+        pending = null;
+        sound.sfx.select();
+        p.resolve(i);
+      });
+      wrap.append(b);
+    });
+    box.append(wrap);
+    wrap.querySelector("button").focus({ preventScroll: true });
+  }
+  function ask(line, choices) {
+    cancelAsk();
+    return new Promise((resolve) => {
+      queue = [];
+      type(line);
+      pending = { choices, resolve, shown: false };
+    });
+  }
+
   function say(lines) {
+    cancelAsk();
     queue = [...lines];
     next();
   }
@@ -604,11 +663,12 @@ const npc = (() => {
 
   // まばたき（ねているあいだは目を閉じたまま）
   let asleep = false;
-  const face = () => (body.innerHTML = pixelSvg(asleep ? NPC.blink : NPC.idle));
+  let away = false;
+  const face = () => (body.innerHTML = away ? "" : pixelSvg(dress(asleep ? NPC.blink : NPC.idle)));
   face();
   setInterval(() => {
-    if (asleep) return;
-    body.innerHTML = pixelSvg(NPC.blink);
+    if (asleep || away) return;
+    body.innerHTML = pixelSvg(dress(NPC.blink));
     setTimeout(face, 150);
   }, 3200);
 
@@ -622,6 +682,7 @@ const npc = (() => {
   let pokes = 0;
   let lastPoke = 0;
   sprite.addEventListener("click", (e) => {
+    if (away) return;
     jump();
     sound.sfx.coin();
     score.add(10, ...pointOf(e, sprite));
@@ -643,16 +704,30 @@ const npc = (() => {
   return {
     say,
     jump,
+    ask,
     intro() {
       introStarted = true;
-      say(INTRO);
+      say([...INTRO, ...extraIntro]);
     },
-    busy: () => !!typing || queue.length > 0,
+    // あいさつの最後に1行足す（boot のときに呼ぶ）
+    addIntro: (line) => extraIntro.push(line),
+    busy: () => !!typing || queue.length > 0 || !!pending,
     // あいさつを最後まで言い終えたか
-    ready: () => introStarted && !typing && queue.length === 0,
+    ready: () => introStarted && !typing && queue.length === 0 && !pending,
     sleep(on) {
       asleep = on;
       sprite.classList.toggle("asleep", on);
+      face();
+    },
+    // ぼうけんやタブ旅行で箱を留守にする
+    setAway(on) {
+      away = on;
+      sprite.classList.toggle("away", on);
+      face();
+    },
+    isAway: () => away,
+    setHat(hat) {
+      currentHat = hat;
       face();
     },
   };
@@ -679,7 +754,7 @@ const secret = (() => {
   }
 
   document.addEventListener("keydown", (e) => {
-    if (!document.body.classList.contains("booted") || document.body.classList.contains("gaming")) return;
+    if (!document.body.classList.contains("booted") || playing()) return;
     if (e.target.closest?.("input, textarea")) return;
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     pos = key === CODE[pos] ? pos + 1 : key === CODE[0] ? 1 : 0;

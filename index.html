@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+  <link rel="icon" id="favicon" href="data:,">
   <link rel="stylesheet" href="style.css">
   <script>document.documentElement.classList.add("js");</script>
 </head>
@@ -41,6 +42,10 @@
       <button class="trophies-close" id="trophies-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <ul class="trophy-list" id="trophy-list"></ul>
+    <section class="wardrobe" aria-labelledby="wardrobe-title">
+      <h3 id="wardrobe-title">WARDROBE</h3>
+      <div class="wardrobe-list" id="wardrobe-list"></div>
+    </section>
     <form class="cheat-form" id="cheat-form" autocomplete="off">
       <label for="cheat-input">CHEAT CODE</label>
       <div class="cheat-row">
@@ -61,6 +66,8 @@
   </div>
 
   <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
+
+  <button class="moon" id="moon" type="button" aria-label="きょうの つき"></button>
 
   <main class="screen">
     <h1 class="title">WARPIX<span class="title-dash">-</span>LINK</h1>
@@ -106,8 +113,13 @@
     </footer>
   </main>
 
+  <!-- 印刷したときだけ出る認定証（中身は world.js が印刷直前に書く） -->
+  <section class="certificate" id="certificate" aria-hidden="true"></section>
+
   <script src="script.js"></script>
   <script src="game.js"></script>
   <script src="extras.js"></script>
+  <script src="adventure.js"></script>
+  <script src="world.js"></script>
 </body>
 </html>

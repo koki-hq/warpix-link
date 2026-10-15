@@ -1122,3 +1122,553 @@ body.party {
     animation-delay: 0s !important;
   }
 }
+
+/* =====================================================================
+   v1.3「ページの外まで遊び場」
+   ===================================================================== */
+
+/* ---------- 会話の選択肢 ---------- */
+.dialog-choices {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.dialog-choices button {
+  padding: 4px 10px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dialog-choices button::before {
+  content: "▶";
+  margin-right: 6px;
+  color: var(--accent);
+  visibility: hidden;
+}
+
+.dialog-choices button:hover,
+.dialog-choices button:focus-visible {
+  background: var(--btn-hover);
+  outline: none;
+}
+
+.dialog-choices button:hover::before,
+.dialog-choices button:focus-visible::before {
+  visibility: visible;
+}
+
+/* ---------- 留守のピクセ・となりのタブから来たピクセ ---------- */
+.npc-sprite.away {
+  outline: 2px dashed var(--muted);
+  outline-offset: -2px;
+  cursor: default;
+}
+
+.npc-sprite.away::after {
+  content: "るす";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.npc-guest {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  margin-left: -12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: bob 0.8s steps(1) infinite;
+}
+
+.npc-guest svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- 今日の月 ---------- */
+.moon {
+  position: absolute;
+  top: 64px;
+  right: 24px;
+  z-index: 3; /* .screen（z-index: 1）より手前にしないとクリックが届かない */
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.moon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.moon:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 4px;
+}
+
+.js .moon {
+  opacity: 0;
+}
+
+.booted .moon {
+  animation: fade-in 0.3s steps(3) 0.5s both;
+}
+
+/* ---------- PIXE ADVENTURE ---------- */
+.adv-hero,
+.adv-coin,
+.adv-enemy,
+.adv-goal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.adv-hero svg,
+.adv-coin svg,
+.adv-enemy svg,
+.adv-goal svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.adv-hero {
+  z-index: 6;
+  width: 32px;
+  height: 32px;
+}
+
+.adv-coin {
+  z-index: 5;
+  width: 16px;
+  height: 16px;
+}
+
+/* 2コマを交互に出して、くるくる回って見せる */
+.adv-coin span {
+  position: absolute;
+  inset: 0;
+}
+
+/* 2枚を半周期ずらして、どちらか片方だけが見えるようにする */
+.adv-coin span {
+  animation: coin-flip 0.6s steps(1) infinite;
+}
+
+.adv-coin span:last-child {
+  animation-delay: -0.3s;
+}
+
+@keyframes coin-flip {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.adv-enemy {
+  z-index: 5;
+  width: 24px;
+  height: 12px;
+}
+
+.adv-enemy.boom {
+  height: 24px;
+}
+
+.adv-goal {
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  animation: bob 0.5s steps(1) infinite;
+}
+
+/* 勢いよく着地されたボタンはへこむ（アニメーションと取り合わないよう transform で） */
+.pixel-btn.bumped,
+.coin-slot.bumped {
+  transform: translateY(var(--px));
+}
+
+.adv-hud {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  z-index: 18;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: var(--bg);
+  translate: -50% 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--gold);
+  white-space: nowrap;
+  box-shadow:
+    0 -2px 0 0 var(--fg),
+    0 2px 0 0 var(--fg),
+    -2px 0 0 0 var(--fg),
+    2px 0 0 0 var(--fg);
+}
+
+.adv-time {
+  color: var(--fg);
+}
+
+.adv-exit {
+  padding: 4px 6px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* タッチ端末だけに出す操作ボタン */
+.adv-pad {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  z-index: 18;
+  display: none;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.adv-pad div {
+  display: flex;
+  gap: 12px;
+}
+
+.adv-pad button {
+  width: 56px;
+  height: 56px;
+  border: 0;
+  background: rgba(42, 33, 80, 0.85);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 16px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
+  box-shadow:
+    0 -2px 0 0 var(--fg),
+    0 2px 0 0 var(--fg),
+    -2px 0 0 0 var(--fg),
+    2px 0 0 0 var(--fg);
+}
+
+.adv-pad .adv-a {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+@media (pointer: coarse) {
+  .adv-pad {
+    display: flex;
+  }
+}
+
+/* ---------- スタッフロール ---------- */
+.credits {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+}
+
+.credits-roll {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: min(420px, calc(100vw - 32px));
+  margin: 0 auto;
+  translate: 0 var(--from, 100vh);
+  animation-name: credits-roll;
+  animation-fill-mode: forwards;
+  text-align: center;
+}
+
+@keyframes credits-roll {
+  from { translate: 0 var(--from); }
+  to { translate: 0 var(--to); }
+}
+
+.cr-title {
+  margin: 0 0 80px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 24px;
+  text-shadow: var(--px) 0 0 var(--accent), calc(var(--px) * 2) var(--px) 0 var(--shadow);
+}
+
+.cr-head {
+  margin: 80px 0 32px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  line-height: 2;
+  color: var(--accent-2);
+}
+
+.cr-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 20px;
+  font-family: "Press Start 2P", "DotGothic16", monospace;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.cr-row span:first-child {
+  color: var(--muted);
+  text-align: left;
+}
+
+.cr-row span:last-child {
+  text-align: right;
+}
+
+.cr-pixe {
+  width: 64px;
+  height: 64px;
+  margin: 48px auto 24px;
+  animation: jump 0.6s steps(3) infinite;
+}
+
+.cr-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cr-end {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  color: var(--gold);
+}
+
+.credits-skip {
+  position: fixed;
+  right: 16px;
+  bottom: 12px;
+  z-index: 41;
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--muted);
+  animation: blink 1.2s steps(1) infinite;
+}
+
+/* ---------- きせかえ ---------- */
+.wardrobe {
+  margin-top: 16px;
+}
+
+.wardrobe h3 {
+  margin: 0 0 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  font-weight: normal;
+  color: var(--accent-2);
+}
+
+.wardrobe-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wardrobe-item {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 4px;
+  border: 0;
+  background: var(--btn);
+  color: var(--muted);
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wardrobe-item svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wardrobe-item:disabled {
+  background: none;
+  outline: 2px dashed var(--btn);
+  cursor: help;
+}
+
+.wardrobe-item[aria-pressed="true"] {
+  outline: 2px solid var(--gold);
+}
+
+.wardrobe-item:not(:disabled):hover,
+.wardrobe-item:focus-visible {
+  background: var(--btn-hover);
+  outline: 2px solid var(--accent-2);
+}
+
+/* ---------- 印刷すると認定証 ---------- */
+.certificate {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body > *:not(.certificate) {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  body::after {
+    display: none;
+  }
+
+  .certificate {
+    display: block;
+  }
+
+  .cert-frame {
+    padding: 32px;
+    border: 8px double #000;
+    font-family: "DotGothic16", monospace;
+    text-align: center;
+  }
+
+  .cert-kicker {
+    margin: 0;
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+  }
+
+  .cert-title {
+    margin: 12px 0 16px;
+    font-size: 40px;
+    letter-spacing: 8px;
+  }
+
+  .cert-pixe {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 16px;
+  }
+
+  .cert-pixe svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cert-lead {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  .cert-table {
+    margin: 16px auto;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  .cert-table th,
+  .cert-table td {
+    padding: 6px 16px;
+    border-bottom: 1px dashed #000;
+    text-align: left;
+  }
+
+  .cert-table td {
+    font-family: "Press Start 2P", "DotGothic16", monospace;
+    font-size: 12px;
+    text-align: right;
+  }
+
+  .cert-sub {
+    margin: 24px 0 4px;
+    font-weight: bold;
+  }
+
+  .cert-trophies {
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .cert-date {
+    margin: 24px 0 4px;
+  }
+
+  .cert-sign {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .cert-stamp {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
+    border: 3px solid #d0103a;
+    color: #d0103a;
+    font-size: 20px;
+    vertical-align: middle;
+    rotate: -8deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .npc-guest,
+  .adv-goal,
+  .cr-pixe,
+  .credits-skip,
+  .adv-coin span {
+    animation: none !important;
+  }
+
+  .adv-coin span:last-child {
+    opacity: 0;
+  }
+
+  .booted .moon {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+  }
+}
