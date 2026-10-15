@@ -82,6 +82,9 @@ const achievements = (() => {
     { id: "gamepad", name: "コントローラー", desc: "ゲームの コントローラーを つないだ", hint: "ゲームきの コントローラーを つないでみて" },
     { id: "online", name: "おなじ そら", desc: "ほかの だれかと おなじ そらを みた", hint: "だれかと おなじ じかんに ここに いると……" },
     { id: "hello", name: "はじめまして", desc: "ほかの だれかと てを ふりあった", hint: "そらに うかぶ ピクセを クリック" },
+    { id: "diary", name: "ピクセの にっき", desc: "ピクセの にっきを よんだ", hint: "ピクセは まいにち なにかを かいている" },
+    { id: "growup", name: "おおきく なったね", desc: "7にち あって ピクセが マントを てにいれた", hint: "なんにちも あいに くると……" },
+    { id: "reunion", name: "ただいま", desc: "ひさしぶりに あいにきて、ピクセと なかなおり した", hint: "しばらく あわないと ピクセは……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
@@ -140,6 +143,7 @@ const achievements = (() => {
     if (unlocked.has(id) || !LIST.some((a) => a.id === id)) return;
     unlocked.add(id);
     store.set("warpix-achievements", [...unlocked]);
+    emit("achievement", { id, name: LIST.find((a) => a.id === id).name });
     render();
     queue.push(LIST.find((a) => a.id === id));
     if (!showing) showNext();

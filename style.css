@@ -1898,3 +1898,199 @@ body.party {
   pointer-events: none;
   background: repeating-linear-gradient(90deg, var(--accent-2) 0 8px, transparent 8px 12px);
 }
+
+/* =====================================================================
+   ピクセが育つ：日記・でんせつの輝き
+   ===================================================================== */
+
+.diary-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 6px 4px 4px;
+  border: 0;
+  background: var(--btn);
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  box-shadow:
+    0 -2px 0 0 var(--accent),
+    0 2px 0 0 var(--accent),
+    -2px 0 0 0 var(--accent),
+    2px 0 0 0 var(--accent);
+}
+
+.diary-btn:hover,
+.diary-btn:focus-visible {
+  background: var(--btn-hover);
+  outline: none;
+}
+
+.diary-icon {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.diary-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.diary-new {
+  padding: 1px 3px;
+  background: var(--accent);
+  color: var(--bg);
+  animation: blink 1s steps(1) infinite;
+}
+
+.diary-new[hidden] {
+  display: none;
+}
+
+/* 罫線ノートの日記 */
+.diary {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  border: 0;
+  background: #fffaf0;
+  color: #1a1433;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--accent),
+    0 var(--px) 0 0 var(--accent),
+    calc(var(--px) * -1) 0 0 0 var(--accent),
+    var(--px) 0 0 0 var(--accent),
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
+}
+
+.diary::backdrop {
+  background: rgba(15, 11, 30, 0.75);
+}
+
+.diary-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--accent);
+  color: #fffaf0;
+}
+
+.diary-top h2 {
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 18px;
+  font-weight: normal;
+}
+
+.diary-close {
+  padding: 2px 8px;
+  border: 0;
+  background: #fffaf0;
+  color: var(--accent);
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.diary-body {
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+  font-family: "DotGothic16", monospace;
+  scrollbar-color: var(--muted) #fffaf0;
+}
+
+.diary-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+  border-bottom: 2px dashed #c9bfa8;
+}
+
+.diary-pixe {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  background: #1a1433;
+}
+
+.diary-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.diary-head dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.diary-head dt {
+  color: #8a7f68;
+}
+
+.diary-head dd {
+  margin: 0;
+}
+
+.diary-day {
+  margin-top: 12px;
+}
+
+.diary-day h3 {
+  margin: 0 0 4px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--accent);
+}
+
+/* 1行ずつ罫線の上に書く */
+.diary-day p {
+  margin: 0;
+  padding: 4px 0 3px;
+  border-bottom: 1px solid #e6dcc6;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.diary-empty,
+.diary-preview {
+  margin: 16px 0 0;
+  color: #8a7f68;
+  font-size: 13px;
+}
+
+/* 30日会った「でんせつの ピクセ」はキラキラ光る（点滅ではなく、ドットが入れかわる） */
+.npc-sprite.legend::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 4px;
+  height: 4px;
+  pointer-events: none;
+  animation: legend 1.6s steps(1) infinite;
+}
+
+@keyframes legend {
+  0% { box-shadow: 0 0 0 var(--gold), 52px 8px 0 var(--accent-2), 8px 48px 0 var(--gold), 56px 52px 0 var(--fg); }
+  50% { box-shadow: 4px 12px 0 var(--accent-2), 48px 0 0 var(--gold), 0 56px 0 var(--fg), 52px 40px 0 var(--gold); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diary-new,
+  .npc-sprite.legend::before {
+    animation: none !important;
+  }
+}

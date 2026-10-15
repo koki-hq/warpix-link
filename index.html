@@ -44,6 +44,7 @@
     <button class="trophy-btn" id="trophy-btn" type="button" aria-label="じっせきを見る">
       <span class="trophy-mini" data-trophy></span><span id="trophy-count">0/0</span>
     </button>
+    <button class="diary-btn" id="diary-btn" type="button" aria-label="ピクセの にっきを よむ"></button>
   </div>
 
   <div class="toast" id="toast" role="status" hidden>
@@ -80,6 +81,14 @@
       </div>
       <p class="cheat-msg" id="cheat-msg" aria-live="polite"></p>
     </form>
+  </dialog>
+
+  <dialog class="diary" id="diary" aria-labelledby="diary-title">
+    <div class="diary-top">
+      <h2 id="diary-title">ピクセの にっき</h2>
+      <button class="diary-close" id="diary-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="diary-body" id="diary-body"></div>
   </dialog>
 
   <div class="game" id="game" role="dialog" aria-label="ミニゲーム PIXE INVADERS" hidden>
@@ -152,5 +161,6 @@
   <script src="device.js"></script>
   <script src="weather.js"></script>
   <script src="online.js"></script>
+  <script src="grow.js"></script>
 </body>
 </html>

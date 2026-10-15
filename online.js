@@ -49,7 +49,8 @@ const online = (() => {
 
   function ghostSvg(hatId) {
     const hats = { ...wardrobeHats() };
-    return pixelSvg(dress(NPC.idle, hatId && hats[hatId] ? hats[hatId] : null));
+    // ほかの人のピクセなので、自分のピクセの成長（マントなど）は着せない
+    return pixelSvg(dress(NPC.idle, hatId && hats[hatId] ? hats[hatId] : null, []));
   }
 
   // きせかえの帽子データを借りる（world.js の wardrobe が持っている）

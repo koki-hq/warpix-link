@@ -165,6 +165,7 @@ const weather = (() => {
     EFFECTS[kind](data.day);
     if (kind === "rain" || kind === "thunder") wardrobe.wearSeasonal("umbrella");
     achievements.unlock("weather");
+    emit("weather", { kind, temp: Math.round(data.temp) });
     const say = () => {
       if (!npc.ready() || playing()) return setTimeout(say, 4000);
       npc.say(LINES[kind](Math.round(data.temp), data.day));

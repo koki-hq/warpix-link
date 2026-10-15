@@ -160,13 +160,19 @@ const NPC = {
 
 // ピクセに帽子などを重ねる。hat = { top: 何行目から, rows: [...] }、"." は透明
 let currentHat = null;
-function dress(frame, hat = currentHat) {
-  if (!hat) return frame;
+// 成長して手に入れたもの（スカーフ・マントなど。grow.js が決める）も、帽子の下に重ねる
+let growthLayers = [];
+function overlay(frame, layer) {
   return frame.map((row, y) => {
-    const over = hat.rows[y - hat.top];
+    const over = layer.rows[y - layer.top];
     if (!over) return row;
     return [...row].map((ch, x) => (over[x] && over[x] !== "." ? over[x] : ch)).join("");
   });
+}
+function dress(frame, hat = currentHat, layers = growthLayers) {
+  let rows = frame;
+  for (const layer of layers) rows = overlay(rows, layer);
+  return hat ? overlay(rows, hat) : rows;
 }
 
 // ミニゲーム・ぼうけん中など、キー入力をページ側で使わないとき
@@ -597,6 +603,7 @@ const npc = (() => {
   let typing = null;
   let lastChatter = -1;
   let introStarted = false;
+  let pokeHook = null;
   const extraIntro = [];
 
   function render() {
@@ -717,6 +724,8 @@ const npc = (() => {
     pokes = now - lastPoke < 1500 ? pokes + 1 : 1;
     lastPoke = now;
     emit("poke", { streak: pokes });
+    // ほかのファイルが反応を引き受けたら（すねている時など）、いつものひとことは言わない
+    if (pokeHook?.(pokes)) return;
     if (pokes >= 10) {
       pokes = 0;
       secret.unlock();
@@ -755,6 +764,12 @@ const npc = (() => {
     setHat(hat) {
       currentHat = hat;
       face();
+    },
+    // 見た目を描き直す（成長したとき）
+    refresh: () => face(),
+    // つついたときの反応を横取りする（true を返すと、いつものひとことは言わない）
+    onPoke(fn) {
+      pokeHook = fn;
     },
   };
 })();

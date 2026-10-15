@@ -88,6 +88,7 @@ const wardrobe = (() => {
         apply();
         render();
         sound.sfx.coin();
+        emit("wear", { id, name: hat.name });
         if (id) achievements.unlock("fashion");
       });
       listEl.append(b);
@@ -263,6 +264,7 @@ const favicon = (() => {
       favicon.refresh();
       post("visit", { to: visitingTo, hat: currentHat });
       achievements.unlock("tab-travel");
+      emit("tab-travel", { role: "visit" });
     }, 1200);
   });
 
@@ -286,6 +288,7 @@ const favicon = (() => {
     sprite.after(el);
     guest = { el, from, timer: null };
     achievements.unlock("tab-travel");
+    emit("tab-travel", { role: "host" });
 
     const greet = () => {
       sound.sfx.coin();
