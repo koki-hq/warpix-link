@@ -8,21 +8,40 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+
+  <div class="start-screen" id="start-screen" hidden>
+    <button class="start-btn" id="start-btn" type="button">PRESS START</button>
+    <p class="start-hint">CLICK OR PRESS ENTER</p>
+  </div>
+
+  <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
+
   <main class="screen">
     <h1 class="title">WARPIX<span class="title-dash">-</span>LINK</h1>
     <p class="subtitle">PRESS A LINK TO WARP<span class="cursor">_</span></p>
 
     <nav class="links">
-      <a class="pixel-btn" href="https://example.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span>WORLD 1-1
+      <a class="pixel-btn" href="https://www.youtube.com/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="youtube"></span>YOUTUBE
       </a>
-      <a class="pixel-btn" href="https://example.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span>WORLD 1-2
+      <a class="pixel-btn" href="https://twitter.com/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="twitter"></span>TWITTER
       </a>
-      <a class="pixel-btn" href="https://example.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span>WORLD 1-3
+      <a class="pixel-btn" href="https://www.instagram.com/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="instagram"></span>INSTAGRAM
+      </a>
+      <a class="pixel-btn" href="https://booth.pm/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="booth"></span>BOOTH
+      </a>
+      <a class="pixel-btn" href="https://www.tumblr.com/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="tumblr"></span>TUMBLR
+      </a>
+      <a class="pixel-btn" href="https://open.spotify.com/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="spotify"></span>SPOTIFY
       </a>
     </nav>
 

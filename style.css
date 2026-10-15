@@ -7,6 +7,7 @@
   --btn: #2a2150;
   --btn-hover: #3d2f78;
   --shadow: #000;
+  --muted: #8a80b8;
   --px: 4px;
 }
 
@@ -38,6 +39,7 @@ body::after {
   content: "";
   position: fixed;
   inset: 0;
+  z-index: 20;
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
@@ -47,7 +49,19 @@ body::after {
   );
 }
 
+/* 流れる星（canvasで描画） */
+.stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .screen {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   max-width: 480px;
   margin: 0 auto;
@@ -96,7 +110,7 @@ body::after {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 /* ピクセル枠のボタン（box-shadowで角を欠かせる） */
@@ -105,7 +119,7 @@ body::after {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 20px;
+  padding: 14px 20px;
   background: var(--btn);
   color: var(--fg);
   font-family: "Press Start 2P", monospace;
@@ -117,12 +131,25 @@ body::after {
     calc(var(--px) * -1) 0 0 0 var(--fg),
     var(--px) 0 0 0 var(--fg),
     calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-  transition: none;
 }
 
 .pixel-btn .arrow {
   color: var(--accent);
   visibility: hidden;
+}
+
+.pixel-btn .icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--accent-2);
+}
+
+.pixel-btn .icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .pixel-btn:hover,
@@ -150,12 +177,151 @@ body::after {
   margin-top: 24px;
   font-family: "Press Start 2P", monospace;
   font-size: 8px;
-  color: #8a80b8;
+  color: var(--muted);
+}
+
+/* ---------- PRESS START 画面 ---------- */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  background: rgba(15, 11, 30, 0.8);
+  cursor: pointer;
+}
+
+.start-screen[hidden] {
+  display: none;
+}
+
+.start-btn {
+  padding: 8px 4px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: clamp(16px, 5vw, 24px);
+  text-shadow: var(--px) var(--px) 0 var(--accent);
+  cursor: pointer;
+  animation: blink 1s steps(1) infinite;
+}
+
+.start-btn:focus-visible {
+  outline: var(--px) solid var(--accent-2);
+  outline-offset: 8px;
+}
+
+.start-hint {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--muted);
+}
+
+/* スタート後に3回点滅して消える */
+.start-screen.leaving {
+  animation: blink-out 0.45s steps(1) forwards;
+}
+
+@keyframes blink-out {
+  0% { opacity: 1; }
+  20% { opacity: 0; }
+  40% { opacity: 1; }
+  60% { opacity: 0; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---------- 起動演出 ---------- */
+/* JSが動くときだけ、スタートまで中身を隠す */
+.js .title,
+.js .subtitle,
+.js .pixel-btn,
+.js .footer,
+.js .bgm-toggle {
+  opacity: 0;
+}
+
+.booted .title {
+  animation: drop-in 0.5s steps(4) both;
+}
+
+.booted .subtitle,
+.booted .footer,
+.booted .bgm-toggle {
+  animation: fade-in 0.3s steps(3) 0.5s both;
+}
+
+.booted .pixel-btn {
+  animation: pop-in 0.3s steps(3) both;
+  animation-delay: calc(0.6s + var(--i, 0) * 0.12s);
+}
+
+/* transform は :active の沈み込みに使うので、演出は translate で動かす */
+@keyframes drop-in {
+  from { opacity: 0; translate: 0 -32px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; translate: -16px 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- BGM 切り替えボタン ---------- */
+.bgm-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  padding: 8px 10px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -0.5) 0 0 var(--fg),
+    0 calc(var(--px) * 0.5) 0 0 var(--fg),
+    calc(var(--px) * -0.5) 0 0 0 var(--fg),
+    calc(var(--px) * 0.5) 0 0 0 var(--fg);
+}
+
+.bgm-toggle[aria-pressed="false"] {
+  color: var(--muted);
+}
+
+.bgm-toggle:hover,
+.bgm-toggle:focus-visible {
+  background: var(--btn-hover);
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cursor,
-  .pixel-btn .arrow {
+  .pixel-btn .arrow,
+  .start-btn {
     animation: none !important;
+  }
+
+  .booted .title,
+  .booted .subtitle,
+  .booted .footer,
+  .booted .bgm-toggle,
+  .booted .pixel-btn,
+  .start-screen.leaving {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
   }
 }
