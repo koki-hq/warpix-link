@@ -67,6 +67,8 @@ sw.js        オフライン用のサービスワーカー
 manifest.webmanifest, icons/   アプリの名前とアイコン
 docs/THEME.md  デザインのテーマと決まりごと
 og.png       共有カードの画像（元は tools/og-card.html、撮影は tools/shoot-og.mjs）
+tests/       テスト一式（node tests/run.mjs）
+tools/health.mjs  健康診断
 docs/spec/     バージョン別の仕様メモ（点数、タイミング、イベント、実績の条件、保存するデータなど）
 ```
 
@@ -94,7 +96,18 @@ URL の最後に `?simple=1` を付けると、スタート画面も演出もな
 
 URL に `?date=2026-10-31` のように付けると、その日のページになります。季節イベントの確認に使えます（例：`?date=2026-12-24` でクリスマス、`?date=2027-01-01` でお正月）。
 
+## テストと健康診断
+
+```sh
+node tests/run.mjs       # ブラウザでぜんぶの遊びを試す（34 件、約 6 分）
+node tools/health.mjs    # 重さ・スマホでの速さ・待機中の CPU・アクセシビリティ
+```
+
+Node 22 以上と Chrome があれば動きます（ライブラリのインストールは不要。Chrome が見つからないときは環境変数 `CHROME_PATH`）。音は鳴らさず、本物の Supabase（世界の記録）にも触りません。くわしくは [docs/spec/v1.6.1.md](docs/spec/v1.6.1.md)。
+
 ## 公開するとき
+
+- 公開する前に `node tests/run.mjs` がぜんぶ通ることを確かめる
 
 - `sw.js` の先頭にある `VERSION` を上げる（例：`warpix-v1.4.0` → `warpix-v1.4.1`）。上げないと、アプリやオフライン用に保存された古いファイルが使われ続けます
 - 新しいファイルを足したら、`sw.js` の `FILES` にも足す
