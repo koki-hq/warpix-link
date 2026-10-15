@@ -88,6 +88,14 @@ body::after {
   gap: 24px;
 }
 
+/* 幅がせまい画面では、左上のスコア（下端 68px）と右上の月（下端 96px）が
+   タイトルにかぶらないよう、中身を下げる */
+@media (max-width: 720px) {
+  .screen {
+    padding-top: 120px;
+  }
+}
+
 .title {
   margin: 0;
   font-family: "Press Start 2P", monospace;
