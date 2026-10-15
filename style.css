@@ -2345,3 +2345,15 @@ body.party {
     animation: none !important;
   }
 }
+
+/* 放っておかれてページごと眠っているとき：動きを全部止めて、少し暗くする（何か触れば起きる） */
+.dozing *,
+.dozing *::before,
+.dozing *::after {
+  animation-play-state: paused !important;
+}
+
+.dozing .screen,
+.dozing .stars {
+  opacity: 0.55;
+}

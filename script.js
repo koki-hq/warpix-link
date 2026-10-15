@@ -175,6 +175,9 @@ function dress(frame, hat = currentHat, layers = growthLayers) {
   return hat ? overlay(rows, hat) : rows;
 }
 
+// 放っておかれて、ページごと眠っているとき（星も点滅も止めて、電池をつかわない）
+const dozing = () => document.body.classList.contains("dozing");
+
 // ミニゲーム・ぼうけん中など、キー入力をページ側で使わないとき
 const playing = () =>
   document.body.classList.contains("gaming") || document.body.classList.contains("adventuring");
@@ -203,15 +206,22 @@ const BOOM = [
   ".....pp.....",
 ];
 
+// 同じ色が横にならんだマスは 1 本の線にまとめ、色ごとに 1 つの <path> にする
+// （1 マス 1 要素だと、アイコンとピクセだけでページの部品が千を超えてしまう）
 function pixelSvg(rows, palette = PALETTE) {
-  const rects = [];
+  const paths = new Map(); // 色 → d
   rows.forEach((row, y) => {
-    [...row].forEach((ch, x) => {
+    for (let x = 0; x < row.length; ) {
+      const ch = row[x];
+      let end = x + 1;
+      while (end < row.length && row[end] === ch) end++;
       const fill = palette[ch];
-      if (fill) rects.push(`<rect x="${x}" y="${y}" width="1" height="1" style="fill:${fill}"/>`);
-    });
+      if (fill) paths.set(fill, `${paths.get(fill) ?? ""}M${x} ${y}h${end - x}v1h${x - end}z`);
+      x = end;
+    }
   });
-  return `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rects.join("")}</svg>`;
+  const body = [...paths].map(([fill, d]) => `<path d="${d}" style="fill:${fill}"/>`).join("");
+  return `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${body}</svg>`;
 }
 
 document.querySelectorAll("[data-icon]").forEach((el) => {
@@ -478,13 +488,24 @@ const stars = (() => {
     }
   }
 
+  // 星は 2px きざみでゆっくり動くだけなので、ふだんは 1 秒に 20 回だけ描きなおす（ワープ中は毎フレーム）。
+  // 画面全体の canvas を毎フレーム描くと、何もしていないときでも CPU と電池を食うため
+  let lastTick = 0;
+  let lastDraw = 0;
+  let paused = false;
   function tick(now) {
+    if (paused) return;
+    const frames = lastTick ? Math.min((now - lastTick) / (1000 / 60), 6) : 1;
+    lastTick = now;
     const b = boost(now);
     for (const s of field) {
-      s.y += s.speed * b;
+      s.y += s.speed * b * frames;
       if (s.y > h) Object.assign(s, makeStar(-s.size));
     }
-    draw(b);
+    if (b > 1 || now - lastDraw >= 50) {
+      draw(b);
+      lastDraw = now;
+    }
     requestAnimationFrame(tick);
   }
 
@@ -497,6 +518,17 @@ const stars = (() => {
   if (!reduceMotion) requestAnimationFrame(tick);
 
   return {
+    // ページが眠るときは止めて、起きたら再開する
+    pause() {
+      paused = true;
+    },
+    resume() {
+      if (!paused) return;
+      paused = false;
+      lastTick = 0;
+      if (!reduceMotion) requestAnimationFrame(tick);
+    },
+    isPaused: () => paused,
     warp(ms = 1000) {
       warpMs = ms;
       warpUntil = performance.now() + ms;
@@ -812,7 +844,7 @@ const secret = (() => {
 // ---------- ときどき飛んでくるUFO ----------
 const ufo = (() => {
   function spawn() {
-    if (document.hidden) return;
+    if (document.hidden || dozing()) return;
     const el = document.createElement("button");
     el.type = "button";
     el.className = `ufo ${Math.random() < 0.5 ? "ltr" : "rtl"}`;

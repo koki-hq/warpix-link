@@ -422,7 +422,7 @@ function mothership() {
   ];
 
   function spawn() {
-    if (document.hidden || playing()) return;
+    if (document.hidden || playing() || dozing()) return;
     const el = document.createElement("button");
     el.type = "button";
     el.className = "shooting-star";
@@ -456,13 +456,27 @@ function mothership() {
 (() => {
   const IDLE_MS = 40000;
   const DEMO_MS = 20000; // 寝てからデモプレイが始まるまで
+  const DEMO_RUN_MS = 30000; // デモプレイを流す長さ。そのあとはページごと眠る
   let lastInput = performance.now();
   let sleeping = false;
   let sleptAt = 0;
+  let demoAt = 0;
+
+  // ページごと眠る：開きっぱなしで放っておかれたスマホの電池を食わないよう、星も点滅も止める
+  function doze() {
+    if (dozing()) return;
+    if (game.isDemo()) game.close();
+    document.body.classList.add("dozing");
+    stars.pause();
+  }
 
   function wake() {
     lastInput = performance.now();
     if (game.isDemo()) game.close();
+    if (dozing()) {
+      document.body.classList.remove("dozing");
+      stars.resume();
+    }
     if (!sleeping) return;
     sleeping = false;
     npc.sleep(false);
@@ -476,10 +490,15 @@ function mothership() {
   setInterval(() => {
     if (document.hidden || !document.body.classList.contains("booted")) return;
     const now = performance.now();
-    // ゲームセンターの筐体みたいに、だれもいないとデモプレイが始まる
+    // ゲームセンターの筐体みたいに、だれもいないとデモプレイが始まり、しばらくするとページごと眠る
     if (sleeping) {
-      if (!reduceMotion && !playing() && now - sleptAt > DEMO_MS) {
+      if (dozing()) return;
+      if (game.isDemo()) {
+        if (now - demoAt > DEMO_RUN_MS) doze();
+      } else if (now - sleptAt > DEMO_MS && !playing()) {
+        if (reduceMotion) return doze();
         game.open({ demo: true });
+        demoAt = now;
         emit("demo");
       }
       return;

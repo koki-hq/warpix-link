@@ -20,7 +20,7 @@ const raid = (() => {
   let missedTimer = 0;
 
   const visible = () =>
-    document.body.classList.contains("booted") && !simple.on && !document.hidden && !game.isOpen();
+    document.body.classList.contains("booted") && !simple.on && !document.hidden && !game.isOpen() && !dozing();
 
   // ---------- 表示 ----------
   function build() {

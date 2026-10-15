@@ -39,14 +39,14 @@
 <body>
   <canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
-  <div class="start-screen" id="start-screen" hidden>
+  <section class="start-screen" id="start-screen" aria-label="スタート" hidden>
     <button class="start-btn" id="start-btn" type="button">PRESS START</button>
     <p class="start-hint">CLICK OR PRESS ENTER</p>
     <button class="simple-enter" id="simple-enter" type="button">リンクだけ みる ▶</button>
     <p class="start-hi">HI-SCORE <span data-hiscore>000000</span></p>
-  </div>
+  </section>
 
-  <div class="hud">
+  <aside class="hud" aria-label="スコアと きろく">
     <span>SCORE <b data-score>000000</b></span>
     <span>HI <b data-hiscore>000000</b></span>
     <span class="online-count" id="online-count" hidden>ONLINE <b>1</b></span>
@@ -54,7 +54,7 @@
       <span class="trophy-mini" data-trophy></span><span id="trophy-count">0/0</span>
     </button>
     <button class="diary-btn" id="diary-btn" type="button" aria-label="ピクセの にっきを よむ"></button>
-  </div>
+  </aside>
 
   <div class="toast" id="toast" role="status" hidden>
     <span class="toast-icon" data-trophy></span>

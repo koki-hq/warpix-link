@@ -111,6 +111,30 @@ export default {
     await server.close();
   },
 
+  async "放っておくと、ピクセが寝て、デモプレイのあとページごと眠り、触ると起きる"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    // テストだけ：performance.now を早送りできるようにする（製品のコードには何も足さない）
+    await p.send("Page.addScriptToEvaluateOnNewDocument", { source: `const __real = performance.now.bind(performance); let __extra = 0; performance.now = () => __real() + __extra; window.__skip = (ms) => (__extra += ms);` });
+    await p.goto(server.url);
+    await p.boot();
+    await p.ev(`__skip(41000)`);
+    await t.sleep(1500);
+    t.ok(await p.ev(`document.getElementById("npc").classList.contains("asleep")`), "40 秒で寝ない");
+    await p.ev(`__skip(21000)`);
+    await t.sleep(1500);
+    t.ok(await p.ev(`game.isDemo()`), "寝て 20 秒でデモプレイが始まらない");
+    await p.ev(`__skip(31000)`);
+    await t.sleep(1500);
+    t.ok(await p.ev(`!game.isOpen() && document.body.classList.contains("dozing") && stars.isPaused()`), "デモのあと、ページごと眠らない");
+    await p.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 900 });
+    await t.sleep(400);
+    t.ok(await p.ev(`!document.body.classList.contains("dozing") && !stars.isPaused()`), "マウスを動かしても起きない");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "デモプレイは点数を入れず、キーを押すと終わる"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
