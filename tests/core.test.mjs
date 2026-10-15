@@ -70,6 +70,21 @@ export default {
     await server.close();
   },
 
+  async "連打する場所は、スマホでダブルタップしても拡大しない設定になっている"(t) {
+    // ヘッドレス Chrome ではダブルタップ拡大そのものを再現できないので、設定が効いていることを確かめる
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url);
+    await p.boot({ readIntro: false });
+    await p.ev(`mothership(); (() => { const el = document.createElement("div"); el.className = "raid"; el.innerHTML = '<button type="button" class="raid-ship"></button>'; document.body.append(el); })()`);
+    await t.sleep(300);
+    const got = await p.ev(`Object.fromEntries([".raid-ship", "#npc", ".mothership", ".pixel-btn", ".dialog", "#start-btn", ".coin-slot"].map((s) => [s, getComputedStyle(document.querySelector(s)).touchAction]))`);
+    for (const [sel, v] of Object.entries(got)) t.eq(v, "manipulation", `${sel} の touch-action`);
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "スマホの幅で、スコア・月・BGM がタイトルに重ならない"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

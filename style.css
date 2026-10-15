@@ -2515,3 +2515,31 @@ body.party {
   font-size: 12px;
   color: var(--muted);
 }
+
+/* スマホで連打しても「ダブルタップで拡大」にならないように（2 本指の拡大はそのまま使える）。
+   レイドのマザーシップ、10 連打のピクセ、UFO など、すばやくタップする場所とボタン全般 */
+button,
+a,
+.raid-ship,
+.npc-sprite,
+.mothership,
+.ufo,
+.ghost,
+.rain-pixe,
+.shooting-star,
+.dialog {
+  touch-action: manipulation;
+}
+
+/* 連打する的は、長押しで文字が選ばれたり、タップのたびに色の四角が出たりしないように */
+.raid-ship,
+.npc-sprite,
+.mothership,
+.ufo,
+.ghost,
+.rain-pixe,
+.shooting-star {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
