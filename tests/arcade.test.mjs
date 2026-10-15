@@ -94,6 +94,50 @@ export default {
     await server.close();
   },
 
+  async "ベスト 5 に入ると 3 文字の名前を入れられ、ランキングに のこる"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url);
+    await p.ev(`localStorage.clear()`);
+    await p.goto(server.url);
+    await p.boot();
+    // 自機の真上に弾を置いて、ゲームオーバーにする
+    const lose = async (score) => {
+      await p.ev(`document.getElementById("coin-slot").click()`);
+      await t.sleep(2000);
+      await p.ev(`(() => { const s = game.state(); s.score = ${score}; s.lives = 1; s.inv = 0; s.ebullets.push({ x: s.px + 4, y: 120, v: 1 }); })()`);
+      await t.sleep(800);
+    };
+    await lose(1234);
+    t.eq(await p.ev(`game.state().phase`), "entry", "名前入れに ならない");
+    await p.shot("arcade-name-entry.png");
+    await p.key("K");
+    await p.key("O");
+    await p.key("ArrowUp"); // 3 文字目は前の名前（PIX）の X → Y
+    await p.key("Enter");
+    await p.key("Enter");
+    await t.sleep(300);
+    t.eq(await p.ev(`game.ranking()`), [{ n: "KOY", s: 1234, w: 1 }], "ランキング");
+    t.eq(await p.ev(`game.state().phase`), "over", "名前を入れたら ゲームオーバー画面に");
+    t.ok(await p.ev(`achievements.has("ranker")`), "実績「なまえを きざめ」がない");
+    t.ok(await p.ev(`JSON.stringify(grow.state).includes("ランキングで 1いに")`), "にっきに ランキングのことが ない");
+    await t.sleep(800);
+    await p.shot("arcade-ranking.png");
+    await p.key("Escape");
+    // 2 回目：前の名前が最初から入っていて、とちゅうで閉じても のこる
+    await lose(500);
+    t.eq(await p.ev(`game.state().entry.letters.join("")`), "KOY", "前の名前が入っていない");
+    await p.key("Escape");
+    t.eq(await p.ev(`game.ranking().map((r) => r.n + r.s)`), ["KOY1234", "KOY500"], "とちゅうで閉じたときの ランキング");
+    // 0 点では名前入れにならない
+    await lose(0);
+    t.eq(await p.ev(`game.state().phase`), "over", "0 点で 名前入れに なった");
+    await p.key("Escape");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "実績画面と CHEAT CODE 欄、コンソールの pixe()"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

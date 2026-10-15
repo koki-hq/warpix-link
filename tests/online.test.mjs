@@ -64,8 +64,13 @@ export default {
     await p.ev(`document.querySelector(".ghost").click()`);
     t.eq(await p.ev(`window.__sent.filter((m) => m.event === "wave").map((m) => m.payload.to)`), ["stranger"], "手を振る合図");
     await p.ev(`__fire("broadcast:wave", { payload: { from: "stranger", to: window.__me } })`);
-    await t.sleep(2000);
-    t.ok((await p.text()).includes("てを"), "振り返されたことに気づかない");
+    // 吹き出しは文字を打ちながら次の行へ進むので、出ているあいだを短い間隔で見る
+    let noticed = false;
+    for (let i = 0; i < 40 && !noticed; i++) {
+      noticed = (await p.text()).includes("てを");
+      if (!noticed) await t.sleep(100);
+    }
+    t.ok(noticed, "振り返されたことに気づかない");
     for (let i = 0; i < 3; i++) await p.ev(`document.getElementById("npc").click()`);
     await t.sleep(3500);
     t.eq(await p.ev(`window.__rpc`), [["bump", { counter: "pokes", n: 3 }]], "つついた回数をまとめて送る");

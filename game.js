@@ -138,6 +138,54 @@ const game = (() => {
     paid = false;
   }
 
+  // ---------- ランキング：ベスト 5 に入ったら、3 文字の名前を入れる ----------
+  const RANK_KEY = "warpix-ranking";
+  const NAME_KEY = "warpix-rank-name";
+  const RANK_MAX = 5;
+  const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-! ";
+  const LETTER_X = [44, 64, 84]; // 名前の 3 文字と END の位置
+  const END_X = 108;
+  const LETTER_Y = 70;
+  const loadRanking = () => (store.get(RANK_KEY, []) ?? []).filter((r) => r && typeof r.n === "string" && Number.isFinite(r.s)).slice(0, RANK_MAX);
+  // 描くたびに読み直さないよう、はじめて使うときに読んで持っておく（store は あとのファイルで できる）
+  let ranking = null;
+  const getRanking = () => (ranking ??= loadRanking());
+  const qualifies = (score) => {
+    const list = getRanking();
+    return score > 0 && (list.length < RANK_MAX || score > list[RANK_MAX - 1].s);
+  };
+
+  function startEntry() {
+    const last = String(store.get(NAME_KEY, "PIX") ?? "PIX").toUpperCase().padEnd(3).slice(0, 3);
+    st.entry = { letters: [...last].map((ch) => (CHARS.includes(ch) ? ch : "A")), pos: 0 };
+    st.phase = "entry";
+  }
+
+  function shiftLetter(d) {
+    const e = st.entry;
+    if (e.pos > 2) return;
+    e.letters[e.pos] = CHARS[(CHARS.indexOf(e.letters[e.pos]) + d + CHARS.length) % CHARS.length];
+    sound.sfx.hover();
+  }
+
+  function submitEntry() {
+    const name = st.entry.letters.join("");
+    const list = [...getRanking()];
+    const row = { n: name, s: st.score, w: st.wave };
+    list.push(row);
+    list.sort((a, b) => b.s - a.s);
+    const rank = list.indexOf(row);
+    ranking = list.slice(0, RANK_MAX);
+    store.set(RANK_KEY, ranking);
+    store.set(NAME_KEY, name);
+    st.entry = null;
+    st.rankRow = rank;
+    st.phase = "over";
+    st.phaseTimer = 30;
+    sound.sfx.fanfare();
+    emit("game-rank", { rank: rank + 1, name: name.trim() || "???", score: row.s });
+  }
+
   const hit = (ax, ay, aw, ah, bx, by, bw, bh) => ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 
   function payout() {
@@ -172,6 +220,7 @@ const game = (() => {
       }
       return;
     }
+    if (st.phase === "entry") return;
     if (st.phase === "over") {
       st.phaseTimer--;
       if (demo && st.phaseTimer < -90) reset();
@@ -308,8 +357,10 @@ const game = (() => {
   function gameOver() {
     st.phase = "over";
     st.phaseTimer = 60;
+    st.rankRow = -1;
     sfx("gameover");
     payout();
+    if (!demo && qualifies(st.score)) startEntry();
   }
 
   function text(str, x, y, color = colors.w, align = "left") {
@@ -363,12 +414,60 @@ const game = (() => {
       text("DEMO PLAY", W / 2, 88, colors.p, "center");
       text("PRESS ANY KEY", W / 2, 100, colors.w, "center");
     }
+    if (st.phase === "entry") drawEntry();
     if (st.phase === "over") {
-      text("GAME OVER", W / 2, 56, colors.p, "center");
+      const list = getRanking();
+      if (!list.length) {
+        text("GAME OVER", W / 2, 56, colors.p, "center");
+      } else {
+        panel();
+        text("GAME OVER", W / 2, 20, colors.p, "center");
+        text("HIGH SCORES", W / 2, 36, colors.c, "center");
+        const blink = Math.floor(performance.now() / 300) % 2;
+        list.forEach((r, i) => {
+          if (i === st.rankRow && !blink) return;
+          const color = i === st.rankRow ? colors.c : colors.w;
+          text(`${i + 1} ${r.n.padEnd(3)}`, 22, 52 + i * 12, color);
+          text(String(r.s).padStart(6, "0"), 138, 52 + i * 12, color, "right");
+        });
+      }
       if (st.phaseTimer <= 0 && Math.floor(performance.now() / 500) % 2) {
-        text("TAP TO RETRY", W / 2, 72, colors.w, "center");
+        text("TAP TO RETRY", W / 2, list.length ? 116 : 72, colors.w, "center");
       }
     }
+  }
+
+  // ランキングと名前入れの うしろの板
+  function panel() {
+    c.fillStyle = colors.bg;
+    c.fillRect(10, 14, W - 20, 116);
+    c.fillStyle = colors.c;
+    c.fillRect(10, 14, W - 20, 1);
+    c.fillRect(10, 129, W - 20, 1);
+  }
+
+  // 上下の小さな三角（▲▼）
+  function tri(x, y, up, color) {
+    c.fillStyle = color;
+    for (let i = 0; i < 3; i++) c.fillRect(x + 3 - i, up ? y + i : y + 2 - i, 1 + i * 2, 1);
+  }
+
+  function drawEntry() {
+    const e = st.entry;
+    panel();
+    text("NEW RECORD!", W / 2, 22, colors.p, "center");
+    text(String(st.score).padStart(6, "0"), W / 2, 36, colors.w, "center");
+    text("ENTER NAME", W / 2, 50, colors.c, "center");
+    const blink = Math.floor(performance.now() / 300) % 2;
+    e.letters.forEach((ch, i) => {
+      const on = i === e.pos;
+      tri(LETTER_X[i] + 1, LETTER_Y - 7, true, on ? colors.c : colors.muted);
+      tri(LETTER_X[i] + 1, LETTER_Y + 11, false, on ? colors.c : colors.muted);
+      text(ch === " " ? "_" : ch, LETTER_X[i], LETTER_Y, on && blink ? colors.c : colors.w);
+    });
+    text("END", END_X, LETTER_Y, e.pos === 3 && blink ? colors.c : colors.p);
+    text("UP/DOWN:A-Z", W / 2, 96, colors.muted, "center");
+    text("ENTER:OK", W / 2, 108, colors.muted, "center");
   }
 
   function loop(t) {
@@ -421,6 +520,7 @@ const game = (() => {
 
   function close() {
     if (!running) return;
+    if (st.phase === "entry") submitEntry(); // とちゅうで閉じても、いまの名前で のこす
     if (st.phase !== "over") payout();
     demo = false;
     running = false;
@@ -433,6 +533,7 @@ const game = (() => {
   addEventListener("keydown", (e) => {
     if (!running) return;
     if (e.key === "Escape") return close();
+    if (st?.phase === "entry") return entryKey(e);
     if (KEYMAP[e.key]) {
       keys.add(KEYMAP[e.key]);
       target = null;
@@ -447,12 +548,49 @@ const game = (() => {
     if (KEYMAP[e.key]) keys.delete(KEYMAP[e.key]);
   });
 
+  // 名前入れ：↑↓ で文字、←→ で場所、Enter で次へ（END で決定）。文字キーは そのまま入る
+  function entryKey(e) {
+    const en = st.entry;
+    e.preventDefault();
+    keys.clear();
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") return shiftLetter(1);
+    if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") return shiftLetter(-1);
+    if (e.key === "ArrowLeft") return void (en.pos = Math.max(0, en.pos - 1));
+    if (e.key === "ArrowRight") return void (en.pos = Math.min(3, en.pos + 1));
+    if (e.key === "Backspace") return void (en.pos = Math.max(0, en.pos - 1));
+    if (e.key === "Enter" || e.key === " ") {
+      if (en.pos >= 3) return submitEntry();
+      en.pos++;
+      return sound.sfx.select();
+    }
+    const ch = e.key.length === 1 ? e.key.toUpperCase() : "";
+    if (ch && CHARS.includes(ch) && en.pos < 3) {
+      en.letters[en.pos] = ch;
+      en.pos++;
+      sound.sfx.select();
+    }
+  }
+
+  // タップ：文字の上半分（▲）で次の文字へ、下半分（▼）で前の文字へ。END で決定
+  function entryTap(e) {
+    const r = canvas.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * W;
+    const y = ((e.clientY - r.top) / r.height) * H;
+    if (y < LETTER_Y - 14 || y > LETTER_Y + 22) return;
+    if (x >= END_X - 4 && x <= END_X + 28) return submitEntry();
+    const i = LETTER_X.findIndex((lx) => x >= lx - 6 && x <= lx + 14);
+    if (i < 0) return;
+    st.entry.pos = i;
+    shiftLetter(y < LETTER_Y + 4 ? 1 : -1);
+  }
+
   // ドラッグ（タップ）した位置に自機が向かう
   function pointerTarget(e) {
     const r = canvas.getBoundingClientRect();
     target = ((e.clientX - r.left) / r.width) * W - 4;
   }
   canvas.addEventListener("pointerdown", (e) => {
+    if (st?.phase === "entry") return entryTap(e);
     if (retryIfOver()) return;
     canvas.setPointerCapture(e.pointerId);
     pointerTarget(e);
@@ -473,5 +611,5 @@ const game = (() => {
     }
   });
 
-  return { open, close, isOpen: () => running, isDemo: () => running && demo, state: () => st };
+  return { open, close, isOpen: () => running, isDemo: () => running && demo, state: () => st, ranking: getRanking };
 })();
