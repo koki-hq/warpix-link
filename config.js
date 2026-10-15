@@ -2,6 +2,6 @@
 // url と key は「ブラウザに載せてよい公開用の値」（Supabase の Project URL と anon / publishable キー）。
 // service_role や secret と書かれたキーは、絶対にここに書かないこと。
 window.WARPIX_ONLINE = {
-  url: "",
-  key: "",
+  url: "https://zjyzaisimszjldnacxle.supabase.co",
+  key: "sb_publishable_giKwovyrft455Vy2fgw5JQ_aUdrjfUR",
 };
