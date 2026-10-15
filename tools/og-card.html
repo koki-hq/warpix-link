@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <!-- リンクを共有したときに出るカード画像（og.png）の元。1200x630 で撮影して og.png にする -->
+  <title>WARPIX-LINK OG card</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0b1e;
+      --grid: #1a1433;
+      --fg: #f4f4f4;
+      --accent: #ff4fa3;
+      --accent-2: #3ee8ff;
+      --gold: #ffd84a;
+      --btn: #2a2150;
+      --muted: #8a80b8;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .card {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid) 2px, transparent 2px),
+        linear-gradient(90deg, var(--grid) 2px, transparent 2px);
+      background-size: 40px 40px;
+      font-family: "Press Start 2P", monospace;
+      color: var(--fg);
+    }
+
+    /* ドットの枠 */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      box-shadow:
+        0 -8px 0 0 var(--fg) inset,
+        0 8px 0 0 var(--fg) inset,
+        -8px 0 0 0 var(--fg) inset,
+        8px 0 0 0 var(--fg) inset;
+    }
+
+    canvas.stars {
+      position: absolute;
+      inset: 0;
+    }
+
+    svg {
+      position: absolute;
+      shape-rendering: crispEdges;
+    }
+
+    .pixe { left: 120px; top: 150px; width: 288px; height: 288px; }
+    .ufo { left: 980px; top: 70px; width: 120px; height: 60px; }
+    .moon { left: 1040px; top: 470px; width: 64px; height: 64px; }
+
+    .text {
+      position: absolute;
+      left: 450px;
+      top: 170px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 54px;
+      line-height: 1.2;
+      text-shadow: 8px 0 0 var(--accent), 16px 8px 0 #000;
+    }
+
+    .title span { color: var(--accent-2); }
+
+    .sub {
+      margin: 36px 0 0;
+      font-size: 22px;
+      color: var(--accent-2);
+    }
+
+    .ja {
+      margin: 32px 0 0;
+      font-family: "DotGothic16", monospace;
+      font-size: 34px;
+    }
+
+    .start {
+      margin: 44px 0 0;
+      display: inline-block;
+      padding: 14px 18px;
+      font-size: 18px;
+      color: var(--gold);
+      outline: 4px solid var(--gold);
+    }
+
+    .shadow {
+      position: absolute;
+      left: 152px;
+      top: 452px;
+      width: 224px;
+      height: 16px;
+      background: #000;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <canvas class="stars" width="1200" height="630"></canvas>
+    <div class="shadow"></div>
+    <svg class="pixe" id="pixe" viewBox="0 0 16 16"></svg>
+    <svg class="ufo" id="ufo" viewBox="0 0 12 6"></svg>
+    <svg class="moon" id="moon" viewBox="0 0 16 16"></svg>
+    <div class="text">
+      <h1 class="title">WARPIX<span>-</span>LINK</h1>
+      <p class="sub">PRESS A LINK TO WARP_</p>
+      <p class="ja">ピクセが まってる、ドットの リンク集</p>
+      <p class="start">▶ PRESS START</p>
+    </div>
+  </div>
+  <script>
+    const PALETTE = { o: "#000", w: "#f4f4f4", p: "#ff4fa3", c: "#3ee8ff", y: "#ffd84a", n: "#2a2150" };
+    const draw = (id, rows) => {
+      document.getElementById(id).innerHTML = rows
+        .flatMap((row, y) => [...row].map((ch, x) => (PALETTE[ch] ? `<rect x="${x}" y="${y}" width="1" height="1" fill="${PALETTE[ch]}"/>` : "")))
+        .join("");
+    };
+    draw("pixe", [
+      ".......pp.......",
+      ".......ww.......",
+      ".......ww.......",
+      ".....oooooo.....",
+      "...oowwwwwwoo...",
+      "..owwwwwwwwwwo..",
+      ".owwwwwwwwwwwwo.",
+      ".owwcowwwwcowwo.",
+      ".owwoowwwwoowwo.",
+      ".owppwwwwwwppwo.",
+      ".owwwwwoowwwwwo.",
+      ".owwwwwwwwwwwwo.",
+      "..owwwwwwwwwwo..",
+      "...oowwwwwwoo...",
+      "....oo....oo....",
+      "................",
+    ]);
+    draw("ufo", ["....cccc....", "...cccccc...", ".wwwwwwwwww.", "wpwwpwwpwwpw", ".wwwwwwwwww.", "...w....w..."]);
+    // みかづき
+    draw("moon", Array.from({ length: 16 }, (_, y) => {
+      let row = "";
+      for (let x = 0; x < 16; x++) {
+        const dx = (x + 0.5 - 8) / 7.5, dy = (y + 0.5 - 8) / 7.5;
+        if (dx * dx + dy * dy > 1) { row += "."; continue; }
+        row += dx >= Math.sqrt(1 - dy * dy) * Math.cos(2 * Math.PI * 0.15) ? "y" : "n";
+      }
+      return row;
+    }));
+    // 星（毎回同じ配置になるよう、決まった乱数で）
+    let seed = 7;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const c = document.querySelector("canvas.stars").getContext("2d");
+    for (let i = 0; i < 90; i++) {
+      const big = rand() < 0.2;
+      c.fillStyle = ["#f4f4f4", "#f4f4f4", "#f4f4f4", "#3ee8ff", "#ff4fa3"][Math.floor(rand() * 5)];
+      c.fillRect(Math.floor((rand() * 1160 + 20) / 4) * 4, Math.floor((rand() * 590 + 20) / 4) * 4, big ? 8 : 4, big ? 8 : 4);
+    }
+  </script>
+</body>
+</html>
