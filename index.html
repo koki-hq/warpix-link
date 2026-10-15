@@ -26,7 +26,15 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#0f0b1e">
   <link rel="stylesheet" href="style.css">
-  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    document.documentElement.classList.add("js");
+    // シンプルモード（リンクだけの静かなページ）。?simple=1 か、前回えらんだ設定で、描く前に切りかえる
+    try {
+      if (new URLSearchParams(location.search).has("simple") || localStorage.getItem("warpix-simple") === "on") {
+        document.documentElement.classList.add("simple");
+      }
+    } catch {}
+  </script>
 </head>
 <body>
   <canvas class="stars" id="stars" aria-hidden="true"></canvas>
@@ -34,6 +42,7 @@
   <div class="start-screen" id="start-screen" hidden>
     <button class="start-btn" id="start-btn" type="button">PRESS START</button>
     <p class="start-hint">CLICK OR PRESS ENTER</p>
+    <button class="simple-enter" id="simple-enter" type="button">リンクだけ みる ▶</button>
     <p class="start-hi">HI-SCORE <span data-hiscore>000000</span></p>
   </div>
 
@@ -67,6 +76,7 @@
         <dt>せかいで ピクセが つつかれた かいすう</dt><dd data-counter="pokes">-</dd>
         <dt>せかいで ワープした かいすう</dt><dd data-counter="warps">-</dd>
         <dt>せかいで おとされた UFO</dt><dd data-counter="ufos">-</dd>
+        <dt>つぎの みんなで マザーシップ</dt><dd id="raid-next">--:--</dd>
       </dl>
     </section>
     <section class="wardrobe" aria-labelledby="wardrobe-title">
@@ -101,6 +111,7 @@
   </div>
 
   <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
+  <button class="simple-toggle" id="simple-toggle" type="button"></button>
 
   <button class="moon" id="moon" type="button" aria-label="きょうの つき"></button>
 
@@ -161,6 +172,7 @@
   <script src="device.js"></script>
   <script src="weather.js"></script>
   <script src="online.js"></script>
+  <script src="raid.js"></script>
   <script src="grow.js"></script>
 </body>
 </html>

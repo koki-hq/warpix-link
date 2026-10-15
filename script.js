@@ -851,6 +851,28 @@ const ufo = (() => {
   };
 })();
 
+// ---------- シンプルモード ----------
+// 切りかえはページを読みなおして行う（動いている演出や音を、まるごと止めるため）
+const simple = (() => {
+  const on = document.documentElement.classList.contains("simple");
+  const toggle = document.getElementById("simple-toggle");
+  toggle.textContent = on ? "▶ あそぶ" : "SIMPLE";
+  toggle.setAttribute("aria-label", on ? "いつもの ページに もどる" : "リンクだけの シンプルな ページに する");
+
+  function set(next) {
+    try {
+      localStorage.setItem("warpix-simple", next ? "on" : "off");
+    } catch {}
+    const url = new URL(location.href);
+    url.searchParams.delete("simple");
+    location.replace(url.href);
+  }
+
+  toggle.addEventListener("click", () => set(!on));
+  document.getElementById("simple-enter").addEventListener("click", () => set(true));
+  return { on };
+})();
+
 // ---------- PRESS START → 起動演出 ----------
 (() => {
   const startScreen = document.getElementById("start-screen");
@@ -874,6 +896,7 @@ const ufo = (() => {
     btn.addEventListener("focus", sound.sfx.hover);
     // リンクを押すとワープ（新しいタブで開くので、このページはそのまま）
     btn.addEventListener("click", (e) => {
+      if (simple.on) return; // シンプルモードでは、ふつうにリンクを開くだけ
       sound.sfx.select();
       stars.warp();
       score.add(100, ...pointOf(e, btn));
@@ -920,7 +943,7 @@ const ufo = (() => {
 
   let started = false;
   function start(e) {
-    if (started) return;
+    if (started || simple.on) return;
     started = true;
     pointerMoved = false;
     startX = e?.clientX ?? null;
@@ -937,7 +960,11 @@ const ufo = (() => {
     }, 450);
   }
 
+  // シンプルモードなら、スタート画面も演出も出さずにリンクだけ
+  if (simple.on) return;
   startScreen.hidden = false;
-  startScreen.addEventListener("click", start);
+  startScreen.addEventListener("click", (e) => {
+    if (!e.target.closest(".simple-enter")) start(e);
+  });
   startBtn.focus();
 })();

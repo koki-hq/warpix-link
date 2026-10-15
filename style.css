@@ -2094,3 +2094,254 @@ body.party {
     animation: none !important;
   }
 }
+
+/* =====================================================================
+   シンプルモード：リンクだけの静かなページ（v1.6）
+   ===================================================================== */
+
+/* いつもの画面の右上、BGM ボタンのとなり */
+.simple-toggle {
+  position: fixed;
+  top: 16px;
+  right: 104px;
+  z-index: 5;
+  padding: 8px 10px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  cursor: pointer;
+  outline: 2px solid var(--btn);
+}
+
+.simple-toggle:hover,
+.simple-toggle:focus-visible {
+  color: var(--fg);
+  outline-color: var(--muted);
+}
+
+.js .simple-toggle {
+  opacity: 0;
+}
+
+.booted .simple-toggle {
+  animation: fade-in 0.3s steps(3) 0.5s both;
+}
+
+/* スタート画面の「リンクだけ みる」 */
+.simple-enter {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.simple-enter:hover,
+.simple-enter:focus-visible {
+  color: var(--fg);
+  outline: none;
+}
+
+/* シンプルモード中：遊びの部品をぜんぶ隠して、リンクをすぐ見せる */
+.simple .start-screen,
+.simple .stars,
+.simple .season-fx,
+.simple .hud,
+.simple .npc,
+.simple #moon,
+.simple .bgm-toggle,
+.simple .coin-slot,
+.simple .ghost,
+.simple .ufo,
+.simple .toast,
+.simple .cursor {
+  display: none !important;
+}
+
+.simple .title,
+.simple .subtitle,
+.simple .pixel-btn,
+.simple .footer,
+.simple .simple-toggle {
+  opacity: 1;
+  animation: none;
+}
+
+.simple .simple-toggle {
+  right: 16px;
+  color: var(--accent-2);
+  outline-color: var(--accent-2);
+}
+
+.simple .screen {
+  padding-top: 72px;
+}
+
+/* =====================================================================
+   みんなでマザーシップ（レイド）（v1.6）
+   ===================================================================== */
+.raid {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  z-index: 8;
+  width: min(320px, calc(100vw - 32px));
+  padding: 8px 10px 4px;
+  background: rgba(15, 11, 30, 0.85);
+  translate: -50% 0;
+  text-align: center;
+  box-shadow:
+    0 -2px 0 0 var(--accent),
+    0 2px 0 0 var(--accent),
+    -2px 0 0 0 var(--accent),
+    2px 0 0 0 var(--accent);
+  /* drop-in を使うと translate が上書きされて、まんなか寄せがずれる */
+  animation: raid-in 0.4s steps(4) both;
+}
+
+/* せまい画面では、左上の HUD（DIARY ボタンの下端 〜100px）にかぶらないよう下げる */
+@media (max-width: 720px) {
+  .raid {
+    top: 112px;
+  }
+
+  /* 会話ウィンドウにもかからないよう、マザーシップを小さめに */
+  .raid .raid-ship {
+    width: 120px;
+    height: 50px;
+    margin-top: 6px;
+  }
+}
+
+@keyframes raid-in {
+  from { translate: -50% -32px; opacity: 0; }
+  to { translate: -50% 0; opacity: 1; }
+}
+
+.raid-title {
+  margin: 0 0 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--accent);
+  animation: blink 0.8s steps(1) infinite;
+}
+
+.raid-bar {
+  height: 8px;
+  background: var(--btn);
+  outline: 2px solid var(--fg);
+}
+
+.raid-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+}
+
+.raid-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 0 0;
+  font-family: "Press Start 2P", "DotGothic16", monospace;
+  font-size: 8px;
+  color: var(--fg);
+}
+
+.raid-people {
+  color: var(--accent-2);
+}
+
+.raid-ship {
+  position: relative;
+  display: block;
+  width: 192px;
+  height: 80px;
+  margin: 8px auto 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: crosshair;
+  animation: bob 0.6s steps(1) infinite;
+}
+
+.raid-ship svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.raid-ship.hurt > svg {
+  animation: hurt 0.15s steps(2);
+}
+
+.raid-spark {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.raid.down .raid-ship {
+  display: flex;
+  justify-content: center;
+  animation: boom 0.9s steps(6) forwards;
+}
+
+.raid.down .raid-ship svg {
+  width: 64px;
+  height: 64px;
+}
+
+.raid.escape {
+  animation: raid-escape 1s steps(8) forwards;
+}
+
+@keyframes raid-escape {
+  to { translate: -50% -240px; opacity: 0; }
+}
+
+/* 広い画面では、まんなかの中身にかからないよう右の余白に出す */
+@media (min-width: 1100px) {
+  .raid {
+    top: 120px;
+    right: 32px;
+    left: auto;
+    translate: none;
+    animation-name: raid-in-side;
+  }
+
+  .raid.escape {
+    animation-name: raid-escape-side;
+  }
+}
+
+@keyframes raid-in-side {
+  from { translate: 0 -32px; opacity: 0; }
+  to { translate: 0 0; opacity: 1; }
+}
+
+@keyframes raid-escape-side {
+  to { translate: 0 -240px; opacity: 0; }
+}
+
+.simple .raid {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raid,
+  .raid-title,
+  .raid-ship,
+  .raid.escape {
+    animation: none !important;
+  }
+}

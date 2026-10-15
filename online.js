@@ -19,6 +19,9 @@ const online = (() => {
   let channel = null;
   let hat = null;
   let metSomeone = false;
+  let peopleNow = 1;
+  // ほかのファイル（raid.js など）が受け取りたい合図。接続する前に登録してもらう
+  const listeners = {};
 
   function loadSdk() {
     return new Promise((resolve, reject) => {
@@ -43,8 +46,8 @@ const online = (() => {
       const x = 16 + r1 * (margin - 72);
       return { left: `${h & 1 ? x : innerWidth - x - 32}px`, top: `${15 + r2 * 70}vh` };
     }
-    // HUD（左上、幅 112px まで）と月・BGM ボタン（右上）のあいだ
-    return { left: `${128 + r1 * Math.max(0, innerWidth - 128 - 128)}px`, top: `${20 + r2 * 64}px` };
+    // HUD（左上、幅 112px まで）と月・BGM ボタン（右上）のあいだ。上のボタンの列（〜46px）より下に浮かべる
+    return { left: `${128 + r1 * Math.max(0, innerWidth - 128 - 128)}px`, top: `${50 + r2 * 36}px` };
   }
 
   function ghostSvg(hatId) {
@@ -62,6 +65,7 @@ const online = (() => {
     const ids = Object.keys(state).filter((id) => id !== me);
     countEl.hidden = false;
     countEl.querySelector("b").textContent = String(ids.length + 1);
+    peopleNow = ids.length + 1;
 
     // いなくなった人のピクセを消す
     for (const [id, el] of ghosts) {
@@ -165,10 +169,13 @@ const online = (() => {
         sound.sfx.coin();
         npc.say(["だれかが てを\nふって くれた！", "……ぼくも ふりかえして みよう。"]);
         achievements.unlock("hello");
-      })
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") channel.track({ hat });
       });
+    for (const [event, fns] of Object.entries(listeners)) {
+      channel.on("broadcast", { event }, ({ payload }) => fns.forEach((fn) => fn(payload)));
+    }
+    channel.subscribe((status) => {
+      if (status === "SUBSCRIBED") channel.track({ hat });
+    });
     hat = wardrobe.currentId();
     setInterval(flush, 3000);
     loadCounters();
@@ -191,5 +198,16 @@ const online = (() => {
     channel?.untrack();
   });
 
-  return { enabled: true };
+  return {
+    enabled: true,
+    me,
+    // いま同じ空を見ている人数（自分をふくむ）
+    count: () => peopleNow,
+    listen(event, fn) {
+      (listeners[event] ??= []).push(fn);
+    },
+    send(event, payload) {
+      channel?.send({ type: "broadcast", event, payload: { ...payload, from: me } });
+    },
+  };
 })();
