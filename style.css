@@ -815,12 +815,30 @@ body::after {
 }
 
 /* ---------- ミニゲーム ---------- */
+/* フッターは画面の幅にかかわらず 2 段：上に遊ぶもの、下にお知らせ。
+   どの画面でも同じ形なので、冒険では「このページについて → INSERT COIN／おみくじ → リンク」の階段になる */
 .footer {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.footer-play,
+.footer-info {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
+}
+
+.footer-info {
+  gap: 8px;
+}
+
+/* シンプルモードでは遊ぶものの段ごと出さない */
+.simple .footer-play {
+  display: none;
 }
 
 .coin-slot {

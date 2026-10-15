@@ -4,7 +4,7 @@ const heroInfo = (p) => p.ev(`(() => {
   if (!h) return null;
   const r = h.getBoundingClientRect();
   const feetY = r.bottom + scrollY, feetX = r.left + r.width / 2;
-  const plats = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn")];
+  const plats = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn, .copyright")];
   const on = plats.find((el) => { const b = el.getBoundingClientRect(); return Math.abs(b.top + scrollY - feetY) < 3 && feetX > b.left && feetX < b.right; });
   const coin = document.querySelector(".coin-slot").getBoundingClientRect();
   return { x: Math.round(r.left + scrollX), feetY: Math.round(feetY), on: on ? on.className.split(" ")[0] + ":" + on.textContent.trim().slice(0, 10) : null, coinX: Math.round(coin.left + coin.width / 2) };
@@ -60,7 +60,7 @@ export default {
       await p.ev(`adventure.start()`);
       await t.sleep(300);
       const gaps = await p.ev(`(() => {
-        const els = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn")];
+        const els = [...document.querySelectorAll(".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot, .omikuji-btn, .about-btn, .copyright")];
         const plats = els.map((el) => { const b = el.getBoundingClientRect(); return { name: el.className.split(" ")[0] + ":" + el.textContent.trim().slice(0, 8), t: b.top + scrollY, l: b.left, r: b.right }; });
         const ground = document.querySelector(".adv-ground").getBoundingClientRect().top + scrollY;
         const top = Math.min(...plats.map((p) => p.t));

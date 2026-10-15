@@ -155,10 +155,17 @@
     </nav>
 
     <footer class="footer">
-      © 2026 WARPIX
-      <button class="coin-slot" id="coin-slot" type="button">INSERT COIN</button>
-      <button class="omikuji-btn" id="omikuji-btn" type="button">おみくじ</button>
-      <button class="about-btn" id="about-btn" type="button">このページについて</button>
+      <!-- 上の段：遊ぶもの（2 つで 1 組をまんなかに） -->
+      <div class="footer-play">
+        <button class="coin-slot" id="coin-slot" type="button">INSERT COIN</button>
+        <button class="omikuji-btn" id="omikuji-btn" type="button">おみくじ</button>
+      </div>
+      <!-- 下の段：お知らせ -->
+      <div class="footer-info">
+        <button class="about-btn" id="about-btn" type="button">このページについて</button>
+        <span aria-hidden="true">・</span>
+        <span class="copyright">© 2026 WARPIX</span>
+      </div>
     </footer>
   </main>
 
