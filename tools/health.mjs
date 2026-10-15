@@ -108,6 +108,8 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("trophies").close()`);
   await axe(p, "日記", `document.getElementById("diary-btn").click()`);
   await p.ev(`document.getElementById("diary").close()`);
+  await axe(p, "このページについて", `document.getElementById("about-btn").click()`);
+  await p.ev(`document.getElementById("about").close()`);
   await p.goto(`${server.url}?simple=1`);
   await axe(p, "シンプルモード");
   await closeAll();

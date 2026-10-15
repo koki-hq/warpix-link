@@ -156,8 +156,42 @@
     <footer class="footer">
       © 2026 WARPIX
       <button class="coin-slot" id="coin-slot" type="button">INSERT COIN</button>
+      <button class="about-btn" id="about-btn" type="button">このページについて</button>
     </footer>
   </main>
+
+  <dialog class="about" id="about" aria-labelledby="about-title">
+    <div class="about-top">
+      <h2 id="about-title">このページについて</h2>
+      <button class="about-close" id="about-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <p>ピクセルアートとチップチューンの、ちいさな リンク集です。ピクセが まってます。</p>
+
+      <h3>このブラウザに のこすもの</h3>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき、よく いく リンク、ぼうし、BGM や シンプルモードの せってい。<br>
+        <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
+
+      <h3>そとに おくるもの</h3>
+      <ul>
+        <li><b>てんき</b>：ピクセが きいて「いいよ」と こたえたときだけ。ばしょを <strong>やく 10km に まるめて</strong>、てんきの サービス（Open-Meteo）に おくります。</li>
+        <li><b>おなじ そら・レイド・せかいの きろく</b>：<strong>ランダムな ばんごうと ぼうしの しゅるい</strong>、つついた かいすうなどを Supabase に おくります。なまえや ばしょ、スコアは おくりません。</li>
+        <li><b>もじ</b>：ドットの もじは Google Fonts から よみこみます。</li>
+      </ul>
+      <p class="about-note">※ この ページを おいている GitHub Pages も ふくめ、どの サービスも、つなぐ ときに ふつうは あなたの IP アドレスを うけとります。</p>
+
+      <h3>つかっていないもの</h3>
+      <p>こうこく、アクセスかいせき、クッキーは つかっていません。</p>
+
+      <h3>きろくを けす</h3>
+      <p>この ブラウザに のこした きろくを ぜんぶ けして、はじめからに します。</p>
+      <button class="about-reset" id="about-reset" type="button">きろくを ぜんぶ けす</button>
+      <p class="about-reset-msg" id="about-reset-msg" aria-live="polite"></p>
+
+      <p class="about-credit">つくったひと：WARPIX ／ いっしょに つくった：Claude<br>
+        <a href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener">ソースコード（GitHub）</a></p>
+    </div>
+  </dialog>
 
   <!-- 印刷したときだけ出る認定証（中身は world.js が印刷直前に書く） -->
   <section class="certificate" id="certificate" aria-hidden="true"></section>
@@ -175,5 +209,6 @@
   <script src="raid.js"></script>
   <script src="grow.js"></script>
   <script src="favorite.js"></script>
+  <script src="about.js"></script>
 </body>
 </html>
