@@ -60,6 +60,7 @@ config.js    オンライン機能の設定（Supabase の公開用 URL とキ�
 sw.js        オフライン用のサービスワーカー
 manifest.webmanifest, icons/   アプリの名前とアイコン
 docs/THEME.md  デザインのテーマと決まりごと
+og.png       共有カードの画像（元は tools/og-card.html、撮影は tools/shoot-og.mjs）
 docs/spec/     バージョン別の仕様メモ（点数、タイミング、イベント、実績の条件、保存するデータなど）
 ```
 
