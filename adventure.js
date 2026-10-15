@@ -11,6 +11,8 @@ const adventure = (() => {
   const MAX_VX = 3.2;
   const FRICTION = 0.78;
   const COIN_COUNT = 8;
+  // 地面は「いちばん下の足場のすぐ下」。ジャンプ（約 110px）で必ず届くように
+  const GROUND_GAP = 56;
   const PLATFORMS = ".pixel-btn:not([hidden]), .dialog, .npc-sprite, .title, .subtitle, .coin-slot";
 
   // ピクセの歩き・ジャンプのコマ（足だけ変える）
@@ -65,6 +67,9 @@ const adventure = (() => {
   let plats = [];
   let docW = 0;
   let docH = 0;
+  let ground = 0;
+  let groundEl = null;
+  let screenRect = null;
   let hero = null;
   let coins = [];
   let enemies = [];
@@ -78,15 +83,55 @@ const adventure = (() => {
   const toClient = (x, y) => [x - scrollX, y - scrollY];
   const overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 
+  const pageRect = (el) => {
+    const r = el.getBoundingClientRect();
+    return { el, x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height };
+  };
+
   function collectPlatforms() {
-    plats = [...document.querySelectorAll(PLATFORMS)]
-      .map((el) => {
-        const r = el.getBoundingClientRect();
-        return { el, x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height };
-      })
-      .filter((p) => p.w > 0 && p.h > 0);
+    plats = [...document.querySelectorAll(PLATFORMS)].map(pageRect).filter((p) => p.w > 0 && p.h > 0);
+    screenRect = pageRect(document.querySelector(".screen"));
     docW = document.documentElement.scrollWidth;
     docH = document.documentElement.scrollHeight;
+    // 大きい画面だと中身が縦のまんなかに寄って、ページの底が遠くなる。地面はいちばん下の足場のすぐ下に置く
+    const lowest = Math.max(...plats.map((p) => p.y + p.h));
+    ground = Math.min(docH, lowest + GROUND_GAP);
+    if (groundEl) {
+      groundEl.style.width = `${docW}px`;
+      place(groundEl, 0, ground);
+    }
+  }
+
+  // ---------- 位置は「どの足場から何 px か」で覚える ----------
+  // 画面サイズが変わったり、会話ウィンドウの高さが変わって足場が動いても、いっしょについていく
+  const rectFor = (el) => (el === screenRect?.el ? screenRect : plats.find((p) => p.el === el));
+  const anchorOf = (x, y, base) => ({ el: base.el, dx: x - base.x, dy: y - base.y });
+  function fromAnchor(a) {
+    const r = a && rectFor(a.el);
+    return r ? [r.x + a.dx, r.y + a.dy] : null;
+  }
+
+  // 足場を測り直して、ピクセ・コイン・UFO・ゴールを付け直す
+  function relayout() {
+    collectPlatforms();
+    const h = hero;
+    const at = fromAnchor(h.anchor);
+    if (at) [h.x, h.y] = at;
+    h.x = Math.max(0, Math.min(docW - SIZE, h.x));
+    h.y = Math.min(h.y, ground - SIZE);
+    if (h.standing) h.standing = rectFor(h.standing.el) ?? null;
+    for (const c of [...coins, goal].filter(Boolean)) {
+      const pos = fromAnchor(c.anchor);
+      if (!pos) continue;
+      [c.x, c.y] = pos;
+      place(c.el, c.x, c.y);
+    }
+    for (const e of enemies) {
+      const np = rectFor(e.p.el);
+      if (!np) continue;
+      e.x = np.x + (e.x - e.p.x);
+      e.p = np;
+    }
   }
 
   function sprite(className, html) {
@@ -113,7 +158,7 @@ const adventure = (() => {
       const y = p.y - 44;
       const el = sprite("adv-coin", `<span>${pixelSvg(COIN[0])}</span><span>${pixelSvg(COIN[1])}</span>`);
       place(el, x, y);
-      return { el, x, y, w: 16, h: 16 };
+      return { el, x, y, w: 16, h: 16, anchor: anchorOf(x, y, p) };
     });
   }
 
@@ -133,7 +178,7 @@ const adventure = (() => {
     const y = title ? title.y - 40 : 40;
     const el = sprite("adv-goal", pixelSvg(GOAL));
     place(el, x, y);
-    goal = { el, x, y, w: 24, h: 24 };
+    goal = { el, x, y, w: 24, h: 24, anchor: title ? anchorOf(x, y, title) : null };
     sound.sfx.powerup();
     npc.say(["コイン コンプリート！\nタイトルの うえに ゴールが でたよ！"]);
   }
@@ -181,7 +226,7 @@ const adventure = (() => {
   // ---------- 1フレームの更新 ----------
   function update() {
     frames++;
-    if (frames % 30 === 0) collectPlatforms();
+    if (frames % 30 === 0) relayout();
     const h = hero;
 
     // 横移動
@@ -240,8 +285,8 @@ const adventure = (() => {
       }
     }
     if (!h.onGround) h.standing = null;
-    if (h.y + SIZE >= docH) {
-      h.y = docH - SIZE;
+    if (h.y + SIZE >= ground) {
+      h.y = ground - SIZE;
       h.vy = 0;
       h.onGround = true;
     }
@@ -292,6 +337,8 @@ const adventure = (() => {
     }
 
     if (goal && overlap(box, goal)) return clear();
+    // 今いる足場（空中なら中身の枠）からの位置を覚えておく
+    h.anchor = anchorOf(h.x, h.y, h.standing ?? screenRect);
     follow();
   }
 
@@ -364,7 +411,7 @@ const adventure = (() => {
     if (k === "jump") input.jumpHeld = false;
     else input[k] = false;
   });
-  addEventListener("resize", () => active && collectPlatforms());
+  addEventListener("resize", () => active && relayout());
   document.addEventListener("visibilitychange", () => {
     if (!active) return;
     if (document.hidden) cancelAnimationFrame(raf);
@@ -380,6 +427,7 @@ const adventure = (() => {
     active = true;
     document.body.classList.add("adventuring");
     Object.assign(input, { left: false, right: false, down: false, jumpHeld: false, jumpPressed: false });
+    groundEl = sprite("adv-ground", "");
     collectPlatforms();
 
     const frame = (rows) => pixelSvg(dress(rows));
@@ -401,6 +449,7 @@ const adventure = (() => {
       dropTimer: 0,
       frame: null,
     };
+    hero.anchor = anchorOf(hero.x, hero.y, screenRect);
     npc.setAway(true);
     got = 0;
     frames = 0;
@@ -426,7 +475,8 @@ const adventure = (() => {
   function cleanup() {
     active = false;
     cancelAnimationFrame(raf);
-    [hero?.el, hud, pad, goal?.el, ...coins.map((c) => c.el), ...enemies.map((e) => e.el)].forEach((el) => el?.remove());
+    [hero?.el, hud, pad, groundEl, goal?.el, ...coins.map((c) => c.el), ...enemies.map((e) => e.el)].forEach((el) => el?.remove());
+    groundEl = null;
     coins = [];
     enemies = [];
     goal = null;

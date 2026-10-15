@@ -1887,3 +1887,14 @@ body.party {
     animation: none !important;
   }
 }
+
+/* 冒険中だけ出る地面（いちばん下の足場のすぐ下） */
+.adv-ground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  height: 4px;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg, var(--accent-2) 0 8px, transparent 8px 12px);
+}
