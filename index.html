@@ -22,6 +22,42 @@
   <div class="hud">
     <span>SCORE <b data-score>000000</b></span>
     <span>HI <b data-hiscore>000000</b></span>
+    <button class="trophy-btn" id="trophy-btn" type="button" aria-label="じっせきを見る">
+      <span class="trophy-mini" data-trophy></span><span id="trophy-count">0/0</span>
+    </button>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden>
+    <span class="toast-icon" data-trophy></span>
+    <span class="toast-body">
+      <small>ACHIEVEMENT UNLOCKED</small>
+      <b class="toast-name"></b>
+    </span>
+  </div>
+
+  <dialog class="trophies" id="trophies" aria-labelledby="trophies-title">
+    <div class="trophies-head">
+      <h2 id="trophies-title">ACHIEVEMENTS <span id="trophies-count"></span></h2>
+      <button class="trophies-close" id="trophies-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <ul class="trophy-list" id="trophy-list"></ul>
+    <form class="cheat-form" id="cheat-form" autocomplete="off">
+      <label for="cheat-input">CHEAT CODE</label>
+      <div class="cheat-row">
+        <input id="cheat-input" type="text" inputmode="latin" autocapitalize="off" spellcheck="false" maxlength="12" placeholder="????">
+        <button type="submit">ENTER</button>
+      </div>
+      <p class="cheat-msg" id="cheat-msg" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <div class="game" id="game" role="dialog" aria-label="ミニゲーム PIXE INVADERS" hidden>
+    <div class="game-head">
+      <span>PIXE INVADERS</span>
+      <button class="game-close" id="game-close" type="button">✕ ESC</button>
+    </div>
+    <canvas class="game-canvas" id="game-canvas" tabindex="0"></canvas>
+    <p class="game-help">← → か ドラッグで いどう ・ ショットは じどう</p>
   </div>
 
   <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
@@ -64,9 +100,14 @@
       </a>
     </nav>
 
-    <footer class="footer">© 2026 WARPIX</footer>
+    <footer class="footer">
+      © 2026 WARPIX
+      <button class="coin-slot" id="coin-slot" type="button">INSERT COIN</button>
+    </footer>
   </main>
 
   <script src="script.js"></script>
+  <script src="game.js"></script>
+  <script src="extras.js"></script>
 </body>
 </html>

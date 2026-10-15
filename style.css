@@ -8,7 +8,22 @@
   --btn-hover: #3d2f78;
   --shadow: #000;
   --muted: #8a80b8;
+  --gold: #ffd84a;
   --px: 4px;
+}
+
+/* 隠しコマンド gameboy：初代ゲームボーイの4色に差しかえ */
+body.gb {
+  --bg: #0f380f;
+  --bg-grid: #1d4b1d;
+  --fg: #9bbc0f;
+  --accent: #8bac0f;
+  --accent-2: #8bac0f;
+  --btn: #306230;
+  --btn-hover: #0f380f;
+  --shadow: #0f380f;
+  --muted: #8bac0f;
+  --gold: #9bbc0f;
 }
 
 * {
@@ -536,6 +551,548 @@ body::after {
 @keyframes boom {
   from { scale: 1; opacity: 1; }
   to { scale: 2; opacity: 0; }
+}
+
+/* ---------- 実績 ---------- */
+.trophy-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 6px 4px 4px;
+  border: 0;
+  background: var(--btn);
+  color: var(--gold);
+  font: inherit;
+  cursor: pointer;
+  box-shadow:
+    0 -2px 0 0 var(--gold),
+    0 2px 0 0 var(--gold),
+    -2px 0 0 0 var(--gold),
+    2px 0 0 0 var(--gold);
+}
+
+.trophy-btn:hover,
+.trophy-btn:focus-visible {
+  background: var(--btn-hover);
+  outline: none;
+}
+
+.trophy-btn.ping {
+  animation: ping 0.6s steps(2) 3;
+}
+
+@keyframes ping {
+  50% { background: var(--gold); color: var(--bg); }
+}
+
+.trophy-mini {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.trophy-mini svg,
+.toast-icon svg,
+.trophy-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 実績解除のお知らせ（下からカクッと上がってくる） */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 14px;
+  background: var(--bg);
+  translate: -50% 0;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--gold),
+    0 var(--px) 0 0 var(--gold),
+    calc(var(--px) * -1) 0 0 0 var(--gold),
+    var(--px) 0 0 0 var(--gold),
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+.toast.show {
+  animation: toast-in 0.3s steps(3) both;
+}
+
+@keyframes toast-in {
+  from { translate: -50% 120px; }
+  to { translate: -50% 0; }
+}
+
+.toast-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toast-body small {
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--gold);
+}
+
+.toast-body b {
+  font-family: "DotGothic16", monospace;
+  font-size: 16px;
+  font-weight: normal;
+}
+
+/* 実績一覧のウィンドウ */
+.trophies {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 16px;
+  border: 0;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--fg),
+    0 var(--px) 0 0 var(--fg),
+    calc(var(--px) * -1) 0 0 0 var(--fg),
+    var(--px) 0 0 0 var(--fg);
+}
+
+.trophies {
+  scrollbar-color: var(--muted) var(--bg);
+}
+
+.trophies::backdrop {
+  background: rgba(15, 11, 30, 0.75);
+}
+
+.trophies-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.trophies-head h2 {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.trophies-close {
+  padding: 4px 8px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.trophy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trophy-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--btn);
+}
+
+.trophy-list li.locked {
+  color: var(--muted);
+  background: none;
+  outline: 2px dashed var(--btn);
+}
+
+.trophy-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+}
+
+.trophy-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: "DotGothic16", monospace;
+}
+
+.trophy-text b {
+  font-weight: normal;
+  font-size: 14px;
+}
+
+.trophy-text small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cheat-form {
+  margin-top: 16px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--accent-2);
+}
+
+.cheat-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cheat-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  outline: 2px solid var(--muted);
+}
+
+.cheat-row input:focus {
+  outline-color: var(--accent-2);
+}
+
+.cheat-row button {
+  padding: 8px 10px;
+  border: 0;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.cheat-msg {
+  min-height: 1em;
+  margin: 8px 0 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+/* ---------- ミニゲーム ---------- */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.coin-slot {
+  padding: 6px 8px;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  cursor: pointer;
+  outline: 2px solid var(--gold);
+  animation: blink 1.2s steps(1) infinite;
+}
+
+.coin-slot:hover,
+.coin-slot:focus-visible {
+  background: var(--gold);
+  color: var(--bg);
+  animation: none;
+}
+
+.game {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(15, 11, 30, 0.92);
+}
+
+.game[hidden] {
+  display: none;
+}
+
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.game-close {
+  padding: 6px 8px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.game-canvas {
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+  outline: none;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--fg),
+    0 var(--px) 0 0 var(--fg),
+    calc(var(--px) * -1) 0 0 0 var(--fg),
+    var(--px) 0 0 0 var(--fg);
+}
+
+.game-help {
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- ピクセの雨 ---------- */
+.rain-pixe {
+  position: fixed;
+  top: -40px;
+  z-index: 4;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: rain-fall 3s steps(30) both;
+}
+
+.rain-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes rain-fall {
+  to { translate: 0 calc(100vh + 80px); }
+}
+
+/* ---------- 流れ星 ---------- */
+.shooting-star {
+  position: fixed;
+  z-index: 3;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: star-fly 1.6s steps(32) forwards;
+}
+
+/* 本体と、右上に伸びるドットのしっぽ */
+.shooting-star::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 4px;
+  height: 4px;
+  background: var(--fg);
+  box-shadow:
+    4px -4px 0 var(--fg),
+    8px -8px 0 var(--accent-2),
+    12px -12px 0 var(--accent-2),
+    16px -16px 0 var(--accent),
+    20px -20px 0 var(--btn-hover);
+}
+
+@keyframes star-fly {
+  from { translate: 0 0; opacity: 1; }
+  85% { opacity: 1; }
+  to { translate: -50vw 40vh; opacity: 0; }
+}
+
+/* ---------- マザーシップ ---------- */
+.mothership {
+  position: fixed;
+  left: 0;
+  z-index: 2;
+  width: 120px;
+  height: 64px;
+  padding: 14px 0 0;
+  border: 0;
+  background: none;
+  cursor: crosshair;
+}
+
+.mothership svg {
+  display: block;
+  width: 120px;
+  height: 50px;
+}
+
+.mothership .hp {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 80px;
+  height: 6px;
+  background: var(--btn);
+  outline: 2px solid var(--fg);
+}
+
+.mothership .hp-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+}
+
+.mothership.ltr {
+  animation: mother-ltr 16s steps(160) forwards;
+}
+
+.mothership.rtl {
+  animation: mother-rtl 16s steps(160) forwards;
+}
+
+@keyframes mother-ltr {
+  from { translate: -140px 0; }
+  to { translate: calc(100vw + 140px) 0; }
+}
+
+@keyframes mother-rtl {
+  from { translate: calc(100vw + 140px) 0; }
+  to { translate: -140px 0; }
+}
+
+.mothership.hurt svg {
+  animation: hurt 0.2s steps(2);
+}
+
+@keyframes hurt {
+  50% { opacity: 0.2; }
+}
+
+.mothership.boom {
+  display: flex;
+  translate: none;
+  pointer-events: none;
+  animation: boom 0.9s steps(6) forwards;
+}
+
+.mothership.boom svg {
+  width: 48px;
+  height: 48px;
+}
+
+/* ---------- マウスのキラキラ ---------- */
+.sparkle {
+  position: fixed;
+  z-index: 4;
+  width: 4px;
+  height: 4px;
+  pointer-events: none;
+  animation: sparkle 0.5s steps(4) forwards;
+}
+
+@keyframes sparkle {
+  to { translate: 0 12px; opacity: 0; }
+}
+
+/* ---------- ねむるピクセ ---------- */
+.npc-sprite {
+  position: relative;
+}
+
+.npc-sprite.asleep .npc-body {
+  animation: none;
+}
+
+.npc-sprite.asleep::after {
+  content: "Z z z";
+  position: absolute;
+  top: -16px;
+  right: -20px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--accent-2);
+  animation: zzz 1.5s steps(3) infinite;
+}
+
+@keyframes zzz {
+  from { translate: 0 4px; opacity: 0.4; }
+  to { translate: 4px -8px; opacity: 1; }
+}
+
+/* ---------- 隠しコマンド party ---------- */
+/* 点滅させすぎないよう、暗い色どうしを0.5秒ごとに切りかえる */
+body.party {
+  animation: party-bg 2s steps(1) infinite;
+}
+
+@keyframes party-bg {
+  0% { background-color: #0f0b1e; }
+  25% { background-color: #1e0b2a; }
+  50% { background-color: #0b1a2a; }
+  75% { background-color: #1a0b1e; }
+}
+
+.party .title {
+  animation:
+    drop-in 0.5s steps(4) both,
+    rainbow 0.6s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.party,
+  .coin-slot,
+  .trophy-btn.ping,
+  .npc-sprite.asleep::after,
+  .party .title {
+    animation: none !important;
+  }
+
+  .party .title {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

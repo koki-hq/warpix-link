@@ -1,3 +1,8 @@
+// ページ内のできごとを他のファイル（game.js / extras.js）に知らせるためのイベントバス
+const bus = new EventTarget();
+const emit = (type, detail = {}) => bus.dispatchEvent(new CustomEvent(type, { detail }));
+const on = (type, fn) => bus.addEventListener(type, (e) => fn(e.detail));
+
 // ドット絵アイコン（12x12、"#" が塗りのピクセル）
 const ICONS = {
   youtube: [
@@ -100,13 +105,15 @@ const ICONS = {
   ],
 };
 
-// 多色スプライト用のパレット（o=輪郭 w=白 p=ピンク c=シアン）
+// 多色スプライト用のパレット（o=輪郭 w=白 p=ピンク c=シアン y=金）
+// CSS変数で塗るので、配色モードが変わるとスプライトの色もいっしょに変わる
 const PALETTE = {
   "#": "currentColor",
-  o: "#000",
-  w: "#f4f4f4",
-  p: "#ff4fa3",
-  c: "#3ee8ff",
+  o: "var(--shadow)",
+  w: "var(--fg)",
+  p: "var(--accent)",
+  c: "var(--accent-2)",
+  y: "var(--gold)",
 };
 
 // ナビゲーター「ピクセ」（16x16）。目を閉じたコマと2枚
@@ -178,7 +185,7 @@ function pixelSvg(rows, palette = PALETTE) {
   rows.forEach((row, y) => {
     [...row].forEach((ch, x) => {
       const fill = palette[ch];
-      if (fill) rects.push(`<rect x="${x}" y="${y}" width="1" height="1" fill="${fill}"/>`);
+      if (fill) rects.push(`<rect x="${x}" y="${y}" width="1" height="1" style="fill:${fill}"/>`);
     });
   });
   return `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rects.join("")}</svg>`;
@@ -282,6 +289,42 @@ const sound = (() => {
         tone({ freq: midi(n), start: t + i * 0.05, dur: 0.1, vol: 0.06 })
       );
     },
+    // ミニゲームの自機ショット
+    shoot() {
+      if (ctx) tone({ freq: 1400, start: ctx.currentTime, dur: 0.08, vol: 0.03, slideTo: 500 });
+    },
+    // 敵に当たった（短いノイズ）
+    hit() {
+      if (ctx) noise(ctx.currentTime, 0.12, 0.08, ctx.destination);
+    },
+    // 自機がやられた
+    damage() {
+      if (!ctx) return;
+      const t = ctx.currentTime;
+      noise(t, 0.5, 0.12, ctx.destination);
+      tone({ freq: 440, start: t, dur: 0.5, vol: 0.06, slideTo: 55 });
+    },
+    // 実績解除のファンファーレ（ソ・ソ・ソ・ド〜）
+    fanfare() {
+      if (!ensure()) return;
+      const t = ctx.currentTime;
+      [79, 79, 79].forEach((n, i) => tone({ freq: midi(n), start: t + i * 0.09, dur: 0.07, vol: 0.05 }));
+      tone({ freq: midi(84), start: t + 0.27, dur: 0.5, vol: 0.06 });
+      tone({ freq: midi(88), start: t + 0.27, dur: 0.5, vol: 0.04 });
+    },
+    // 流れ星（キラキラ下がる）
+    twinkle() {
+      if (!ensure()) return;
+      const t = ctx.currentTime;
+      [96, 91, 88, 84, 79].forEach((n, i) => tone({ freq: midi(n), start: t + i * 0.04, dur: 0.12, vol: 0.04 }));
+    },
+    // ゲームオーバー（下がっていくメロディ）
+    gameover() {
+      if (!ensure()) return;
+      const t = ctx.currentTime;
+      [72, 67, 64, 60].forEach((n, i) => tone({ freq: midi(n), start: t + i * 0.18, dur: 0.17, vol: 0.06 }));
+      tone({ freq: midi(36), start: t + 0.72, dur: 0.6, type: "triangle", vol: 0.15 });
+    },
   };
 
   // BGM：Am → F → C → G の4小節ループ（8分音符刻み、null は休符）
@@ -298,12 +341,13 @@ const sound = (() => {
   let timer = null;
   let step = 0;
   let nextTime = 0;
+  let stepDur = STEP; // setTempo でテンポを変えられる
 
   function scheduleStep(i, t) {
     const n = LEAD[i];
-    if (n) tone({ freq: midi(n), start: t, dur: STEP * 0.9, vol: 0.04, dest: bgmGain });
+    if (n) tone({ freq: midi(n), start: t, dur: stepDur * 0.9, vol: 0.04, dest: bgmGain });
     const root = BASS[Math.floor(i / 8)] + (i % 2 ? 12 : 0);
-    tone({ freq: midi(root), start: t, dur: STEP * 0.9, type: "triangle", vol: 0.12, dest: bgmGain });
+    tone({ freq: midi(root), start: t, dur: stepDur * 0.9, type: "triangle", vol: 0.12, dest: bgmGain });
     if (i % 2 === 1) noise(t, 0.03, 0.03, bgmGain);
   }
 
@@ -317,7 +361,7 @@ const sound = (() => {
       if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.05;
       while (nextTime < ctx.currentTime + 0.12) {
         scheduleStep(step, nextTime);
-        nextTime += STEP;
+        nextTime += stepDur;
         step = (step + 1) % LEAD.length;
       }
     }, 25);
@@ -333,19 +377,23 @@ const sound = (() => {
   const pause = () => ctx?.suspend();
   const resume = () => ctx?.resume();
 
-  return { sfx, bgmPlay, bgmStop, pause, resume };
+  // 1 = ふつう、1.5 = 1.5倍速
+  const setTempo = (mult) => (stepDur = STEP / mult);
+
+  return { sfx, bgmPlay, bgmStop, pause, resume, setTempo };
 })();
 
 // ---------- 流れる星（縦スクロールのシューティング風） ----------
 const stars = (() => {
   const canvas = document.getElementById("stars");
   const c = canvas.getContext("2d");
-  const COLORS = ["#f4f4f4", "#f4f4f4", "#f4f4f4", "#3ee8ff", "#ff4fa3"];
-  const WARP_MS = 1000;
+  const DEFAULT_COLORS = ["#f4f4f4", "#f4f4f4", "#f4f4f4", "#3ee8ff", "#ff4fa3"];
+  let colors = DEFAULT_COLORS;
   let field = [];
   let w = 0;
   let h = 0;
   let warpUntil = 0;
+  let warpMs = 1000;
 
   function makeStar(y) {
     const big = Math.random() < 0.2;
@@ -354,7 +402,7 @@ const stars = (() => {
       y,
       size: big ? 4 : 2,
       speed: big ? 0.6 : 0.2 + Math.random() * 0.2,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      color: colors[Math.floor(Math.random() * colors.length)],
     };
   }
 
@@ -368,7 +416,7 @@ const stars = (() => {
   // ワープ中は 1 → 25 → 1 倍に加速する
   function boost(now) {
     if (now >= warpUntil) return 1;
-    const t = 1 - (warpUntil - now) / WARP_MS;
+    const t = 1 - (warpUntil - now) / warpMs;
     return 1 + 24 * Math.sin(Math.PI * t);
   }
 
@@ -402,8 +450,15 @@ const stars = (() => {
   if (!reduceMotion) requestAnimationFrame(tick);
 
   return {
-    warp() {
-      warpUntil = performance.now() + WARP_MS;
+    warp(ms = 1000) {
+      warpMs = ms;
+      warpUntil = performance.now() + ms;
+    },
+    // 星の色を入れかえる（null でもとに戻す）
+    setColors(list) {
+      colors = list ?? DEFAULT_COLORS;
+      for (const s of field) s.color = colors[Math.floor(Math.random() * colors.length)];
+      draw();
     },
   };
 })();
@@ -433,7 +488,16 @@ const score = (() => {
     setTimeout(() => el.remove(), 900);
   }
 
+  // 1.5秒以内に続けて点を取るとコンボ。5コンボごとに倍率が上がる（最大x4）
+  let combo = 0;
+  let lastAdd = 0;
+
   function add(points, x, y) {
+    const now = performance.now();
+    combo = now - lastAdd < 1500 ? combo + 1 : 0;
+    lastAdd = now;
+    const mult = Math.min(1 + Math.floor(combo / 5), 4);
+    points *= mult;
     value += points;
     if (value > hi) {
       hi = value;
@@ -442,7 +506,8 @@ const score = (() => {
       } catch {}
     }
     render();
-    popup(`+${points}`, x, y);
+    popup(mult > 1 ? `+${points} x${mult}` : `+${points}`, x, y);
+    emit("score", { value, mult });
   }
 
   render();
@@ -463,8 +528,14 @@ const npc = (() => {
   const box = document.getElementById("dialog");
   const textEl = document.getElementById("dialog-text");
 
+  const hour = new Date().getHours();
+  const GREETING =
+    hour < 5 ? "こんな じかんに……\nもしかして よふかし？" :
+    hour < 10 ? "おはよう！ ぼくは ピクセ。\nここは ワーピクスの ほしぞら。" :
+    hour < 17 ? "こんにちは！ ぼくは ピクセ。\nここは ワーピクスの ほしぞら。" :
+    "こんばんは！ ぼくは ピクセ。\nここは ワーピクスの ほしぞら。";
   const INTRO = [
-    "ようこそ！ ぼくは ピクセ。\nここは ワーピクスの ほしぞら。",
+    GREETING,
     "したの ボタンを えらぶと\nその せかいへ ワープできるよ。",
     "……そういえば ときどき\nそらを なにかが とんでるんだ。",
   ];
@@ -530,26 +601,34 @@ const npc = (() => {
 
   box.addEventListener("click", () => (typing ? finish() : next()));
 
-  // まばたき
-  body.innerHTML = pixelSvg(NPC.idle);
+  // まばたき（ねているあいだは目を閉じたまま）
+  let asleep = false;
+  const face = () => (body.innerHTML = pixelSvg(asleep ? NPC.blink : NPC.idle));
+  face();
   setInterval(() => {
+    if (asleep) return;
     body.innerHTML = pixelSvg(NPC.blink);
-    setTimeout(() => (body.innerHTML = pixelSvg(NPC.idle)), 150);
+    setTimeout(face, 150);
   }, 3200);
+
+  function jump() {
+    sprite.classList.remove("jump");
+    void sprite.offsetWidth; // アニメーションを最初からやり直す
+    sprite.classList.add("jump");
+  }
 
   // つつくとジャンプしてコイン。10回つづけてつつくと……
   let pokes = 0;
   let lastPoke = 0;
   sprite.addEventListener("click", (e) => {
-    sprite.classList.remove("jump");
-    void sprite.offsetWidth; // アニメーションを最初からやり直す
-    sprite.classList.add("jump");
+    jump();
     sound.sfx.coin();
     score.add(10, ...pointOf(e, sprite));
 
     const now = performance.now();
     pokes = now - lastPoke < 1500 ? pokes + 1 : 1;
     lastPoke = now;
+    emit("poke", { streak: pokes });
     if (pokes >= 10) {
       pokes = 0;
       secret.unlock();
@@ -560,7 +639,17 @@ const npc = (() => {
     }
   });
 
-  return { say, intro: () => say(INTRO) };
+  return {
+    say,
+    jump,
+    intro: () => say(INTRO),
+    busy: () => !!typing || queue.length > 0,
+    sleep(on) {
+      asleep = on;
+      sprite.classList.toggle("asleep", on);
+      face();
+    },
+  };
 })();
 
 // ---------- ひみつのワープゾーン（コナミコマンド or ピクセを10連打） ----------
@@ -580,14 +669,17 @@ const secret = (() => {
     link.hidden = false;
     score.add(5000, innerWidth / 2, innerHeight / 3);
     npc.say(["ひみつの ワープゾーンが\nひらいた！", "いちばん したの ボタンを\nみてごらん。"]);
+    emit("secret");
   }
 
   document.addEventListener("keydown", (e) => {
-    if (!document.body.classList.contains("booted")) return;
+    if (!document.body.classList.contains("booted") || document.body.classList.contains("gaming")) return;
+    if (e.target.closest?.("input, textarea")) return;
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     pos = key === CODE[pos] ? pos + 1 : key === CODE[0] ? 1 : 0;
     if (pos === CODE.length) {
       pos = 0;
+      emit("konami");
       unlock();
     }
   });
@@ -614,6 +706,7 @@ const ufo = (() => {
       sound.sfx.boom();
       score.add(1000, ...pointOf(e, el));
       npc.say(["ナイスショット！"]);
+      emit("ufo-down");
       setTimeout(() => el.remove(), 450);
     });
     el.addEventListener("animationend", (e) => {
@@ -662,6 +755,7 @@ const ufo = (() => {
       sound.sfx.select();
       stars.warp();
       score.add(100, ...pointOf(e, btn));
+      emit("warp", { icon: btn.querySelector("[data-icon]")?.dataset.icon });
       if (!reduceMotion) {
         document.body.classList.remove("shake");
         void document.body.offsetWidth;
@@ -678,6 +772,7 @@ const ufo = (() => {
     } catch {}
     if (bgmOn) sound.bgmPlay();
     else sound.bgmStop();
+    emit("bgm", { on: bgmOn });
   });
 
   // よそ見するとポーズ
@@ -704,6 +799,7 @@ const ufo = (() => {
       document.body.classList.add("booted");
       setTimeout(npc.intro, reduceMotion ? 0 : 1600);
       ufo.start();
+      emit("boot");
     }, 450);
   }
 
