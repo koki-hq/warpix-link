@@ -93,6 +93,7 @@ const achievements = (() => {
     { id: "daikichi", name: "だいきち！", desc: "おみくじで だいきちを ひいた", hint: "まいにち ひいていれば いつか……" },
     { id: "ghost", name: "ゴーストに かて", desc: "ぼうけんで きょうの ゴーストに かった", hint: "おなじ ひに 2かい ぼうけんすると……" },
     { id: "zukan-half", name: "ずかん はんぶん", desc: "ピクセの ずかんを はんぶん うめた", hint: "いろいろな ものに であうと……" },
+    { id: "postcard", name: "ポストカード", desc: "ピクセの ポストカードを つくった", hint: "ノートの うえの ほうに……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 

@@ -2953,12 +2953,36 @@ a,
 /* =====================================================================
    ピクセの ずかん（v1.9）：日記のノートのタブ
    ===================================================================== */
-.diary-tabs {
+.diary-bar {
   display: flex;
-  gap: 4px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 16px 0;
   background: #fffaf0;
   border-bottom: 2px solid #e6dcc6;
+}
+
+.diary-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.postcard-btn {
+  margin-bottom: 4px;
+  padding: 4px 10px;
+  border: 0;
+  background: #1a1433;
+  color: #fffaf0;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.postcard-btn:hover,
+.postcard-btn:focus-visible {
+  background: var(--accent);
+  outline: 2px solid #1a1433;
 }
 
 .diary-tab {
@@ -3150,4 +3174,65 @@ a,
 
 .plain-font .title {
   font-weight: 800;
+}
+
+/* =====================================================================
+   ピクセの ポストカード（v1.11）
+   ===================================================================== */
+.postcard {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 11, 30, 0.85);
+}
+
+.postcard-box {
+  width: min(720px, 100%);
+}
+
+.postcard-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--fg),
+    0 var(--px) 0 0 var(--fg),
+    calc(var(--px) * -1) 0 0 0 var(--fg),
+    var(--px) 0 0 0 var(--fg);
+}
+
+.postcard-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.postcard-row > * {
+  padding: 8px 16px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.postcard-row .postcard-save {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.postcard-row > *:hover,
+.postcard-row > *:focus-visible {
+  outline: 2px solid var(--accent-2);
+}
+
+.postcard-row [hidden] {
+  display: none;
 }
