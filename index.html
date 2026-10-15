@@ -16,6 +16,12 @@
   <div class="start-screen" id="start-screen" hidden>
     <button class="start-btn" id="start-btn" type="button">PRESS START</button>
     <p class="start-hint">CLICK OR PRESS ENTER</p>
+    <p class="start-hi">HI-SCORE <span data-hiscore>000000</span></p>
+  </div>
+
+  <div class="hud">
+    <span>SCORE <b data-score>000000</b></span>
+    <span>HI <b data-hiscore>000000</b></span>
   </div>
 
   <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
@@ -23,6 +29,16 @@
   <main class="screen">
     <h1 class="title">WARPIX<span class="title-dash">-</span>LINK</h1>
     <p class="subtitle">PRESS A LINK TO WARP<span class="cursor">_</span></p>
+
+    <section class="npc" aria-label="ナビゲーター">
+      <button class="npc-sprite" id="npc" type="button" aria-label="ナビゲーターのピクセルをつつく">
+        <span class="npc-body" id="npc-body"></span>
+      </button>
+      <div class="dialog" id="dialog" role="status">
+        <p class="dialog-text" id="dialog-text"></p>
+        <span class="dialog-next" aria-hidden="true">▼</span>
+      </div>
+    </section>
 
     <nav class="links">
       <a class="pixel-btn" href="https://www.youtube.com/" target="_blank" rel="noopener">
@@ -42,6 +58,9 @@
       </a>
       <a class="pixel-btn" href="https://open.spotify.com/" target="_blank" rel="noopener">
         <span class="arrow">▶</span><span class="icon" data-icon="spotify"></span>SPOTIFY
+      </a>
+      <a class="pixel-btn secret" id="secret-link" href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener" hidden>
+        <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE
       </a>
     </nav>
 

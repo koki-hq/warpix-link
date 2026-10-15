@@ -243,7 +243,9 @@ body::after {
 .js .subtitle,
 .js .pixel-btn,
 .js .footer,
-.js .bgm-toggle {
+.js .bgm-toggle,
+.js .hud,
+.js .npc {
   opacity: 0;
 }
 
@@ -253,7 +255,9 @@ body::after {
 
 .booted .subtitle,
 .booted .footer,
-.booted .bgm-toggle {
+.booted .bgm-toggle,
+.booted .hud,
+.booted .npc {
   animation: fade-in 0.3s steps(3) 0.5s both;
 }
 
@@ -308,18 +312,254 @@ body::after {
   outline: none;
 }
 
+/* ---------- スコア表示 ---------- */
+.hud {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--muted);
+}
+
+.hud b {
+  font-weight: normal;
+  color: var(--fg);
+}
+
+.start-hi {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--accent-2);
+}
+
+/* 取ったポイントがふわっと…ではなく、カクカク浮かぶ */
+.score-pop {
+  position: fixed;
+  z-index: 15;
+  pointer-events: none;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  color: var(--fg);
+  text-shadow: 2px 2px 0 var(--accent);
+  translate: -50% 0;
+  animation: score-up 0.8s steps(4) forwards;
+}
+
+@keyframes score-up {
+  from { translate: -50% 0; opacity: 1; }
+  80% { opacity: 1; }
+  to { translate: -50% -40px; opacity: 0; }
+}
+
+/* ---------- ナビゲーター（マスコット＋会話ウィンドウ） ---------- */
+.npc {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.npc-sprite {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.npc-sprite:focus-visible {
+  outline: var(--px) solid var(--accent-2);
+  outline-offset: 4px;
+}
+
+.npc-sprite.jump {
+  animation: jump 0.3s steps(3);
+}
+
+.npc-body {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: bob 1s steps(1) infinite;
+}
+
+.npc-body svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes bob {
+  50% { translate: 0 calc(var(--px) * -1); }
+}
+
+@keyframes jump {
+  50% { translate: 0 -16px; }
+}
+
+/* RPGのメッセージウィンドウ */
+.dialog {
+  position: relative;
+  flex: 1;
+  min-height: 72px;
+  padding: 12px 14px 18px;
+  background: var(--bg);
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--fg),
+    0 var(--px) 0 0 var(--fg),
+    calc(var(--px) * -1) 0 0 0 var(--fg),
+    var(--px) 0 0 0 var(--fg);
+}
+
+.dialog-text {
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.dialog-next {
+  position: absolute;
+  right: 10px;
+  bottom: 4px;
+  font-size: 10px;
+  color: var(--accent);
+  visibility: hidden;
+}
+
+.dialog.more .dialog-next {
+  visibility: visible;
+  animation: blink 0.6s steps(1) infinite;
+}
+
+/* ---------- ひみつのワープゾーン ---------- */
+.pixel-btn[hidden] {
+  display: none;
+}
+
+.pixel-btn.secret {
+  color: var(--accent);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--accent),
+    0 var(--px) 0 0 var(--accent),
+    calc(var(--px) * -1) 0 0 0 var(--accent),
+    var(--px) 0 0 0 var(--accent),
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
+}
+
+.pixel-btn.secret .icon {
+  color: var(--accent);
+}
+
+/* 隠しコマンド後はタイトルの影がチカチカ色変わり */
+.booted.secret-mode .title {
+  /* drop-in を残さないと、上書きされて opacity: 0 に戻ってしまう */
+  animation:
+    drop-in 0.5s steps(4) both,
+    rainbow 0.6s steps(1) infinite;
+}
+
+@keyframes rainbow {
+  0% { text-shadow: var(--px) 0 0 var(--accent), calc(var(--px) * 2) var(--px) 0 var(--shadow); }
+  33% { text-shadow: var(--px) 0 0 var(--accent-2), calc(var(--px) * 2) var(--px) 0 var(--shadow); }
+  66% { text-shadow: var(--px) 0 0 var(--btn-hover), calc(var(--px) * 2) var(--px) 0 var(--shadow); }
+}
+
+/* ---------- ワープしたときの画面ゆれ ---------- */
+.shake .screen {
+  animation: shake 0.3s steps(6);
+}
+
+@keyframes shake {
+  0% { translate: var(--px) 0; }
+  25% { translate: calc(var(--px) * -1) var(--px); }
+  50% { translate: 0 calc(var(--px) * -1); }
+  75% { translate: var(--px) var(--px); }
+  100% { translate: 0 0; }
+}
+
+/* ---------- UFO ---------- */
+.ufo {
+  position: fixed;
+  left: 0;
+  z-index: 2;
+  width: 48px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: crosshair;
+}
+
+.ufo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: bob 0.4s steps(1) infinite;
+}
+
+.ufo.ltr {
+  animation: ufo-ltr 9s steps(90) forwards;
+}
+
+.ufo.rtl {
+  animation: ufo-rtl 9s steps(90) forwards;
+}
+
+@keyframes ufo-ltr {
+  from { translate: -64px 0; }
+  to { translate: calc(100vw + 64px) 0; }
+}
+
+@keyframes ufo-rtl {
+  from { translate: calc(100vw + 64px) 0; }
+  to { translate: -64px 0; }
+}
+
+.ufo.boom {
+  height: 48px;
+  translate: none;
+  pointer-events: none;
+  animation: boom 0.4s steps(4) forwards;
+}
+
+@keyframes boom {
+  from { scale: 1; opacity: 1; }
+  to { scale: 2; opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cursor,
   .pixel-btn .arrow,
-  .start-btn {
+  .start-btn,
+  .npc-body,
+  .npc-sprite.jump,
+  .shake .screen {
     animation: none !important;
+  }
+
+  .booted.secret-mode .title {
+    animation: drop-in 1ms both !important;
   }
 
   .booted .title,
   .booted .subtitle,
   .booted .footer,
   .booted .bgm-toggle,
+  .booted .hud,
+  .booted .npc,
   .booted .pixel-btn,
+  .score-pop,
   .start-screen.leaving {
     animation-duration: 1ms !important;
     animation-delay: 0s !important;
