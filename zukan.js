@@ -71,6 +71,15 @@ const zukan = (() => {
       ].map(([name, ph]) => ({ id: name, name, draw: () => pixelSvg(moonRows(ph), { ...PALETTE, n: "var(--btn)" }) })),
     },
     {
+      id: "skycolor", title: "そらの いろ",
+      entries: [
+        ["night", "よる", ["nnnnnnnnnnnn", "nnwnnnnnnwnn", "nnnnnnwnnnnn", "nwnnnnnnnnnn", "nnnnnwnnnnwn", "nnnnnnnnnnnn", "nnnwnnnnnnnn", "nnnnnnnnwnnn", "nwnnnnnnnnnn", "nnnnnnwnnnnn", "nnnnnnnnnnwn", "nnnnnnnnnnnn"]],
+        ["dawn", "あさやけ", ["nnnnnnnnnnnn", "nnnnnnnnnnnn", "vvvvvvvvvvvv", "vvvvvvvvvvvv", "vvvvvvvvvvvv", "pppppppppppp", "pppppppppppp", "pppppyyppppp", "ppppyyyypppp", "pppyyyyyyppp", "pppppppppppp", "pppppppppppp"]],
+        ["day", "ひる", ["vvvvvvvvvvvv", "vvvvvvvvyyvv", "vvvvvvvyyyyv", "vvvvvvvyyyyv", "vvvvvvvvyyvv", "vvvvvvvvvvvv", "cccccccccccc", "cccccccccccc", "cccccccccccc", "cccccccccccc", "cccccccccccc", "cccccccccccc"]],
+        ["dusk", "ゆうやけ", ["nnnnnnnnnnnn", "nnnnnnnnnnnn", "pppppppppppp", "pppppppppppp", "kkkkkkkkkkkk", "kkkkkkkkkkkk", "kkkkyyyykkkk", "kkkyyyyyykkk", "kkkkkkkkkkkk", "kkkkkkkkkkkk", "nnnnnnnnnnnn", "nnnnnnnnnnnn"]],
+      ].map(([id, name, rows]) => ({ id, name, draw: () => pixelSvg(rows, { ...PALETTE, n: "var(--btn)" }) })),
+    },
+    {
       id: "weather", title: "そっちの てんき",
       entries: [["clear", "はれ"], ["cloudy", "くもり"], ["fog", "きり"], ["rain", "あめ"], ["snow", "ゆき"], ["thunder", "かみなり"]]
         .map(([id, name]) => ({ id, name, draw: () => pixelSvg(WEATHER[id]) })),

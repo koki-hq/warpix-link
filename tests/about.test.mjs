@@ -44,7 +44,9 @@ export default {
     t.eq(await p.ev(`localStorage.getItem("warpix-hi")`), "9999", "1 回目で消えてしまった");
     await p.ev(`document.getElementById("about-reset").click()`);
     await t.sleep(2000);
-    t.eq(await p.ev(`Object.keys(localStorage).filter((k) => k.startsWith("warpix-") && k !== "warpix-pixe").length`), 0, "warpix- の記録が残っている（開き直したときの新しい出会いの記録は除く）");
+    t.eq(await p.ev(`[localStorage.getItem("warpix-hi"), localStorage.getItem("warpix-links")]`), [null, null], "消す前の記録が残っている");
+    // 読みなおした瞬間に始まる記録（新しい出会い、きょうの空・月の図鑑）だけがある
+    t.eq(await p.ev(`Object.keys(localStorage).filter((k) => k.startsWith("warpix-") && !["warpix-pixe", "warpix-zukan"].includes(k))`), [], "はじめから以外の記録がある");
     t.eq(await p.ev(`localStorage.getItem("not-ours")`), "keep", "このサイト以外の記録まで消した");
     t.eq(await p.ev(`JSON.parse(localStorage.getItem("warpix-pixe")).diary[0].text`), "はじめて あった。ドキドキした。", "はじめからに なっていない");
     t.noErrors(p);
