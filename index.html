@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
   <link rel="icon" id="favicon" href="data:,">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#0f0b1e">
   <link rel="stylesheet" href="style.css">
   <script>document.documentElement.classList.add("js");</script>
 </head>
@@ -23,6 +26,7 @@
   <div class="hud">
     <span>SCORE <b data-score>000000</b></span>
     <span>HI <b data-hiscore>000000</b></span>
+    <span class="online-count" id="online-count" hidden>ONLINE <b>1</b></span>
     <button class="trophy-btn" id="trophy-btn" type="button" aria-label="じっせきを見る">
       <span class="trophy-mini" data-trophy></span><span id="trophy-count">0/0</span>
     </button>
@@ -42,6 +46,14 @@
       <button class="trophies-close" id="trophies-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <ul class="trophy-list" id="trophy-list"></ul>
+    <section class="world-record" id="world-record" aria-labelledby="world-record-title" hidden>
+      <h3 id="world-record-title">WORLD RECORD</h3>
+      <dl>
+        <dt>せかいで ピクセが つつかれた かいすう</dt><dd data-counter="pokes">-</dd>
+        <dt>せかいで ワープした かいすう</dt><dd data-counter="warps">-</dd>
+        <dt>せかいで おとされた UFO</dt><dd data-counter="ufos">-</dd>
+      </dl>
+    </section>
     <section class="wardrobe" aria-labelledby="wardrobe-title">
       <h3 id="wardrobe-title">WARDROBE</h3>
       <div class="wardrobe-list" id="wardrobe-list"></div>
@@ -116,10 +128,15 @@
   <!-- 印刷したときだけ出る認定証（中身は world.js が印刷直前に書く） -->
   <section class="certificate" id="certificate" aria-hidden="true"></section>
 
+  <script src="config.js"></script>
   <script src="script.js"></script>
   <script src="game.js"></script>
   <script src="extras.js"></script>
   <script src="adventure.js"></script>
   <script src="world.js"></script>
+  <script src="season.js"></script>
+  <script src="device.js"></script>
+  <script src="weather.js"></script>
+  <script src="online.js"></script>
 </body>
 </html>

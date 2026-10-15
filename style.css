@@ -9,6 +9,7 @@
   --shadow: #000;
   --muted: #8a80b8;
   --gold: #ffd84a;
+  --pumpkin: #ff8a1f;
   --px: 4px;
 }
 
@@ -24,6 +25,7 @@ body.gb {
   --shadow: #0f380f;
   --muted: #8bac0f;
   --gold: #9bbc0f;
+  --pumpkin: #8bac0f;
 }
 
 * {
@@ -1678,5 +1680,210 @@ body.party {
   .booted .moon {
     animation-duration: 1ms !important;
     animation-delay: 0s !important;
+  }
+}
+
+/* =====================================================================
+   v1.4「最高の踊り」：季節・天気・アプリ・コントローラー・オンライン
+   ===================================================================== */
+
+/* ---------- 雪・雨・雲・天の川を描く canvas（星の上、中身の下） ---------- */
+.season-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- かみなりの稲妻（画面は光らせない） ---------- */
+.bolt {
+  position: fixed;
+  top: 40px;
+  z-index: 2;
+  width: 32px;
+  height: 48px;
+  pointer-events: none;
+  animation: bolt 0.6s steps(3) forwards;
+}
+
+.bolt svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes bolt {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ---------- 年賀状 ---------- */
+.nenga {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 11, 30, 0.8);
+}
+
+.nenga-card {
+  width: min(360px, 100%);
+  padding: 24px 20px;
+  background: #fffaf0;
+  color: #1a1433;
+  text-align: center;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 #d0103a,
+    0 var(--px) 0 0 #d0103a,
+    calc(var(--px) * -1) 0 0 0 #d0103a,
+    var(--px) 0 0 0 #d0103a,
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
+  animation: drop-in 0.4s steps(4) both;
+}
+
+.nenga-kicker {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: #d0103a;
+}
+
+.nenga-title {
+  margin: 12px 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 28px;
+  line-height: 1.3;
+}
+
+.nenga-pixe {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 8px;
+}
+
+.nenga-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.nenga-body {
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.nenga-from {
+  margin: 12px 0 16px;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  text-align: right;
+}
+
+.nenga-close {
+  padding: 6px 16px;
+  border: 0;
+  background: #d0103a;
+  color: #fffaf0;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ---------- ほかの訪問者のピクセ ---------- */
+.online-count {
+  color: var(--accent-2);
+}
+
+.online-count[hidden] {
+  display: none;
+}
+
+.ghost {
+  position: fixed;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  opacity: 0.65;
+  cursor: pointer;
+  animation: float 3s steps(6) infinite alternate;
+}
+
+.ghost svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ghost:hover,
+.ghost:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+@keyframes float {
+  from { translate: 0 0; }
+  to { translate: 0 -12px; }
+}
+
+.ghost.hop svg {
+  animation: jump 0.3s steps(3);
+}
+
+.ghost.leaving {
+  animation: fade-in 0.4s steps(4) reverse forwards;
+}
+
+/* ---------- 世界の記録 ---------- */
+.world-record {
+  margin-top: 16px;
+}
+
+.world-record[hidden] {
+  display: none;
+}
+
+.world-record h3 {
+  margin: 0 0 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  font-weight: normal;
+  color: var(--accent-2);
+}
+
+.world-record dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+}
+
+.world-record dt {
+  color: var(--muted);
+}
+
+.world-record dd {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost,
+  .ghost.hop svg,
+  .nenga-card {
+    animation: none !important;
   }
 }

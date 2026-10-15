@@ -56,24 +56,30 @@ const wardrobe = (() => {
   };
 
   const listEl = document.getElementById("wardrobe-list");
+  // 季節の帽子はあとから足されるので、ここでは知らない ID でも消さない
   let current = store.get("warpix-hat", null);
-  if (current && !HATS[current]) current = null;
+
+  // 季節イベント中は、帽子を選んでいなければ季節の帽子をかぶる
+  let seasonal = null;
+  const seen = new Set(store.get("warpix-season-hats", []));
+  const isOpen = (hat) => !hat.unlock || achievements.has(hat.unlock) || seen.has(hat.unlock);
 
   function apply() {
-    npc.setHat(current ? HATS[current] : null);
-    emit("hat", { id: current });
+    const id = current ?? seasonal;
+    npc.setHat(id && HATS[id] ? HATS[id] : null);
+    emit("hat", { id });
   }
 
   function render() {
     listEl.innerHTML = "";
     const options = [[null, { name: "なし" }], ...Object.entries(HATS)];
     for (const [id, hat] of options) {
-      const open = !hat.unlock || achievements.has(hat.unlock);
+      const open = isOpen(hat);
       const b = document.createElement("button");
       b.type = "button";
       b.className = "wardrobe-item";
       b.setAttribute("aria-pressed", String(current === id));
-      b.title = open ? hat.name : `じっせき「${achievements.nameOf(hat.unlock)}」で もらえる`;
+      b.title = open ? hat.name : hat.unlock.startsWith("season:") ? hat.hint : `じっせき「${achievements.nameOf(hat.unlock)}」で もらえる`;
       b.disabled = !open;
       b.innerHTML = open ? pixelSvg(dress(NPC.idle, id ? hat : null)) : "?";
       b.addEventListener("click", () => {
@@ -90,7 +96,24 @@ const wardrobe = (() => {
 
   document.getElementById("trophy-btn").addEventListener("click", render);
   apply();
-  return { render };
+  return {
+    render,
+    // 季節の帽子を足す（unlock は "season:名前"。その季節を一度見たらずっと使える）
+    addHat(id, hat) {
+      HATS[id] = hat;
+      if (current === id) apply();
+    },
+    seeSeason(key) {
+      seen.add(key);
+      store.set("warpix-season-hats", [...seen]);
+    },
+    wearSeasonal(id) {
+      seasonal = id;
+      apply();
+    },
+    hats: () => HATS,
+    currentId: () => current ?? seasonal,
+  };
 })();
 
 // ---------- 生きているファビコン（タブのアイコンでもピクセがまばたきする） ----------
@@ -158,7 +181,7 @@ const favicon = (() => {
 (() => {
   const el = document.getElementById("moon");
   const SYNODIC = 29.530588853;
-  const phase = (((Date.now() / 86400000 + 2440587.5 - 2451550.1) / SYNODIC) % 1 + 1) % 1;
+  const phase = (((today().getTime() / 86400000 + 2440587.5 - 2451550.1) / SYNODIC) % 1 + 1) % 1;
   const age = phase * SYNODIC;
 
   // 16x16 の円。満ち欠けの境目を行ごとに計算する

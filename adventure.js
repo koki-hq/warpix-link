@@ -122,7 +122,7 @@ const adventure = (() => {
     enemies = [];
     for (let i = 0; i < 2 && spots.length; i++) {
       const p = spots.splice(Math.floor(Math.random() * spots.length), 1)[0];
-      const el = sprite("adv-enemy", pixelSvg(UFO));
+      const el = sprite("adv-enemy", pixelSvg(ufoLook));
       enemies.push({ el, p, x: p.x + p.w / 2, y: p.y - 12, w: 24, h: 12, dir: Math.random() < 0.5 ? -1 : 1, alive: true });
     }
   }

@@ -114,6 +114,8 @@ const PALETTE = {
   p: "var(--accent)",
   c: "var(--accent-2)",
   y: "var(--gold)",
+  v: "var(--muted)",
+  k: "var(--pumpkin)",
 };
 
 // ナビゲーター「ピクセ」（16x16）。目を閉じたコマと2枚
@@ -212,6 +214,16 @@ document.querySelectorAll("[data-icon]").forEach((el) => {
 });
 
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// きょうの日付。?date=2026-10-31 のように付けると、その日のページを先取りできる（季節イベントの確認用）
+const today = (() => {
+  const q = new URLSearchParams(location.search).get("date");
+  const fixed = q && /^\d{4}-\d{2}-\d{2}$/.test(q) ? new Date(`${q}T12:00:00`) : null;
+  return () => (fixed && !isNaN(fixed) ? new Date(fixed) : new Date());
+})();
+
+// UFO の見た目（季節イベントでコウモリなどに変わる）
+let ufoLook = UFO;
 
 // ---------- サウンド（Web Audio API で8bit風に鳴らす） ----------
 const sound = (() => {
@@ -333,6 +345,13 @@ const sound = (() => {
       const t = ctx.currentTime;
       [96, 91, 88, 84, 79].forEach((n, i) => tone({ freq: midi(n), start: t + i * 0.04, dur: 0.12, vol: 0.04 }));
     },
+    // かみなりのゴロゴロ（低い三角波とノイズ）
+    rumble() {
+      if (!ctx) return;
+      const t = ctx.currentTime;
+      noise(t, 1.2, 0.05, ctx.destination);
+      tone({ freq: 70, start: t, dur: 1.2, type: "triangle", vol: 0.15, slideTo: 35 });
+    },
     // ゲームオーバー（下がっていくメロディ）
     gameover() {
       if (!ensure()) return;
@@ -345,13 +364,13 @@ const sound = (() => {
   // BGM：Am → F → C → G の4小節ループ（8分音符刻み、null は休符）
   const BPM = 140;
   const STEP = 60 / BPM / 2;
-  const LEAD = [
+  let LEAD = [
     76, null, 72, 69, 72, 76, 81, null,
     77, null, 76, 72, 69, 72, 77, null,
     79, null, 76, 72, 76, 79, 84, null,
     83, 81, 79, 74, 71, 74, 79, null,
   ];
-  const BASS = [45, 41, 48, 43];
+  let BASS = [45, 41, 48, 43];
 
   let timer = null;
   let step = 0;
@@ -395,7 +414,14 @@ const sound = (() => {
   // 1 = ふつう、1.5 = 1.5倍速
   const setTempo = (mult) => (stepDur = STEP / mult);
 
-  return { sfx, bgmPlay, bgmStop, pause, resume, setTempo };
+  // 曲を差しかえる（季節イベント用）。lead は 8分音符ごと、bass は 1小節ごと（lead の長さ ÷ 8 個）
+  function setSong({ lead, bass }) {
+    LEAD = lead;
+    BASS = bass;
+    step = step % LEAD.length;
+  }
+
+  return { sfx, bgmPlay, bgmStop, pause, resume, setTempo, setSong };
 })();
 
 // ---------- 流れる星（縦スクロールのシューティング風） ----------
@@ -777,7 +803,7 @@ const ufo = (() => {
     el.className = `ufo ${Math.random() < 0.5 ? "ltr" : "rtl"}`;
     el.setAttribute("aria-label", "UFOをうつ");
     el.style.top = `${40 + Math.floor(Math.random() * 160)}px`;
-    el.innerHTML = pixelSvg(UFO);
+    el.innerHTML = pixelSvg(ufoLook);
 
     el.addEventListener("click", (e) => {
       // 飛んでいた位置で止めてから爆発させる
