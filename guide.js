@@ -20,6 +20,7 @@ const guide = (() => {
     ["postcard", "ノートの「ポストカード」で、\nぼくの えはがきが つくれるよ。", () => has("postcard")],
     ["settings", "おとが おおきかったら、いちばん したの\n「せってい」で かえられるよ。", () => store.get("warpix-settings", null)],
     ["adventure", "ぼくが「そとに でてみたい」って きいたら、\n「いいよ」って いってみて。", () => has("adventure")],
+    ["hide", "まいにち 3びきの ちびピクセが、\nページの どこかに かくれてるよ。", () => has("hideseek")],
     ["simple", "リンクだけ みたい ひは、\nみぎうえの SIMPLE で しずかに なるよ。", () => store.get("warpix-simple", null) === "on"],
   ];
 

@@ -103,6 +103,7 @@ const achievements = (() => {
     { id: "rest", name: "きゅうけい じょうず", desc: "ピクセと いっしょに めを やすめた", hint: "ながく あそんでいると、ピクセが……" },
     { id: "designer", name: "ぼうし デザイナー", desc: "じぶんで かいた ぼうしを ピクセに かぶせた", hint: "WARDROBE の となりで……" },
     { id: "voice", name: "ピクセの こえ", desc: "ピクセの こえを きいた", hint: "せっていの「おと」に……" },
+    { id: "hideseek", name: "かくれんぼ めいじん", desc: "かくれている ちびピクセを 3びき ぜんぶ みつけた", hint: "ページの すみっこを よーく みると……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 

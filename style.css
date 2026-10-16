@@ -3896,3 +3896,90 @@ a,
   font-size: 13px;
   text-align: center;
 }
+
+/* =====================================================================
+   かくれピクセ（v1.23）：ページの すみから のぞく ちびピクセ
+   ===================================================================== */
+.hide-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  width: 0;
+  height: 0;
+}
+
+.hide-pixe {
+  position: absolute;
+  width: 24px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: translate 0.15s steps(2);
+}
+
+/* ときどき ひっこむ（JS が 6 びょうに 1 かい、1 ぴきだけ つける。ずっと うごかす アニメは つかわない） */
+.hide-pixe.duck {
+  translate: 0 6px;
+}
+
+.hide-pixe[hidden] {
+  display: none;
+}
+
+.hide-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hide-pixe.flip svg {
+  transform: scaleY(-1);
+}
+
+.hide-pixe.side-left svg {
+  transform: rotate(-90deg);
+}
+
+.hide-pixe.side-right svg {
+  transform: rotate(90deg);
+}
+
+.hide-pixe:hover,
+.hide-pixe:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.hide-pixe.found {
+  animation: hide-found 0.5s steps(5) forwards;
+}
+
+@keyframes hide-found {
+  to { translate: 0 -20px; opacity: 0; }
+}
+
+.gaming .hide-layer,
+.adventuring .hide-layer {
+  display: none;
+}
+
+.reduce-motion .hide-pixe {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hide-pixe {
+    transition: none;
+  }
+}
+
+@media print {
+  .hide-layer {
+    display: none;
+  }
+}
