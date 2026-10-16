@@ -115,6 +115,8 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("settings").close()`);
   await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); document.getElementById("compose-btn").click()`);
   await p.ev(`document.getElementById("composer").close()`);
+  await axe(p, "スタンプカード", `document.getElementById("diary-btn").click(); document.getElementById("tab-stamp").click()`);
+  await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "おるすばん レポート", `rusuban.show({ seed: 1, mins: 300, code: composer.make(), date: "2026-10-16" })`);
   await p.ev(`document.querySelector("dialog.rusuban").close()`);
   await p.goto(`${server.url}?simple=1`);

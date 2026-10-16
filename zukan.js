@@ -161,9 +161,9 @@ const zukan = (() => {
   const tabs = [...document.querySelectorAll(".diary-tab")];
   function show(which) {
     for (const t of tabs) t.setAttribute("aria-selected", String(t.dataset.tab === which));
-    document.getElementById("diary-body").hidden = which !== "diary";
-    body.hidden = which !== "zukan";
+    for (const t of tabs) document.getElementById(t.getAttribute("aria-controls")).hidden = t.dataset.tab !== which;
     if (which === "zukan") render();
+    emit("notebook-tab", { which });
   }
   tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.tab)));
   document.getElementById("diary-btn").addEventListener("click", () => show("diary"));
