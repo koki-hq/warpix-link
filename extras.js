@@ -99,6 +99,7 @@ const achievements = (() => {
     { id: "ranker", name: "なまえを きざめ", desc: "ミニゲームの ランキングに なまえを のこした", hint: "ミニゲームで いい てんを とると……" },
     { id: "rusuban", name: "おるすばん ありがとう", desc: "るすばんした ピクセから おみやげを もらった", hint: "しばらく るすに して、もどってくると……" },
     { id: "streak7", name: "まいにち スタンプ", desc: "7にち つづけて ピクセに あった", hint: "スタンプカードを うめていくと……" },
+    { id: "dreamer", name: "ゆめみる ピクセ", desc: "ピクセの ゆめを のぞいた", hint: "ピクセが ねむったら、あたまの うえを……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
@@ -370,6 +371,7 @@ const cheats = (() => {
   on("game-wave", () => achievements.unlock("invader"));
   on("game-boss", () => achievements.unlock("boss"));
   on("game-rank", () => achievements.unlock("ranker"));
+  on("dream", () => achievements.unlock("dreamer"));
   on("game-over", ({ score: s }) => {
     if (s >= 1000) achievements.unlock("invader-pro");
   });
@@ -485,6 +487,7 @@ function mothership() {
     if (game.isDemo()) game.close();
     document.body.classList.add("dozing");
     stars.pause();
+    dream.pause();
   }
 
   function wake() {
@@ -497,7 +500,8 @@ function mothership() {
     if (!sleeping) return;
     sleeping = false;
     npc.sleep(false);
-    npc.say(["はっ！ ねてないよ！\nねてないってば！"]);
+    const dreamt = dream.stop();
+    npc.say(["はっ！ ねてないよ！\nねてないってば！", ...(dreamt ? [`……${dreamt} ゆめ なんて\nみてないってば。`] : [])]);
   }
 
   ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"].forEach((type) =>
@@ -525,6 +529,7 @@ function mothership() {
     sleptAt = now;
     npc.sleep(true);
     npc.say(["ふあぁ……\nちょっと ねむく なってきた。", "すやすや……"]);
+    dream.start();
     achievements.unlock("sleepy");
   }, 1000);
 })();

@@ -166,6 +166,20 @@ const zukan = (() => {
     emit("notebook-tab", { which });
   }
   tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.tab)));
+  // ←→ で となりの タブへ、Home/End で はしへ（えらんだ タブだけ Tab キーで とまる）
+  const syncTabStops = () => tabs.forEach((t) => (t.tabIndex = t.getAttribute("aria-selected") === "true" ? 0 : -1));
+  syncTabStops();
+  on("notebook-tab", syncTabStops);
+  tabs.forEach((t, i) =>
+    t.addEventListener("keydown", (e) => {
+      const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault();
+      const next = tabs[(j + tabs.length) % tabs.length];
+      show(next.dataset.tab);
+      next.focus();
+    })
+  );
   document.getElementById("diary-btn").addEventListener("click", () => show("diary"));
   cheats.add("zukan", () => {
     grow.open();
