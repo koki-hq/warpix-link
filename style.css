@@ -3677,3 +3677,222 @@ a,
 .rest-stop {
   margin-top: 8px;
 }
+
+/* =====================================================================
+   ぼうし アトリエ（v1.21）：じぶんで ぼうしを かく
+   ===================================================================== */
+.wardrobe-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wardrobe-head h3 {
+  margin: 0;
+}
+
+.atelier-btn {
+  padding: 4px 8px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.atelier-btn:hover,
+.atelier-btn:focus-visible {
+  background: var(--btn-hover);
+  outline: 2px solid var(--accent-2);
+}
+
+.atelier {
+  width: min(520px, calc(100vw - 16px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--accent-2),
+    0 var(--px) 0 0 var(--accent-2),
+    calc(var(--px) * -1) 0 0 0 var(--accent-2),
+    var(--px) 0 0 0 var(--accent-2);
+}
+
+.atelier::backdrop {
+  background: rgba(15, 11, 30, 0.75);
+}
+
+.atelier-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--btn);
+}
+
+.atelier-top h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: normal;
+  color: var(--accent-2);
+}
+
+.atelier-close {
+  padding: 2px 8px;
+  border: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.atelier-body {
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.atelier-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.atelier-grid {
+  display: grid;
+  gap: 1px;
+  padding: 1px;
+  background: var(--btn);
+  touch-action: none;
+}
+
+.atelier-grid [role="row"] {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 1px;
+}
+
+.atelier-cell {
+  width: clamp(14px, 4.6vw, 20px);
+  height: clamp(14px, 4.6vw, 20px);
+  padding: 0;
+  border: 0;
+  background: var(--bg);
+  cursor: crosshair;
+}
+
+/* ピクセの あたまの ばしょは、からっぽの ときだけ うすく みせる */
+.atelier-cell.under[data-c="."] { background: #3d3460; }
+.atelier-cell[data-c="w"] { background: var(--fg); }
+.atelier-cell[data-c="p"] { background: var(--accent); }
+.atelier-cell[data-c="c"] { background: var(--accent-2); }
+.atelier-cell[data-c="y"] { background: var(--gold); }
+.atelier-cell[data-c="o"] { background: #000; }
+
+.atelier-cell:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--gold);
+}
+
+.atelier-preview {
+  width: 96px;
+  height: 96px;
+}
+
+.atelier-preview svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.atelier-colors {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.atelier-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.atelier-color::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  outline: 1px solid var(--muted);
+}
+
+.atelier-color[data-c="w"]::before { background: var(--fg); }
+.atelier-color[data-c="p"]::before { background: var(--accent); }
+.atelier-color[data-c="c"]::before { background: var(--accent-2); }
+.atelier-color[data-c="y"]::before { background: var(--gold); }
+.atelier-color[data-c="o"]::before { background: #000; }
+.atelier-color[data-c="."]::before { background: linear-gradient(135deg, transparent 45%, var(--accent) 45% 55%, transparent 55%); }
+
+.atelier-color[aria-checked="true"] {
+  background: var(--accent-2);
+  color: var(--bg);
+}
+
+.atelier-color:focus-visible {
+  outline: 2px solid var(--gold);
+}
+
+.atelier-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.atelier-name input {
+  width: 11em;
+  padding: 4px 6px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+}
+
+.atelier-name input:focus-visible {
+  outline: 2px solid var(--accent-2);
+}
+
+.atelier-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.atelier-msg {
+  min-height: 1.4em;
+  margin: 10px 0 0;
+  font-size: 13px;
+  text-align: center;
+}

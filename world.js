@@ -83,16 +83,20 @@ const wardrobe = (() => {
       b.disabled = !open;
       b.innerHTML = open ? pixelSvg(dress(NPC.idle, id ? hat : null)) : "?";
       b.addEventListener("click", () => {
-        current = id;
-        store.set("warpix-hat", current);
-        apply();
-        render();
+        wear(id);
         sound.sfx.coin();
-        emit("wear", { id, name: hat.name });
-        if (id) achievements.unlock("fashion");
       });
       listEl.append(b);
     }
+  }
+
+  function wear(id) {
+    current = id;
+    store.set("warpix-hat", current);
+    apply();
+    render();
+    emit("wear", { id, name: id ? HATS[id]?.name : "なし" });
+    if (id) achievements.unlock("fashion");
   }
 
   document.getElementById("trophy-btn").addEventListener("click", render);
@@ -112,6 +116,7 @@ const wardrobe = (() => {
       seasonal = id;
       apply();
     },
+    wear,
     hats: () => HATS,
     opened: (id) => !!HATS[id] && isOpen(HATS[id]),
     currentId: () => current ?? seasonal,

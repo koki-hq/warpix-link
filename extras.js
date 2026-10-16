@@ -101,6 +101,7 @@ const achievements = (() => {
     { id: "streak7", name: "まいにち スタンプ", desc: "7にち つづけて ピクセに あった", hint: "スタンプカードを うめていくと……" },
     { id: "dreamer", name: "ゆめみる ピクセ", desc: "ピクセの ゆめを のぞいた", hint: "ピクセが ねむったら、あたまの うえを……" },
     { id: "rest", name: "きゅうけい じょうず", desc: "ピクセと いっしょに めを やすめた", hint: "ながく あそんでいると、ピクセが……" },
+    { id: "designer", name: "ぼうし デザイナー", desc: "じぶんで かいた ぼうしを ピクセに かぶせた", hint: "WARDROBE の となりで……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
