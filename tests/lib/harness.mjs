@@ -59,7 +59,8 @@ export async function startServer({ online = false, port = 0 } = {}) {
 }
 
 // ---------- ヘッドレス Chrome ----------
-let nextPort = 9400 + Math.floor(Math.random() * 400);
+// 何人かで 同時に ながすときは、ワーカーごとに ポートの はばを わける（WARPIX_PORT_BASE）
+let nextPort = Number(process.env.WARPIX_PORT_BASE) || 9400 + Math.floor(Math.random() * 400);
 const live = new Set();
 
 export async function launchBrowser({ width = 480, height = 1000 } = {}) {
