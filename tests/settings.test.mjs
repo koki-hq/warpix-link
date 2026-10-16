@@ -54,11 +54,13 @@ export default {
     await server.close();
   },
 
-  async "シンプルモードでも開けて、キーそうさに ひみつの答えは書いていない"(t) {
-    const { server, p } = await openSite(t, "?simple=1");
+  // v1.30.1 から シンプルモードでは「せってい」を かくす（おとも うごきも ないので）。ここでは いつもの ページで みる
+  async "キーそうさに ひみつの答えは書いていない"(t) {
+    const { server, p } = await openSite(t);
+    await p.boot();
     await p.click("#settings-btn");
     await t.sleep(300);
-    t.ok(await p.ev(`document.getElementById("settings").open`), "シンプルモードで開かない");
+    t.ok(await p.ev(`document.getElementById("settings").open`), "開かない");
     const text = await p.ev(`document.getElementById("settings").innerText.toLowerCase()`);
     t.ok(text.includes("esc") && text.includes("tab"), "キーそうさの一覧がない");
     for (const secret of ["gameboy", "party", "pixe", "invaders", "konami", "↑ ↑ ↓ ↓"]) t.ok(!text.includes(secret), `ひみつ「${secret}」が書いてある`);

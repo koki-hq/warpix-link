@@ -153,9 +153,9 @@ export default {
     const ghost = await p.ev(`JSON.parse(localStorage.getItem("warpix-adv-ghost"))`);
     t.ok(ghost && ghost.frames.length > 20, "ゴーストが保存されない");
     t.ok(ghost && ghost.keys.length >= 1, "足場の名前が記録されない");
-    await p.ev(`document.querySelector(".credits")?.click()`);
+    await p.ev(`document.querySelector(".credits-skip")?.click()`);
     await t.sleep(4500);
-    await p.ev(`document.querySelector(".credits")?.click()`);
+    await p.ev(`document.querySelector(".credits-skip")?.click()`);
     await p.ev(`adventure.start()`);
     await t.sleep(200);
     t.ok(await p.ev(`!!document.querySelector(".adv-ghost")`), "2 回目にゴーストが出ない");
@@ -289,7 +289,13 @@ export default {
     await t.sleep(4000);
     t.ok(await p.ev(`!!document.querySelector(".credits")`), "スタッフロールが流れない");
     await p.shot("adventure-credits.png");
-    await p.ev(`document.querySelector(".credits")?.click()`);
+    t.ok((await p.ev(`document.querySelector(".credits").textContent`)).includes("WARPIX製作所"), "ロールに WARPIX製作所 が ない");
+    // ロールの どこを さわっても おわらない。SKIP ボタンで おわる
+    await p.ev(`document.querySelector(".credits-roll").click(); document.querySelector(".credits").click()`);
+    t.ok(await p.ev(`!!document.querySelector(".credits")`), "ロールを さわった だけで おわった");
+    await p.ev(`document.querySelector(".credits-skip").click()`);
+    await t.sleep(600);
+    t.ok(await p.ev(`!document.querySelector(".credits")`), "SKIP で おわらない");
     t.noErrors(p);
     await server.close();
   },

@@ -49,4 +49,23 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "シンプルモードでは「せってい」を かくし、スタート前は リンクの いれかえも かくれている"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(`${server.url}?simple=1`);
+    t.ok(await p.ev(`getComputedStyle(document.getElementById("settings-btn")).display === "none" && getComputedStyle(document.querySelector(".sep-settings")).display === "none"`), "シンプルモードで せっていが みえる");
+    t.ok(await p.ev(`getComputedStyle(document.getElementById("about-btn")).display !== "none"`), "このページについて まで きえた");
+    t.eq(await p.ev(`getComputedStyle(document.getElementById("cassette-btn")).opacity`), "1", "シンプルモードで いれかえが みえない");
+    await p.ev(`localStorage.clear()`);
+    await p.goto(server.url);
+    t.eq(await p.ev(`getComputedStyle(document.getElementById("cassette-btn")).opacity`), "0", "スタート前に いれかえが みえる");
+    t.ok(await p.ev(`getComputedStyle(document.getElementById("settings-btn")).display !== "none"`), "いつもの ページで せっていが ない");
+    await p.boot();
+    await t.sleep(800);
+    t.eq(await p.ev(`getComputedStyle(document.getElementById("cassette-btn")).opacity`), "1", "スタートしても いれかえが でない");
+    t.noErrors(p);
+    await server.close();
+  },
 };

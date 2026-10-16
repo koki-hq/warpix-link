@@ -269,6 +269,7 @@ body::after {
 .js .subtitle,
 .js .pixel-btn,
 .js .footer,
+.js .cassette-btn,
 .js .bgm-toggle,
 .js .hud,
 .js .npc {
@@ -281,6 +282,7 @@ body::after {
 
 .booted .subtitle,
 .booted .footer,
+.booted .cassette-btn,
 .booted .bgm-toggle,
 .booted .hud,
 .booted .npc {
@@ -1125,6 +1127,7 @@ body.party {
   .booted .title,
   .booted .subtitle,
   .booted .footer,
+  .booted .cassette-btn,
   .booted .bgm-toggle,
   .booted .hud,
   .booted .npc,
@@ -1493,10 +1496,28 @@ body.party {
   bottom: 12px;
   z-index: 41;
   margin: 0;
+  padding: 8px 10px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
   font-family: "Press Start 2P", monospace;
-  font-size: 8px;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.credits-skip:hover,
+.credits-skip:focus-visible {
+  background: var(--btn-hover);
+  outline: 2px solid var(--accent-2);
+}
+
+/* ロールの いちばん さいご：フッターと おなじ 製作所の なふだ */
+.cr-maker {
+  margin: 24px 0 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 12px;
   color: var(--muted);
-  animation: blink 1.2s steps(1) infinite;
+  text-align: center;
 }
 
 /* ---------- きせかえ ---------- */
@@ -2140,9 +2161,16 @@ body.party {
 .simple .subtitle,
 .simple .pixel-btn,
 .simple .footer,
+.simple .cassette-btn,
 .simple .simple-toggle {
   opacity: 1;
   animation: none;
+}
+
+/* シンプルモードは おとも うごきも ないので、せっていする ものが ない */
+.simple .settings-btn,
+.simple .sep-settings {
+  display: none;
 }
 
 .simple .simple-toggle {

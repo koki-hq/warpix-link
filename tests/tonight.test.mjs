@@ -7,7 +7,8 @@ async function open(t, { hour, before = "", boot = true } = {}) {
   const b = await t.launchBrowser();
   const p = await b.firstPage();
   await p.goto(server.url);
-  await p.ev(`localStorage.clear(); ${before}`);
+  // よなか（0〜5時）に ながすと、ひらいた だけで「よふかし」が とれて 1 ぎょうめが かわる。さきに もっている ことに する
+  await p.ev(`localStorage.clear(); localStorage.setItem("warpix-achievements", JSON.stringify(["night-owl"])); ${before}`);
   await p.goto(`${server.url}?hour=${hour}`);
   if (boot) await p.boot();
   return { server, p };

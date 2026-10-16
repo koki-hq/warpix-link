@@ -20,10 +20,10 @@ const SOLO_FAKE = `${FAKE_CONFIG}
     rpc: async (name, args) => { window.__rpc.push([name, args]); return { data: 1 }; },
   }) };`;
 
-// 同じブラウザの中のページどうしを BroadcastChannel でつなぐにせもの ＋ 時計を「次の 5 分の 3 秒前」に進める
+// 同じブラウザの中のページどうしを BroadcastChannel でつなぐにせもの ＋ 時計を「次の 10 分の 3 秒前」に進める
 const LINKED_FAKE = `${FAKE_CONFIG}
   const realNow = Date.now.bind(Date);
-  const P = 5 * 60 * 1000;
+  const P = 10 * 60 * 1000;
   const target = Math.ceil((realNow() + 4000) / P) * P - 3000;
   const offset = target - realNow();
   Date.now = () => realNow() + offset;
@@ -93,7 +93,7 @@ export default {
     await p.goto(`${server.url}tests/fixtures/pair.html`, 2500);
     const inFrame = (i, expr) => p.ev(`document.querySelectorAll("iframe")[${i}].contentWindow.eval(${JSON.stringify(expr)})`);
     for (const i of [0, 1]) await inFrame(i, `document.getElementById("start-btn").click()`);
-    // 時計は「次の 5 分の 3 秒前」から始まっている。レイドが始まって HP がそろうまで待つ
+    // 時計は「次の 10 分の 3 秒前」から始まっている。レイドが始まって HP がそろうまで待つ
     let ready = false;
     for (let k = 0; k < 20 && !ready; k++) {
       await t.sleep(500);

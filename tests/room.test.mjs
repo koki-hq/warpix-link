@@ -14,7 +14,7 @@ export default {
     t.eq(hud, ["room-btn"], "HUD の ボタンが ROOM だけに なっていない");
     t.ok(await p.ev(`!document.getElementById("trophy-btn") && !document.getElementById("diary-btn") && !document.getElementById("trophies")`), "まえの ボタンや まどが のこっている");
     t.ok(await p.ev(`!!document.querySelector("#room-btn .room-icon svg")`), "おうちの アイコンが ない");
-    t.eq(await p.ev(`document.getElementById("trophy-count").textContent`), `0/${await p.ev(`achievements.total`)}`, "じっせきの かず");
+    t.eq(await p.ev(`document.getElementById("trophy-count").textContent`), `${await p.ev(`achievements.count()`)}/${await p.ev(`achievements.total`)}`, "じっせきの かず");
     await p.click("#room-btn");
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("diary").open`), "おへやが ひらかない");
@@ -53,10 +53,11 @@ export default {
     await p.ev(`localStorage.clear()`);
     await p.goto(server.url);
     await p.boot();
+    const before = await p.ev(`achievements.count()`); // よなか（0〜5時）は「よふかし」を もう とっている
     await p.ev(`achievements.unlock("fashion")`);
     await t.sleep(100);
     t.ok(await p.ev(`document.getElementById("room-btn").classList.contains("ping")`), "ROOM が ひからない");
-    t.ok((await p.ev(`document.getElementById("trophy-count").textContent`)).startsWith("1/"), "かずが ふえない");
+    t.ok((await p.ev(`document.getElementById("trophy-count").textContent`)).startsWith(`${before + 1}/`), "かずが ふえない");
     await p.ev(`room.open("trophy")`);
     await t.sleep(200);
     t.eq(await panel(p), "trophy-body", "room.open('trophy')");

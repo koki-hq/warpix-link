@@ -486,7 +486,7 @@ const credits = (() => {
         ${row("PIXEL ART", "12×12 / 16×16")}
         ${row("PROGRAM", "HTML / CSS / JS")}
         ${row("BUILD TOOL", "NONE")}
-        ${row("PRODUCER", "WARPIX")}
+        ${row("PRODUCER", "WARPIX製作所")}
         ${row("BUILT WITH", "CLAUDE")}
         ${row("SPECIAL THANKS", "YOU")}
         <p class="cr-head">あなたの きろく</p>
@@ -494,8 +494,9 @@ const credits = (() => {
         <p class="cr-head">THANK YOU<br>FOR PLAYING!</p>
         <div class="cr-pixe">${pixelSvg(dress(NPC.idle))}</div>
         <p class="cr-end">THE END ?</p>
+        <p class="cr-maker">© 2026 WARPIX製作所</p>
       </div>
-      <p class="credits-skip">CLICK TO SKIP</p>`;
+      <button type="button" class="credits-skip">SKIP ▶</button>`;
     document.body.append(el);
     sound.setTempo(0.7);
 
@@ -510,7 +511,8 @@ const credits = (() => {
     rollEl.style.animationDuration = `${Math.round(dist / 40)}s`;
     rollEl.style.animationTimingFunction = `steps(${Math.round(dist / 4)})`;
     rollEl.addEventListener("animationend", () => setTimeout(() => close(true), 2500));
-    el.addEventListener("click", () => close(false));
+    // スキップは ボタン（と キー）だけ。スマホで スクロールしようと さわった だけで おわらないように
+    el.querySelector(".credits-skip").addEventListener("click", () => close(false));
     addEventListener("keydown", function skip(e) {
       if (!el) return removeEventListener("keydown", skip);
       if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
