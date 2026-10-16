@@ -705,6 +705,7 @@ const npc = (() => {
 
   function type(line) {
     clearInterval(typing);
+    emit("npc-line", { line });
     full = line;
     shown = 0;
     textEl.textContent = "";

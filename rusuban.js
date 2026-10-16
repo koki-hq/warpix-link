@@ -233,7 +233,7 @@ const rusuban = (() => {
 
   // あいさつの あとに「おみやげ あるよ」と聞く
   function offer(mins) {
-    if (document.body.classList.contains("simple")) return;
+    if (simple.on) return;
     const gift = makeGift(mins);
     lastGift = gift;
     if (!preview) store.set(KEY, gift);

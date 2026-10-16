@@ -38,7 +38,7 @@ const rest = (() => {
     const now = Date.now();
     const dt = Math.min(now - state.lastTick, 60000);
     state.lastTick = now;
-    if (document.hidden || !document.body.classList.contains("booted") || document.body.classList.contains("simple")) return;
+    if (document.hidden || !document.body.classList.contains("booted") || simple.on) return;
     if (now - state.lastInput > IDLE_GAP) return;
     state.active += dt;
     if (state.active >= ASK_AFTER && !state.asking) offer();

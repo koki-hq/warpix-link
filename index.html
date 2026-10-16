@@ -241,6 +241,8 @@
         <input type="range" id="set-bgm" min="0" max="100" step="10"><output id="set-bgm-out" for="set-bgm">100</output></label>
       <label class="set-row" for="set-se"><span>こうかおんの おおきさ</span>
         <input type="range" id="set-se" min="0" max="100" step="10"><output id="set-se-out" for="set-se">100</output></label>
+      <label class="set-check"><input type="checkbox" id="set-voice"> ピクセの こえ（ピクセの セリフを よみあげる）</label>
+      <p class="about-note" id="set-voice-note"></p>
       <p class="about-note">BGM を けすだけなら、みぎうえの「BGM ON」でも できます。</p>
 
       <h3>みやすさ</h3>
@@ -281,6 +283,7 @@
         <li><b>てんき</b>：ピクセが きいて「いいよ」と こたえたときだけ。ばしょを <strong>やく 10km に まるめて</strong>、てんきの サービス（Open-Meteo）に おくります。</li>
         <li><b>おなじ そら・レイド・せかいの きろく</b>：<strong>ランダムな ばんごうと ぼうしの しゅるい</strong>、つついた かいすうなどを Supabase に おくります。なまえや ばしょ、スコアは おくりません。</li>
         <li><b>もじ</b>：ドットの もじは Google Fonts から よみこみます。</li>
+        <li><b>ピクセの こえ</b>：せっていで オンに した ときだけ、ブラウザの よみあげを つかいます。その きかいの なかの こえを さきに えらびますが、ない ときは ブラウザの 会社の サーバーで よみあげる こえに なり、セリフの もじが そこへ おくられる ことが あります。</li>
       </ul>
       <p class="about-note">※ この ページを おいている GitHub Pages も ふくめ、どの サービスも、つなぐ ときに ふつうは あなたの IP アドレスを うけとります。</p>
 
@@ -323,6 +326,7 @@
   <script src="settings.js"></script>
   <script src="postcard.js"></script>
   <script src="rusuban.js"></script>
+  <script src="voice.js"></script>
   <script src="rest.js"></script>
   <script src="guide.js"></script>
   <script src="about.js"></script>

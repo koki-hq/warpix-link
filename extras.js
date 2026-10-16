@@ -102,6 +102,7 @@ const achievements = (() => {
     { id: "dreamer", name: "ゆめみる ピクセ", desc: "ピクセの ゆめを のぞいた", hint: "ピクセが ねむったら、あたまの うえを……" },
     { id: "rest", name: "きゅうけい じょうず", desc: "ピクセと いっしょに めを やすめた", hint: "ながく あそんでいると、ピクセが……" },
     { id: "designer", name: "ぼうし デザイナー", desc: "じぶんで かいた ぼうしを ピクセに かぶせた", hint: "WARDROBE の となりで……" },
+    { id: "voice", name: "ピクセの こえ", desc: "ピクセの こえを きいた", hint: "せっていの「おと」に……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 

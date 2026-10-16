@@ -150,7 +150,7 @@ const dream = (() => {
 
   const drawFrame = () => (bubble.innerHTML = pixelSvg(scenes[scene].frames[frame]));
   function start() {
-    if (document.body.classList.contains("simple")) return;
+    if (simple.on) return;
     scenes = pickScenes();
     scene = 0;
     frame = 0;

@@ -2,7 +2,7 @@
 // 設定はこのブラウザに保存する。動き・文字は <head> の中で描く前に切りかえ、変えたときはページを読みなおす。
 const settings = (() => {
   const KEY = "warpix-settings";
-  const state = { bgm: 100, se: 100, motion: "auto", font: "pixel", ...store.get(KEY, {}) };
+  const state = { bgm: 100, se: 100, motion: "auto", font: "pixel", voice: "off", ...store.get(KEY, {}) };
   const save = () => store.set(KEY, state);
 
   // 音量はすぐに反映（0〜100 → 0〜1）
@@ -54,8 +54,11 @@ const settings = (() => {
   motion.addEventListener("change", () => reloadWith({ motion: motion.checked ? "reduce" : "auto" }));
   font.addEventListener("change", () => reloadWith({ font: font.checked ? "plain" : "pixel" }));
 
+  // ほかの ファイルが、ひらく ときに じぶんの ぶんを かきなおせるように
+  const openHooks = [];
   function open() {
     render();
+    openHooks.forEach((fn) => fn());
     dialog.showModal();
   }
   document.getElementById("settings-btn").addEventListener("click", open);
@@ -63,5 +66,5 @@ const settings = (() => {
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
   cheats.add("settings", open);
 
-  return { state, open };
+  return { state, open, save, onOpen: (fn) => openHooks.push(fn) };
 })();

@@ -161,7 +161,13 @@ async function connectPage(browser, wsUrl) {
     }
     return r.result?.result?.value;
   };
-  page.goto = async (url, wait = 1200) => { await page.send("Page.navigate", { url }); await sleep(wait); };
+  // 読みこみ（load）を まってから、さらに wait だけ まつ（同時に ながして 重い ときも、読みこみ前に さわらない）
+  page.goto = async (url, wait = 1200) => {
+    const loaded = page.waitFor("Page.loadEventFired", () => true, 15000).catch(() => null);
+    await page.send("Page.navigate", { url });
+    await loaded;
+    await sleep(wait);
+  };
   page.size = (width, height, mobile = false) => page.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile });
   // 本物のマウス操作でクリック（要素のまんなか）
   page.click = async (selector) => {
