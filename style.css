@@ -4004,3 +4004,50 @@ a,
   font-size: 8px;
   vertical-align: 2px;
 }
+
+/* ---------- きろくを まもる・ひっこす（このページについて の なか） ---------- */
+.save-status {
+  color: var(--accent-2);
+}
+.save-status:empty {
+  display: none;
+}
+.save-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.save-btn {
+  padding: 6px 10px;
+  border: 0;
+  background: var(--accent-2);
+  color: var(--bg);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+.save-label {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.save-input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 2px solid var(--muted);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  resize: vertical;
+}
+.save-msg {
+  min-height: 1.7em;
+  margin-top: 6px !important;
+  white-space: pre-line;
+}

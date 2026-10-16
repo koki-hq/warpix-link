@@ -291,6 +291,23 @@
       <h3>つかっていないもの</h3>
       <p>こうこく、アクセスかいせき、クッキーは つかっていません。</p>
 
+      <h3>きろくを まもる・ひっこす</h3>
+      <p>きろくは この ブラウザの なかだけに あります。キャッシュを けしたり、iPhone の Safari で ホームがめんに いれずに しばらく ひらかなかったり すると、きえる ことが あります。<br>
+        <b>ふっかつの じゅもん</b>を とっておくと、きえても もどせるし、べつの ブラウザや スマホにも ひっこせます。じゅもんは この ブラウザの なかで つくり、どこにも おくりません。</p>
+      <p class="save-status" id="save-status"></p>
+      <div class="save-row">
+        <button class="save-btn" id="save-copy" type="button">じゅもんを コピー</button>
+        <button class="save-btn" id="save-file" type="button">ファイルに ほぞん</button>
+      </div>
+      <label class="save-label" for="save-input">ふっかつの じゅもん</label>
+      <textarea class="save-input" id="save-input" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+      <div class="save-row">
+        <button class="save-btn" id="save-load" type="button">ふっかつ する</button>
+        <button class="save-btn" id="save-open" type="button">ファイルから よむ</button>
+        <input type="file" id="save-file-input" accept=".txt,text/plain" hidden>
+      </div>
+      <p class="save-msg" id="save-msg" aria-live="polite"></p>
+
       <h3>きろくを けす</h3>
       <p>この ブラウザに のこした きろくを ぜんぶ けして、はじめからに します。</p>
       <button class="about-reset" id="about-reset" type="button">きろくを ぜんぶ けす</button>
@@ -333,6 +350,7 @@
   <script src="rest.js"></script>
   <script src="news.js"></script>
   <script src="guide.js"></script>
+  <script src="save.js"></script>
   <script src="about.js"></script>
 </body>
 </html>
