@@ -162,7 +162,7 @@ const grow = (() => {
     master: "じっせきを ぜんぶ あつめた！ でんせつだ。",
   };
   // ほかの行で書いている実績は、二重に書かない
-  const COVERED = new Set(["dreamer", "rusuban", "ranker", "collector", "boss", "postcard", "raid", "night-owl", "growup", "adventure", "speedrun", "reunion", "diary", "ufo", "weather", "season", "invader", "invader-pro"]);
+  const COVERED = new Set(["rest", "dreamer", "rusuban", "ranker", "collector", "boss", "postcard", "raid", "night-owl", "growup", "adventure", "speedrun", "reunion", "diary", "ufo", "weather", "season", "invader", "invader-pro"]);
   on("achievement", ({ id, name }) => {
     if (NOTABLE[id]) write(`ach-${id}`, NOTABLE[id]);
     else if (!COVERED.has(id)) write("ach", `じっせき「${name}」を とった。`); // ふつうの実績は 1日 1行まで

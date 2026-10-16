@@ -3634,3 +3634,46 @@ a,
     animation: none;
   }
 }
+
+/* =====================================================================
+   きゅうけい（v1.20）：20 びょう、とおくを みる
+   ===================================================================== */
+.rest {
+  position: fixed;
+  inset: 0;
+  z-index: 36;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(15, 11, 30, 0.92);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  text-align: center;
+}
+
+.rest p {
+  margin: 0;
+}
+
+.rest-title {
+  font-size: 20px;
+  color: var(--accent-2);
+}
+
+.rest-count {
+  font-family: "Press Start 2P", monospace;
+  font-size: 56px;
+  line-height: 1.4;
+  color: var(--gold);
+}
+
+.rest-hint {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.rest-stop {
+  margin-top: 8px;
+}
