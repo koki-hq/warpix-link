@@ -4248,3 +4248,76 @@ a,
   background: var(--bg);
   border-bottom: 2px solid var(--btn);
 }
+
+/* =====================================================================
+   こんやの 3ぎょう（v1.29）：よるに ピクセが かく きょうの まとめ
+   ===================================================================== */
+.tonight {
+  margin: 4px 0 12px;
+  padding: 10px 14px 12px;
+  background: #1a1433;
+  color: #fffaf0;
+}
+
+.tonight h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: normal;
+  color: var(--gold);
+}
+
+.tonight-moon {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.tonight-moon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tonight ol {
+  margin: 0;
+  padding-left: 1.6em;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.tonight ol li::marker {
+  color: var(--accent-2);
+}
+
+/* ROOM ボタンの つきの しるし（よるで、こんやの 3ぎょうを まだ よんでいない） */
+.room-moon {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+
+.room-moon[hidden] {
+  display: none;
+}
+
+.room-moon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ひるの よこく */
+.tonight.waiting {
+  padding: 6px 12px;
+  background: none;
+  color: #8a7f68;
+  border: 2px dashed #c9bfa8;
+}
+
+.tonight.waiting p {
+  margin: 0;
+  font-size: 13px;
+}
