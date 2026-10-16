@@ -385,17 +385,24 @@ const composer = (() => {
     shelfEmpty.hidden = shelf.length > 0;
   }
 
-  document.getElementById("shelf-add").addEventListener("click", () => {
-    const code = encode(draft);
-    if (draft.steps.every((n) => !n)) return say("ピクセ「まだ おとが ひとつも ないよ。」");
-    if (shelf.includes(code)) return say(`ピクセ「その きょくは もう たなに あるよ。『${titleOf(code)}』。」`);
-    if (shelf.length >= SHELF_MAX) return say(`ピクセ「たなが いっぱい（${SHELF_MAX}まい）。✕ で ひとつ だしてね。」`);
+  // たなに しまう。"ok"・"dup"（もうある）・"full"（いっぱい）を返す
+  function shelve(code) {
+    if (shelf.includes(code)) return "dup";
+    if (shelf.length >= SHELF_MAX) return "full";
     shelf.push(code);
     saveShelf();
     renderShelf();
-    say(`ピクセ「『${titleOf(code)}』って なまえに したよ。たなに しまった！」`);
     grow.write("shelf", `きょく『${titleOf(code)}』を たなに しまった。`);
     if (shelf.length >= 3) achievements.unlock("collector");
+    return "ok";
+  }
+  document.getElementById("shelf-add").addEventListener("click", () => {
+    const code = encode(draft);
+    if (draft.steps.every((n) => !n)) return say("ピクセ「まだ おとが ひとつも ないよ。」");
+    const res = shelve(code);
+    if (res === "dup") return say(`ピクセ「その きょくは もう たなに あるよ。『${titleOf(code)}』。」`);
+    if (res === "full") return say(`ピクセ「たなが いっぱい（${SHELF_MAX}まい）。✕ で ひとつ だしてね。」`);
+    say(`ピクセ「『${titleOf(code)}』って なまえに したよ。たなに しまった！」`);
   });
   renderShelf();
 
@@ -421,5 +428,24 @@ const composer = (() => {
     setTimeout(wait, 1200);
   });
 
-  return { encode, decode, open, titleOf, current: () => current, shelf: () => [...shelf] };
+  // ほかのファイルから使う：ピクセの自動作曲・ためしに鳴らす・もとに戻す
+  const make = () => {
+    const chord = Math.floor(Math.random() * CHORDS.length);
+    return encode({ chord, bpm: BPMS[2 + Math.floor(Math.random() * 4)], steps: pixeCompose(chord) });
+  };
+  function play(code) {
+    const s = decode(code);
+    if (!s) return;
+    apply(s);
+    sound.bgmPlay();
+  }
+  // ためしに鳴らした曲をしまって、いつもの BGM に戻す（もともと止まっていたら止める）
+  function restore(wasPlaying) {
+    apply(current);
+    if (!saved && !received) sound.setBpm(140);
+    const bgmOn = document.getElementById("bgm-toggle").getAttribute("aria-pressed") === "true";
+    if (sound.playing() && !(wasPlaying && bgmOn)) sound.bgmStop();
+  }
+
+  return { encode, decode, open, titleOf, make, play, restore, shelve, current: () => current, shelf: () => [...shelf] };
 })();

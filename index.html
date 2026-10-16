@@ -107,7 +107,10 @@
         <button type="button" class="diary-tab" role="tab" id="tab-diary" data-tab="diary" aria-selected="true" aria-controls="diary-body">にっき</button>
         <button type="button" class="diary-tab" role="tab" id="tab-zukan" data-tab="zukan" aria-selected="false" aria-controls="zukan-body">ずかん</button>
       </div>
-      <button type="button" class="postcard-btn" id="postcard-btn">ポストカード</button>
+      <span class="diary-tools">
+        <button type="button" class="postcard-btn" id="gift-btn" hidden>おみやげ</button>
+        <button type="button" class="postcard-btn" id="postcard-btn">ポストカード</button>
+      </span>
     </div>
     <!-- ページは長くてスクロールするので、キーボードでも選んでスクロールできるよう tabindex をつける -->
     <div class="diary-body" id="diary-body" role="tabpanel" aria-labelledby="tab-diary" tabindex="0"></div>
@@ -265,7 +268,7 @@
       <p>ピクセルアートとチップチューンの、ちいさな リンク集です。ピクセが まってます。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき、よく いく リンク、ぼうし、BGM や シンプルモードの せってい。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき、よく いく リンク、ぼうし、つくった きょくと レコードだな、ミニゲームの ランキング、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -311,6 +314,7 @@
   <script src="sky.js"></script>
   <script src="settings.js"></script>
   <script src="postcard.js"></script>
+  <script src="rusuban.js"></script>
   <script src="guide.js"></script>
   <script src="about.js"></script>
 </body>
