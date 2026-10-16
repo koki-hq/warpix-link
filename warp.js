@@ -108,7 +108,7 @@ const warpDive = (() => {
     trip = null;
     if (t.left) {
       // ほんとうに むこうへ いって もどってきた ときだけ、おみやげばなし
-      const lines = LINES[t.icon] ?? OTHER;
+      const lines = LINES[t.icon] ?? (CASSETTES.byId(t.icon)?.back ? [CASSETTES.byId(t.icon).back] : OTHER);
       npc.say([lines[Math.floor(Math.random() * lines.length)]]);
       achievements.unlock("warp-buddy");
       grow.write("dive", `${t.label} の せかいへ いっしょに ワープした。`);

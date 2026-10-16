@@ -96,7 +96,7 @@ export default {
     t.ok((await p.ev(`document.activeElement.textContent`)).includes("TWITTER"), "十字キーで 2 番目のリンクに行かない");
     await p.ev(`__tap(0)`);
     await t.sleep(300);
-    t.eq(await p.ev(`window.__opened`), "https://twitter.com/", "A でリンクが開かない");
+    t.eq(await p.ev(`window.__opened`), "https://x.com/", "A でリンクが開かない");
     for (const i of [12, 12, 13, 13, 14, 15, 14, 15, 1, 0]) await p.ev(`__tap(${i})`);
     await t.sleep(400);
     t.ok(await p.ev(`!document.getElementById("secret-link").hidden`), "パッドのコナミコマンドでワープゾーンが開かない");

@@ -157,8 +157,8 @@
       <a class="pixel-btn" href="https://www.youtube.com/" target="_blank" rel="noopener">
         <span class="arrow">▶</span><span class="icon" data-icon="youtube"></span>YOUTUBE<span class="sr-only">（あたらしい タブで ひらく）</span>
       </a>
-      <a class="pixel-btn" href="https://twitter.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="twitter"></span>TWITTER<span class="sr-only">（あたらしい タブで ひらく）</span>
+      <a class="pixel-btn" href="https://x.com/" target="_blank" rel="noopener">
+        <span class="arrow">▶</span><span class="icon" data-icon="twitter"></span>TWITTER<small class="link-sub">(X)</small><span class="sr-only">（あたらしい タブで ひらく）</span>
       </a>
       <a class="pixel-btn" href="https://www.instagram.com/" target="_blank" rel="noopener">
         <span class="arrow">▶</span><span class="icon" data-icon="instagram"></span>INSTAGRAM<span class="sr-only">（あたらしい タブで ひらく）</span>
@@ -176,6 +176,8 @@
         <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE<span class="sr-only">（あたらしい タブで ひらく）</span>
       </a>
     </nav>
+    <!-- カセット えらび：6 この リンクを、たなの 公式リンクから いれかえる -->
+    <button class="cassette-btn" id="cassette-btn" type="button">⇄ リンクを いれかえる</button>
 
     <footer class="footer">
       <!-- 上の段：遊ぶもの（2 つで 1 組をまんなかに） -->
@@ -234,6 +236,23 @@
     </div>
   </dialog>
 
+  <dialog class="about cassette" id="cassette" aria-labelledby="cassette-title">
+    <div class="about-top">
+      <h2 id="cassette-title">カセット えらび</h2>
+      <button class="about-close" id="cassette-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <p class="about-note">リンクは いつも 6 こ。いれかえる ばしょを えらんで、たなの カセットを おしてね。</p>
+      <!-- いまの 6 こは、たなを スクロールしても うえに みえている -->
+      <div class="cas-head">
+        <ol class="cas-slots" id="cas-slots" aria-label="いまの リンク"></ol>
+        <p class="cas-msg" id="cas-msg" aria-live="polite"></p>
+      </div>
+      <div class="cas-shelves" id="cas-shelves"></div>
+      <button class="save-btn cas-reset" id="cas-reset" type="button">いつもの 6 こに もどす</button>
+    </div>
+  </dialog>
+
   <dialog class="about settings" id="settings" aria-labelledby="settings-title">
     <div class="about-top">
       <h2 id="settings-title">せってい</h2>
@@ -279,7 +298,7 @@
       <p>いつもの 公式サイトへ、ピクセの いる 空間を とおって ワープする 踏み台リンク集です。ピクセルアートと チップチューンで できています。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき、えらんだ リンクの カセット、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -327,6 +346,7 @@
   <section class="certificate" id="certificate" aria-hidden="true"></section>
 
   <script src="config.js"></script>
+  <script src="cassette.js"></script>
   <script src="script.js"></script>
   <script src="game.js"></script>
   <script src="extras.js"></script>
@@ -356,6 +376,7 @@
   <script src="guide.js"></script>
   <script src="save.js"></script>
   <script src="warp.js"></script>
+  <script src="cassette-ui.js"></script>
   <script src="about.js"></script>
 </body>
 </html>

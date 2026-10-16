@@ -105,6 +105,9 @@ const ICONS = {
   ],
 };
 
+// カセット えらびの アイコン（cassette.js）も いっしょに
+for (const c of CASSETTES.LIST) if (c.icon) ICONS[c.id] = c.icon;
+
 // 多色スプライト用のパレット（o=輪郭 w=白 p=ピンク c=シアン y=金）
 // CSS変数で塗るので、配色モードが変わるとスプライトの色もいっしょに変わる
 const PALETTE = {

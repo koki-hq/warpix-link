@@ -107,6 +107,7 @@ const achievements = (() => {
     { id: "factory", name: "せいさくしょ けんがく", desc: "WARPIX製作所の だよりを ひらいた", hint: "いちばん したの ほうに、こうじょうへの とびらが……" },
     { id: "spell", name: "ふっかつの じゅもん", desc: "ふっかつの じゅもんを つくった", hint: "このページについての なかに、まほうの ことばが……" },
     { id: "warp-buddy", name: "いっしょに ワープ", desc: "ワープあなから もどってきた ピクセに「ただいま」を いわれた", hint: "リンクを おして、また もどってくると……" },
+    { id: "cassette", name: "カセット こうかん", desc: "リンクの カセットを いれかえた", hint: "リンクの したに、いれかえる ボタンが……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
@@ -543,12 +544,14 @@ function mothership() {
   };
   let lastIcon = null;
   document.querySelectorAll(".pixel-btn").forEach((btn) => {
-    const icon = btn.querySelector("[data-icon]")?.dataset.icon;
     const show = () => {
+      // カセットを いれかえると なかみが かわるので、そのつど よむ
+      const icon = btn.querySelector("[data-icon]")?.dataset.icon;
+      const comment = COMMENTS[icon] ?? CASSETTES.byId(icon)?.hi;
       // あいさつより先に紹介しない（スタート直後にカーソルの下へボタンが出てきたときなど）
-      if (icon === lastIcon || !npc.ready() || !COMMENTS[icon]) return;
+      if (icon === lastIcon || !npc.ready() || !comment) return;
       lastIcon = icon;
-      npc.say([COMMENTS[icon]]);
+      npc.say([comment]);
     };
     btn.addEventListener("mouseenter", show);
     btn.addEventListener("focus", show);

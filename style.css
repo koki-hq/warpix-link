@@ -147,7 +147,8 @@ body::after {
   padding: 14px 20px;
   background: var(--btn);
   color: var(--fg);
-  font-family: "Press Start 2P", monospace;
+  /* ニコニコ動画・スタディサプリなど、にほんごの なまえは ドットの ゴシックで */
+  font-family: "Press Start 2P", "DotGothic16", monospace;
   font-size: 14px;
   text-decoration: none;
   box-shadow:
@@ -1317,7 +1318,8 @@ body.party {
 .coin-slot.bumped,
 .omikuji-btn.bumped,
 .about-btn.bumped,
-.settings-btn.bumped {
+.settings-btn.bumped,
+.cassette-btn.bumped {
   transform: translateY(var(--px));
 }
 
@@ -4079,4 +4081,170 @@ a,
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* =====================================================================
+   カセット えらび（v1.28）：6 この リンクを、たなの 公式リンクから いれかえる
+   ===================================================================== */
+/* TWITTER の よこの (X)：ちいさく。ボタンの しゅやくは TWITTER の まま（いろは アイコンと おなじ シアンで、よめる こさに） */
+.link-sub {
+  margin-left: -4px;
+  font-size: 9px;
+  color: var(--accent-2);
+}
+
+/* リンクの した：めだたない いれかえ ボタン */
+.cassette-btn {
+  align-self: center;
+  margin-top: 16px;
+  padding: 4px 10px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.cassette-btn:hover,
+.cassette-btn:focus-visible {
+  color: var(--accent-2);
+  outline: 2px solid var(--accent-2);
+}
+
+.cas-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cas-slot,
+.cas-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 4px 8px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", "DotGothic16", monospace;
+  font-size: 7px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* カセットの かたち：うえの はしに みぞ */
+.cas-slot::before,
+.cas-item::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: var(--shadow);
+}
+
+.cas-slot .icon,
+.cas-item .icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  color: var(--accent-2);
+}
+
+.cas-slot .icon svg,
+.cas-item .icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cas-name {
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.cas-no,
+.cas-at {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  color: var(--muted);
+}
+
+.cas-slot[aria-pressed="true"] {
+  outline: 2px solid var(--accent);
+  background: var(--btn-hover);
+}
+
+.cas-slot[aria-pressed="true"] .cas-no {
+  color: var(--accent);
+}
+
+.cas-slot:hover,
+.cas-slot:focus-visible,
+.cas-item:hover,
+.cas-item:focus-visible {
+  background: var(--btn-hover);
+  outline: 2px solid var(--accent-2);
+}
+
+/* もう スロットに はいっている カセット */
+.cas-item.in {
+  background: none;
+  outline: 2px dashed var(--btn);
+}
+
+.cas-item.in .cas-at {
+  color: var(--gold);
+}
+
+.cas-msg {
+  min-height: 1.5em;
+  margin: 8px 0 0;
+  color: var(--accent-2);
+  font-size: 14px;
+}
+
+.cas-shelf h3 {
+  margin: 14px 0 8px;
+}
+
+.cas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+
+.cas-reset {
+  margin-top: 16px;
+}
+
+.pixel-btn.jp-label {
+  font-size: 17px;
+}
+
+.cas-name.jp {
+  font-family: "DotGothic16", monospace;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.cas-head {
+  position: sticky;
+  top: -8px;
+  z-index: 1;
+  margin: 0 -20px;
+  padding: 0 20px 4px;
+  background: var(--bg);
+  border-bottom: 2px solid var(--btn);
 }

@@ -17,17 +17,17 @@ const favorite = (() => {
   const saveStats = () => store.set(STATS_KEY, stats);
   const saveAsk = () => !preview && store.set(ASK_KEY, ask);
 
-  // ページにあるリンク（ひみつのワープゾーンは数えない）
-  const links = [...document.querySelectorAll(".pixel-btn:not(.secret)")].map((el) => ({
+  // ページにあるリンク（ひみつのワープゾーンは数えない）。カセットを いれかえると かわるので、そのつど よむ
+  const linksNow = () => [...document.querySelectorAll(".pixel-btn:not(.secret)")].map((el) => ({
     el,
     icon: el.querySelector("[data-icon]")?.dataset.icon,
     label: linkLabel(el),
   }));
-  const byIcon = (icon) => links.find((l) => l.icon === icon);
+  const byIcon = (icon) => linksNow().find((l) => l.icon === icon);
 
   // いちばん多く行っていて、MIN_FAV 回以上なら「お気に入り」（同点ならなし）
   function fav() {
-    const ranked = links.map((l) => ({ ...l, n: stats[l.icon]?.n ?? 0 })).sort((a, b) => b.n - a.n);
+    const ranked = linksNow().map((l) => ({ ...l, n: stats[l.icon]?.n ?? 0 })).sort((a, b) => b.n - a.n);
     if (ranked[0].n < MIN_FAV || ranked[0].n === ranked[1]?.n) return null;
     return ranked[0];
   }
@@ -93,6 +93,7 @@ const favorite = (() => {
     }
 
     // 2. しばらく行っていないリンクを思い出させる（前に 2 回以上行っていて、14 日以上あいた）
+    const links = linksNow();
     const forgotten = links.find((l) => stats[l.icon]?.n >= 2 && stats[l.icon].last && dayDiff(stats[l.icon].last, ymd) >= 14);
     if (forgotten) {
       ask.last = ymd;
@@ -121,6 +122,7 @@ const favorite = (() => {
     setTimeout(wait, 1500);
   });
 
+  on("cassette", renderMark);
   renderMark();
   return { fav, stats };
 })();

@@ -171,8 +171,9 @@ async function connectPage(browser, wsUrl) {
   };
   page.size = (width, height, mobile = false) => page.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile });
   // 本物のマウス操作でクリック（要素のまんなか）
+  // ほんものの マウスで おす。画面の そとに あれば、人と おなじように スクロールして から
   page.click = async (selector) => {
-    const p = await page.ev(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+    const p = await page.ev(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el) return null; el.scrollIntoView({ block: "nearest" }); const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
     if (!p) throw new Error(`${selector} が見つかりません`);
     for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) {
       await page.send("Input.dispatchMouseEvent", { type, x: p.x, y: p.y, button: "left", clickCount: 1 });
