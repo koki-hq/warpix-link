@@ -151,6 +151,22 @@ const cassetteUi = (() => {
   document.getElementById("cas-gift-no").addEventListener("click", () => gift.close());
   document.getElementById("cas-gift-close").addEventListener("click", () => gift.close());
 
+  // ---------- すうじキーで ワープ（v1.35）：1〜6 で その ばんごうの リンクへ ----------
+  // もじを うっている とき・まどや かさねた がめん（おみくじ・スタッフロール など）が ひらいている とき・
+  // ミニゲームや ぼうけんの とちゅうは はんのう しない。シンプルモードでも つかえる
+  document.addEventListener("keydown", (e) => {
+    if (!/^[1-6]$/.test(e.key) || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    if (e.target.closest?.("input, textarea, select, [contenteditable]")) return;
+    if (!simple.on && (!document.body.classList.contains("booted") || playing())) return;
+    if (document.querySelector('dialog[open], [role="dialog"]:not(dialog):not([hidden])')) return;
+    const a = document.querySelectorAll(".links .pixel-btn:not(.secret)")[Number(e.key) - 1];
+    if (!a) return;
+    e.preventDefault();
+    a.focus({ preventScroll: true });
+    a.click(); // ふつうに おしたのと おなじ（あたらしい タブで ひらいて、ピクセも とびこむ）
+    achievements.unlock("keywarp");
+  });
+
   document.getElementById("cassette-btn").addEventListener("click", open);
   document.getElementById("cassette-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());

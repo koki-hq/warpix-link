@@ -151,7 +151,7 @@ URL に `?date=2026-10-31` のように付けると、その日のページに�
 ## テストと健康診断
 
 ```sh
-node tests/run.mjs            # ブラウザでぜんぶの遊びを試す（135 件。4 つ同時に ながして 約 6 分）
+node tests/run.mjs            # ブラウザでぜんぶの遊びを試す（138 件。4 つ同時に ながして 約 7 分。かかった じかんは tests/.output/timings.json に おぼえる）
 node tests/run.mjs sky        # 名前に sky を含むテストだけ
 node tests/run.mjs --jobs 1   # 1 つずつ順番に（約 16 分。いちばん安定）
 node tools/health.mjs    # 重さ・スマホでの速さ・待機中の CPU・アクセシビリティ

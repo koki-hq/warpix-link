@@ -87,7 +87,7 @@ const warpDive = (() => {
     if (reduceMotion || simple.on || trip || npc.isAway() || adventure.isActive()) return false;
     const sprite = document.getElementById("npc");
     if (!sprite.getClientRects().length) return false;
-    const label = btn.textContent.replace(/（.*）/, "").replace("▶", "").trim();
+    const label = linkLabel(btn); // ボタンの もじだけ（▶・(X)・すうじキーの ばんごう・よみあげ用の もじは のぞく）
     const from = center(sprite);
     const hole = openHole(btn, icon);
     const to = center(hole);

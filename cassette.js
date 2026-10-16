@@ -128,13 +128,14 @@ const CASSETTES = (() => {
   const jp = (c) => /[^\x00-\x7f]/.test(c.label);
 
   // リンクの なかみを かきかえる（▶・アイコン・なまえ・(X)・よみあげ用の「あたらしい タブ」）
-  function fill(a, c) {
+  // i は 0〜5。パソコンでは みぎはしに すうじキーの ばんごう（v1.35）
+  function fill(a, c, i) {
     a.href = c.url;
     a.classList.toggle("jp-label", jp(c));
-    a.innerHTML = `<span class="arrow">▶</span><span class="icon" data-icon="${c.id}"></span>${c.label}${c.sub ? `<small class="link-sub">${c.sub}</small>` : ""}<span class="sr-only">（あたらしい タブで ひらく）</span>`;
+    a.innerHTML = `<span class="arrow">▶</span><span class="icon" data-icon="${c.id}"></span>${c.label}${c.sub ? `<small class="link-sub">${c.sub}</small>` : ""}<span class="link-key" aria-hidden="true">${i + 1}</span><span class="sr-only">（あたらしい タブで ひらく）</span>`;
   }
   const slots = () => [...document.querySelectorAll(".links .pixel-btn:not(.secret)")];
-  slots().forEach((a, i) => fill(a, byId(current[i])));
+  slots().forEach((a, i) => fill(a, byId(current[i]), i));
 
   return {
     SHELVES,
@@ -180,7 +181,7 @@ const CASSETTES = (() => {
     },
     // ページの リンクを いまの カセットに そろえる（アイコンを かくのは よびだした がわ）
     apply() {
-      slots().forEach((a, i) => fill(a, byId(current[i])));
+      slots().forEach((a, i) => fill(a, byId(current[i]), i));
     },
   };
 })();

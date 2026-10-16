@@ -4555,3 +4555,29 @@ a,
     position: sticky;
   }
 }
+
+/* =====================================================================
+   すうじキーで ワープ（v1.35）：パソコンでは リンクの みぎはしに ばんごう
+   ===================================================================== */
+.link-key {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link-key {
+    display: block;
+    margin-left: auto;
+    padding: 2px 5px;
+    font-size: 9px;
+    color: var(--accent-2);
+    outline: 2px solid var(--accent-2);
+    outline-offset: -2px;
+  }
+}
+
+/* よく いく せかいの ハートは みぎはしに かさねて おくので、ばんごうは その ひだりに */
+@media (hover: hover) and (pointer: fine) {
+  .pixel-btn:has(.fav-mark) .link-key {
+    margin-right: 28px;
+  }
+}

@@ -1,10 +1,10 @@
 // テストをまとめて流す。
-//   node tests/run.mjs              … ぜんぶ（4 つ同時に）
+//   node tests/run.mjs              … ぜんぶ（4 つ同時に。6 つ・8 つは はやいが メモリを たくさん つかう（--jobs 6）。まえに かかった じかんが ながい ものから、あいた ワーカーが じゅんに）
 //   node tests/run.mjs adventure    … 名前に adventure を含むテストだけ
 //   node tests/run.mjs --jobs 1     … 1 つずつ順番に（いちばん安定。時間は かかる）
 // Chrome の場所は自動でさがす（見つからないときは環境変数 CHROME_PATH）。
 // スクリーンショットは tests/.output/ に保存される。
-import { readdirSync, statSync } from "node:fs";
+import { readdirSync, statSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
@@ -84,46 +84,59 @@ if (jobs === 1 || only) {
   process.exit(failed ? 1 : 0);
 } else {
   // ---------- 何人かで わけて ながす ----------
-  // 大きい ファイル（だいたい 長く かかる）から じゅんに、いちばん すいている ワーカーへ
-  const size = (f) => statSync(join(dir, f)).size;
-  const queues = Array.from({ length: jobs }, () => ({ files: [], load: 0 }));
-  for (const f of [...files].sort((a, b) => size(b) - size(a))) {
-    const q = queues.reduce((a, b) => (b.load < a.load ? b : a));
-    q.files.push(f);
-    q.load += size(f);
-  }
+  // まえに かかった じかん（tests/.output/timings.json）が ながい ファイルから じゅんに ならべ、
+  // あいた ワーカーが つぎの ファイルを とりにいく（はやく おわった ワーカーが あそばない）。
+  // じかんを しらない あたらしい ファイルは、大きさで みつもって さきに
+  const TIMINGS = join(harness.OUT, "timings.json");
+  let past = {};
+  try { past = JSON.parse(readFileSync(TIMINGS, "utf8")); } catch {}
+  const cost = (f) => past[f] ?? statSync(join(dir, f)).size / 100;
+  const queue = [...files].sort((a, b) => cost(b) - cost(a));
   const results = new Map();
+  const took = {};
   const me = fileURLToPath(import.meta.url);
   console.log(`${files.length} ファイルを ${jobs} つ 同時に ながします…`);
+  // 1 つの ファイルを、ワーカー i（Chrome の ポートを ずらして ぶつからないように）で ながす
+  const runOne = (file, i) =>
+    new Promise((resolve) => {
+      const t0 = Date.now();
+      const child = spawn(process.execPath, [me, "--files", file], {
+        env: { ...process.env, WARPIX_PORT_BASE: String(9400 + i * 150) },
+        stdio: ["ignore", "pipe", "inherit"],
+      });
+      let buf = "";
+      child.stdout.on("data", (d) => {
+        buf += d;
+        let n;
+        while ((n = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, n);
+          buf = buf.slice(n + 1);
+          try {
+            const r = JSON.parse(line);
+            results.set(r.file, r);
+            console.log(r.lines.join("\n"));
+          } catch {
+            if (line.trim()) console.log(line);
+          }
+        }
+      });
+      child.on("close", () => {
+        took[file] = Math.round((Date.now() - t0) / 100) / 10;
+        resolve();
+      });
+    });
   await Promise.all(
-    queues.map(
-      (q, i) =>
-        new Promise((resolve) => {
-          // ワーカーごとに Chrome の ポートを ずらして、ぶつからないように する
-          const child = spawn(process.execPath, [me, "--files", q.files.join(",")], {
-            env: { ...process.env, WARPIX_PORT_BASE: String(9400 + i * 150) },
-            stdio: ["ignore", "pipe", "inherit"],
-          });
-          let buf = "";
-          child.stdout.on("data", (d) => {
-            buf += d;
-            let n;
-            while ((n = buf.indexOf("\n")) >= 0) {
-              const line = buf.slice(0, n);
-              buf = buf.slice(n + 1);
-              try {
-                const r = JSON.parse(line);
-                results.set(r.file, r);
-                console.log(r.lines.join("\n"));
-              } catch {
-                if (line.trim()) console.log(line);
-              }
-            }
-          });
-          child.on("close", resolve);
-        })
-    )
+    Array.from({ length: jobs }, async (_, i) => {
+      while (queue.length) await runOne(queue.shift(), i);
+    })
   );
+  // つぎの ために、かかった じかんを おぼえておく（ぜんぶ ながした ときだけ）
+  if (!filter) {
+    try {
+      mkdirSync(harness.OUT, { recursive: true });
+      writeFileSync(TIMINGS, JSON.stringify({ ...past, ...took }, null, 1));
+    } catch {}
+  }
   let passed = 0;
   let failed = 0;
   const missing = files.filter((f) => !results.has(f));
