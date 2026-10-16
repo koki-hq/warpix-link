@@ -4053,3 +4053,30 @@ a,
 .room-dark .wardrobe {
   margin-top: 0;
 }
+
+/* =====================================================================
+   ワープ ダイブ（v1.27）：リンクを おすと ピクセが ワープあなに とびこむ
+   ===================================================================== */
+.warp-hole,
+.warp-pixe {
+  position: fixed;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.warp-hole {
+  width: 56px;
+  height: 24px;
+}
+
+.warp-pixe {
+  width: 64px;
+  height: 64px;
+}
+
+.warp-hole svg,
+.warp-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
