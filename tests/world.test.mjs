@@ -55,7 +55,7 @@ export default {
     await p.type("party"); // パーティーハットがもらえる
     await t.sleep(500);
     const favBefore = await p.ev(`document.getElementById("favicon").href`);
-    await p.ev(`document.getElementById("trophy-btn").click()`);
+    await p.ev(`document.getElementById("room-btn").click(); document.getElementById("tab-hat").click()`);
     await t.sleep(300);
     await p.ev(`[...document.querySelectorAll(".wardrobe-item")].find((b) => b.title === "パーティーハット").click()`);
     await t.sleep(3500);

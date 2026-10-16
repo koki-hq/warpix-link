@@ -74,7 +74,7 @@ export default {
     for (let i = 0; i < 3; i++) await p.ev(`document.getElementById("npc").click()`);
     await t.sleep(3500);
     t.eq(await p.ev(`window.__rpc`), [["bump", { counter: "pokes", n: 3 }]], "つついた回数をまとめて送る");
-    await p.ev(`document.getElementById("trophy-btn").click()`);
+    await p.ev(`room.open("trophy")`);
     await t.sleep(400);
     t.eq(await p.ev(`document.querySelector('[data-counter="pokes"]').textContent`), "12,345", "世界の記録");
     await p.ev(`window.__presence = { [window.__me]: [{ hat: null }] }; __fire("presence:sync")`);

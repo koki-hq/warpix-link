@@ -99,7 +99,7 @@ const wardrobe = (() => {
     if (id) achievements.unlock("fashion");
   }
 
-  document.getElementById("trophy-btn").addEventListener("click", render);
+  on("notebook-tab", ({ which }) => which === "hat" && render());
   apply();
   return {
     render,

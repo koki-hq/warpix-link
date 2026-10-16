@@ -242,7 +242,7 @@ const rusuban = (() => {
       if (!npc.ready() || playing() || npc.isAway() || document.querySelector("dialog[open]")) return setTimeout(wait, 1500);
       npc.ask(`おかえり！ ${fmtAway(mins)}\nまってたよ。おみやげ あるんだ。`, ["みる！", "あとで"]).then((i) => {
         if (i === 0) show(gift);
-        else if (i === 1) npc.say(["じゃあ ノートに はさんでおくね。\n（DIARY の「おみやげ」から みられるよ）"]);
+        else if (i === 1) npc.say(["じゃあ おへやに かざっておくね。\n（ROOM の「おみやげ」から みられるよ）"]);
       });
     };
     setTimeout(wait, 1500);
@@ -250,7 +250,7 @@ const rusuban = (() => {
 
   addEventListener("keydown", (e) => e.key === "Escape" && dialog?.open && dialog.close());
 
-  // ノートの「おみやげ」から、いちばん新しい おみやげを もう一度 見られる
+  // おへやの「おみやげ」から、いちばん新しい おみやげを もう一度 見られる
   const giftBtn = document.getElementById("gift-btn");
   let lastGift = store.get(KEY, null);
   giftBtn.hidden = !lastGift;

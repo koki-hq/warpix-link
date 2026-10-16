@@ -25,7 +25,7 @@ export default {
     const s = await state();
     t.eq(s.days.length, 1, "会えた日数");
     t.eq(s.diary[0]?.text, "はじめて あった。ドキドキした。", "日記の 1 行目");
-    await p.ev(`document.getElementById("diary-btn").click()`);
+    await p.ev(`document.getElementById("room-btn").click()`);
     await t.sleep(300);
     t.ok((await p.ev(`document.getElementById("diary-body").innerText`)).includes("ちびピクセ"), "日記の上の欄");
     t.ok(await p.ev(`achievements.has("diary")`), "実績「ピクセの にっき」がない");

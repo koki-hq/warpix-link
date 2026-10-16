@@ -65,20 +65,20 @@ export default {
     const p = await b.firstPage();
     await p.goto(server.url);
     await p.boot();
-    await p.click("#diary-btn");
+    await p.click("#room-btn");
     await t.sleep(300);
     await p.ev(`document.getElementById("tab-diary").focus()`);
-    const state = () => p.ev(`[document.activeElement.id, ["diary-body", "zukan-body", "stamp-body"].find((id) => !document.getElementById(id).hidden), [...document.querySelectorAll(".diary-tab")].map((t) => t.tabIndex).join()]`);
+    const state = () => p.ev(`[document.activeElement.id, ["diary-body", "zukan-body", "stamp-body", "trophy-body", "hat-body"].find((id) => !document.getElementById(id).hidden), [...document.querySelectorAll(".diary-tab")].map((t) => t.tabIndex).join()]`);
     await p.key("ArrowRight");
-    t.eq(await state(), ["tab-zukan", "zukan-body", "-1,0,-1"], "→ で ずかん");
+    t.eq(await state(), ["tab-zukan", "zukan-body", "-1,0,-1,-1,-1"], "→ で ずかん");
     await p.key("End");
-    t.eq(await state(), ["tab-stamp", "stamp-body", "-1,-1,0"], "End で スタンプ");
+    t.eq(await state(), ["tab-hat", "hat-body", "-1,-1,-1,-1,0"], "End で ぼうし");
     await p.key("ArrowRight");
-    t.eq(await state(), ["tab-diary", "diary-body", "0,-1,-1"], "はしから → で さいしょへ");
+    t.eq(await state(), ["tab-diary", "diary-body", "0,-1,-1,-1,-1"], "はしから → で さいしょへ");
     await p.key("ArrowLeft");
-    t.eq(await state(), ["tab-stamp", "stamp-body", "-1,-1,0"], "← で さいごへ");
+    t.eq(await state(), ["tab-hat", "hat-body", "-1,-1,-1,-1,0"], "← で さいごへ");
     await p.key("Home");
-    t.eq(await state(), ["tab-diary", "diary-body", "0,-1,-1"], "Home で にっき");
+    t.eq(await state(), ["tab-diary", "diary-body", "0,-1,-1,-1,-1"], "Home で にっき");
     t.noErrors(p);
     await server.close();
   },

@@ -54,10 +54,11 @@
     <span>SCORE <b data-score>000000</b></span>
     <span>HI <b data-hiscore>000000</b></span>
     <span class="online-count" id="online-count" hidden>ONLINE <b>1</b></span>
-    <button class="trophy-btn" id="trophy-btn" type="button" aria-label="じっせきを見る">
-      <span class="trophy-mini" data-trophy></span><span id="trophy-count">0/0</span>
+    <!-- ピクセの おへや：にっき・ずかん・スタンプ・じっせき・ぼうしが ぜんぶ ここに -->
+    <button class="room-btn" id="room-btn" type="button">
+      <span class="room-icon" aria-hidden="true"></span><span class="sr-only">ピクセの おへや</span><span aria-hidden="true">ROOM</span>
+      <span class="room-trophy"><span class="trophy-mini" data-trophy></span><span class="sr-only">じっせき</span><span id="trophy-count">0/0</span></span><span class="diary-new" hidden>NEW</span>
     </button>
-    <button class="diary-btn" id="diary-btn" type="button" aria-label="ピクセの にっきを よむ"></button>
   </aside>
 
   <div class="toast" id="toast" role="status" hidden>
@@ -68,58 +69,59 @@
     </span>
   </div>
 
-  <dialog class="trophies" id="trophies" aria-labelledby="trophies-title">
-    <div class="trophies-head">
-      <h2 id="trophies-title">ACHIEVEMENTS <span id="trophies-count"></span></h2>
-      <button class="trophies-close" id="trophies-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <ul class="trophy-list" id="trophy-list"></ul>
-    <section class="world-record" id="world-record" aria-labelledby="world-record-title" hidden>
-      <h3 id="world-record-title">WORLD RECORD</h3>
-      <dl>
-        <dt>せかいで ピクセが つつかれた かいすう</dt><dd data-counter="pokes">-</dd>
-        <dt>せかいで ワープした かいすう</dt><dd data-counter="warps">-</dd>
-        <dt>せかいで おとされた UFO</dt><dd data-counter="ufos">-</dd>
-        <dt>つぎの みんなで マザーシップ</dt><dd id="raid-next">--:--</dd>
-      </dl>
-    </section>
-    <section class="wardrobe" aria-labelledby="wardrobe-title">
-      <div class="wardrobe-head">
-        <h3 id="wardrobe-title">WARDROBE</h3>
-        <button type="button" class="atelier-btn" id="atelier-btn">＋ ぼうしを つくる</button>
-      </div>
-      <div class="wardrobe-list" id="wardrobe-list"></div>
-    </section>
-    <form class="cheat-form" id="cheat-form" autocomplete="off">
-      <label for="cheat-input">CHEAT CODE</label>
-      <div class="cheat-row">
-        <input id="cheat-input" type="text" inputmode="latin" autocapitalize="off" spellcheck="false" maxlength="12" placeholder="????">
-        <button type="submit">ENTER</button>
-      </div>
-      <p class="cheat-msg" id="cheat-msg" aria-live="polite"></p>
-    </form>
-  </dialog>
-
   <dialog class="diary" id="diary" aria-labelledby="diary-title">
     <div class="diary-top">
-      <h2 id="diary-title">ピクセの ノート</h2>
-      <button class="diary-close" id="diary-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="diary-bar">
-      <div class="diary-tabs" role="tablist" aria-label="ノートの ページ">
-        <button type="button" class="diary-tab" role="tab" id="tab-diary" data-tab="diary" aria-selected="true" aria-controls="diary-body">にっき</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-zukan" data-tab="zukan" aria-selected="false" aria-controls="zukan-body">ずかん</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-stamp" data-tab="stamp" aria-selected="false" aria-controls="stamp-body">スタンプ</button>
-      </div>
+      <h2 id="diary-title">ピクセの おへや</h2>
       <span class="diary-tools">
         <button type="button" class="postcard-btn" id="gift-btn" hidden>おみやげ</button>
         <button type="button" class="postcard-btn" id="postcard-btn">ポストカード</button>
       </span>
+      <button class="diary-close" id="diary-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="diary-bar">
+      <div class="diary-tabs" role="tablist" aria-label="おへやの ページ">
+        <button type="button" class="diary-tab" role="tab" id="tab-diary" data-tab="diary" aria-selected="true" aria-controls="diary-body">にっき</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-zukan" data-tab="zukan" aria-selected="false" aria-controls="zukan-body">ずかん</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-stamp" data-tab="stamp" aria-selected="false" aria-controls="stamp-body">スタンプ</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-trophy" data-tab="trophy" aria-selected="false" aria-controls="trophy-body">じっせき</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-hat" data-tab="hat" aria-selected="false" aria-controls="hat-body">ぼうし</button>
+      </div>
     </div>
     <!-- ページは長くてスクロールするので、キーボードでも選んでスクロールできるよう tabindex をつける -->
     <div class="diary-body" id="diary-body" role="tabpanel" aria-labelledby="tab-diary" tabindex="0"></div>
     <div class="diary-body zukan-body" id="zukan-body" role="tabpanel" aria-labelledby="tab-zukan" tabindex="0" hidden></div>
     <div class="diary-body stamp-body" id="stamp-body" role="tabpanel" aria-labelledby="tab-stamp" tabindex="0" hidden></div>
+    <!-- じっせきと ぼうしは、ゲームの がめんみたいな こい いろの ページ -->
+    <div class="diary-body room-dark trophy-body" id="trophy-body" role="tabpanel" aria-labelledby="tab-trophy" tabindex="0" hidden>
+      <h3 class="room-sub">ACHIEVEMENTS <span id="trophies-count"></span></h3>
+      <ul class="trophy-list" id="trophy-list"></ul>
+      <section class="world-record" id="world-record" aria-labelledby="world-record-title" hidden>
+        <h3 id="world-record-title">WORLD RECORD</h3>
+        <dl>
+          <dt>せかいで ピクセが つつかれた かいすう</dt><dd data-counter="pokes">-</dd>
+          <dt>せかいで ワープした かいすう</dt><dd data-counter="warps">-</dd>
+          <dt>せかいで おとされた UFO</dt><dd data-counter="ufos">-</dd>
+          <dt>つぎの みんなで マザーシップ</dt><dd id="raid-next">--:--</dd>
+        </dl>
+      </section>
+      <form class="cheat-form" id="cheat-form" autocomplete="off">
+        <label for="cheat-input">CHEAT CODE</label>
+        <div class="cheat-row">
+          <input id="cheat-input" type="text" inputmode="latin" autocapitalize="off" spellcheck="false" maxlength="12" placeholder="????">
+          <button type="submit">ENTER</button>
+        </div>
+        <p class="cheat-msg" id="cheat-msg" aria-live="polite"></p>
+      </form>
+    </div>
+    <div class="diary-body room-dark hat-body" id="hat-body" role="tabpanel" aria-labelledby="tab-hat" tabindex="0" hidden>
+      <section class="wardrobe" aria-labelledby="wardrobe-title">
+        <div class="wardrobe-head">
+          <h3 id="wardrobe-title" class="room-sub">WARDROBE</h3>
+          <button type="button" class="atelier-btn" id="atelier-btn">＋ ぼうしを つくる</button>
+        </div>
+        <div class="wardrobe-list" id="wardrobe-list"></div>
+      </section>
+    </div>
   </dialog>
 
   <div class="game" id="game" role="dialog" aria-label="ミニゲーム PIXE INVADERS" hidden>

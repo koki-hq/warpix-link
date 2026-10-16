@@ -104,10 +104,10 @@ async function axe(p, label, setup = "") {
   await axe(p, "PRESS START 画面");
   await p.boot();
   await axe(p, "いつもの画面（起動後）");
-  await axe(p, "実績画面", `document.getElementById("trophy-btn").click()`);
-  await p.ev(`document.getElementById("trophies").close()`);
-  await axe(p, "日記", `document.getElementById("diary-btn").click()`);
-  await axe(p, "ずかん", `document.querySelector('.diary-tab[data-tab="zukan"]').click()`);
+  await axe(p, "ピクセの おへや（にっき）", `document.getElementById("room-btn").click()`);
+  await axe(p, "おへや：ずかん", `document.querySelector('.diary-tab[data-tab="zukan"]').click()`);
+  await axe(p, "おへや：じっせき", `document.getElementById("tab-trophy").click()`);
+  await axe(p, "おへや：ぼうし", `document.getElementById("tab-hat").click()`);
   await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "このページについて", `document.getElementById("about-btn").click()`);
   await p.ev(`document.getElementById("about").close()`);
@@ -115,7 +115,7 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("settings").close()`);
   await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); document.getElementById("compose-btn").click()`);
   await p.ev(`document.getElementById("composer").close()`);
-  await axe(p, "スタンプカード", `document.getElementById("diary-btn").click(); document.getElementById("tab-stamp").click()`);
+  await axe(p, "スタンプカード", `document.getElementById("room-btn").click(); document.getElementById("tab-stamp").click()`);
   await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "ぼうし アトリエ", `atelier.open()`);
   await p.ev(`document.querySelector("dialog.atelier").close()`);

@@ -193,7 +193,7 @@ const online = (() => {
   });
   on("warp", () => pending.warps++);
   on("ufo-down", () => pending.ufos++);
-  document.getElementById("trophy-btn").addEventListener("click", loadCounters);
+  on("notebook-tab", ({ which }) => which === "trophy" && loadCounters());
   addEventListener("pagehide", () => {
     flush();
     channel?.untrack();

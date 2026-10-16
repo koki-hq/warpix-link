@@ -79,8 +79,8 @@ const pocket = (() => {
   const focusables = () => {
     const choices = [...document.querySelectorAll(".dialog-choices button")];
     if (choices.length) return choices;
-    const dialog = document.querySelector("#trophies[open]");
-    if (dialog) return [...dialog.querySelectorAll("button:not(:disabled), input")];
+    const dialog = document.querySelector("#diary[open]");
+    if (dialog) return [...dialog.querySelectorAll("button:not(:disabled), input")].filter((el) => el.getClientRects().length);
     return [...document.querySelectorAll(".pixel-btn:not([hidden]), .coin-slot")];
   };
 
@@ -145,12 +145,13 @@ const pocket = (() => {
     }
     if (name === "b") {
       key("keydown", "b");
-      document.querySelector("#trophies[open]")?.close();
+      document.querySelector("#diary[open]")?.close();
     }
     if (name === "start") {
-      const dialog = document.getElementById("trophies");
+      // START で おへやの「じっせき」を ひらく・とじる
+      const dialog = document.getElementById("diary");
       if (dialog.open) dialog.close();
-      else document.getElementById("trophy-btn").click();
+      else room.open("trophy");
     }
   }
 

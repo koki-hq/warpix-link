@@ -194,12 +194,12 @@ const atelier = (() => {
   });
 
   dialog.querySelector(".atelier-close").addEventListener("click", () => dialog.close());
-  // とじたら、ひらく まえに いた ところ（じっせきの まどは とじているので トロフィー）へ フォーカスを もどす
-  dialog.addEventListener("close", () => document.getElementById("trophy-btn").focus({ preventScroll: true }));
+  // とじたら、ひらく まえに いた ところ（おへやは とじているので ROOM ボタン）へ フォーカスを もどす
+  dialog.addEventListener("close", () => document.getElementById("room-btn").focus({ preventScroll: true }));
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
 
   function open() {
-    document.getElementById("trophies").close?.();
+    document.getElementById("diary").close?.();
     cells = (saved?.rows ?? Array(H).fill(".".repeat(W))).map((r) => [...r]);
     nameEl.value = saved?.name ?? "じぶんの ぼうし";
     focus = [0, 0];
@@ -210,7 +210,7 @@ const atelier = (() => {
     cellBtn(0, 0).focus();
   }
 
-  // WARDROBE に「つくる」ボタン
+  // おへやの「ぼうし」の WARDROBE に「つくる」ボタン
   const makeBtn = document.getElementById("atelier-btn");
   makeBtn.addEventListener("click", open);
   cheats.add("atelier", open);

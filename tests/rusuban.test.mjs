@@ -47,7 +47,7 @@ export default {
     t.ok(await p.ev(`!document.querySelector("dialog.rusuban")`), "Esc で とじない");
     t.eq(await p.ev(`composer.encode(composer.current())`), song, "とじたら いつもの BGM に もどらない");
     // ノートの「おみやげ」から もう一度
-    await p.click("#diary-btn");
+    await p.click("#room-btn");
     await t.sleep(300);
     t.ok(await p.ev(`!document.getElementById("gift-btn").hidden`), "ノートに おみやげボタンが ない");
     await p.click("#gift-btn");

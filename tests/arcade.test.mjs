@@ -145,14 +145,14 @@ export default {
     await p.goto(server.url);
     await p.boot();
     t.eq(await p.ev(`pixe()`), "🕹 HELLO, HACKER.", "pixe() の返事");
-    await p.ev(`document.getElementById("trophy-btn").click()`);
+    await p.ev(`document.getElementById("room-btn").click(); document.getElementById("tab-trophy").click()`);
     await t.sleep(300);
-    t.ok(await p.ev(`document.getElementById("trophies").open`), "実績画面が開かない");
+    t.ok(await p.ev(`document.getElementById("diary").open && !document.getElementById("trophy-body").hidden`), "おへやの じっせきが開かない");
     t.ok(await p.ev(`document.querySelectorAll("#trophy-list li").length === achievements.total`), "実績の行数が合わない");
     await p.ev(`document.getElementById("cheat-input").value = "nope"; document.getElementById("cheat-form").requestSubmit()`);
     t.ok((await p.ev(`document.getElementById("cheat-msg").textContent`)).includes("ない"), "ないコマンドのメッセージ");
     await p.ev(`document.getElementById("cheat-input").value = "warp"; document.getElementById("cheat-form").requestSubmit()`);
-    t.ok(await p.ev(`!document.getElementById("trophies").open`), "コマンドを打つと実績画面が閉じる");
+    t.ok(await p.ev(`!document.getElementById("diary").open`), "コマンドを打つと実績画面が閉じる");
     t.noErrors(p);
     await server.close();
   },

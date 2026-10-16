@@ -94,14 +94,14 @@ const achievements = (() => {
     { id: "daikichi", name: "だいきち！", desc: "おみくじで だいきちを ひいた", hint: "まいにち ひいていれば いつか……" },
     { id: "ghost", name: "ゴーストに かて", desc: "ぼうけんで きょうの ゴーストに かった", hint: "おなじ ひに 2かい ぼうけんすると……" },
     { id: "zukan-half", name: "ずかん はんぶん", desc: "ピクセの ずかんを はんぶん うめた", hint: "いろいろな ものに であうと……" },
-    { id: "postcard", name: "ポストカード", desc: "ピクセの ポストカードを つくった", hint: "ノートの うえの ほうに……" },
+    { id: "postcard", name: "ポストカード", desc: "ピクセの ポストカードを つくった", hint: "ピクセの おへやの うえの ほうに……" },
     { id: "boss", name: "ボス げきは", desc: "ミニゲームの ボスを たおした", hint: "ミニゲームで 3ウェーブめまで いくと……" },
     { id: "ranker", name: "なまえを きざめ", desc: "ミニゲームの ランキングに なまえを のこした", hint: "ミニゲームで いい てんを とると……" },
     { id: "rusuban", name: "おるすばん ありがとう", desc: "るすばんした ピクセから おみやげを もらった", hint: "しばらく るすに して、もどってくると……" },
     { id: "streak7", name: "まいにち スタンプ", desc: "7にち つづけて ピクセに あった", hint: "スタンプカードを うめていくと……" },
     { id: "dreamer", name: "ゆめみる ピクセ", desc: "ピクセの ゆめを のぞいた", hint: "ピクセが ねむったら、あたまの うえを……" },
     { id: "rest", name: "きゅうけい じょうず", desc: "ピクセと いっしょに めを やすめた", hint: "ながく あそんでいると、ピクセが……" },
-    { id: "designer", name: "ぼうし デザイナー", desc: "じぶんで かいた ぼうしを ピクセに かぶせた", hint: "WARDROBE の となりで……" },
+    { id: "designer", name: "ぼうし デザイナー", desc: "じぶんで かいた ぼうしを ピクセに かぶせた", hint: "おへやの「ぼうし」の となりで……" },
     { id: "voice", name: "ピクセの こえ", desc: "ピクセの こえを きいた", hint: "せっていの「おと」に……" },
     { id: "hideseek", name: "かくれんぼ めいじん", desc: "かくれている ちびピクセを 3びき ぜんぶ みつけた", hint: "ページの すみっこを よーく みると……" },
     { id: "factory", name: "せいさくしょ けんがく", desc: "WARPIX製作所の だよりを ひらいた", hint: "いちばん したの ほうに、こうじょうへの とびらが……" },
@@ -110,9 +110,8 @@ const achievements = (() => {
   ];
 
   const unlocked = new Set(store.get("warpix-achievements", []));
-  const btn = document.getElementById("trophy-btn");
+  const btn = document.getElementById("room-btn"); // じっせきは ピクセの おへやの「じっせき」タブに ある
   const countEl = document.getElementById("trophy-count");
-  const dialog = document.getElementById("trophies");
   const listEl = document.getElementById("trophy-list");
   const titleCountEl = document.getElementById("trophies-count");
   const toastEl = document.getElementById("toast");
@@ -190,16 +189,6 @@ const achievements = (() => {
     if (!locked.length) return null;
     return locked[Math.floor(Math.random() * locked.length)].hint;
   }
-
-  btn.addEventListener("click", () => {
-    render();
-    dialog.showModal();
-  });
-  document.getElementById("trophies-close").addEventListener("click", () => dialog.close());
-  // 外側（背景）をクリックしても閉じる
-  dialog.addEventListener("click", (e) => {
-    if (e.target === dialog) dialog.close();
-  });
 
   render();
   return {
@@ -309,7 +298,7 @@ const cheats = (() => {
     if (!word) return;
     if (COMMANDS[word]) {
       msg.textContent = "OK!";
-      document.getElementById("trophies").close();
+      document.getElementById("diary").close();
       run(word);
     } else {
       msg.textContent = "そんな コマンドは ない みたい……";

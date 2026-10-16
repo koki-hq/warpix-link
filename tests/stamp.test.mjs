@@ -16,7 +16,7 @@ export default {
     // ?date= で 2026-10-16（金）に きめて見る（記録は かわらない）
     await p.goto(server.url + "?date=2026-10-16");
     await p.boot();
-    await p.click("#diary-btn");
+    await p.click("#room-btn");
     await t.sleep(300);
     await p.ev(`document.getElementById("tab-stamp").click()`);
     await t.sleep(200);
@@ -58,7 +58,7 @@ export default {
     await p.ev(`localStorage.clear()`);
     await p.goto(server.url);
     await p.boot();
-    await p.click("#diary-btn");
+    await p.click("#room-btn");
     await t.sleep(300);
     await p.ev(`document.getElementById("tab-stamp").click()`);
     t.eq(await p.ev(`document.querySelectorAll(".stamp-cal td.visited").length`), 1, "きょうの スタンプ");

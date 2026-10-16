@@ -191,7 +191,7 @@ const grow = (() => {
   // ---------- 日記を読む ----------
   const dialog = document.getElementById("diary");
   const body = document.getElementById("diary-body");
-  const btn = document.getElementById("diary-btn");
+  const btn = document.getElementById("room-btn");
   let readCount = store.get("warpix-diary-read", 0);
 
   function renderBadge() {
@@ -237,25 +237,25 @@ const grow = (() => {
     achievements.unlock("diary");
   }
 
-  btn.innerHTML = `<span class="diary-icon">${pixelSvg([
-    "............",
-    ".pppp..pppp.",
-    "pwwwwppwwwwp",
-    "pwoowppwoowp",
-    "pwwwwppwwwwp",
-    "pwoowppwoowp",
-    "pwwwwppwwwwp",
-    "pwoowppwoowp",
-    "pwwwwppwwwwp",
-    ".pppp..pppp.",
-    "............",
-    "............",
-  ])}</span>DIARY<span class="diary-new" hidden>NEW</span>`;
+  // ROOM ボタンの おうち（えんとつ つき）
+  btn.querySelector(".room-icon").innerHTML = pixelSvg([
+    "........pp..",
+    ".....pp.pp..",
+    "....pwwppp..",
+    "...pwwwwpp..",
+    "..pwwwwwwp..",
+    ".pwwwwwwwwp.",
+    "pppppppppppp",
+    ".pwwwwwwwwp.",
+    ".pwccwwoowp.",
+    ".pwccwwoowp.",
+    ".pwwwwwoowp.",
+    ".pppppppppp.",
+  ]);
   badge = btn.querySelector(".diary-new");
-  btn.addEventListener("click", open);
   document.getElementById("diary-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
-  cheats.add("diary", open);
+  cheats.add("diary", () => room.open("diary"));
   renderBadge();
 
   return { state, open, write, stageName: () => STAGES[state.stage].name };

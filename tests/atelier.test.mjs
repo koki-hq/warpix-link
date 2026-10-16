@@ -1,6 +1,6 @@
 // ぼうし アトリエ：じぶんで ドット絵の ぼうしを かいて、ピクセに かぶせる
 async function openAtelier(t, p) {
-  await p.ev(`document.getElementById("trophy-btn").click()`);
+  await p.ev(`document.getElementById("room-btn").click(); document.getElementById("tab-hat").click()`);
   await t.sleep(300);
   await p.ev(`document.getElementById("atelier-btn").click()`);
   await t.sleep(300);
@@ -21,7 +21,7 @@ export default {
     await p.goto(server.url);
     await p.boot();
     await openAtelier(t, p);
-    t.ok(await p.ev(`document.querySelector("dialog.atelier").open && !document.getElementById("trophies").open`), "アトリエが ひらかない");
+    t.ok(await p.ev(`document.querySelector("dialog.atelier").open && !document.getElementById("diary").open`), "アトリエが ひらかない");
     t.eq(await p.ev(`document.querySelectorAll(".atelier-cell").length`), 96, "マスの かず");
     t.ok(await p.ev(`document.activeElement.matches('.atelier-cell[data-x="0"][data-y="0"]')`), "さいしょの マスに フォーカス");
     // からっぽでは かぶれない
@@ -57,7 +57,7 @@ export default {
     t.eq(await p.ev(`wardrobe.currentId()`), "mine", "かぶっていない");
     t.eq(await p.ev(`dress(NPC.idle)[4].slice(4, 7)`), "yyy", "ピクセの え に ぼうしが ない");
     t.ok(await p.ev(`achievements.has("designer") && achievements.has("fashion")`), "実績");
-    t.ok(await p.ev(`document.activeElement.id === "trophy-btn"`), "とじたあと フォーカスが もどらない");
+    t.ok(await p.ev(`document.activeElement.id === "room-btn"`), "とじたあと フォーカスが もどらない");
     // ひらきなおしても かぶっている。WARDROBE にも ある
     await p.goto(server.url);
     await p.boot({ readIntro: false });

@@ -11,7 +11,7 @@ export default {
     await p.ev(`localStorage.clear()`);
     await p.goto(server.url);
     await p.boot();
-    await p.click("#diary-btn");
+    await p.click("#room-btn");
     await t.sleep(300);
     await p.click("#postcard-btn");
     await t.sleep(1500);

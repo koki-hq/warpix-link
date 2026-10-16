@@ -180,11 +180,17 @@ const zukan = (() => {
       next.focus();
     })
   );
-  document.getElementById("diary-btn").addEventListener("click", () => show("diary"));
-  cheats.add("zukan", () => {
-    grow.open();
-    show("zukan");
-  });
+  document.getElementById("room-btn").addEventListener("click", () => room.open("diary"));
+  cheats.add("zukan", () => room.open("zukan"));
 
   return { mark, counts, show, state };
 })();
+
+// ---------- ピクセの おへや：にっき・ずかん・スタンプ・じっせき・ぼうしを ひとつの まどに ----------
+const room = {
+  // tab："diary" | "zukan" | "stamp" | "trophy" | "hat"
+  open(tab = "diary") {
+    if (!document.getElementById("diary").open) grow.open();
+    zukan.show(tab);
+  },
+};

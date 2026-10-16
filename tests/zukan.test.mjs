@@ -33,7 +33,7 @@ export default {
     await p.ev(`mothership(); document.getElementById("omikuji-btn").click()`);
     await t.sleep(1500);
     await p.ev(`document.querySelector(".omikuji-close")?.click()`);
-    await p.click("#diary-btn");
+    await p.click("#room-btn");
     await t.sleep(300);
     t.ok(await p.ev(`!document.getElementById("diary-body").hidden && document.getElementById("zukan-body").hidden`), "最初は日記のページ");
     await p.ev(`document.querySelector('.diary-tab[data-tab="zukan"]').click()`);
@@ -48,7 +48,7 @@ export default {
     await p.shot("zukan.png");
     // もう一度ひらくと、日記のページから
     await p.ev(`document.getElementById("diary").close()`);
-    await p.ev(`document.getElementById("diary-btn").click()`);
+    await p.ev(`document.getElementById("room-btn").click()`);
     t.ok(await p.ev(`!document.getElementById("diary-body").hidden`), "ひらき直すと日記のページに戻らない");
     t.noErrors(p);
     await server.close();

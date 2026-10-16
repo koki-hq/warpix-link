@@ -29,7 +29,7 @@ export default {
     await t.closeAll();
     r = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify(pixe(1))})`);
     const tip = tipOf(r.intro);
-    t.ok(tip?.includes("DIARY"), `2 日目のヒント: ${tip}`);
+    t.ok(tip?.includes("ROOM"), `2 日目のヒント: ${tip}`);
     t.eq(r.intro.filter((l) => l.startsWith("きょうの ヒント")).length, 1, "ヒントは 1 つだけ");
     t.noErrors(r.p);
     await r.server.close();

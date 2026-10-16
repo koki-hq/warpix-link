@@ -12,12 +12,12 @@ const guide = (() => {
   // [名前, ヒント, もう使ったか]
   const has = (id) => achievements.has(id);
   const TIPS = [
-    ["diary", "ひだりうえの DIARY に、ぼくの にっきと\nずかんが あるよ。のぞいてみて。", () => has("diary")],
+    ["diary", "ひだりうえの ROOM が ぼくの おへや。\nにっきや ずかんが あるよ。のぞいてみて。", () => has("diary")],
     ["compose", "みぎうえの ♪ で、ぼくと いっしょに\nさっきょく できるよ。", () => has("composer") || store.get("warpix-song", null)],
     ["omikuji", "いちばん したの「おみくじ」、\nまいにち 1かい ひけるよ。", () => has("omikuji")],
     ["invaders", "INSERT COIN を おすと、\nミニゲームで あそべるよ。", () => has("invader") || has("invader-pro")],
-    ["wardrobe", "じっせきの まどの WARDROBE で、\nぼくの ぼうしを かえられるよ。", () => has("fashion")],
-    ["postcard", "ノートの「ポストカード」で、\nぼくの えはがきが つくれるよ。", () => has("postcard")],
+    ["wardrobe", "おへやの「ぼうし」で、\nぼくの ぼうしを かえられるよ。", () => has("fashion")],
+    ["postcard", "おへやの「ポストカード」で、\nぼくの えはがきが つくれるよ。", () => has("postcard")],
     ["settings", "おとが おおきかったら、いちばん したの\n「せってい」で かえられるよ。", () => store.get("warpix-settings", null)],
     ["adventure", "ぼくが「そとに でてみたい」って きいたら、\n「いいよ」って いってみて。", () => has("adventure")],
     ["hide", "まいにち 3びきの ちびピクセが、\nページの どこかに かくれてるよ。", () => has("hideseek")],
