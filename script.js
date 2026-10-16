@@ -1031,8 +1031,25 @@ const simple = (() => {
   });
 
   let started = false;
+  // ほかの ファイルは あとから よむ（defer）。defer の ファイルが うごいている あいだは readyState が
+  // もう "interactive" なので、DOMContentLoaded（defer が ぜんぶ おわった あいず）を じぶんで おぼえておく
+  let allLoaded = false;
+  document.addEventListener("DOMContentLoaded", () => (allLoaded = true), { once: true });
+  let waiting = false;
   function start(e) {
     if (started || simple.on) return;
+    // そろう まえに おされたら、そろってから はじめる
+    // （そうしないと、あとの ファイルが「はじまった」合図を うけとりそこねる）
+    if (!allLoaded) {
+      if (waiting) return;
+      waiting = true;
+      startBtn.textContent = "NOW LOADING...";
+      document.addEventListener("DOMContentLoaded", () => {
+        startBtn.textContent = "PRESS START";
+        start(e);
+      }, { once: true });
+      return;
+    }
     started = true;
     pointerMoved = false;
     startX = e?.clientX ?? null;

@@ -345,39 +345,41 @@
   <!-- 印刷したときだけ出る認定証（中身は world.js が印刷直前に書く） -->
   <section class="certificate" id="certificate" aria-hidden="true"></section>
 
+  <!-- config.js と cassette.js だけは すぐ よむ（えらんだ リンクを、かく まえに さしかえる ため）。
+       ほかは defer：HTML を さいごまで よんでから じゅんばんに うごく。そのぶん はやく PRESS START や リンクが みえる（v1.31） -->
   <script src="config.js"></script>
   <script src="cassette.js"></script>
-  <script src="script.js"></script>
-  <script src="game.js"></script>
-  <script src="extras.js"></script>
-  <script src="adventure.js"></script>
-  <script src="world.js"></script>
-  <script src="season.js"></script>
-  <script src="device.js"></script>
-  <script src="weather.js"></script>
-  <script src="online.js"></script>
-  <script src="raid.js"></script>
-  <script src="grow.js"></script>
-  <script src="favorite.js"></script>
-  <script src="compose.js"></script>
-  <script src="omikuji.js"></script>
-  <script src="zukan.js"></script>
-  <script src="stamp.js"></script>
-  <script src="atelier.js"></script>
-  <script src="dream.js"></script>
-  <script src="sky.js"></script>
-  <script src="settings.js"></script>
-  <script src="postcard.js"></script>
-  <script src="rusuban.js"></script>
-  <script src="hide.js"></script>
-  <script src="voice.js"></script>
-  <script src="rest.js"></script>
-  <script src="news.js"></script>
-  <script src="guide.js"></script>
-  <script src="save.js"></script>
-  <script src="warp.js"></script>
-  <script src="cassette-ui.js"></script>
-  <script src="tonight.js"></script>
-  <script src="about.js"></script>
+  <script src="script.js" defer></script>
+  <script src="game.js" defer></script>
+  <script src="extras.js" defer></script>
+  <script src="adventure.js" defer></script>
+  <script src="world.js" defer></script>
+  <script src="season.js" defer></script>
+  <script src="device.js" defer></script>
+  <script src="weather.js" defer></script>
+  <script src="online.js" defer></script>
+  <script src="raid.js" defer></script>
+  <script src="grow.js" defer></script>
+  <script src="favorite.js" defer></script>
+  <script src="compose.js" defer></script>
+  <script src="omikuji.js" defer></script>
+  <script src="zukan.js" defer></script>
+  <script src="stamp.js" defer></script>
+  <script src="atelier.js" defer></script>
+  <script src="dream.js" defer></script>
+  <script src="sky.js" defer></script>
+  <script src="settings.js" defer></script>
+  <script src="postcard.js" defer></script>
+  <script src="rusuban.js" defer></script>
+  <script src="hide.js" defer></script>
+  <script src="voice.js" defer></script>
+  <script src="rest.js" defer></script>
+  <script src="news.js" defer></script>
+  <script src="guide.js" defer></script>
+  <script src="save.js" defer></script>
+  <script src="warp.js" defer></script>
+  <script src="cassette-ui.js" defer></script>
+  <script src="tonight.js" defer></script>
+  <script src="about.js" defer></script>
 </body>
 </html>
