@@ -236,6 +236,12 @@
     </div>
   </dialog>
 
+  <!-- ピクセの てがみ（v1.33）。なかみは letter.js が かく -->
+  <dialog class="letter" id="letter" aria-label="ピクセからの てがみ">
+    <button class="letter-close" id="letter-close" type="button" aria-label="閉じる">✕</button>
+    <div class="letter-body" id="letter-body"></div>
+  </dialog>
+
   <dialog class="about cassette" id="cassette" aria-labelledby="cassette-title">
     <div class="about-top">
       <h2 id="cassette-title">カセット えらび</h2>
@@ -318,7 +324,7 @@
       <p>いつもの 公式サイトへ、ピクセの いる 空間を とおって ワープする 踏み台リンク集です。ピクセルアートと チップチューンで できています。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき、きょうの ワープや つついた かず（こんやの 3ぎょうの ため）、えらんだ リンクの カセット、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき、きょうと さいきん 2 しゅうかんの ワープや つついた かず（こんやの 3ぎょうと てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセット、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -400,6 +406,7 @@
   <script src="warp.js" defer></script>
   <script src="cassette-ui.js" defer></script>
   <script src="tonight.js" defer></script>
+  <script src="letter.js" defer></script>
   <script src="about.js" defer></script>
 </body>
 </html>

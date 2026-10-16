@@ -119,6 +119,10 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "ぼうし アトリエ", `atelier.open()`);
   await p.ev(`document.querySelector("dialog.atelier").close()`);
+  await axe(p, "カセット えらび", `document.getElementById("cassette-btn").click()`);
+  await p.ev(`document.getElementById("cassette").close()`);
+  await axe(p, "ピクセの てがみ", `room.open("diary"); letter.letters().unshift({ week: "2026-10-18", from: "2026-10-12", lines: letter.write().lines, unread: false }); letter.read("2026-10-18")`);
+  await p.ev(`document.getElementById("letter").close(); document.getElementById("diary").close()`);
   await axe(p, "きゅうけい（とおくを みる）", `rest.lookFar()`);
   await p.ev(`document.querySelector(".rest-stop").click()`);
   await axe(p, "おるすばん レポート", `rusuban.show({ seed: 1, mins: 300, code: composer.make(), date: "2026-10-16" })`);

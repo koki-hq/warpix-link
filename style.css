@@ -4407,3 +4407,143 @@ a,
   background: var(--btn);
   color: var(--fg);
 }
+
+/* =====================================================================
+   ピクセの てがみ（v1.33）：にちようの よるに とどく
+   ===================================================================== */
+.letters {
+  margin: 4px 0 12px;
+}
+
+.letters h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: normal;
+  color: var(--accent);
+}
+
+.letter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.letter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 2px solid #c9bfa8;
+  background: #fffaf0;
+  color: #1a1433;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.letter-btn:hover,
+.letter-btn:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.letter-btn.unread {
+  border-color: var(--accent);
+}
+
+.letter-env {
+  display: block;
+  width: 20px;
+  height: 14px;
+  --fg: #fffaf0;
+}
+
+.letter-env svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: 1px solid #8a7f68;
+}
+
+.letter-new {
+  padding: 0 3px;
+  background: var(--accent);
+  color: #fffaf0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 7px;
+}
+
+/* びんせん：クリーム いろに あわい けいせん */
+.letter {
+  width: min(400px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 28px 24px 20px;
+  border: 0;
+  background: repeating-linear-gradient(#fffaf0 0 31px, #e6dcc6 31px 32px);
+  color: #1a1433;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--gold),
+    0 var(--px) 0 0 var(--gold),
+    calc(var(--px) * -1) 0 0 0 var(--gold),
+    var(--px) 0 0 0 var(--gold),
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
+}
+
+.letter::backdrop {
+  background: rgba(15, 11, 30, 0.75);
+}
+
+.letter-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 8px;
+  border: 0;
+  background: #1a1433;
+  color: #fffaf0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.letter-body {
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  line-height: 32px;
+}
+
+.letter-body p {
+  margin: 0;
+}
+
+.letter-date {
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  color: #8a7f68;
+}
+
+.letter-to {
+  color: var(--accent);
+}
+
+.letter-from {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px !important;
+}
+
+.letter-pixe {
+  display: block;
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+  background: #1a1433;
+}
+
+.letter-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

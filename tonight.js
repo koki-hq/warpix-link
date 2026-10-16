@@ -24,8 +24,18 @@ const tonight = (() => {
   };
 
   const fresh = () => ({ date: ymd, warps: {}, pokes: 0, ufos: 0, ach: [] });
+  // ひづけが かわったら、まえの ひの かずは warpix-days に のこす（さいきん 14 にちぶん。ピクセの てがみ v1.33 が よむ）
+  const DAYS = "warpix-days";
   let tally = store.get(KEY, null);
-  if (!tally || tally.date !== ymd) tally = fresh();
+  if (!tally || tally.date !== ymd) {
+    if (tally?.date && tally.date < ymd && !preview) {
+      const days = store.get(DAYS, []).filter((d) => d.date !== tally.date);
+      days.push(tally);
+      days.sort((a, b) => (a.date < b.date ? -1 : 1));
+      store.set(DAYS, days.slice(-14));
+    }
+    tally = fresh();
+  }
   const save = () => !preview && store.set(KEY, tally);
 
   on("link", ({ icon }) => {
@@ -116,5 +126,7 @@ const tonight = (() => {
   mark();
   setInterval(mark, 60000); // よるに なったら でる（1 ぷんに いちど みるだけ）
 
-  return { lines, isNight, tally: () => tally };
+  // きょうまでの かず（のこした ひ ＋ きょう）
+  const history = () => [...store.get(DAYS, []).filter((d) => d.date < ymd), tally];
+  return { lines, isNight, hourNow, ymd, tally: () => tally, history };
 })();
