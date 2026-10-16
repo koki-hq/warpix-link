@@ -92,6 +92,24 @@ const CASSETTES = (() => {
       hi: "WIKIPEDIAは なんでも じてん。\nしらべものなら ここ。", back: "ただいま！ しらべものを してたら\nリンクを たどって とおくまで いった。",
       icon: ["............", "#....##....#", "#....##....#", "#....##....#", "#...#..#...#", "#...#..#...#", ".#..#..#..#.", ".#.#....#.#.", ".#.#....#.#.", "..#......#..", "..#......#..", "............"] },
   ];
+  // ワープの おみやげ（v1.30）：たなごとに、ワープあなの いろと、ピクセが もって かえる もの（8×8）
+  // hole の c は あなの そとがわ、p は うちがわ。ひみつの ワープゾーン（key）は "secret"
+  const GIFTS = {
+    default: { name: "ほしの かけら", hole: { c: "var(--accent-2)", p: "var(--accent)" },
+      rows: ["...c....", "..ccc...", ".ccwcc..", "ccwwwcc.", ".ccwcc..", "..ccc...", "...c....", "........"] },
+    sns: { name: "ハートの ふきだし", hole: { c: "var(--accent)", p: "var(--fg)" },
+      rows: ["wwwwwwww", "wppwppww", "wpppppww", "wwpppwww", "wwwpwwww", "wwwwwwww", ".ww.....", "w......."] },
+    music: { name: "おんぷ", hole: { c: "var(--gold)", p: "var(--accent)" },
+      rows: ["...yyyyy", "...y...y", "...y...y", "...y...y", ".yyy.yyy", "yyyy.yyy", "yyy..yy.", "........"] },
+    play: { name: "ゲームの コイン", hole: { c: "var(--accent-2)", p: "var(--gold)" },
+      rows: ["..yyyy..", ".yyyyyy.", "yyyywyyy", "yyyywyyy", "yyyywyyy", "yyyywyyy", ".yyyyyy.", "..yyyy.."] },
+    make: { name: "えふで", hole: { c: "var(--pumpkin)", p: "var(--gold)" },
+      rows: [".......k", "......kk", ".....kk.", "....kk..", "...pk...", "..ppp...", ".ppp....", "pp......"] },
+    study: { name: "えんぴつ", hole: { c: "var(--accent-2)", p: "var(--fg)" },
+      rows: ["......pp", ".....ppp", "....yyp.", "...yyy..", "..yyy...", ".wyy....", "wwy.....", "o......."] },
+    secret: { name: "ひみつの かぎ", hole: { c: "var(--gold)", p: "var(--gold)" },
+      rows: ["........", ".yyy....", "y...y...", "y...yyyy", "y...y.y.", ".yyy..y.", "........", "........"] },
+  };
   const DEFAULT = LIST.filter((c) => c.shelf === "default").map((c) => c.id);
   const KEY = "warpix-cassette";
   const byId = (id) => LIST.find((c) => c.id === id);
@@ -121,6 +139,9 @@ const CASSETTES = (() => {
   return {
     SHELVES,
     LIST,
+    GIFTS,
+    // その リンクの たな（おみやげと あなの いろを きめる）
+    shelfOf: (icon) => (icon === "key" ? "secret" : byId(icon)?.shelf ?? "default"),
     DEFAULT,
     byId,
     jp,

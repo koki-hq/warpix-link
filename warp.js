@@ -30,13 +30,14 @@ const warpDive = (() => {
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   };
 
-  // リンクの みぎはしに あなを あける
-  function openHole(btn) {
+  // リンクの みぎはしに あなを あける。いろは その リンクの たなで かわる（v1.30）
+  function openHole(btn, icon) {
     const r = btn.getBoundingClientRect();
     const hole = document.createElement("div");
     hole.className = "warp-hole";
+    hole.dataset.shelf = CASSETTES.shelfOf(icon);
     hole.setAttribute("aria-hidden", "true");
-    hole.innerHTML = pixelSvg(HOLE);
+    hole.innerHTML = pixelSvg(HOLE, { ...PALETTE, ...CASSETTES.GIFTS[hole.dataset.shelf].hole });
     hole.style.left = `${r.right - 72}px`;
     hole.style.top = `${r.top + r.height / 2 - 12}px`;
     document.body.append(hole);
@@ -50,11 +51,12 @@ const warpDive = (() => {
   }
 
   // ピクセの コピーを とばす（from → to、からだの まんなか どうし）
-  function fly(from, to, frames, duration) {
+  // gift を わたすと、あたまの うえに のせて とぶ
+  function fly(from, to, frames, duration, gift = null) {
     const el = document.createElement("div");
     el.className = "warp-pixe";
     el.setAttribute("aria-hidden", "true");
-    el.innerHTML = pixelSvg(dress(NPC.idle));
+    el.innerHTML = pixelSvg(dress(NPC.idle)) + (gift ? `<span class="warp-gift-on">${pixelSvg(gift.rows)}</span>` : "");
     el.style.left = `${from.x - 32}px`;
     el.style.top = `${from.y - 32}px`;
     document.body.append(el);
@@ -64,13 +66,30 @@ const warpDive = (() => {
     return a.finished.then(() => el.remove(), () => el.remove());
   }
 
+  // はこに もどったら、おみやげを あたまの うえに ふわっと うかべて けす（1.8 びょう）
+  function showGift(gift, sprite) {
+    const c = center(sprite);
+    const el = document.createElement("div");
+    el.className = "warp-gift";
+    el.setAttribute("aria-hidden", "true");
+    el.innerHTML = pixelSvg(gift.rows);
+    el.style.left = `${c.x - 12}px`;
+    el.style.top = `${c.y - 64}px`;
+    document.body.append(el);
+    const a = el.animate(
+      [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-8px)", opacity: 1, offset: 0.7 }, { transform: "translateY(-16px)", opacity: 0 }],
+      { duration: 1800, easing: "steps(9)", fill: "forwards" }
+    );
+    a.finished.then(() => el.remove(), () => el.remove());
+  }
+
   function dive(btn, icon) {
     if (reduceMotion || simple.on || trip || npc.isAway() || adventure.isActive()) return false;
     const sprite = document.getElementById("npc");
     if (!sprite.getClientRects().length) return false;
     const label = btn.textContent.replace(/（.*）/, "").replace("▶", "").trim();
     const from = center(sprite);
-    const hole = openHole(btn);
+    const hole = openHole(btn, icon);
     const to = center(hole);
     npc.setAway(true);
     sound.sfx.powerup();
@@ -94,18 +113,25 @@ const warpDive = (() => {
     const sprite = document.getElementById("npc");
     // リンクが みえなく なっていたら（スクロールや まどの かわり）、あなは ださずに はこへ もどる
     const visible = t.btn.isConnected && t.btn.getClientRects().length && sprite.getClientRects().length;
+    // ほんとうに むこうへ いって きた ときだけ、おみやげを もって かえる
+    const shelf = CASSETTES.shelfOf(t.icon);
+    const gift = t.left ? CASSETTES.GIFTS[shelf] : null;
     if (visible) {
-      const hole = openHole(t.btn);
+      const hole = openHole(t.btn, t.icon);
       sound.sfx.coin();
       await fly(center(hole), center(sprite), (dx, dy) => [
         { transform: "translate(0, 0) scale(0) rotate(-540deg)" },
         { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 90}px) scale(0.9) rotate(-180deg)` },
         { transform: `translate(${dx}px, ${dy}px) scale(1) rotate(0deg)` },
-      ], 650);
+      ], 650, gift);
       closeHole(hole);
     }
     npc.setAway(false);
     trip = null;
+    if (gift) {
+      showGift(gift, sprite);
+      zukan.mark("souvenir", shelf);
+    }
     if (t.left) {
       // ほんとうに むこうへ いって もどってきた ときだけ、おみやげばなし
       const lines = LINES[t.icon] ?? (CASSETTES.byId(t.icon)?.back ? [CASSETTES.byId(t.icon).back] : OTHER);

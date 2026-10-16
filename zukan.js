@@ -64,6 +64,11 @@ const zukan = (() => {
       ],
     },
     {
+      // ワープから もどった ピクセが もって かえる もの（v1.30、warp.js が しるす）
+      id: "souvenir", title: "ワープの おみやげ",
+      entries: Object.entries(CASSETTES.GIFTS).map(([id, g]) => ({ id, name: g.name, draw: () => pixelSvg(g.rows) })),
+    },
+    {
       id: "moon", title: "みた つき",
       entries: [
         ["しんげつ", 0.02], ["みかづき", 0.12], ["じょうげんの つき", 0.25], ["まんげつ ちょっと まえ", 0.4],
