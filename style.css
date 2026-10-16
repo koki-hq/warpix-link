@@ -4374,3 +4374,36 @@ a,
   width: 100%;
   height: 100%;
 }
+
+/* =====================================================================
+   カセットの おすそわけ（v1.32）
+   ===================================================================== */
+.cas-tools {
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.cas-tools .cas-reset {
+  margin-top: 0;
+}
+
+.cas-share-msg {
+  min-height: 1.5em;
+  margin: 8px 0 0;
+  color: var(--accent-2);
+  overflow-wrap: anywhere;
+}
+
+.cas-slot.static {
+  cursor: default;
+}
+
+.cas-slot.static:hover {
+  background: var(--btn);
+  outline: none;
+}
+
+.cas-gift-no {
+  background: var(--btn);
+  color: var(--fg);
+}

@@ -89,6 +89,68 @@ const cassetteUi = (() => {
     slotsEl.querySelector(".cas-slot").focus();
   }
 
+  // ---------- おすそわけ（v1.32）：いまの 6 こを URL で ともだちに わたす ----------
+  const shareMsg = document.getElementById("cas-share-msg");
+  document.getElementById("cas-share").addEventListener("click", async () => {
+    const url = CASSETTES.shareUrl();
+    const done = (text) => {
+      shareMsg.textContent = text;
+      achievements.unlock("cassette-share");
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "WARPIX-LINK の カセット", text: "ぼくの 6 この リンク、つかってみて！", url });
+        return done("おすそわけ したよ。");
+      }
+    } catch (err) {
+      if (err?.name === "AbortError") return; // じぶんで やめた
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      done("URL を コピーしたよ。ともだちに おくってね。");
+    } catch {
+      done(`この URL を おくってね：${url}`);
+    }
+  });
+
+  // ---------- とどいた カセット（?cassette=…） ----------
+  const gift = document.getElementById("cas-gift");
+  const params = new URLSearchParams(location.search);
+  const incoming = CASSETTES.parse(params.get("cassette"));
+  if (params.has("cassette")) {
+    // ひらきなおしても なんども きかない ように、URL から けしておく
+    params.delete("cassette");
+    const q = params.toString();
+    history.replaceState(null, "", `${location.pathname}${q ? `?${q}` : ""}${location.hash}`);
+  }
+  function offer() {
+    document.getElementById("cas-gift-slots").innerHTML = incoming
+      .map((id, i) => {
+        const c = CASSETTES.byId(id);
+        return `<li><span class="cas-slot static" aria-label="${i + 1}ばんめ：${c.label}"><span class="cas-no" aria-hidden="true">${i + 1}</span><span class="icon" data-icon="${id}"></span><span class="cas-name${CASSETTES.jp(c) ? " jp" : ""}" aria-hidden="true">${c.label}</span></span></li>`;
+      })
+      .join("");
+    drawIcons(gift);
+    gift.showModal();
+    document.getElementById("cas-gift-yes").focus();
+  }
+  if (incoming && incoming.join() !== CASSETTES.current().join()) {
+    // いつもの ページは PRESS START の あと、シンプルモードは すぐ
+    if (simple.on) offer();
+    else on("boot", () => setTimeout(offer, 600));
+  }
+  document.getElementById("cas-gift-yes").addEventListener("click", () => {
+    CASSETTES.set(incoming);
+    applyToPage();
+    sound.sfx.coin();
+    emit("cassette", { gift: true });
+    achievements.unlock("cassette-share");
+    grow.write("cassette-gift", "ともだちの カセットを いれた。");
+    gift.close();
+  });
+  document.getElementById("cas-gift-no").addEventListener("click", () => gift.close());
+  document.getElementById("cas-gift-close").addEventListener("click", () => gift.close());
+
   document.getElementById("cassette-btn").addEventListener("click", open);
   document.getElementById("cassette-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());

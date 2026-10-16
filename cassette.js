@@ -159,6 +159,19 @@ const CASSETTES = (() => {
       current = [...DEFAULT];
       this.save();
     },
+    // おすそわけ（v1.32）：「youtube,tiktok,…」を よむ。6 こで、ぜんぶ しっていて、かぶりが ない ときだけ
+    parse(text) {
+      const ids = String(text ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+      return ids.length === 6 && new Set(ids).size === 6 && ids.every(byId) ? ids : null;
+    },
+    set(ids) {
+      current = [...ids];
+      this.save();
+    },
+    // いまの 6 こが はいった このページの URL
+    shareUrl() {
+      return `${location.origin}${location.pathname}?cassette=${current.join(",")}`;
+    },
     save() {
       try {
         if (current.join() === DEFAULT.join()) localStorage.removeItem(KEY);

@@ -249,7 +249,27 @@
         <p class="cas-msg" id="cas-msg" aria-live="polite"></p>
       </div>
       <div class="cas-shelves" id="cas-shelves"></div>
-      <button class="save-btn cas-reset" id="cas-reset" type="button">いつもの 6 こに もどす</button>
+      <div class="save-row cas-tools">
+        <button class="save-btn" id="cas-share" type="button">この 6 こを おすそわけ</button>
+        <button class="save-btn cas-reset" id="cas-reset" type="button">いつもの 6 こに もどす</button>
+      </div>
+      <p class="cas-share-msg" id="cas-share-msg" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <!-- ともだちから とどいた カセット（?cassette=…）。かってに いれかえず、きいてから -->
+  <dialog class="about cas-gift" id="cas-gift" aria-labelledby="cas-gift-title">
+    <div class="about-top">
+      <h2 id="cas-gift-title">カセットの おすそわけ</h2>
+      <button class="about-close" id="cas-gift-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <p>ともだちから 6 この カセットが とどいたよ。いまの リンクと いれかえる？</p>
+      <ol class="cas-slots" id="cas-gift-slots" aria-label="とどいた カセット"></ol>
+      <div class="save-row">
+        <button class="save-btn" id="cas-gift-yes" type="button">いれかえる</button>
+        <button class="save-btn cas-gift-no" id="cas-gift-no" type="button">いまの まま</button>
+      </div>
     </div>
   </dialog>
 
