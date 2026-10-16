@@ -43,7 +43,8 @@ export async function startServer({ online = false, port = 0 } = {}) {
     const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
     if (path === "/config.js" && !online) {
       res.writeHead(200, { "content-type": TYPES[".js"] });
-      return res.end("window.WARPIX_ONLINE = {};");
+      // おしらせも 本物は よまない（テストで つかう ときは、さきに window.WARPIX_NEWS を いれておく）
+      return res.end('window.WARPIX_ONLINE = {}; window.WARPIX_NEWS ??= "tests/fixtures/no-news.json";');
     }
     const file = join(ROOT, path === "/" ? "index.html" : path);
     if (!file.startsWith(ROOT) || !existsSync(file)) {

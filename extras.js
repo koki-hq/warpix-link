@@ -104,6 +104,7 @@ const achievements = (() => {
     { id: "designer", name: "ぼうし デザイナー", desc: "じぶんで かいた ぼうしを ピクセに かぶせた", hint: "WARDROBE の となりで……" },
     { id: "voice", name: "ピクセの こえ", desc: "ピクセの こえを きいた", hint: "せっていの「おと」に……" },
     { id: "hideseek", name: "かくれんぼ めいじん", desc: "かくれている ちびピクセを 3びき ぜんぶ みつけた", hint: "ページの すみっこを よーく みると……" },
+    { id: "factory", name: "せいさくしょ けんがく", desc: "WARPIX製作所の だよりを ひらいた", hint: "いちばん したの ほうに、こうじょうへの とびらが……" },
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 

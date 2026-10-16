@@ -1,0 +1,7 @@
+{
+  "news": [
+    { "id": "old", "date": "2026-01-01", "title": "むかしの おしらせ" },
+    { "id": "fresh", "date": "2026-10-18", "title": "あたらしい こうじょう できました", "url": "https://example.com/" },
+    { "id": "broken", "title": "日付が ない" }
+  ]
+}

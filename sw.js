@@ -1,6 +1,6 @@
 // ---------- サービスワーカー：オフラインでもピクセに会えるように ----------
 // 公開するたびに VERSION を上げると、新しいファイルを取り直す
-const VERSION = "warpix-v1.23.0";
+const VERSION = "warpix-v1.24.0";
 const FONT_CACHE = "warpix-fonts";
 const FILES = [
   "./",
@@ -32,6 +32,7 @@ const FILES = [
   "hide.js",
   "voice.js",
   "rest.js",
+  "news.js",
   "guide.js",
   "about.js",
   "manifest.webmanifest",
@@ -64,7 +65,8 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
 
   // 自分のファイル：キャッシュをすぐ返し、裏で新しいものに更新しておく
-  if (url.origin === location.origin) {
+  // （おなじ github.io でも、ほかの リポジトリ＝製作所だより などは ふつうに ネットへ）
+  if (url.origin === location.origin && url.pathname.startsWith(new URL(self.registration.scope).pathname)) {
     e.respondWith(
       caches.open(VERSION).then(async (cache) => {
         const hit = await cache.match(req, { ignoreSearch: true });

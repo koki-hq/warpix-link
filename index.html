@@ -187,7 +187,7 @@
         <span aria-hidden="true">・</span>
         <button class="settings-btn" id="settings-btn" type="button">せってい</button>
         <span aria-hidden="true">・</span>
-        <span class="copyright">© 2026 WARPIX</span>
+        <a class="copyright news-link" id="news-link" href="https://koki-hq.github.io/warpix/#news" target="_blank" rel="noopener">製作所だより<span class="news-new" hidden>NEW</span><span class="sr-only">（あたらしい タブで ひらく）</span></a>
       </div>
     </footer>
   </main>
@@ -272,10 +272,10 @@
       <button class="about-close" id="about-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <div class="about-body">
-      <p>ピクセルアートとチップチューンの、ちいさな リンク集です。ピクセが まってます。</p>
+      <p>いつもの 公式サイトへ、ピクセの いる 空間を とおって ワープする 踏み台リンク集です。ピクセルアートと チップチューンで できています。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -283,6 +283,7 @@
         <li><b>てんき</b>：ピクセが きいて「いいよ」と こたえたときだけ。ばしょを <strong>やく 10km に まるめて</strong>、てんきの サービス（Open-Meteo）に おくります。</li>
         <li><b>おなじ そら・レイド・せかいの きろく</b>：<strong>ランダムな ばんごうと ぼうしの しゅるい</strong>、つついた かいすうなどを Supabase に おくります。なまえや ばしょ、スコアは おくりません。</li>
         <li><b>もじ</b>：ドットの もじは Google Fonts から よみこみます。</li>
+        <li><b>製作所だより</b>：WARPIX製作所の ホームページ（おなじ GitHub Pages）から、おしらせの ファイルを よみこみます。なにも おくりません。</li>
         <li><b>ピクセの こえ</b>：せっていで オンに した ときだけ、ブラウザの よみあげを つかいます。その きかいの なかの こえを さきに えらびますが、ない ときは ブラウザの 会社の サーバーで よみあげる こえに なり、セリフの もじが そこへ おくられる ことが あります。</li>
       </ul>
       <p class="about-note">※ この ページを おいている GitHub Pages も ふくめ、どの サービスも、つなぐ ときに ふつうは あなたの IP アドレスを うけとります。</p>
@@ -295,7 +296,8 @@
       <button class="about-reset" id="about-reset" type="button">きろくを ぜんぶ けす</button>
       <p class="about-reset-msg" id="about-reset-msg" aria-live="polite"></p>
 
-      <p class="about-credit">つくったひと：WARPIX ／ いっしょに つくった：Claude<br>
+      <p class="about-credit">© 2026 <a href="https://koki-hq.github.io/warpix/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（あたらしい タブで ひらく）</span></a> ／ いっしょに つくった：Claude<br>
+        プログラムは MIT ライセンス。ピクセ と WARPIX の 名前・絵は WARPIX製作所の ものです。<br>
         <a href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener">ソースコード（GitHub）</a></p>
     </div>
   </dialog>
@@ -329,6 +331,7 @@
   <script src="hide.js"></script>
   <script src="voice.js"></script>
   <script src="rest.js"></script>
+  <script src="news.js"></script>
   <script src="guide.js"></script>
   <script src="about.js"></script>
 </body>

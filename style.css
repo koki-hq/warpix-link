@@ -3983,3 +3983,24 @@ a,
     display: none;
   }
 }
+
+/* ---------- 製作所だより（フッターの リンク） ---------- */
+/* よこの はばは まえの「© 2026 WARPIX」と おなじ（ぼうけんで おみくじへの 足場に なっている） */
+.news-link {
+  padding: 6px 16px;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 12px;
+}
+.news-link.has-new {
+  color: var(--accent-2);
+}
+.news-new {
+  margin-left: 4px;
+  padding: 0 3px;
+  background: var(--accent);
+  color: var(--shadow);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  vertical-align: 2px;
+}
