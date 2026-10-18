@@ -93,9 +93,19 @@ export default {
 
   async "しばらく行っていないリンクを、ひとこと思い出させる"(t) {
     const { server, p } = await open(t, { "warpix-links": { spotify: { n: 2, last: dayAgo(20) } } });
-    await p.boot();
-    await t.sleep(2500);
-    t.ok((await p.text()).includes("SPOTIFYに いってないね"), `思い出させない: ${await p.text()}`);
+    await p.boot({ readIntro: false });
+    // あいさつを よみすすめて、思い出させる ひとことが でたら とまる
+    // （p.readIntro は ひまに なるまで おしつづけるので、あいさつの すぐ あとの ひとことまで よみとばして しまう。
+    //  1きせいの きっぷで あいさつが 2 ぎょう ふえて わかった、v1.41）
+    let said = false;
+    for (let i = 0; i < 80 && !said; i++) {
+      said = (await p.text()).includes("SPOTIFYに いってないね");
+      if (!said) {
+        await p.ev(`document.getElementById("dialog").click()`);
+        await t.sleep(200);
+      }
+    }
+    t.ok(said, `思い出させない: ${await p.text()}`);
     t.eq(await choices(p), [], "勧める質問は出さない（お気に入りはまだない）");
     t.noErrors(p);
     await server.close();

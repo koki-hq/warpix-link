@@ -217,6 +217,7 @@ const grow = (() => {
           <dt>あえた ひ</dt><dd>${state.days.length}にち</dd>
           <dt>よく いく せかい</dt><dd>${typeof favorite !== "undefined" && favorite.fav() ? `${favorite.fav().label}（${favorite.fav().n}かい）` : "まだ ない"}</dd>
           <dt>つぎの せいちょう</dt><dd>${STAGES[state.stage + 1] ? `あと ${STAGES[state.stage + 1].days - state.days.length}にち` : "もう さいこう！"}</dd>
+          ${typeof ticket !== "undefined" && ticket.has() ? `<dt>きっぷ</dt><dd class="diary-ticket">1きせい（${ticket.since()} から）</dd>` : ""}
         </dl>
       </div>
       ${days.length ? days.map(([date, lines]) => `

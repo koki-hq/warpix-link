@@ -4655,3 +4655,8 @@ a,
 .raid.night .raid-ship svg {
   filter: sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.1);
 }
+
+/* 1きせいの きっぷ（v1.41） */
+.diary-ticket {
+  color: var(--gold);
+}

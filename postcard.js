@@ -128,7 +128,17 @@ const postcard = (() => {
     const d = today();
     c.font = '18px "Press Start 2P", monospace';
     c.fillStyle = v("--muted");
-    c.fillText(`${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`, 70, 560);
+    const date = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+    c.fillText(date, 70, 560);
+    // 1きせいの しるし（v1.41）
+    if (typeof ticket !== "undefined" && ticket.has()) {
+      const x = 70 + c.measureText(date).width + 28;
+      c.font = '22px "DotGothic16", monospace';
+      c.fillStyle = pal.y;
+      c.fillText("★1きせい", x, 556);
+      c.font = '18px "Press Start 2P", monospace';
+      c.fillStyle = v("--muted");
+    }
     c.textAlign = "right";
     c.fillText("link.warpix.app", W - 70, 560);
     return cv;

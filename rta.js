@@ -77,6 +77,10 @@ const rta = (() => {
     c.font = '24px "DotGothic16", monospace';
     c.fillStyle = pal.c;
     c.fillText("#ピクセRTA", tagX, 556);
+    if (ticket.has()) {
+      c.fillStyle = pal.y;
+      c.fillText("★1きせい", tagX + c.measureText("#ピクセRTA").width + 24, 556);
+    }
     c.font = '18px "Press Start 2P", monospace';
     c.fillStyle = pal.v;
     c.textAlign = "right";
