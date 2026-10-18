@@ -4632,3 +4632,26 @@ a,
 #home-install {
   margin: 8px 0;
 }
+
+/* =====================================================================
+   しゅうらいの よる（v1.40）：まいつき さいしょの にちようびの 21:00 は きんいろの だい マザーシップ
+   ===================================================================== */
+.raid.night {
+  box-shadow:
+    0 -2px 0 0 var(--gold),
+    0 2px 0 0 var(--gold),
+    -2px 0 0 0 var(--gold),
+    2px 0 0 0 var(--gold);
+}
+
+.raid.night .raid-title {
+  color: var(--gold);
+}
+
+.raid.night .raid-fill {
+  background: var(--gold);
+}
+
+.raid.night .raid-ship svg {
+  filter: sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.1);
+}

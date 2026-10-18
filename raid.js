@@ -11,7 +11,28 @@ const raid = (() => {
   const startOf = (slot) => slot * PERIOD;
   const next = () => startOf(slotOf(Date.now()) + 1);
 
-  if (!online.enabled) return { next: () => null };
+  // ---------- しゅうらいの よる（v1.40）：まいつき さいしょの にちようびの 21:00（日本時間）は だい マザーシップ ----------
+  // SNS で 予告して、その じかんに みんなで あつまる 日。HP は 3 ばい、3 ぷんかん、きんいろ
+  const JST = 9 * 60 * 60 * 1000;
+  const NIGHT_HOUR = 21;
+  const jst = (t) => new Date(t + JST); // getUTC… で 日本の 日付・じこくが よめる
+  const isNightDay = (t) => { const d = jst(t); return d.getUTCDay() === 0 && d.getUTCDate() <= 7; };
+  const isNight = (slot) => { const d = jst(startOf(slot)); return isNightDay(startOf(slot)) && d.getUTCHours() === NIGHT_HOUR && d.getUTCMinutes() === 0; };
+  const durationOf = (slot) => (isNight(slot) ? 3 * 60 * 1000 : DURATION);
+  const hpPerPlayer = (slot) => (isNight(slot) ? HP_PER_PLAYER * 3 : HP_PER_PLAYER);
+  // つぎの しゅうらいの よる（その 時刻）
+  function nextNight(from = Date.now()) {
+    const d = jst(from);
+    for (let m = 0; m < 3; m++) {
+      const first = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + m, 1));
+      const sunday = 1 + ((7 - first.getUTCDay()) % 7);
+      const at = Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), sunday, NIGHT_HOUR) - JST;
+      if (at + 3 * 60 * 1000 > from) return at;
+    }
+    return null;
+  }
+
+  if (!online.enabled) return { next: () => null, nextNight, isNight };
 
   let cur = null; // { slot, hp, max, hits, players, el, ... }
   let warned = -1;
@@ -28,8 +49,10 @@ const raid = (() => {
     el.className = "raid";
     el.setAttribute("role", "region");
     el.setAttribute("aria-label", "みんなで マザーシップ");
+    const night = isNight(cur.slot);
+    el.classList.toggle("night", night);
     el.innerHTML = `
-      <p class="raid-title">RAID! みんなで マザーシップ</p>
+      <p class="raid-title">${night ? "しゅうらいの よる！ だい マザーシップ" : "RAID! みんなで マザーシップ"}</p>
       <div class="raid-bar"><span class="raid-fill"></span></div>
       <p class="raid-info"><span class="raid-hp">HP ---</span><span class="raid-people"></span><span class="raid-time"></span></p>
       <button type="button" class="raid-ship" aria-label="マザーシップを うつ">${pixelSvg(MOTHERSHIP)}</button>`;
@@ -44,7 +67,7 @@ const raid = (() => {
     el.querySelector(".raid-hp").textContent = hp === null ? "HP ---" : `HP ${hp}/${max}`;
     el.querySelector(".raid-fill").style.width = hp === null ? "100%" : `${(hp / max) * 100}%`;
     el.querySelector(".raid-people").textContent = `${Math.max(cur.players.size, online.count())}にん`;
-    const left = Math.max(0, Math.ceil((startOf(cur.slot) + DURATION - Date.now()) / 1000));
+    const left = Math.max(0, Math.ceil((startOf(cur.slot) + durationOf(cur.slot) - Date.now()) / 1000));
     el.querySelector(".raid-time").textContent = `のこり ${left}びょう`;
   }
 
@@ -71,7 +94,8 @@ const raid = (() => {
   // ---------- 始まり・終わり ----------
   function join(slot) {
     emit("seen", { id: "raid" });
-    cur = { slot, hp: null, max: null, owner: null, hits: 0, players: new Set([online.me]), el: build() };
+    cur = { slot, hp: null, max: null, owner: null, hits: 0, players: new Set([online.me]), el: null };
+    cur.el = build();
     render();
     sound.sfx.rumble();
     // すでに始まっていれば、だれかが今の HP を教えてくれる
@@ -80,11 +104,13 @@ const raid = (() => {
     clearTimeout(missedTimer);
     missedTimer = setTimeout(() => {
       if (!cur || cur.slot !== slot || cur.hp !== null) return;
-      const max = HP_PER_PLAYER * Math.max(1, online.count());
+      const max = hpPerPlayer(slot) * Math.max(1, online.count());
       adopt(max, max, online.me);
       online.send("raid-state", { slot, hp: max, max });
     }, 700 + Math.random() * 900);
-    if (!npc.isAway()) npc.say(["きた！ みんなの そらに\nマザーシップ！", "60びょう いないに\nみんなで うちおとそう！"]);
+    if (npc.isAway()) return;
+    if (isNight(slot)) npc.say(["しゅうらいの よるだ！\nきんいろの だい マザーシップ！", "3ぷん いないに\nみんなで うちおとそう！"]);
+    else npc.say(["きた！ みんなの そらに\nマザーシップ！", "60びょう いないに\nみんなで うちおとそう！"]);
   }
 
   function adopt(hp, max, owner) {
@@ -107,12 +133,20 @@ const raid = (() => {
     if (!cur || done === cur.slot) return;
     const players = Math.max(cur.players.size, 1);
     const mine = cur.hits;
+    const night = isNight(cur.slot);
     const el = finish();
     el.classList.add("down");
     el.querySelector(".raid-ship").innerHTML = pixelSvg(BOOM) + pixelSvg(BOOM) + pixelSvg(BOOM);
     [0, 180, 360, 540].forEach((d) => setTimeout(sound.sfx.boom, d));
     stars.warp(2000);
-    if (mine > 0) {
+    if (mine > 0 && night) {
+      score.add(20000, innerWidth / 2, 160);
+      achievements.unlock("raid");
+      achievements.unlock("raid-night");
+      emit("raid-win", { players, hits: mine, night: true });
+      grow.write("raid-night", `しゅうらいの よるに、${players}にんで だい マザーシップを たおした。`, { force: true });
+      npc.say([`しゅうらいの よるを\n${players}にんで のりきった！`, `きみは ${mine}かい うった。\nらいげつも あつまろうね！`]);
+    } else if (mine > 0) {
       score.add(5000, innerWidth / 2, 160);
       achievements.unlock("raid");
       emit("raid-win", { players, hits: mine });
@@ -126,7 +160,7 @@ const raid = (() => {
     if (!cur) return;
     const el = finish();
     el.classList.add("escape");
-    npc.say(["にげられた……", "つぎは 5ふんご！\nまた みんなで あつまろう。"]);
+    npc.say(["にげられた……", "つぎは 10ぷんご！\nまた みんなで あつまろう。"]);
   }
 
   // ---------- 攻撃 ----------
@@ -187,15 +221,17 @@ const raid = (() => {
     // 予告（10 秒前）
     if (next() - now <= WARN && warned !== slot + 1 && visible() && npc.ready()) {
       warned = slot + 1;
-      npc.say(["……そらが ざわざわ してる。", "みんなの そらに\nなにか くる……！"]);
+      npc.say(isNight(slot + 1)
+        ? ["……そらが きんいろに ひかってる。", "しゅうらいの よるが\nはじまる……！"]
+        : ["……そらが ざわざわ してる。", "みんなの そらに\nなにか くる……！"]);
     }
 
     if (cur) {
-      if (cur.slot !== slot || into >= DURATION) escape();
+      if (cur.slot !== slot || into >= durationOf(cur.slot)) escape();
       else render();
       return;
     }
-    if (into < DURATION && done !== slot && visible()) join(slot);
+    if (into < durationOf(slot) && done !== slot && visible()) join(slot);
   }, 1000);
 
   // 実績画面の WORLD RECORD に、次のレイドまでの時間を出す
@@ -205,5 +241,17 @@ const raid = (() => {
     nextEl.textContent = cur ? "いま！" : `${String(Math.floor(ms / 60000)).padStart(2, "0")}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
   }, 1000);
 
-  return { next, active: () => !!cur };
+  // しゅうらいの よるの 日は、ひらいた ときに ピクセが 予告する（21 じ まえ だけ、1 日 1 かい）
+  on("boot", () => {
+    const now = Date.now();
+    const at = nextNight(now);
+    if (!at || !isNightDay(now) || now >= at || simple.on) return;
+    const day = jst(now).toISOString().slice(0, 10);
+    if (store.get("warpix-raid-night-told", null) === day) return;
+    store.set("warpix-raid-night-told", day);
+    npc.addIntro("こんや 21じ、きんいろの\nだい マザーシップが くるって……！");
+    npc.addIntro("しゅうらいの よるだよ。\nみんなで あつまろう！");
+  });
+
+  return { next, nextNight, isNight, active: () => !!cur };
 })();
