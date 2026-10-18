@@ -83,14 +83,108 @@ const opening = (() => {
     // 人数ぶんの ほし（12 こ まで）。ぼうしの ほうが すくなければ しろい ほしで うめる
     const n = Math.max(1, Math.min(12, Math.max(players, hats.length)));
     const colors = Array.from({ length: n }, (_, i) => colorOf(hats[i]));
-    const entry = { date: ymdOf(today()), colors };
+    const entry = { date: ymdOf(today()), colors, hats: Array.from({ length: n }, (_, i) => hats[i] ?? null) };
     remember(entry);
     setTimeout(() => {
       show(entry);
       npc.say(["みて！ そらの ほしが つながって……", `きょうの ${n}にんの せいざが できた！\nROOM の WORLD RECORD に のこしたよ。`]);
       grow.write("seiza", `しゅうらいの よるに、${n}この ほしの せいざが できた。`, { force: true });
+      offerPhoto(entry);
     }, 3200);
   });
+
+  // ---------- 3. きねんしゃしん（v1.45）：せいざの したに、いっしょに たたかった みんなの ピクセ ----------
+  // まんなかが じぶん（育った すがたと いまの ぼうし）。ほかの ひとは おなじ そらで かぶって いた ぼうし
+  async function photo(entry) {
+    await postcard.fontsReady();
+    const W = 1200;
+    const H = 630;
+    const css = getComputedStyle(document.body);
+    const v = (n) => css.getPropertyValue(n).trim();
+    const pal = { o: "#000000", w: v("--fg"), p: v("--accent"), c: v("--accent-2"), y: v("--gold"), k: v("--pumpkin"), v: v("--muted") };
+    const cv = document.createElement("canvas");
+    cv.width = W;
+    cv.height = H;
+    const c = cv.getContext("2d");
+    c.fillStyle = v("--bg");
+    c.fillRect(0, 0, W, H);
+    c.fillStyle = v("--bg-grid");
+    for (let x = 0; x < W; x += 40) c.fillRect(x, 0, 2, H);
+    for (let y = 0; y < H; y += 40) c.fillRect(0, y, W, 2);
+    // そらの せいざ（100×50 の ならびを ひろげて）
+    const pts = points(`warpix-seiza-${entry.date}`, entry.colors.length).map(([x, y]) => [x * 12, 30 + y * 4.4]);
+    c.strokeStyle = "rgba(244,244,244,0.55)";
+    c.lineWidth = 3;
+    c.setLineDash([6, 8]);
+    c.beginPath();
+    pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+    c.stroke();
+    c.setLineDash([]);
+    pts.forEach(([x, y], i) => {
+      c.fillStyle = entry.colors[i];
+      c.fillRect(x - 8, y - 8, 16, 16);
+    });
+    // みんなの ピクセ（まんなかが じぶん）
+    const hats = wardrobe.hats();
+    const others = (entry.hats ?? entry.colors.map(() => null)).slice(1);
+    const half = Math.ceil(others.length / 2);
+    const people = [...others.slice(0, half), "me", ...others.slice(half)];
+    const px = people.length <= 6 ? 8 : people.length <= 9 ? 6 : 5;
+    const gap = px * 16 + 14;
+    const left = Math.round((W - (people.length * gap - 14)) / 2);
+    const top = 400 - px * 16;
+    c.fillStyle = "rgba(255,216,74,0.18)";
+    c.fillRect(0, 400, W, 14);
+    people.forEach((h, i) => {
+      const rows = h === "me" ? dress(NPC.idle) : dress(NPC.idle, hats[h] ?? null, []);
+      postcard.drawSprite(c, rows, left + i * gap, top - (h === "me" ? 12 : 0), px, pal);
+    });
+    // かんばん
+    c.textBaseline = "top";
+    c.textAlign = "center";
+    c.font = '40px "DotGothic16", monospace';
+    const d = `${Number(entry.date.slice(5, 7))}/${Number(entry.date.slice(8, 10))}`;
+    const title = `${d} しゅうらいの よる`;
+    c.fillStyle = "#000";
+    c.fillText(title, W / 2 + 4, 448);
+    c.fillStyle = pal.y;
+    c.fillText(title, W / 2, 444);
+    c.font = '28px "DotGothic16", monospace';
+    c.fillStyle = pal.w;
+    c.fillText(`${entry.colors.length}にんで だい マザーシップを のりきった！`, W / 2, 504);
+    c.textAlign = "left";
+    c.font = '18px "Press Start 2P", monospace';
+    c.fillStyle = pal.v;
+    c.fillText("RAID NIGHT", 60, 572);
+    if (ticket.has()) {
+      c.font = '22px "DotGothic16", monospace';
+      c.fillStyle = pal.y;
+      c.fillText("★1きせい", 280, 568);
+    }
+    c.textAlign = "right";
+    c.font = '18px "Press Start 2P", monospace';
+    c.fillStyle = pal.v;
+    c.fillText("link.warpix.app", W - 60, 572);
+    return cv;
+  }
+  async function openPhoto(entry) {
+    document.getElementById("diary").close();
+    await postcard.show(await photo(entry), {
+      name: `warpix-raid-night-${entry.date}.png`,
+      title: "しゅうらいの よるの きねんしゃしん",
+      alt: `${entry.date} しゅうらいの よるの きねんしゃしん：${entry.colors.length}にんの ピクセと せいざ`,
+    });
+    grow.write("kinen", "しゅうらいの よるの きねんしゃしんを とった。", { force: true });
+  }
+  // せいざの あと、ピクセが ひまに なったら さそう
+  function offerPhoto(entry) {
+    const timer = setInterval(() => {
+      if (playing() || npc.busy() || simple.on || postcard.isOpen() || document.querySelector(".credits, dialog[open]")) return;
+      clearInterval(timer);
+      npc.ask("みんなで きねんしゃしん とろう！", ["とる", "いい"]).then((i) => i === 0 && openPhoto(entry));
+    }, 800);
+    setTimeout(() => clearInterval(timer), 60000);
+  }
 
   // ---------- WORLD RECORD の なかの せいざの ならび ----------
   function renderList() {
@@ -99,11 +193,16 @@ const opening = (() => {
     const list = saved();
     box.hidden = !list.length;
     box.querySelector(".seiza-items").innerHTML = list
-      .map((e) => `<li>${svg(e)}<span>${Number(e.date.slice(5, 7))}/${Number(e.date.slice(8, 10))}・${e.colors.length}にん</span></li>`)
+      .map((e, i) => `<li><button type="button" class="seiza-btn" data-i="${i}" aria-label="${Number(e.date.slice(5, 7))}/${Number(e.date.slice(8, 10))} しゅうらいの よるの きねんしゃしんを みる">${svg(e)}</button><span>${Number(e.date.slice(5, 7))}/${Number(e.date.slice(8, 10))}・${e.colors.length}にん</span></li>`)
       .join("");
   }
   renderList();
+  // せいざを おすと、その よるの きねんしゃしん
+  document.getElementById("seiza-list")?.addEventListener("click", (e) => {
+    const b = e.target.closest(".seiza-btn");
+    if (b) openPhoto(saved()[Number(b.dataset.i)]);
+  });
 
   cheats.add("seiza", () => show({ date: ymdOf(today()), colors: COLORS.slice(0, 5) }));
-  return { show, svg, points, saved };
+  return { show, svg, points, saved, photo, openPhoto };
 })();
