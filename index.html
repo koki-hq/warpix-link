@@ -183,8 +183,9 @@
       <a class="pixel-btn" href="https://open.spotify.com/" target="_blank" rel="noopener">
         <span class="arrow">▶</span><span class="icon" data-icon="spotify"></span>SPOTIFY<span class="sr-only">（あたらしい タブで ひらく）</span>
       </a>
-      <a class="pixel-btn secret" id="secret-link" href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener" hidden>
-        <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE<span class="sr-only">（あたらしい タブで ひらく）</span>
+      <!-- ひみつの ワープゾーン：おすと アプリの なかの「ひみつの こうじょう」へ（kojo.js、v1.43）。href は スクリプトが ない とき だけ -->
+      <a class="pixel-btn secret" id="secret-link" href="https://github.com/koki-hq/warpix-link" hidden>
+        <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE<span class="sr-only">（ひみつの こうじょうへ）</span>
       </a>
     </nav>
     <!-- カセット えらび：6 この リンクを、たなの 公式リンクから いれかえる -->
@@ -302,6 +303,29 @@
       <div class="save-row">
         <button class="save-btn" id="move-yes" type="button"></button>
         <button class="save-btn move-no" id="move-no" type="button"></button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ひみつの こうじょう（v1.43）：ワープゾーンの いきさき -->
+  <dialog class="about kojo" id="kojo" aria-labelledby="kojo-title">
+    <div class="about-top">
+      <h2 id="kojo-title">ひみつの こうじょう</h2>
+      <button class="about-close" id="kojo-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <div class="kojo-blueprint"><div class="kojo-pixe" id="kojo-pixe" aria-hidden="true"></div><p class="kojo-stamp">PIXE / DESIGN No.1</p></div>
+      <p>ピクセ「ようこそ、ワーピクスの ひみつの こうじょうへ！」</p>
+      <p>warpix-link は、ここに ある <b>せっけいず</b>（プログラム）で うごいてるんだ。だれでも みられる ように、おいて あるよ。</p>
+      <dl class="keys kojo-facts">
+        <dt>いまの はん</dt><dd id="kojo-version">…</dd>
+        <dt>きみと であって</dt><dd id="kojo-days">-</dd>
+        <dt>きみが ワープした かいすう</dt><dd id="kojo-warps">-</dd>
+      </dl>
+      <p class="about-note">せっけいずは えいごと プログラムの ページ（GitHub）です。むずかしいけど、のぞいても だいじょうぶ。</p>
+      <div class="save-row">
+        <a class="save-btn kojo-code" href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener">せっけいずを みる<span class="sr-only">（GitHub、あたらしい タブで ひらく）</span></a>
+        <button class="save-btn move-no" id="kojo-back" type="button">もどる</button>
       </div>
     </div>
   </dialog>
@@ -446,6 +470,7 @@
   <script src="rta.js" defer></script>
   <script src="ticket.js" defer></script>
   <script src="opening.js" defer></script>
+  <script src="kojo.js" defer></script>
   <script src="warp.js" defer></script>
   <script src="cassette-ui.js" defer></script>
   <script src="tonight.js" defer></script>
