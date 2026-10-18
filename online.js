@@ -61,8 +61,10 @@ const online = (() => {
     return wardrobe.hats?.() ?? {};
   }
 
+  let othersHats = []; // いま おなじ そらに いる ほかの ひとの ぼうし（開店の よるの せいざで つかう、v1.42）
   function render(state) {
     const ids = Object.keys(state).filter((id) => id !== me);
+    othersHats = ids.map((id) => state[id][0]?.hat ?? null);
     countEl.hidden = false;
     countEl.querySelector("b").textContent = String(ids.length + 1);
     peopleNow = ids.length + 1;
@@ -204,6 +206,8 @@ const online = (() => {
     me,
     // いま同じ空を見ている人数（自分をふくむ）
     count: () => peopleNow,
+    // じぶんと、いま おなじ そらに いる ひとの ぼうし
+    hats: () => [hat, ...othersHats],
     listen(event, fn) {
       (listeners[event] ??= []).push(fn);
     },

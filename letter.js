@@ -47,7 +47,7 @@ const letter = (() => {
 
   // ---------- とどける（にちようの よる、まだ なければ） ----------
   function deliver() {
-    if (!isSundayNight() || letters.some((l) => l.week === ymd)) return null;
+    if (!isSundayNight() || letters.some((l) => l.week === ymd && !l.kind)) return null;
     const l = write();
     l.unread = true;
     letters = [l, ...letters].slice(0, 8);
@@ -58,11 +58,12 @@ const letter = (() => {
   // ---------- よむ ----------
   const dialog = document.getElementById("letter");
   const bodyEl = document.getElementById("letter-body");
-  function read(week) {
-    const l = letters.find((x) => x.week === week);
+  const keyOf = (l) => (l.kind ? `${l.week}:${l.kind}` : l.week);
+  function read(key) {
+    const l = letters.find((x) => keyOf(x) === key);
     if (!l) return;
     const [to, ...rest] = l.lines;
-    bodyEl.innerHTML = `<p class="letter-date">${fmt(l.from)} 〜 ${fmt(l.week)}</p>
+    bodyEl.innerHTML = `<p class="letter-date">${l.kind ? fmt(l.week) : `${fmt(l.from)} 〜 ${fmt(l.week)}`}</p>
       <p class="letter-to">${to}</p>
       ${rest.map((t) => `<p>${t}</p>`).join("")}
       <p class="letter-from"><span class="letter-pixe">${pixelSvg(dress(NPC.idle))}</span>ピクセより</p>`;
@@ -89,8 +90,8 @@ const letter = (() => {
     el.className = "letters";
     el.innerHTML = `<h3>ピクセからの てがみ</h3>
       <div class="letter-list">${letters
-        .map((l) => `<button type="button" class="letter-btn${l.unread ? " unread" : ""}" data-week="${l.week}">
-          <span class="letter-env" aria-hidden="true">${pixelSvg(ENVELOPE)}</span>${fmt(l.week)} の てがみ${l.unread ? '<span class="letter-new">NEW</span>' : ""}</button>`)
+        .map((l) => `<button type="button" class="letter-btn${l.unread ? " unread" : ""}${l.kind ? " special" : ""}" data-week="${keyOf(l)}">
+          <span class="letter-env" aria-hidden="true">${pixelSvg(ENVELOPE)}</span>${fmt(l.week)} の ${l.title ?? "てがみ"}${l.unread ? '<span class="letter-new">NEW</span>' : ""}</button>`)
         .join("")}</div>`;
     el.addEventListener("click", (e) => {
       const b = e.target.closest(".letter-btn");
@@ -101,5 +102,14 @@ const letter = (() => {
   }
   on("notebook-tab", ({ which }) => which === "diary" && card());
 
-  return { write, letters: () => letters, read, isSundayNight };
+  // とくべつな てがみ（開店の ひ など、v1.42）。おなじ kind は 1 かい だけ
+  function add({ kind, title, lines }) {
+    if (letters.some((l) => l.kind === kind)) return null;
+    const l = { week: ymd, from: ymd, kind, title, lines, unread: true };
+    letters = [l, ...letters].slice(0, 8);
+    if (!preview) store.set(KEY, letters);
+    return l;
+  }
+
+  return { write, letters: () => letters, read, add, isSundayNight };
 })();

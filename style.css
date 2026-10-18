@@ -4660,3 +4660,98 @@ a,
 .diary-ticket {
   color: var(--gold);
 }
+
+/* =====================================================================
+   開店の よる（v1.42）：しゅうらいの よるの せいざ・ひらく ひの てがみ
+   ===================================================================== */
+.seiza {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  z-index: 7;
+  width: min(420px, calc(100vw - 32px));
+  translate: -50% 0;
+  pointer-events: none;
+  text-align: center;
+  animation: seiza-in 1.2s steps(6) both;
+}
+
+.seiza svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  shape-rendering: crispEdges;
+}
+
+.seiza-lines line {
+  stroke: var(--fg);
+  stroke-width: 0.6;
+  stroke-dasharray: 1 1.5;
+  opacity: 0.7;
+}
+
+.seiza-name {
+  margin: 4px 0 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.seiza.gone {
+  opacity: 0;
+  transition: opacity 1s steps(4);
+}
+
+@keyframes seiza-in {
+  from { opacity: 0; translate: -50% 12px; }
+  to { opacity: 1; translate: -50% 0; }
+}
+
+.seiza-list h4 {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--gold);
+}
+
+.seiza-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seiza-items li {
+  display: grid;
+  gap: 2px;
+  font-size: 11px;
+  text-align: center;
+}
+
+.seiza-items svg {
+  width: 100%;
+  height: auto;
+  background: #000;
+  shape-rendering: crispEdges;
+}
+
+/* せまい 画面では ピクセの セリフに かさなるので、なまえは ださない（ピクセが いう） */
+@media (max-width: 720px) {
+  .seiza-name {
+    display: none;
+  }
+}
+
+.letter-btn.special {
+  color: var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seiza {
+    animation: none;
+  }
+}
