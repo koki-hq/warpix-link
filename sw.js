@@ -1,11 +1,12 @@
 // ---------- サービスワーカー：オフラインでもピクセに会えるように ----------
 // 公開するたびに VERSION を上げると、新しいファイルを取り直す
-const VERSION = "warpix-v1.37.0";
+const VERSION = "warpix-v1.38.0";
 const FONT_CACHE = "warpix-fonts";
 const FILES = [
   "./",
   "index.html",
   "style.css",
+  "fonts/dotgothic16.woff2",
   "config.js",
   "script.js",
   "game.js",

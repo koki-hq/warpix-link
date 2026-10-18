@@ -1,3 +1,11 @@
+/* 日本語の ドット文字：この サイトで つかう 文字 だけに した DotGothic16（tools/fonts.mjs で つくる、OFL：fonts/OFL-DotGothic16.txt）。
+   名前は もとの まま なので、ほかの ところの font-family は かえなくて いい */
+@font-face {
+  font-family: "DotGothic16";
+  src: url("fonts/dotgothic16.woff2") format("woff2");
+  font-display: swap;
+}
+
 :root {
   --bg: #0f0b1e;
   --bg-grid: #1a1433;

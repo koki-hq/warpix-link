@@ -120,8 +120,10 @@ sw.js        オフライン用のサービスワーカー
 manifest.webmanifest, icons/   アプリの名前とアイコン
 docs/THEME.md  デザインのテーマと決まりごと
 og.png       共有カードの画像（元は tools/og-card.html、撮影は tools/shoot-og.mjs）。ホームページの せいひん展示室も https://link.warpix.app/og.png を つかう ので、名前や 場所を かえる ときは 事務所の おしらせ下書き.md で 知らせる
+fonts/       日本語の ドット文字（DotGothic16 の つかう 文字 だけ、OFL）。文字を ふやしたら node tools/fonts.mjs
 tests/       テスト一式（node tests/run.mjs）
 tools/health.mjs  健康診断
+tools/fonts.mjs   日本語の ドット文字を つくりなおす（--check で たりない 文字を しらべる）
 docs/spec/     バージョン別の仕様メモ（点数、タイミング、イベント、実績の条件、保存するデータなど）
 ```
 
@@ -154,10 +156,11 @@ URL に `?date=2026-10-31` のように付けると、その日のページに�
 ## テストと健康診断
 
 ```sh
-node tests/run.mjs            # ブラウザでぜんぶの遊びを試す（144 件。4 つ同時に ながして 約 7 分。かかった じかんは tests/.output/timings.json に おぼえる）
+node tests/run.mjs            # ブラウザでぜんぶの遊びを試す（146 件。4 つ同時に ながして 約 7 分。かかった じかんは tests/.output/timings.json に おぼえる）
 node tests/run.mjs sky        # 名前に sky を含むテストだけ
 node tests/run.mjs --jobs 1   # 1 つずつ順番に（約 16 分。いちばん安定）
 node tools/health.mjs    # 重さ・スマホでの速さ・待機中の CPU・アクセシビリティ
+node tools/fonts.mjs     # セリフや 文章に あたらしい 文字を つかったら（テストが たりない 文字を おしえる）
 ```
 
 Node 22 以上と Chrome があれば動きます（ライブラリのインストールは不要。Chrome が見つからないときは環境変数 `CHROME_PATH`）。音は鳴らさず、本物の Supabase（世界の記録）にも触りません。くわしくは [docs/spec/v1.6.1.md](docs/spec/v1.6.1.md)。

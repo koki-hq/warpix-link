@@ -30,3 +30,10 @@ WARPIX製作所.
 上の MIT ライセンスは プログラムの コードだけに あてはまります。
 キャラクター「ピクセ」と その ドット絵、「WARPIX」「WARPIX製作所」の 名前は
 このライセンスの 対象では なく、WARPIX製作所が すべての 権利を もっています。
+
+---
+
+fonts/dotgothic16.woff2 is a subset of DotGothic16 (Copyright 2020 The
+DotGothic16 Project Authors), licensed under the SIL Open Font License 1.1
+(fonts/OFL-DotGothic16.txt), not under the MIT License above.
+fonts/dotgothic16.woff2 は DotGothic16 の 一部の 文字です。SIL Open Font License 1.1 です（fonts/OFL-DotGothic16.txt）。

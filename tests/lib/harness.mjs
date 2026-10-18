@@ -37,6 +37,7 @@ const TYPES = {
   ".png": "image/png",
   ".webmanifest": "application/manifest+json",
   ".json": "application/json",
+  ".woff2": "font/woff2",
 };
 export async function startServer({ online = false, port = 0 } = {}) {
   const server = createServer((req, res) => {
