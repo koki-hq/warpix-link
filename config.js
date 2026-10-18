@@ -2,7 +2,9 @@
 // url と key は「ブラウザに載せてよい公開用の値」（Supabase の Project URL と anon / publishable キー）。
 // service_role や secret と書かれたキーは、絶対にここに書かないこと。
 // 製作所だより（WARPIX製作所の ホームページの おしらせ）。news.js が よむ
-window.WARPIX_NEWS ??= "https://koki-hq.github.io/warpix/news.json";
+window.WARPIX_NEWS ??= "https://warpix.app/news.json";
+// ひっこし（move.js）：ふるい じゅうしょ（from）で ひらいたら、あたらしい じゅうしょ（to）へ きろくごと さそう
+window.WARPIX_MOVE ??= { from: "koki-hq.github.io", to: "https://link.warpix.app/" };
 
 window.WARPIX_ONLINE = {
   url: "https://zjyzaisimszjldnacxle.supabase.co",

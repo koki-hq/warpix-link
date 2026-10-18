@@ -130,7 +130,7 @@ const postcard = (() => {
     c.fillStyle = v("--muted");
     c.fillText(`${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`, 70, 560);
     c.textAlign = "right";
-    c.fillText("koki-hq.github.io/warpix-link", W - 70, 560);
+    c.fillText("link.warpix.app", W - 70, 560);
     return cv;
   }
 
@@ -165,7 +165,7 @@ const postcard = (() => {
     if (!(navigator.canShare && navigator.canShare({ files: [file] }))) share.hidden = true;
     share.addEventListener("click", async () => {
       try {
-        await navigator.share({ files: [file], title: "ピクセの ポストカード", url: "https://koki-hq.github.io/warpix-link/" });
+        await navigator.share({ files: [file], title: "ピクセの ポストカード", url: "https://link.warpix.app/" });
       } catch {}
     });
     overlay.querySelector(".postcard-close").addEventListener("click", close);

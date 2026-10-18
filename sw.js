@@ -1,6 +1,6 @@
 // ---------- サービスワーカー：オフラインでもピクセに会えるように ----------
 // 公開するたびに VERSION を上げると、新しいファイルを取り直す
-const VERSION = "warpix-v1.35.0";
+const VERSION = "warpix-v1.36.0";
 const FONT_CACHE = "warpix-fonts";
 const FILES = [
   "./",
@@ -34,6 +34,7 @@ const FILES = [
   "rest.js",
   "news.js",
   "save.js",
+  "move.js",
   "warp.js",
   "cassette.js",
   "cassette-ui.js",

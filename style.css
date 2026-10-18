@@ -4405,7 +4405,8 @@ a,
   outline: none;
 }
 
-.cas-gift-no {
+.cas-gift-no,
+.move-no {
   background: var(--btn);
   color: var(--fg);
 }
@@ -4580,4 +4581,16 @@ a,
   .pixel-btn:has(.fav-mark) .link-key {
     margin-right: 28px;
   }
+}
+
+/* =====================================================================
+   ピクセの ひっこし（v1.36）：ふるい じゅうしょから あたらしい おうちへ
+   ===================================================================== */
+.move-text {
+  white-space: pre-line;
+}
+
+.move-addr {
+  color: var(--accent-2);
+  overflow-wrap: anywhere;
 }

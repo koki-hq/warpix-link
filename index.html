@@ -11,8 +11,8 @@
   <meta property="og:site_name" content="WARPIX-LINK">
   <meta property="og:title" content="WARPIX-LINK">
   <meta property="og:description" content="ピクセが まってる、ドットの リンク集。リンクを えらぶと その せかいへ ワープ。">
-  <meta property="og:url" content="https://koki-hq.github.io/warpix-link/">
-  <meta property="og:image" content="https://koki-hq.github.io/warpix-link/og.png">
+  <meta property="og:url" content="https://link.warpix.app/">
+  <meta property="og:image" content="https://link.warpix.app/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="ドット絵のピクセと WARPIX-LINK の文字">
@@ -37,6 +37,11 @@
       const settings = JSON.parse(localStorage.getItem("warpix-settings") || "{}");
       if (settings.motion === "reduce") document.documentElement.classList.add("reduce-motion");
       if (settings.font === "plain") document.documentElement.classList.add("plain-font");
+      // ひっこしで とどいた きろく（#move=…、move.js）。ほかの スクリプトが かきこむ まえに、もう きろくが あったかを みておく
+      if (location.hash.startsWith("#move=")) {
+        window.WARPIX_MOVE_IN = { code: location.hash.slice(6), had: Object.keys(localStorage).some((k) => k.startsWith("warpix-")) };
+        history.replaceState(null, "", location.pathname + location.search);
+      }
     } catch {}
   </script>
 </head>
@@ -191,7 +196,7 @@
         <span class="sep-settings" aria-hidden="true">・</span>
         <button class="settings-btn" id="settings-btn" type="button">せってい</button>
         <span aria-hidden="true">・</span>
-        <a class="copyright news-link" id="news-link" href="https://koki-hq.github.io/warpix/#news" target="_blank" rel="noopener">製作所だより<span class="news-new" hidden>NEW</span><span class="sr-only">（あたらしい タブで ひらく）</span></a>
+        <a class="copyright news-link" id="news-link" href="https://warpix.app/#news" target="_blank" rel="noopener">製作所だより<span class="news-new" hidden>NEW</span><span class="sr-only">（あたらしい タブで ひらく）</span></a>
       </div>
       <!-- いちばん下：どこの 製品か -->
       <p class="footer-maker">© 2026 WARPIX製作所</p>
@@ -279,6 +284,22 @@
     </div>
   </dialog>
 
+  <!-- ピクセの ひっこし（v1.36）：ふるい じゅうしょで ひらいた とき、あたらしい おうちへ さそう -->
+  <dialog class="about move" id="move" aria-labelledby="move-title">
+    <div class="about-top">
+      <h2 id="move-title">ピクセの ひっこし</h2>
+      <button class="about-close" id="move-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <p class="move-text" id="move-text"></p>
+      <p class="move-addr" id="move-addr" hidden></p>
+      <div class="save-row">
+        <button class="save-btn" id="move-yes" type="button"></button>
+        <button class="save-btn move-no" id="move-no" type="button"></button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog class="about settings" id="settings" aria-labelledby="settings-title">
     <div class="about-top">
       <h2 id="settings-title">せってい</h2>
@@ -333,7 +354,8 @@
         <li><b>てんき</b>：ピクセが きいて「いいよ」と こたえたときだけ。ばしょを <strong>やく 10km に まるめて</strong>、てんきの サービス（Open-Meteo）に おくります。</li>
         <li><b>おなじ そら・レイド・せかいの きろく</b>：<strong>ランダムな ばんごうと ぼうしの しゅるい</strong>、つついた かいすうなどを Supabase に おくります。なまえや ばしょ、スコアは おくりません。</li>
         <li><b>もじ</b>：ドットの もじは Google Fonts から よみこみます。</li>
-        <li><b>製作所だより</b>：WARPIX製作所の ホームページ（おなじ GitHub Pages）から、おしらせの ファイルを よみこみます。なにも おくりません。</li>
+        <li><b>製作所だより</b>：WARPIX製作所の ホームページ（warpix.app、おなじ GitHub Pages）から、おしらせの ファイルを よみこみます。なにも おくりません。</li>
+        <li><b>ひっこし</b>：ふるい じゅうしょ（koki-hq.github.io）で ひらいた ときだけ、あたらしい じゅうしょ（link.warpix.app）が できているかを たしかめます。「きろくごと ひっこす」を おすと、きろくを ふっかつの じゅもんに して あたらしい じゅうしょへ もっていきます（URL の「#」の うしろ なので、サーバーには おくられません）。</li>
         <li><b>ピクセの こえ</b>：せっていで オンに した ときだけ、ブラウザの よみあげを つかいます。その きかいの なかの こえを さきに えらびますが、ない ときは ブラウザの 会社の サーバーで よみあげる こえに なり、セリフの もじが そこへ おくられる ことが あります。</li>
       </ul>
       <p class="about-note">※ この ページを おいている GitHub Pages も ふくめ、どの サービスも、つなぐ ときに ふつうは あなたの IP アドレスを うけとります。</p>
@@ -363,7 +385,7 @@
       <button class="about-reset" id="about-reset" type="button">きろくを ぜんぶ けす</button>
       <p class="about-reset-msg" id="about-reset-msg" aria-live="polite"></p>
 
-      <p class="about-credit">© 2026 <a href="https://koki-hq.github.io/warpix/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（あたらしい タブで ひらく）</span></a> ／ いっしょに つくった：Claude<br>
+      <p class="about-credit">© 2026 <a href="https://warpix.app/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（あたらしい タブで ひらく）</span></a> ／ いっしょに つくった：Claude<br>
         プログラムは MIT ライセンス。ピクセ と WARPIX の 名前・絵は WARPIX製作所の ものです。<br>
         <a href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener">ソースコード（GitHub）</a></p>
     </div>
@@ -404,6 +426,7 @@
   <script src="news.js" defer></script>
   <script src="guide.js" defer></script>
   <script src="save.js" defer></script>
+  <script src="move.js" defer></script>
   <script src="warp.js" defer></script>
   <script src="cassette-ui.js" defer></script>
   <script src="tonight.js" defer></script>

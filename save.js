@@ -5,7 +5,7 @@ const save = (() => {
   const PREFIX = "WARPIX1-";
   const MOVED = "warpix-moved"; // ひっこして きた しるし（つぎに ひらいた ときに ピクセが よろこぶ）
   const WARNED = "warpix-save-told";
-  const SKIP = new Set([MOVED, "warpix-lastseen"]); // さいごに みていた じこくは もちはこばない（おるすばんが でてしまう）
+  const SKIP = new Set([MOVED, "warpix-lastseen", "warpix-moved-out"]); // さいごに みていた じこくは もちはこばない（おるすばんが でてしまう）
   const pad2 = (n) => String(n).padStart(2, "0");
   const ymd = (() => { const d = today(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; })();
 

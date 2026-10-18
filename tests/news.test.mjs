@@ -39,7 +39,7 @@ export default {
     t.ok(await p.ev(`document.querySelector("#news-link .news-new").hidden && !document.getElementById("news-link").classList.contains("has-new")`), "ひらいても NEW が きえない");
     t.ok(await p.ev(`achievements.has("factory")`), "実績「せいさくしょ けんがく」がない");
     t.eq(await p.ev(`JSON.parse(localStorage.getItem("warpix-news")).opened`), ["fresh"], "ひらいた きろく");
-    t.eq(await p.ev(`document.getElementById("news-link").href`), "https://koki-hq.github.io/warpix/#news", "とびさき");
+    t.eq(await p.ev(`document.getElementById("news-link").href`), "https://warpix.app/#news", "とびさき");
     t.noErrors(p);
     await server.close();
   },

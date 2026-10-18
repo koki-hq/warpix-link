@@ -51,7 +51,8 @@ export async function startServer({ online = false, port = 0 } = {}) {
       res.writeHead(404).end();
       return;
     }
-    res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
+    // GitHub Pages と おなじく、ほかの じゅうしょからも よめる（ひっこしの テストで つかう）
+    res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream", "access-control-allow-origin": "*" });
     res.end(readFileSync(file));
   });
   await new Promise((r) => server.listen(port, "127.0.0.1", r));
