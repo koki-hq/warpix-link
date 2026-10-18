@@ -32,7 +32,7 @@ export default {
       await t.sleep(200);
       const s = await p.text();
       if (s && !said.includes(s)) said.push(s);
-      if (said.some((l) => l.startsWith("ただいま！ こうじょうで ね"))) await p.ev(`document.getElementById("dialog").click()`);
+      if (said.some((l) => l.startsWith("ただいま！ むこうで ね"))) await p.ev(`document.getElementById("dialog").click()`);
     }
     t.ok(said.some((l) => l.includes("ヘルメット")), `はなしが ない: ${JSON.stringify(said)}`);
     t.ok(await p.ev(`!npc.isAway() && !document.getElementById("npc").classList.contains("satogaeri")`), "もどらない");
