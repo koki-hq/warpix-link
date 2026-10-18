@@ -64,7 +64,7 @@ const pocket = (() => {
   addEventListener("online", () => npc.say(["つながった！\nおかえり、インターネット。"]));
 
   cheats.add("install", install);
-  return { install, standalone };
+  return { install, standalone, canInstall: () => Boolean(deferred) && !standalone() };
 })();
 
 // ---------- ゲームのコントローラー（Gamepad API） ----------

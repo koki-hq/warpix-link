@@ -4594,3 +4594,33 @@ a,
   color: var(--accent-2);
   overflow-wrap: anywhere;
 }
+
+/* =====================================================================
+   ホームがめんに いれる（v1.37）：いまの きかいの やりかたに しるし
+   ===================================================================== */
+.home-steps {
+  grid-template-columns: 1fr;
+  gap: 2px;
+  margin: 4px 0;
+}
+
+.home-steps dt {
+  color: var(--muted);
+  white-space: normal;
+}
+
+.home-steps dd {
+  margin: 0 0 6px 1em;
+}
+
+.home-steps .here {
+  color: var(--accent-2);
+}
+
+.home-here {
+  color: var(--gold);
+}
+
+#home-install {
+  margin: 8px 0;
+}

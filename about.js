@@ -4,7 +4,27 @@
   const resetBtn = document.getElementById("about-reset");
   const resetMsg = document.getElementById("about-reset-msg");
 
+  // ---------- ホームがめんに いれる（v1.37） ----------
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const os = ios ? "ios" : /Android/.test(navigator.userAgent) ? "android" : "pc";
+  const installBtn = document.getElementById("home-install");
+  for (const el of document.querySelectorAll(`#home-steps [data-os="${os}"]`)) el.classList.add("here");
+  document.querySelector(`#home-steps dt[data-os="${os}"]`).insertAdjacentHTML("beforeend", '<span class="home-here">（この きかい）</span>');
+  function showHome() {
+    const app = pocket.standalone();
+    document.getElementById("home-status").textContent = app
+      ? "いまは ホームがめんの アプリで ひらいているよ。"
+      : "アプリに すると、ひらくのが はやく なって、きろくも きえにくく なるよ。";
+    installBtn.hidden = !pocket.canInstall();
+    document.getElementById("home-ios-note").hidden = !ios || app;
+  }
+  installBtn.addEventListener("click", async () => {
+    await pocket.install();
+    showHome();
+  });
+
   document.getElementById("about-btn").addEventListener("click", () => {
+    showHome();
     resetBtn.textContent = "きろくを ぜんぶ けす";
     resetMsg.textContent = "";
     armed = false;
