@@ -141,19 +141,18 @@ const postcard = (() => {
     overlay = null;
   };
 
-  async function open() {
-    const cv = await render();
+  // canvas の 画像を、ほぞん・シェアできる まどで みせる（ぼうけんの きろくカードも つかう、v1.39）
+  async function show(cv, { name, title, alt }) {
     const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
     const url = URL.createObjectURL(blob);
-    const name = `warpix-pixe-${today().toISOString().slice(0, 10)}.png`;
     close();
     overlay = document.createElement("div");
     overlay.className = "postcard";
     overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-label", "ピクセの ポストカード");
+    overlay.setAttribute("aria-label", title);
     overlay.innerHTML = `
       <div class="postcard-box">
-        <img class="postcard-img" alt="ピクセの ポストカード（${grow.stageName()}）" src="${url}">
+        <img class="postcard-img" alt="${alt}" src="${url}">
         <div class="postcard-row">
           <a class="postcard-save" href="${url}" download="${name}">ほぞん</a>
           <button type="button" class="postcard-share">シェア</button>
@@ -165,7 +164,7 @@ const postcard = (() => {
     if (!(navigator.canShare && navigator.canShare({ files: [file] }))) share.hidden = true;
     share.addEventListener("click", async () => {
       try {
-        await navigator.share({ files: [file], title: "ピクセの ポストカード", url: "https://link.warpix.app/" });
+        await navigator.share({ files: [file], title, url: "https://link.warpix.app/" });
       } catch {}
     });
     overlay.querySelector(".postcard-close").addEventListener("click", close);
@@ -173,6 +172,11 @@ const postcard = (() => {
     document.body.append(overlay);
     overlay.querySelector(".postcard-close").focus({ preventScroll: true });
     sound.sfx.coin();
+  }
+
+  async function open() {
+    const name = `warpix-pixe-${today().toISOString().slice(0, 10)}.png`;
+    await show(await render(), { name, title: "ピクセの ポストカード", alt: `ピクセの ポストカード（${grow.stageName()}）` });
     achievements.unlock("postcard");
     grow.write("postcard", "ポストカードを つくってもらった。");
   }
@@ -184,5 +188,5 @@ const postcard = (() => {
   });
   cheats.add("postcard", open);
 
-  return { render, open };
+  return { render, open, show, drawSprite, fontsReady, isOpen: () => Boolean(overlay) };
 })();
