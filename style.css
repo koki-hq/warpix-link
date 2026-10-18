@@ -4864,3 +4864,12 @@ a,
   font-size: 11px;
   color: var(--gold);
 }
+
+/* ピクセに おてがみ（v1.47） */
+.about .otegami-btn,
+.about .otegami-btn:visited {
+  display: inline-block;
+  margin: 6px 0 2px;
+  color: var(--bg);
+  text-decoration: none;
+}
