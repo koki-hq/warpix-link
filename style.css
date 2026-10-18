@@ -4806,3 +4806,38 @@ a,
 .kojo .about-body > p + p {
   margin-top: 6px;
 }
+
+/* =====================================================================
+   ピクセの ワープえにっき（v1.44）：ROOM の にっきの なかに ページが たまる
+   ===================================================================== */
+.enikki-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.enikki-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 6px 0 12px;
+}
+
+.enikki-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.enikki-btn img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  outline: 2px solid var(--fg);
+}
+
+.enikki-btn:hover img,
+.enikki-btn:focus-visible img {
+  outline-color: var(--accent-2);
+}

@@ -132,14 +132,16 @@ const warpDive = (() => {
       showGift(gift, sprite);
       zukan.mark("souvenir", shelf);
     }
+    let line = null;
     if (t.left) {
       // ほんとうに むこうへ いって もどってきた ときだけ、おみやげばなし
       const lines = LINES[t.icon] ?? (CASSETTES.byId(t.icon)?.back ? [CASSETTES.byId(t.icon).back] : OTHER);
-      npc.say([lines[Math.floor(Math.random() * lines.length)]]);
+      line = lines[Math.floor(Math.random() * lines.length)];
+      npc.say([line]);
       achievements.unlock("warp-buddy");
       grow.write("dive", `${t.label} の せかいへ いっしょに ワープした。`);
     }
-    emit("warp-back", { icon: t.icon, left: t.left });
+    emit("warp-back", { icon: t.icon, left: t.left, label: t.label, line }); // line と label は ワープえにっき（v1.44）が つかう
   }
 
   on("warp", ({ icon }) => {
