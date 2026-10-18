@@ -4856,3 +4856,11 @@ a,
 .seiza-btn:focus-visible svg {
   outline: 2px solid var(--accent-2);
 }
+
+
+/* ピクセの さとがえり（v1.46）：るすの かわりに「おでかけ」 */
+.npc-sprite.away.satogaeri::after {
+  content: "おでかけ";
+  font-size: 11px;
+  color: var(--gold);
+}
