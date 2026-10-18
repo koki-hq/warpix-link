@@ -131,7 +131,8 @@ const raid = (() => {
 
   function win() {
     if (!cur || done === cur.slot) return;
-    const players = Math.max(cur.players.size, 1);
+    // うった 人 だけで なく、その とき おなじ そらに いた 人も なかま（HP も その 人数で きまる。v1.46）
+    const players = Math.max(cur.players.size, online.count(), 1);
     const mine = cur.hits;
     const night = isNight(cur.slot);
     const el = finish();
