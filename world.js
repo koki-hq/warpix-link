@@ -369,19 +369,24 @@ const favicon = (() => {
   on("boot", () => {
     const visits = store.get("warpix-visits", 0) + 1;
     store.set("warpix-visits", visits);
-    if (visits >= 100) npc.addIntro(`${visits}かいめ！？\nもう ここに すんでるでしょ。`);
-    else if (visits >= 10) npc.addIntro(`もう ${visits}かいめ！\nすっかり じょうれんさん だね。`);
-    else if (visits >= 2) npc.addIntro(`また きてくれたんだ！\n${visits}かいめ だね。`);
+    // まいかい かぞえると くどいので、ふしめの かいだけ（v1.50）
+    if (visits >= 100 && visits % 100 === 0) npc.addIntro(`${visits}かいめ！？\nもう ここに すんでるでしょ。`);
+    else if (visits === 10 || visits === 50) npc.addIntro(`もう ${visits}かいめ！\nすっかり じょうれんさん だね。`);
+    else if (visits === 2) npc.addIntro("また きてくれたんだ！\n2かいめ だね。");
   });
 
   // 別のタブに行って、戻ってきたとき
   let hiddenAt = 0;
+  let lastBack = -1;
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) return (hiddenAt = Date.now());
     const sec = (Date.now() - hiddenAt) / 1000;
     if (!hiddenAt || sec < 30) return;
     const span = sec < 60 ? `${Math.round(sec)}びょう` : sec < 3600 ? `${Math.round(sec / 60)}ふん` : `${Math.round(sec / 3600)}じかん`;
-    notice([`おかえり！ ${span}も\nどこ いってたの？`]);
+    // いつも おなじ だと くどいので、まえと ちがう いいかたで（v1.50）
+    const BACK = [`おかえり！ ${span}も\nどこ いってたの？`, `おかえり。${span}、\nちょっと さみしかった。`, "あ、もどってきた！", "おかえりー！"];
+    const i = lastBack < 0 ? Math.floor(Math.random() * BACK.length) : (lastBack + 1 + Math.floor(Math.random() * (BACK.length - 1))) % BACK.length;
+    if (notice([BACK[i]])) lastBack = i;
   });
 
   document.addEventListener("copy", () => noticeOnce("copy", ["コピーした？\nなにを もっていくの？"]));

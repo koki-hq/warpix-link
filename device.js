@@ -44,9 +44,12 @@ const pocket = (() => {
 
   on("boot", () => {
     // ホーム画面から開いてくれたとき
+    // はじめての ときだけ きく。そのあとは ときどき ひとこと（v1.50）
     if (standalone()) {
+      const first = !achievements.has("pocket");
       achievements.unlock("pocket");
-      npc.addIntro("ホームがめんから きてくれたんだ！\nアプリの ぼく、どう？");
+      if (first) npc.addIntro("ホームがめんから きてくれたんだ！\nアプリの ぼく、どう？");
+      else if (grow.firstToday && Math.random() < 0.15) npc.addIntro(["ポケットの なか、\nあったかいね。", "アイコンの なかで\nまってたよ。"][Math.floor(Math.random() * 2)]);
     }
     // しばらくして、インストールできそうならおさそい
     setTimeout(function offer() {

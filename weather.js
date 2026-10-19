@@ -166,8 +166,13 @@ const weather = (() => {
     if (kind === "rain" || kind === "thunder") wardrobe.wearSeasonal("umbrella");
     achievements.unlock("weather");
     emit("weather", { kind, temp: Math.round(data.temp) });
+    // おなじ 日に おなじ 天気なら もう いわない。そらと かさで わかる（v1.50）
+    const d = today();
+    const said = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}:${kind}`;
+    if (store.get("warpix-weather-said", null) === said) return;
     const say = () => {
       if (!npc.ready() || playing()) return setTimeout(say, 4000);
+      store.set("warpix-weather-said", said);
       npc.say(LINES[kind](Math.round(data.temp), data.day));
     };
     say();

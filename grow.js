@@ -259,5 +259,6 @@ const grow = (() => {
   cheats.add("diary", () => room.open("diary"));
   renderBadge();
 
-  return { state, open, write, stageName: () => STAGES[state.stage].name };
+  // firstToday：きょう はじめて 来たか（あいさつの なれ v1.50 が つかう）
+  return { state, open, write, firstToday, stageName: () => STAGES[state.stage].name };
 })();

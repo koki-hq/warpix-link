@@ -698,6 +698,53 @@ const npc = (() => {
     "UFOを うちおとすと\nいいこと あるかも。",
   ];
 
+  // ---------- なれ（v1.50）：はじめての 人には ていねいに、なれた 人には みじかく ----------
+  // じこしょうかいと ボタンの せつめいは、はじめて きた ときだけ。そのあとは あいさつ 1 ぎょうで、
+  // 会った 日が ふえるほど くだけて いく。おなじ ことばが 2 かい つづかない よう、まえの を おぼえておく
+  const TIME = hour < 5 ? "late" : hour < 10 ? "morning" : hour < 17 ? "day" : "evening";
+  const HELLO = {
+    // 会って 2〜6 日
+    warm: {
+      late: ["こんな じかんに……\nもしかして よふかし？", "しーっ。\nみんな ねてる じかん だよ。"],
+      morning: ["おはよう！\nきょうも いい そら。", "おはよう！\nよく ねむれた？", "おはよう！\nきょうは どこへ ワープする？"],
+      day: ["こんにちは！\nきょうも きてくれたね。", "こんにちは！\nきょうは どこへ ワープする？", "あ、こんにちは！\nちょうど ひまだったんだ。"],
+      evening: ["こんばんは！\nほしが でてきたよ。", "こんばんは！\nきょうも おつかれさま。", "こんばんは！\nよるの そらへ ようこそ。"],
+    },
+    // 会って 7 日から（なかよし）
+    close: {
+      late: ["……ふあ。\nきみも ねむれないの？", "よふかし なかま だね。"],
+      morning: ["おはよ！", "あ、おはよう。\nまってたよ。", "おはよー。\nきょうも いこっか。"],
+      day: ["や！", "きたきた！", "おっ、きみか。"],
+      evening: ["こんばんは。\nきょうも おつかれ。", "おかえり、\nきょうは どうだった？", "よるの ぶ、はじまり！"],
+    },
+  };
+  // おなじ 日に もう いちど 来た とき
+  const AGAIN = ["あ、おかえり！", "さっきぶり！", "おっ、また きたね。", "おかえりー。"];
+  // ときどき（なかよしに なってから、その 日 はじめての ときだけ）
+  const RARE = [
+    "きみが くると、ほしが\nちょっと ふえる きがする。",
+    "……あ、ねてないよ！\nおきてたよ！",
+    "きょうの ぼく、ちょっと\nかっこよくない？",
+  ];
+
+  function pickFresh(list, key) {
+    const last = store.get(key, null);
+    const pool = list.length > 1 ? list.filter((l) => l !== last) : list;
+    const line = pool[Math.floor(Math.random() * pool.length)];
+    store.set(key, line);
+    return line;
+  }
+
+  function greeting() {
+    const visits = store.get("warpix-visits", 1);
+    const days = grow.state.days?.length ?? 1;
+    if (visits <= 1) return INTRO;
+    if (!grow.firstToday) return [pickFresh(AGAIN, "warpix-greet")];
+    const lines = [pickFresh(HELLO[days >= 7 ? "close" : "warm"][TIME], "warpix-greet")];
+    if (days >= 7 && Math.random() < 0.12) lines.push(pickFresh(RARE, "warpix-greet-rare"));
+    return lines;
+  }
+
   let queue = [];
   let full = "";
   let shown = 0;
@@ -844,7 +891,7 @@ const npc = (() => {
     ask,
     intro() {
       introStarted = true;
-      say([...INTRO, ...extraIntro]);
+      say([...greeting(), ...extraIntro]);
     },
     // あいさつの最後に1行足す（boot のときに呼ぶ）
     addIntro: (line) => extraIntro.push(line),
