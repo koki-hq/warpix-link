@@ -1875,6 +1875,16 @@ body.party {
   animation: jump 0.3s steps(3);
 }
 
+/* てを ふりすぎ：てが つかれて ぐったり（v1.48.2） */
+.ghost.tired svg {
+  animation: ghost-tired 0.9s steps(3);
+}
+
+@keyframes ghost-tired {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  30%, 80% { translate: 0 3px; rotate: -12deg; }
+}
+
 .ghost.leaving {
   animation: fade-in 0.4s steps(4) reverse forwards;
 }
@@ -1919,6 +1929,7 @@ body.party {
 @media (prefers-reduced-motion: reduce) {
   .ghost,
   .ghost.hop svg,
+  .ghost.tired svg,
   .nenga-card {
     animation: none !important;
   }
@@ -4970,6 +4981,12 @@ a,
   font-size: 16px;
   text-align: center;
   color: var(--fg);
+}
+
+/* せまい 画面では「、」の ところで 2 行に（「入」と「口。」が わかれない、v1.48.2） */
+.start-tagline span,
+.manual-lead span {
+  display: inline-block;
 }
 
 .manual-lead {

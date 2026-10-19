@@ -76,11 +76,15 @@ export default {
     await p.ev(`document.querySelector(".ghost").click()`);
     t.eq(await p.ev(`window.__sent.filter((m) => m.event === "wave").map((m) => m.payload.to)`), ["stranger"], "手を振る合図");
     await p.ev(`__fire("broadcast:wave", { payload: { from: "stranger", to: window.__me } })`);
-    // 吹き出しは文字を打ちながら次の行へ進むので、出ているあいだを短い間隔で見る
+    // 吹き出しは文字を打ちながら次の行へ進むので、出ているあいだを短い間隔で見る。
+    // 「ほかにも だれかが みてる」の おはなし中なら、おわってから いう（v1.48.2）
     let noticed = false;
-    for (let i = 0; i < 40 && !noticed; i++) {
-      noticed = (await p.text()).includes("てを");
-      if (!noticed) await t.sleep(100);
+    for (let i = 0; i < 160 && !noticed; i++) {
+      noticed = (await p.text()).includes("ふって くれた");
+      if (!noticed) {
+        if (i % 10 === 9) await p.ev(`document.getElementById("dialog").click()`); // おはなしを すすめる
+        await t.sleep(100);
+      }
     }
     t.ok(noticed, "振り返されたことに気づかない");
     for (let i = 0; i < 3; i++) await p.ev(`document.getElementById("npc").click()`);
@@ -92,6 +96,46 @@ export default {
     await p.ev(`window.__presence = { [window.__me]: [{ hat: null }] }; __fire("presence:sync")`);
     await t.sleep(600);
     t.eq(await p.ev(`document.querySelectorAll(".ghost").length`), 0, "帰った人のピクセが残っている");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "てを ふるのは おなじ 人に 10 びょうに 1 かい。ふって もらっても おはなしに わりこまず、あとで まとめて いう"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.send("Page.addScriptToEvaluateOnNewDocument", { source: SOLO_FAKE });
+    await p.goto(server.url);
+    await p.boot();
+    await p.ev(`window.__presence = { [window.__me]: [{ hat: null }], stranger: [{ hat: "party" }] }; __fire("presence:sync")`);
+    await t.sleep(300);
+    const waves = () => p.ev(`window.__sent.filter((m) => m.event === "wave").length`);
+    await p.ev(`document.querySelector(".ghost").click()`);
+    const score = await p.ev(`document.querySelector("[data-score]").textContent`);
+    for (let i = 0; i < 5; i++) await p.ev(`document.querySelector(".ghost").click()`);
+    t.eq(await waves(), 1, "れんだで なんども 合図が とぶ");
+    t.eq(await p.ev(`document.querySelector("[data-score]").textContent`), score, "れんだで スコアが ふえる");
+    t.ok(await p.ev(`document.querySelector(".ghost").classList.contains("tired")`), "てが つかれた かおに ならない");
+    await p.shot("ghost-tired.png");
+    await t.sleep(1000);
+    t.ok(await p.ev(`!document.querySelector(".ghost").classList.contains("tired")`), "つかれた かおが もどらない");
+
+    // ピクセが おはなし中：わりこまない。ふるい ばんからの れんだは 1 かいに かぞえる
+    await p.ev(`npc.say(["いま おはなし ちゅう だよ。", "まだ つづくよ。"])`);
+    for (let i = 0; i < 4; i++) await p.ev(`__fire("broadcast:wave", { payload: { from: "stranger", to: window.__me } })`);
+    await p.ev(`__fire("broadcast:wave", { payload: { from: "other", to: window.__me } })`);
+    await t.sleep(300);
+    t.ok(!(await p.text()).includes("てを"), "おはなしに わりこんだ");
+    for (let i = 0; i < 6 && !(await p.ev(`npc.ready()`)); i++) {
+      await p.ev(`document.getElementById("dialog").click()`);
+      await t.sleep(600);
+    }
+    let told = "";
+    for (let i = 0; i < 80 && !told.includes("2かい"); i++) {
+      told = await p.text();
+      await t.sleep(100);
+    }
+    t.ok(told.includes("さっき 2かい"), "あとで まとめて いわない");
     t.noErrors(p);
     await server.close();
   },

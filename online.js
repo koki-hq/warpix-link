@@ -50,10 +50,10 @@ const online = (() => {
     return { left: `${128 + r1 * Math.max(0, innerWidth - 128 - 128)}px`, top: `${50 + r2 * 36}px` };
   }
 
-  function ghostSvg(hatId) {
+  function ghostSvg(hatId, face = NPC.idle) {
     const hats = { ...wardrobeHats() };
     // ほかの人のピクセなので、自分のピクセの成長（マントなど）は着せない
-    return pixelSvg(dress(NPC.idle, hatId && hats[hatId] ? hats[hatId] : null, []));
+    return pixelSvg(dress(face, hatId && hats[hatId] ? hats[hatId] : null, []));
   }
 
   // きせかえの帽子データを借りる（world.js の wardrobe が持っている）
@@ -120,12 +120,51 @@ const online = (() => {
     el.classList.add("hop");
   }
 
+  // てを ふるのは おなじ ひとに 10 びょうに 1 かいまで（v1.48.2）。れんだで あいての じゃまを しない
+  const WAVE_GAP = 10000;
+  const wavedAt = new Map(); // id → さいごに ふった とき
+  const wavedBy = new Map(); // id → さいごに ふって もらった とき
+  let wavesLater = 0; // ピクセが おはなし中に ふって もらった かず（あとで まとめて いう）
+
+  function tired(el) {
+    el.classList.remove("hop", "tired");
+    void el.offsetWidth;
+    el.classList.add("tired");
+    el.innerHTML = ghostSvg(el.dataset.hat, NPC.blink);
+    clearTimeout(el.tiredTimer);
+    el.tiredTimer = setTimeout(() => {
+      el.classList.remove("tired");
+      el.innerHTML = ghostSvg(el.dataset.hat);
+    }, 900);
+  }
+
   function wave(id, el, e) {
+    if (Date.now() - (wavedAt.get(id) ?? -Infinity) < WAVE_GAP) return tired(el); // てが つかれちゃった
+    wavedAt.set(id, Date.now());
     bounce(el);
     sound.sfx.coin();
     score.add(10, e.clientX, e.clientY);
     channel?.send({ type: "broadcast", event: "wave", payload: { from: me, to: id } });
     achievements.unlock("hello");
+  }
+
+  // ふって もらった：おはなしの とちゅうなら わりこまず、あとで まとめて 1 かいだけ いう
+  function waved(from) {
+    const el = ghosts.get(from);
+    if (el) bounce(el);
+    if (Date.now() - (wavedBy.get(from) ?? -Infinity) < WAVE_GAP) return; // ふるい ばんの れんだ
+    wavedBy.set(from, Date.now());
+    achievements.unlock("hello");
+    npc.jump();
+    if (wavesLater++) return; // もう まって いる
+    const tell = () => {
+      if (!npc.ready() || playing()) return setTimeout(tell, 4000);
+      const n = wavesLater;
+      wavesLater = 0;
+      sound.sfx.coin();
+      npc.say(n === 1 ? ["だれかが てを\nふって くれた！", "……ぼくも ふりかえして みよう。"] : [`さっき ${n}かい\nてを ふって もらったよ！`, "……ぼくも ふりかえして みよう。"]);
+    };
+    tell();
   }
 
   async function loadCounters() {
@@ -165,13 +204,7 @@ const online = (() => {
         if (el) bounce(el);
       })
       .on("broadcast", { event: "wave" }, ({ payload }) => {
-        if (payload.to !== me) return;
-        const el = ghosts.get(payload.from);
-        if (el) bounce(el);
-        npc.jump();
-        sound.sfx.coin();
-        npc.say(["だれかが てを\nふって くれた！", "……ぼくも ふりかえして みよう。"]);
-        achievements.unlock("hello");
+        if (payload.to === me) waved(payload.from);
       });
     for (const [event, fns] of Object.entries(listeners)) {
       channel.on("broadcast", { event }, ({ payload }) => fns.forEach((fn) => fn(payload)));

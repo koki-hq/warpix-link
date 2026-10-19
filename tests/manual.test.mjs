@@ -26,6 +26,9 @@ export default {
     const p = await phone(t, IPHONE);
     await p.goto(server.url, 100);
     t.eq(await p.ev(`document.querySelector(".start-tagline").textContent`), "いつものアプリを、ちょっと楽しくひらく入口。", "さいしょの 画面の ひとこと");
+    // iPhone の はばでは「、」で 2 行。「入」と「口。」が わかれない（v1.48.2）
+    const lines = await p.ev(`[...document.querySelectorAll(".start-tagline span")].map((s) => { const r = s.getClientRects(); return [r.length, Math.round(r[0].top)]; })`);
+    t.ok(lines.length === 2 && lines[0][0] === 1 && lines[1][0] === 1 && lines[1][1] > lines[0][1], `ひとことの かいぎょう: ${JSON.stringify(lines)}`);
     t.eq((await state(p)).open, false, "テレビの スイッチの まえに 出た");
     await t.sleep(900);
     let s = await state(p);
