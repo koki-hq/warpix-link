@@ -16,7 +16,7 @@ const otegami = (() => {
   }
 
   async function href() {
-    const body = ["ピクセへ", "", "（ここに かいてね）", "", "", "──", `warpix-link v${await version()}`, kind()].join("\n");
+    const body = ["ピクセへ", "", "（ここに かいてね）", "", "", "──", `WARPIX LINK v${await version()}`, kind()].join("\n");
     return `mailto:${TO}?subject=${encodeURIComponent("ピクセに おてがみ")}&body=${encodeURIComponent(body)}`;
   }
 

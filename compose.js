@@ -282,7 +282,7 @@ const composer = (() => {
     url.searchParams.set("song", encode(draft));
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) {
-        await navigator.share({ title: "WARPIX-LINK の きょく", url: url.href });
+        await navigator.share({ title: "WARPIX LINK の きょく", url: url.href });
         say("ピクセ「おくったよ！」");
       } else {
         await navigator.clipboard.writeText(url.href);

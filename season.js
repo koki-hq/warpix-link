@@ -157,7 +157,7 @@ const season = (() => {
         <p class="nenga-kicker">HAPPY NEW YEAR ${year}</p>
         <p class="nenga-title">あけまして<br>おめでとう！</p>
         <div class="nenga-pixe">${pixelSvg(dress(NPC.idle))}</div>
-        <p class="nenga-body">ことしは ${ETO[year % 12]}どし。<br>ことしも ワーピクスの ほしぞらで<br>いっぱい あそんでね。</p>
+        <p class="nenga-body">ことしは ${ETO[year % 12]}どし。<br>ことしも ワーピックスの ほしぞらで<br>いっぱい あそんでね。</p>
         <p class="nenga-from">ピクセより</p>
         <button type="button" class="nenga-close">とじる</button>
       </div>`;

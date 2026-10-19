@@ -21,7 +21,7 @@ export default {
     const m = await mail(p);
     t.eq([m.to, m.subject], ["pixe@warpix.app", "ピクセに おてがみ"], "あて先と 題");
     const v = readFileSync(new URL("../sw.js", import.meta.url), "utf8").match(/warpix-v(\d+\.\d+(?:\.\d+)?)/)[1].replace(/\.0$/, "");
-    t.ok(m.body.includes(`warpix-link v${v}`) && m.body.includes("パソコン（ブラウザ）") && m.body.startsWith("ピクセへ"), `したがき: ${m.body}`);
+    t.ok(m.body.includes(`WARPIX LINK v${v}`) && m.body.includes("パソコン（ブラウザ）") && m.body.startsWith("ピクセへ"), `したがき: ${m.body}`);
     // おしたら にっきに（ほんとうに メールの アプリは ひらかない）
     await p.ev(`(() => { const a = document.getElementById("otegami"); a.addEventListener("click", (e) => e.preventDefault()); a.click(); })()`);
     t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "otegami")`), "にっき");

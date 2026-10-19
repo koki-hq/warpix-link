@@ -99,7 +99,7 @@ const cassetteUi = (() => {
     };
     try {
       if (navigator.share) {
-        await navigator.share({ title: "WARPIX-LINK の カセット", text: "ぼくの 6 この リンク、つかってみて！", url });
+        await navigator.share({ title: "WARPIX LINK の カセット", text: "ぼくの 6 この リンク、つかってみて！", url });
         return done("おすそわけ したよ。");
       }
     } catch (err) {

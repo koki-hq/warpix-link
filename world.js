@@ -306,7 +306,7 @@ const favicon = (() => {
     if (document.hidden) {
       // 裏のタブにいるときは、タブのアイコンとタイトルで知らせる
       favicon.alert();
-      document.title = "❗ ピクセが きたよ - warpix-link";
+      document.title = "❗ ピクセが きたよ - WARPIX LINK";
       document.addEventListener("visibilitychange", function onShow() {
         if (document.hidden) return;
         document.removeEventListener("visibilitychange", onShow);
@@ -556,12 +556,12 @@ const credits = (() => {
         <p class="cert-kicker">WARPIX-LINK</p>
         <h1 class="cert-title">にんていしょう</h1>
         <div class="cert-pixe">${pixelSvg(dress(NPC.idle))}</div>
-        <p class="cert-lead">あなたは ワーピクスの ほしぞらで<br>つぎの きろくを のこしました。</p>
+        <p class="cert-lead">あなたは ワーピックスの ほしぞらで<br>つぎの きろくを のこしました。</p>
         <table class="cert-table">${items.map(([a, b]) => `<tr><th>${a}</th><td>${b}</td></tr>`).join("")}</table>
         <p class="cert-sub">てにいれた じっせき</p>
         <p class="cert-trophies">${names.length ? names.join(" ／ ") : "これから！"}</p>
         <p class="cert-date">${d.getFullYear()}ねん ${d.getMonth() + 1}がつ ${d.getDate()}にち</p>
-        <p class="cert-sign">ワーピクスの ほしぞら あんないにん　ピクセ <span class="cert-stamp">ピ</span></p>
+        <p class="cert-sign">ワーピックスの ほしぞら あんないにん　ピクセ <span class="cert-stamp">ピ</span></p>
       </div>`;
   });
   cheats.add("print", () => print());

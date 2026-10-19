@@ -166,7 +166,7 @@ export default {
 
     // リンク集の 下にも となりの へや
     t.eq(await p.ev(`document.querySelector(".arcade-door").href`), "https://arcade.warpix.app/", "となりの へやの いりぐち");
-    t.ok(await p.ev(`document.getElementById("about").textContent.includes("WARPIX-ARCADE")`), "このページについて に となりの へや が ない");
+    t.ok(await p.ev(`document.getElementById("about").textContent.includes("WARPIX ARCADE")`), "このページについて に となりの へや が ない");
     t.noErrors(p);
     await server.close();
   },

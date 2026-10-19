@@ -244,12 +244,20 @@ export default {
     await t.sleep(2500);
     const start = await heroInfo(p);
     t.ok(start.on, "最初に着地していない");
+    // 足場は 30 コマごとに はかりなおす。パソコンが こんで いると コマが おそいので、つきなおすまで 5 びょう まつ
+    const settle = async () => {
+      let w;
+      for (let i = 0; i < 25; i++) {
+        await t.sleep(200);
+        w = await heroInfo(p);
+        if (w.on === start.on) break;
+      }
+      return w;
+    };
     await p.size(900, 640);
-    await t.sleep(1200);
-    t.eq((await heroInfo(p)).on, start.on, "小さくしたら足場から外れた");
+    t.eq((await settle()).on, start.on, "小さくしたら足場から外れた");
     await p.size(1920, 1080);
-    await t.sleep(1200);
-    t.eq((await heroInfo(p)).on, start.on, "大きく戻したら足場から外れた");
+    t.eq((await settle()).on, start.on, "大きく戻したら足場から外れた");
     t.noErrors(p);
     await server.close();
   },
