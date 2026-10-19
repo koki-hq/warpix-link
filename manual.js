@@ -156,10 +156,12 @@ const manual = (() => {
     open(false);
   });
 
+  // ?go=manual：だれでも ひらいて すぐ せつめいしょ（v1.49.2）。前に 来た 人に「ここで 見られるよ」と リンクを おくれる
+  const asked = new URLSearchParams(location.search).get("go") === "manual";
   // はじめての 人だけ。テレビの スイッチ（0.45 びょう）が おわってから。テストは WARPIX_MANUAL = false で とめる
-  if (window.WARPIX_MANUAL !== false && window.WARPIX_FIRST && !simple.on && !store.get(KEY, false)) {
+  if (asked || (window.WARPIX_MANUAL !== false && window.WARPIX_FIRST && !simple.on && !store.get(KEY, false))) {
     setTimeout(() => {
-      if (startScreen.hidden || startScreen.classList.contains("leaving")) return; // もう はじめた
+      if (startScreen.hidden || startScreen.classList.contains("leaving")) return asked && open(false); // もう はじめた（シンプルモードなど）
       open(true);
     }, reduceMotion ? 0 : 500);
   }

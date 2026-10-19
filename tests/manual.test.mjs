@@ -170,4 +170,31 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "?go=manual の リンクなら、前に 来た 人にも せつめいしょ（シンプルモードでも）"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url, 100);
+    await p.ev(`localStorage.setItem("warpix-visits", "5"); localStorage.setItem("warpix-manual", "true")`);
+    await p.goto(server.url + "?go=manual");
+    await t.sleep(1000);
+    let s = await state(p);
+    t.ok(s.open && s.page === "1/3" && !(await p.ev(`document.getElementById("start-screen").hidden`)), `?go=manual で ひらかない: ${JSON.stringify(s)}`);
+    for (let i = 0; i < 2; i++) await p.ev(`document.getElementById("manual-next").click()`);
+    t.eq((await state(p)).next, "はじめる ▶", "さいごは はじめる");
+    await p.ev(`document.getElementById("manual-next").click()`);
+    await t.sleep(2600);
+    t.ok(await p.ev(`document.body.classList.contains("booted")`), "はじめるで スタートしない");
+    // ふつうに ひらけば 出ない
+    await p.goto(server.url);
+    await t.sleep(1000);
+    t.eq((await state(p)).open, false, "?go なしで 出た");
+    // シンプルモードでも
+    await p.goto(server.url + "?simple=1&go=manual");
+    await t.sleep(1500);
+    t.ok((await state(p)).open, "シンプルモードで ?go=manual が ひらかない");
+    t.noErrors(p);
+    await server.close();
+  },
 };
