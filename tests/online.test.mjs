@@ -8,8 +8,8 @@ const SOLO_FAKE = `${FAKE_CONFIG}
   const ch = {
     on(type, filter, cb) { (handlers[type + ":" + filter.event] ??= []).push(cb); return ch; },
     subscribe(cb) { setTimeout(() => cb("SUBSCRIBED"), 10); return ch; },
-    track(p) { window.__tracked = p; return Promise.resolve(); },
-    untrack() {},
+    track(p) { window.__tracked = p; window.__tracks = (window.__tracks ?? 0) + 1; return Promise.resolve(); },
+    untrack() { window.__untracks = (window.__untracks ?? 0) + 1; },
     send(m) { window.__sent.push(m); return Promise.resolve(); },
     presenceState() { return window.__presence; },
   };
@@ -46,6 +46,18 @@ const LINKED_FAKE = `${FAKE_CONFIG}
     rpc: async () => ({ data: 1 }),
   }) };`;
 
+// 裏に まわる ふりと、音の そうちの みはり（つくった かず・おこした かず）
+const HIDE_AND_AUDIO = `
+  let hid = false;
+  Object.defineProperty(document, "hidden", { get: () => hid, configurable: true });
+  window.__hide = (v) => { hid = v; document.dispatchEvent(new Event("visibilitychange")); };
+  window.__ctxs = [];
+  const RealAC = window.AudioContext;
+  window.AudioContext = class extends RealAC {
+    constructor(...a) { super(...a); this.__resumes = 0; window.__ctxs.push(this); }
+    resume() { this.__resumes++; return super.resume(); }
+  };`;
+
 export default {
   async "ほかの人が来ると空に浮かび、手を振り合える"(t) {
     const server = await t.startServer();
@@ -80,6 +92,43 @@ export default {
     await p.ev(`window.__presence = { [window.__me]: [{ hat: null }] }; __fire("presence:sync")`);
     await t.sleep(600);
     t.eq(await p.ev(`document.querySelectorAll(".ghost").length`), 0, "帰った人のピクセが残っている");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "見ていない画面は空から消え、裏では音を起こさない。もどると音の装置を作りなおす"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.send("Page.addScriptToEvaluateOnNewDocument", { source: SOLO_FAKE + HIDE_AND_AUDIO });
+    await p.goto(server.url);
+    await p.boot();
+    await t.sleep(300);
+    t.eq(await p.ev(`window.__tracks`), 1, "つないだら そらに うかぶ");
+    t.ok(await p.ev(`sound.playing()`), "BGM が なっていない（はじめの じょうたい）");
+    await p.ev(`window.__presence = { [window.__me]: [{ hat: null }], stranger: [{ hat: null }] }; __fire("presence:sync")`);
+    t.eq(await p.ev(`__ctxs.length`), 1, "音の そうちは 1 つ");
+
+    // 裏に まわる → そらから きえる。てを ふられても 音は おきない
+    await p.ev(`__hide(true)`);
+    t.eq(await p.ev(`window.__untracks ?? 0`), 1, "裏に まわっても そらに のこる");
+    await t.sleep(200);
+    const resumes = await p.ev(`__ctxs[0].__resumes`);
+    await p.ev(`__fire("broadcast:wave", { payload: { from: "stranger", to: window.__me } })`);
+    await p.ev(`sound.sfx.coin(); sound.bgmPlay()`);
+    await t.sleep(300);
+    t.eq(await p.ev(`[__ctxs.length, __ctxs[0].__resumes, __ctxs[0].state]`), [1, resumes, "suspended"], "裏に いるのに 音が おきた");
+    await p.ev(`emit("hat", { id: "party" })`);
+    t.eq(await p.ev(`window.__tracks`), 1, "裏に いるのに ぼうしを かえたら そらに もどった");
+
+    // もどる → そらに もどる（ぼうしも あたらしく）。音の そうちは つくりなおして、BGM は つづく
+    await p.ev(`__hide(false)`);
+    await t.sleep(300);
+    t.eq(await p.ev(`[window.__tracks, window.__tracked.hat]`), [2, "party"], "もどっても そらに もどらない");
+    t.eq(await p.ev(`[__ctxs.length, __ctxs[0].state]`), [2, "closed"], "もどっても 音の そうちを つくりなおさない");
+    t.ok(await p.ev(`sound.playing() && __ctxs[1].state !== "closed"`), "つくりなおしたら BGM が とまった");
+    await p.ev(`sound.sfx.coin()`);
+    t.eq(await p.ev(`__ctxs.length`), 2, "チャリンで また 音の そうちが ふえた");
     t.noErrors(p);
     await server.close();
   },

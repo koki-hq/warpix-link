@@ -177,17 +177,33 @@ const online = (() => {
       channel.on("broadcast", { event }, ({ payload }) => fns.forEach((fn) => fn(payload)));
     }
     channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") channel.track({ hat });
+      if (status === "SUBSCRIBED") {
+        subscribed = true;
+        show();
+      }
     });
     hat = wardrobe.currentId();
     setInterval(flush, 3000);
     loadCounters();
   }
 
+  // そらに うかぶのは、いま この がめんを みて いる ひと だけ（v1.47.2）。
+  // ひらきっぱなしで うらに いる ひとは いったん そらから きえる（レイドの かたさも みている ひとの ぶんだけに なる）。
+  // 合図（レイドなど）は うらでも うけとりつづけるので、もどったら すぐ おいつく
+  let subscribed = false;
+  function show() {
+    if (subscribed && !document.hidden) channel.track({ hat });
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!subscribed) return;
+    if (document.hidden) channel.untrack();
+    else show();
+  });
+
   on("boot", connect);
   on("hat", ({ id }) => {
     hat = id;
-    channel?.track({ hat });
+    show();
   });
   on("poke", () => {
     pending.pokes++;

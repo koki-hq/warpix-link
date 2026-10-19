@@ -257,6 +257,8 @@ const sound = (() => {
 
   // ブラウザの自動再生制限があるので、最初のクリック以降に作る
   function ensure() {
+    // 裏に いる ページは 音を おこさない。だれかに てを ふられても、ポケットの なかで BGM が なりださないように（v1.47.2）
+    if (document.hidden) return false;
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return false;
@@ -273,7 +275,8 @@ const sound = (() => {
       const data = noiseBuffer.getChannelData(0);
       for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
     }
-    if (ctx.state === "suspended") ctx.resume();
+    // iPhone には「suspended」の ほかに「interrupted」も ある。どちらでも おこす
+    if (ctx.state !== "running") ctx.resume().catch(() => {});
     return true;
   }
 
@@ -437,6 +440,7 @@ const sound = (() => {
     nextTime = ctx.currentTime + delay;
     bgmGain.gain.setValueAtTime(bgmVol, ctx.currentTime);
     timer = setInterval(() => {
+      if (!ctx) return;
       // タブが裏に回って遅れたときは、まとめて鳴らさず今から再開する
       if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.05;
       while (nextTime < ctx.currentTime + 0.12) {
@@ -456,8 +460,20 @@ const sound = (() => {
   }
 
   // タブが裏にいる間は一時停止
-  const pause = () => ctx?.suspend();
-  const resume = () => ctx?.resume();
+  const pause = () => ctx?.suspend().catch(() => {});
+  // もどったら 音の そうちを つくりなおす。iPhone では リンク先で 動画などが 音を つかうと、
+  // もどった あとの 音が ゆっくり・かさなって くずれる ことが ある（v1.47.2）。せっていと BGM は ひきつぐ
+  function resume() {
+    if (!ctx) return;
+    const old = ctx;
+    ctx = null;
+    old.close().catch(() => {});
+    if (!ensure()) return;
+    nextTime = ctx.currentTime + 0.05;
+    if (timer) bgmGain.gain.setValueAtTime(bgmVol, ctx.currentTime);
+    // タップを もらうまで 音を ださせて くれない ときは、つぎの タップで おこす
+    if (ctx.state !== "running") addEventListener("pointerdown", () => ctx?.state !== "running" && ctx?.resume().catch(() => {}), { once: true, capture: true });
+  }
 
   // 1 = ふつう、1.5 = 1.5倍速（パーティーやスタッフロールで一時的に変える。自分の曲のテンポにかけ算する）
   let tempoMult = 1;
