@@ -1,5 +1,35 @@
 // 基本：起動、あいさつ、リンク、BGM、スマホのレイアウト
 export default {
+  async "ひらくと テレビの スイッチが はいる。iPhone の 起動画面は ねむっている ピクセ"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.goto(server.url);
+    t.eq(await p.ev(`getComputedStyle(document.querySelector(".tv-on")).display`), "block", "テレビの スイッチが ない");
+    // とちゅうの コマを とめて みる（よこせんが はしる → うえと したに ひらく）
+    const at = (ms) => p.ev(`document.getAnimations().filter((a) => a.animationName?.startsWith("tv-on")).forEach((a) => { a.pause(); a.currentTime = ${ms}; })`);
+    await at(120);
+    await p.shot("tv-on-line.png");
+    t.ok(await p.ev(`(() => { const r = document.querySelector(".tv-on i").getBoundingClientRect(); return r.width > innerWidth * 0.5 && r.height < 10; })()`), "よこせんが はしらない");
+    await at(320);
+    await p.shot("tv-on-open.png");
+    await p.ev(`document.getAnimations().forEach((a) => a.play())`);
+    await t.sleep(600);
+    t.eq(await p.ev(`getComputedStyle(document.querySelector(".tv-on")).visibility`), "hidden", "ひらいた あとも のこっている");
+    t.ok(await p.ev(`document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.id === "start-btn" || !!document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest("#start-screen")`), "PRESS START を おせない");
+    // うごきを へらす ときは でない
+    await p.ev(`localStorage.setItem("warpix-settings", JSON.stringify({ motion: "reduce" }))`);
+    await p.goto(server.url);
+    t.eq(await p.ev(`getComputedStyle(document.querySelector(".tv-on")).display`), "none", "うごきを へらしても でる");
+    // 起動画面：13 の 大きさ。どれも とどく
+    const hrefs = await p.ev(`[...document.querySelectorAll('link[rel="apple-touch-startup-image"]')].map((l) => l.getAttribute("href"))`);
+    t.eq(hrefs.length, 13, "起動画面の かず");
+    const codes = await p.ev(`Promise.all(${JSON.stringify(hrefs)}.map((h) => fetch(h).then((r) => r.status)))`);
+    t.ok(codes.every((c) => c === 200), `とどかない 起動画面: ${codes.join(",")}`);
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "起動してピクセがあいさつする"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <!-- iPhone の ホーム画面アプリの 起動画面（icons/splash-*.png）の 元。?w=393&h=852&r=3 の ように CSS の 大きさと 倍率を わたす（v1.47.3） -->
+  <title>WARPIX-LINK splash</title>
+  <style>
+    :root {
+      --bg: #0f0b1e;
+      --grid: #1a1433;
+    }
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .sky {
+      position: relative;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid) 2px, transparent 2px),
+        linear-gradient(90deg, var(--grid) 2px, transparent 2px);
+      background-size: 32px 32px;
+    }
+    canvas, svg {
+      position: absolute;
+      image-rendering: pixelated;
+      shape-rendering: crispEdges;
+    }
+  </style>
+</head>
+<body>
+  <div class="sky" id="sky">
+    <canvas id="stars"></canvas>
+    <svg id="pixe" viewBox="0 0 16 16"></svg>
+    <svg id="zzz" viewBox="0 0 16 15"></svg>
+  </div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const W = Number(q.get("w") || 393);
+    const H = Number(q.get("h") || 852);
+    const sky = document.getElementById("sky");
+    sky.style.width = `${W}px`;
+    sky.style.height = `${H}px`;
+
+    const PALETTE = { o: "#000", w: "#f4f4f4", p: "#ff4fa3", c: "#3ee8ff" };
+    const draw = (el, rows) => {
+      el.innerHTML = rows
+        .flatMap((row, y) => [...row].map((ch, x) => (PALETTE[ch] ? `<rect x="${x}" y="${y}" width="1" height="1" fill="${PALETTE[ch]}"/>` : "")))
+        .join("");
+    };
+    // ねむっている ピクセ（script.js の NPC.blink と おなじ）
+    const pixe = document.getElementById("pixe");
+    draw(pixe, [
+      ".......pp.......",
+      ".......ww.......",
+      ".......ww.......",
+      ".....oooooo.....",
+      "...oowwwwwwoo...",
+      "..owwwwwwwwwwo..",
+      ".owwwwwwwwwwwwo.",
+      ".owwwwwwwwwwwwo.",
+      ".owwoowwwwoowwo.",
+      ".owppwwwwwwppwo.",
+      ".owwwwwoowwwwwo.",
+      ".owwwwwwwwwwwwo.",
+      "..owwwwwwwwwwo..",
+      "...oowwwwwwoo...",
+      "....oo....oo....",
+      "................",
+    ]);
+    // z z Z（あたまの そばが ちいさく、みぎうえに いくほど おおきく）
+    const zzz = document.getElementById("zzz");
+    draw(zzz, [
+      "..........cccccc",
+      "..............c.",
+      ".............c..",
+      "............c...",
+      "...........c....",
+      "..........cccccc",
+      ".....ccccc......",
+      "........c.......",
+      ".......c........",
+      "......c.........",
+      ".....ccccc......",
+      "cccc............",
+      "..c.............",
+      ".c..............",
+      "cccc............",
+    ]);
+    // まんなかより すこし うえに。ドット 1 つは CSS で 6px
+    const S = 6;
+    const px = Math.round((W - 16 * S) / 2);
+    const py = Math.round(H * 0.42 - 8 * S);
+    Object.assign(pixe.style, { left: `${px}px`, top: `${py}px`, width: `${16 * S}px`, height: `${16 * S}px` });
+    Object.assign(zzz.style, { left: `${px + 14 * S}px`, top: `${py - 6 * S}px`, width: `${16 * (S - 3)}px`, height: `${15 * (S - 3)}px` });
+
+    // 星（毎回 おなじ 配置に なるよう、決まった 乱数で。ピクセの まわりは あける）
+    const c = document.getElementById("stars");
+    c.width = W;
+    c.height = H;
+    Object.assign(c.style, { left: 0, top: 0, width: `${W}px`, height: `${H}px` });
+    const g = c.getContext("2d");
+    let seed = 11;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const n = Math.round((W * H) / 6000);
+    for (let i = 0; i < n; i++) {
+      const big = rand() < 0.18;
+      const color = ["#f4f4f4", "#f4f4f4", "#f4f4f4", "#3ee8ff", "#ff4fa3"][Math.floor(rand() * 5)];
+      const x = Math.floor((rand() * (W - 16) + 8) / 4) * 4;
+      const y = Math.floor((rand() * (H - 16) + 8) / 4) * 4;
+      if (Math.abs(x - W / 2) < 90 && Math.abs(y - (py + 8 * S)) < 110) continue;
+      g.fillStyle = color;
+      g.fillRect(x, y, big ? 4 : 2, big ? 4 : 2);
+    }
+  </script>
+</body>
+</html>
