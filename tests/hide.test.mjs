@@ -2,6 +2,28 @@
 const ymdNow = `(() => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); })()`;
 
 export default {
+  async "スマホの はばで、がめんの ふちに かくれても ページは よこに ひろがらない（はんぶんは みえて、おせる）"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser({ width: 390, height: 844 });
+    const p = await b.firstPage();
+    await p.size(390, 844, true);
+    await p.goto(server.url);
+    // みぎに かくれる ばしょ（link2・link4）が ある 日を さがす
+    const day = await p.ev(`(() => { const d = new Date(2026, 9, 1); for (let i = 0; i < 400; i++, d.setDate(d.getDate() + 1)) { const ymd = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); if (hide.spotsOf(ymd).some(([, , side]) => side === "right")) return ymd; } return null; })()`);
+    t.ok(day, "みぎに かくれる 日が ない");
+    await p.goto(`${server.url}?date=${day}`);
+    await p.boot({ readIntro: false });
+    await t.sleep(2200);
+    t.eq(await p.ev(`[document.documentElement.scrollWidth, document.documentElement.clientWidth]`), [390, 390], "ページが よこに ひろがった");
+    const side = await p.ev(`(() => { const b = document.querySelector(".hide-pixe.side-right"); if (!b) return null; const r = b.getBoundingClientRect(); const seen = Math.min(r.right, 390) - Math.max(r.left, 0); const at = document.elementFromPoint((Math.max(r.left, 0) + Math.min(r.right, 390)) / 2, r.top + r.height / 2); return { seen, w: r.width, hit: at?.closest(".hide-pixe") === b }; })()`);
+    t.ok(side, "みぎに かくれた ちびピクセが いない");
+    t.ok(side.seen >= side.w / 2, `はんぶんも みえない: ${JSON.stringify(side)}`);
+    t.ok(side.hit, "がめんの ふちの ちびピクセが おせない");
+    await p.shot("hide-edge.png");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "3 びきが のぞいていて、みつけると 50 てん。ぜんぶで 実績。おなじ日は もう でない"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

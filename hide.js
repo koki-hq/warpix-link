@@ -71,6 +71,9 @@ const hide = (() => {
     else if (side === "bottom") [x, y] = [r.left + r.width * f - w / 2, r.bottom - 2];
     else if (side === "left") [x, y] = [r.left - w + 2, r.top + r.height * f - h / 2];
     else [x, y] = [r.right - 2, r.top + r.height * f - h / 2];
+    // がめんの ふちより そとには にげない。すくなくとも はんぶんは かおを だす（v1.47.4）
+    const W = document.documentElement.clientWidth;
+    x = Math.max(-w / 2, Math.min(x, W - w / 2));
     btn.style.left = `${Math.round(x + scrollX)}px`;
     btn.style.top = `${Math.round(y + scrollY)}px`;
     btn.classList.toggle("flip", side === "bottom");
