@@ -227,6 +227,8 @@
         <span aria-hidden="true">・</span>
         <a class="copyright news-link" id="news-link" href="https://warpix.app/#news" target="_blank" rel="noopener">製作所だより<span class="news-new" hidden>NEW</span><span class="sr-only">（あたらしい タブで ひらく）</span></a>
       </div>
+      <!-- となりの へや（v1.49）：リンクが いらない 日は ゲームセンターへ -->
+      <a class="arcade-door" href="https://arcade.warpix.app/">となりの へや：WARPIX-ARCADE（ゲームセンター） ▶</a>
       <!-- いちばん下：どこの 製品か -->
       <p class="footer-maker">© 2026 WARPIX製作所</p>
     </footer>
@@ -406,6 +408,19 @@
         <p>YouTube や Instagram など、いつも使うアプリやサイトを、ここからひらけます。ひらくまでの間に、ピクセとちょっと寄り道できます。</p>
         <p class="manual-pixe">ピクセ「ゆっくり していってね。」</p>
       </section>
+      <!-- きみの いつもは？（v1.49）：「とくに ない」人は となりの ゲームセンターへ -->
+      <section class="manual-sheet" data-sheet="where" hidden>
+        <h3>きみが いつも いく せかいは？</h3>
+        <p>いまは この 6こが ならんでいます。</p>
+        <p class="manual-mine" id="manual-mine"></p>
+        <div class="manual-choices" role="group" aria-label="こたえ">
+          <button type="button" data-where="yes" aria-pressed="false">この なかに ある！</button>
+          <button type="button" data-where="other" aria-pressed="false">ほかの アプリが いい</button>
+          <button type="button" data-where="none" aria-pressed="false">とくに ない</button>
+        </div>
+        <p class="manual-pixe" id="manual-answer" aria-live="polite"></p>
+        <a class="manual-door" id="manual-door" href="https://arcade.warpix.app/" hidden>となりの ゲームセンター WARPIX-ARCADE へ ▶</a>
+      </section>
       <section class="manual-sheet" data-sheet="how" hidden>
         <div class="manual-stage stage-how" aria-hidden="true">
           <span class="ms-pixe"></span>
@@ -444,6 +459,7 @@
       <p class="manual-lead"><span>いつものアプリを、</span><span>ちょっと楽しくひらく入口。</span></p>
       <p>いつもの 公式サイトへ、ピクセの いる 空間を とおって ワープする 踏み台リンク集です。ピクセルアートと チップチューンで できています。</p>
       <button class="save-btn" id="about-manual" type="button">とりあつかい せつめいしょを よむ</button>
+      <p class="about-arcade">「いつも いく ところ」が とくに ない 日は、となりの <a href="https://arcade.warpix.app/">WARPIX-ARCADE</a>（ピクセが まってる、レトロゲームの ゲームセンター）へ どうぞ。</p>
 
       <!-- ホームがめんに いれる（v1.37）：いまの きかいの やりかたに しるし -->
       <h3>ホームがめんに いれる</h3>

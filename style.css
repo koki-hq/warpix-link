@@ -822,6 +822,20 @@ body::after {
   gap: 8px;
 }
 
+/* となりの へや（v1.49）：ゲームセンター WARPIX-ARCADE への いりぐち */
+.arcade-door {
+  color: var(--accent-2);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  text-align: center;
+  text-underline-offset: 3px;
+}
+
+.arcade-door:hover,
+.arcade-door:focus-visible {
+  color: var(--fg);
+}
+
 /* いちばん下の 名札（どこの 製品か） */
 .footer-maker {
   margin: 0;
@@ -5072,6 +5086,74 @@ a,
 .manual-next:focus-visible,
 .manual-skip:focus-visible {
   outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+/* きみの いつもは？（v1.49） */
+.manual-mine {
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  line-height: 2;
+  color: var(--muted);
+}
+
+.manual-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+
+.manual-choices button {
+  padding: 8px 12px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--fg);
+}
+
+.manual-choices button::before {
+  content: "▶ ";
+  visibility: hidden;
+  color: var(--accent);
+}
+
+.manual-choices button[aria-pressed="true"] {
+  background: var(--btn-hover);
+  box-shadow: 0 0 0 2px var(--accent-2);
+}
+
+.manual-choices button[aria-pressed="true"]::before,
+.manual-choices button:hover::before,
+.manual-choices button:focus-visible::before {
+  visibility: visible;
+}
+
+.manual-choices button:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+.manual-door {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: var(--accent-2);
+  color: var(--bg);
+  text-decoration: none;
+  box-shadow: var(--px) var(--px) 0 0 var(--shadow);
+}
+
+.manual-door[hidden] {
+  display: none;
+}
+
+.manual-door:focus-visible {
+  outline: 2px solid var(--fg);
   outline-offset: 3px;
 }
 

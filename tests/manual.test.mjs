@@ -1,4 +1,4 @@
-// とりあつかい せつめいしょ（v1.48、おたより #4・#6）：はじめての 人にだけ。なにの アプリか・つかいかた・ホーム画面に 入れる やりかた
+// とりあつかい せつめいしょ（v1.48、おたより #4・#6）：はじめての 人にだけ。なにの アプリか・きみの いつもは？（v1.49）・つかいかた・ホーム画面に 入れる やりかた
 const ON = `window.WARPIX_MANUAL = true;`;
 const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 const INSTA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0.0.0";
@@ -21,7 +21,7 @@ async function fresh(t) {
 const state = (p) => p.ev(`({ open: document.getElementById("manual").open, page: document.getElementById("manual-page").textContent, next: document.getElementById("manual-next").textContent, skip: !document.getElementById("manual-skip").hidden, how: document.getElementById("manual-how").textContent, point: !document.getElementById("manual-point").hidden })`);
 
 export default {
-  async "はじめての 人には ひらいて すぐ せつめいしょ。3 まいめは iPhone の Safari の やりかた、はじめるで そのまま スタート"(t) {
+  async "はじめての 人には ひらいて すぐ せつめいしょ。4 まいめは iPhone の Safari の やりかた、はじめるで そのまま スタート"(t) {
     const server = await t.startServer();
     const p = await phone(t, IPHONE);
     await p.goto(server.url, 100);
@@ -32,18 +32,24 @@ export default {
     t.eq((await state(p)).open, false, "テレビの スイッチの まえに 出た");
     await t.sleep(900);
     let s = await state(p);
-    t.ok(s.open && s.page === "1/3" && s.next === "つぎへ ▶" && s.skip, `1 まいめ: ${JSON.stringify(s)}`);
+    t.ok(s.open && s.page === "1/4" && s.next === "つぎへ ▶" && s.skip, `1 まいめ: ${JSON.stringify(s)}`);
     t.ok((await p.ev(`document.querySelector('[data-sheet="what"]').textContent`)).includes("いつものアプリを、ちょっと楽しくひらく入口。"), "なにの アプリか");
     t.ok(await p.ev(`document.querySelectorAll("#manual .ms-pixe svg").length === 3 && !!document.querySelector("#manual .ms-cursor svg")`), "ピクセの え");
     await p.shot("manual-1.png");
     await p.ev(`document.getElementById("manual-next").click()`);
+    // 2 まいめ：きみの いつもは？（えらばなくても つぎへ いける）
     s = await state(p);
-    t.ok(s.page === "2/3" && (await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("SIMPLE"), `2 まいめ: ${JSON.stringify(s)}`);
+    t.ok(s.page === "2/4" && (await p.ev(`document.getElementById("manual-mine").textContent`)) === "YOUTUBE・TWITTER・INSTAGRAM・BOOTH・TUMBLR・SPOTIFY", `2 まいめ: ${JSON.stringify(s)}`);
+    await p.ev(`document.querySelector('[data-where="yes"]').click()`);
+    t.ok((await p.ev(`document.getElementById("manual-answer").textContent`)).includes("そのまま") && (await p.ev(`document.getElementById("manual-door").hidden`)), "この なかに ある の こたえ");
+    await p.ev(`document.getElementById("manual-next").click()`);
+    s = await state(p);
+    t.ok(s.page === "3/4" && (await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("SIMPLE"), `3 まいめ: ${JSON.stringify(s)}`);
     await t.sleep(2300); // ピクセが あなに とびこんで「ワープ！」の ところ
     await p.shot("manual-2.png");
     await p.ev(`document.getElementById("manual-next").click()`);
     s = await state(p);
-    t.ok(s.page === "3/3" && s.next === "はじめる ▶" && !s.skip, `3 まいめ: ${JSON.stringify(s)}`);
+    t.ok(s.page === "4/4" && s.next === "はじめる ▶" && !s.skip, `4 まいめ: ${JSON.stringify(s)}`);
     t.ok(s.how.includes("共有ボタン") && s.how.includes("ホーム画面に追加") && s.point, `Safari の やりかたと ピクセの ゆびさし: ${JSON.stringify(s)}`);
     t.ok(await p.ev(`(() => { const r = document.getElementById("manual-point").getBoundingClientRect(); return r.bottom > innerHeight - 40 && r.bottom <= innerHeight; })()`), "ピクセが 画面の 下に いない");
     await p.shot("manual-3.png");
@@ -59,13 +65,13 @@ export default {
     await server.close();
   },
 
-  async "前に 来た 人には 出ない。とばす・Esc で とじて、パソコンは 2 まい"(t) {
+  async "前に 来た 人には 出ない。とばす・Esc で とじて、パソコンは 3 まい"(t) {
     const server = await t.startServer();
     let p = await fresh(t);
     await p.goto(server.url);
     await t.sleep(1000);
     let s = await state(p);
-    t.ok(s.open && s.page === "1/2", `パソコンは ホーム画面の ページなし: ${JSON.stringify(s)}`);
+    t.ok(s.open && s.page === "1/3", `パソコンは ホーム画面の ページなし: ${JSON.stringify(s)}`);
     await p.ev(`document.getElementById("manual-skip").click()`);
     await t.sleep(300);
     t.ok(await p.ev(`!document.getElementById("manual").open && !document.getElementById("start-screen").hidden && !document.body.classList.contains("booted")`), "とばすと PRESS START に もどらない");
@@ -109,13 +115,48 @@ export default {
     await p.ev(`document.getElementById("about-manual").click()`);
     await t.sleep(200);
     let s = await state(p);
-    t.ok(s.open && s.page === "1/3" && !(await p.ev(`document.getElementById("about").open`)), `よみなおし: ${JSON.stringify(s)}`);
-    await p.ev(`document.getElementById("manual-next").click(); document.getElementById("manual-next").click()`);
+    t.ok(s.open && s.page === "1/4" && !(await p.ev(`document.getElementById("about").open`)), `よみなおし: ${JSON.stringify(s)}`);
+    await p.ev(`for (let i = 0; i < 3; i++) document.getElementById("manual-next").click()`);
     s = await state(p);
     t.ok(s.how.includes("ブラウザでひらく") && !s.point && s.next === "とじる", `インスタの なか: ${JSON.stringify(s)}`);
     await p.ev(`document.getElementById("manual-next").click()`);
     await t.sleep(300);
     t.ok(await p.ev(`!document.getElementById("manual").open && document.body.classList.contains("booted")`), "とじられない");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "いつも いく ところが「とくに ない」人は、となりの ゲームセンターへ。「ほかの アプリ」なら はじめたら たなが ひらく"(t) {
+    const server = await t.startServer();
+    let p = await fresh(t);
+    await p.goto(server.url);
+    await t.sleep(1000);
+    await p.ev(`document.getElementById("manual-next").click()`);
+    await p.ev(`document.querySelector('[data-where="none"]').click()`);
+    const s = await p.ev(`({ answer: document.getElementById("manual-answer").textContent, door: !document.getElementById("manual-door").hidden, href: document.getElementById("manual-door").href, pressed: document.querySelector('[data-where="none"]').getAttribute("aria-pressed") })`);
+    t.ok(s.answer.includes("ゲームセンター") && s.door && s.href === "https://arcade.warpix.app/" && s.pressed === "true", `とくに ない: ${JSON.stringify(s)}`);
+    await p.shot("manual-where-none.png");
+    // ゲームセンターへ いっても、もう よんだ ことに（つぎに 来ても せつめいしょは 出ない）
+    await p.ev(`document.getElementById("manual-door").addEventListener("click", (e) => e.preventDefault()); document.getElementById("manual-door").click()`);
+    t.eq(await p.ev(`localStorage.getItem("warpix-manual")`), "true", "ゲームセンターへ いったら よんだ ことに ならない");
+
+    // ほかの アプリが いい → はじめる → 起動の あとで カセットの たな
+    p = await fresh(t);
+    await p.goto(server.url);
+    await t.sleep(1000);
+    await p.ev(`document.getElementById("manual-next").click()`);
+    await p.ev(`document.querySelector('[data-where="other"]').click()`);
+    t.ok((await p.ev(`document.getElementById("manual-answer").textContent`)).includes("たな"), "ほかの アプリ の こたえ");
+    await p.ev(`for (let i = 0; i < 2; i++) document.getElementById("manual-next").click()`);
+    t.eq(await p.ev(`document.getElementById("manual-next").textContent`), "はじめる ▶", "さいごの ページ");
+    await p.ev(`document.getElementById("manual-next").click()`);
+    await t.sleep(3200);
+    t.ok(await p.ev(`document.body.classList.contains("booted") && document.getElementById("cassette").open`), "はじめても たなが ひらかない");
+    await p.ev(`document.getElementById("cassette").close()`);
+
+    // リンク集の 下にも となりの へや
+    t.eq(await p.ev(`document.querySelector(".arcade-door").href`), "https://arcade.warpix.app/", "となりの へやの いりぐち");
+    t.ok(await p.ev(`document.getElementById("about").textContent.includes("WARPIX-ARCADE")`), "このページについて に となりの へや が ない");
     t.noErrors(p);
     await server.close();
   },
