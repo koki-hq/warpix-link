@@ -8,7 +8,7 @@ import { readdirSync, statSync, readFileSync, writeFileSync, mkdirSync } from "n
 import { join } from "node:path";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
-import { cpus } from "node:os";
+import { cpus, freemem } from "node:os";
 import * as harness from "./lib/harness.mjs";
 
 const args = process.argv.slice(2);
@@ -25,7 +25,10 @@ const filter = args[0] ?? "";
 const dir = join(harness.ROOT, "tests");
 const all = readdirSync(dir).filter((f) => f.endsWith(".test.mjs") && f.includes(filter)).sort();
 const files = only ? only.split(",") : all;
-const jobs = Math.max(1, Math.min(Number(jobsArg ?? Math.min(4, Math.floor(cpus().length / 2) || 1)), files.length));
+// 同時に ながす かず：あいて いる メモリで きめる（1 つ 約 600MB、のこりに 1.5GB）。2〜5 つ、CPU の はんぶんまで。
+// 5 つで 約 10 ぷん（4 つより 15% はやい、2026-10-19）。6 つは メモリ不足で とめられた ことが ある
+const autoJobs = Math.max(2, Math.min(5, Math.floor(cpus().length / 2) || 1, Math.floor((freemem() / 1048576 - 1500) / 600)));
+const jobs = Math.max(1, Math.min(Number(jobsArg ?? autoJobs), files.length));
 const started = Date.now();
 
 // ---------- 1 つの ファイルを ながす（結果の行を かえす） ----------

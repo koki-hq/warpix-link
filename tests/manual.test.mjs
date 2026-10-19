@@ -11,10 +11,12 @@ async function phone(t, ua) {
   await p.send("Page.addScriptToEvaluateOnNewDocument", { source: ON });
   return p;
 }
-// ページの そとから きろくを けす（ページの なかで けすと、うつる ときに また かきこまれる）
-async function fresh(p, url) {
-  await p.goto("about:blank", 100);
-  await p.send("Storage.clearDataForOrigin", { origin: url.replace(/\/$/, ""), storageTypes: "local_storage" });
+// まっさらな ブラウザ（きろくを けすより たしか。テストが 混んで いても まえの きろくが のこらない）
+async function fresh(t) {
+  const b = await t.launchBrowser();
+  const p = await b.firstPage();
+  await p.send("Page.addScriptToEvaluateOnNewDocument", { source: ON });
+  return p;
 }
 const state = (p) => p.ev(`({ open: document.getElementById("manual").open, page: document.getElementById("manual-page").textContent, next: document.getElementById("manual-next").textContent, skip: !document.getElementById("manual-skip").hidden, how: document.getElementById("manual-how").textContent, point: !document.getElementById("manual-point").hidden })`);
 
@@ -56,9 +58,7 @@ export default {
 
   async "前に 来た 人には 出ない。とばす・Esc で とじて、パソコンは 2 まい"(t) {
     const server = await t.startServer();
-    const b = await t.launchBrowser();
-    const p = await b.firstPage();
-    await p.send("Page.addScriptToEvaluateOnNewDocument", { source: ON });
+    let p = await fresh(t);
     await p.goto(server.url);
     await t.sleep(1000);
     let s = await state(p);
@@ -69,14 +69,14 @@ export default {
     t.eq(await p.ev(`document.activeElement.id`), "start-btn", "とばしたら PRESS START に フォーカス");
     t.eq(await p.ev(`localStorage.getItem("warpix-manual")`), "true", "とばしても おぼえない");
     // 前に 来た ことが ある 人（せつめいしょが できる まえからの 1期生など）
-    await fresh(p, server.url);
+    p = await fresh(t);
     await p.goto(server.url, 100);
     await p.ev(`localStorage.setItem("warpix-visits", "5")`);
     await p.goto(server.url);
     await t.sleep(1000);
     t.eq((await state(p)).open, false, "前に 来た 人に 出た");
     // Esc で とじる
-    await fresh(p, server.url);
+    p = await fresh(t);
     await p.goto(server.url);
     await t.sleep(1000);
     t.ok((await state(p)).open, "まっさらなのに 出ない");
@@ -85,7 +85,7 @@ export default {
     await t.sleep(300);
     t.ok(await p.ev(`!document.getElementById("manual").open && localStorage.getItem("warpix-manual") === "true"`), "Esc で とじない・おぼえない");
     // シンプルモードでは 出ない
-    await fresh(p, server.url);
+    p = await fresh(t);
     await p.goto(server.url + "?simple=1");
     await t.sleep(1000);
     t.eq((await state(p)).open, false, "シンプルモードで 出た");
