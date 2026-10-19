@@ -4961,3 +4961,275 @@ a,
     display: none;
   }
 }
+
+/* ---------- ひとことで なにの アプリか（v1.48、おたより #4） ---------- */
+.start-tagline {
+  margin: 0;
+  padding: 0 8px;
+  font-family: "DotGothic16", monospace;
+  font-size: 16px;
+  text-align: center;
+  color: var(--fg);
+}
+
+.manual-lead {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+#about-manual {
+  margin-top: 8px;
+}
+
+/* ---------- とりあつかい せつめいしょ（v1.48、manual.js） ---------- */
+.manual-body {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding: 12px 20px 4px;
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.manual-page {
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.manual-sheet h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: normal;
+  color: var(--accent-2);
+}
+
+.manual-sheet p {
+  margin: 0 0 8px;
+}
+
+.manual-pixe {
+  color: var(--accent);
+}
+
+.manual-steps {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.manual-steps li + li {
+  margin-top: 6px;
+}
+
+.manual-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px 18px;
+}
+
+.manual-next {
+  margin-left: auto;
+  padding: 8px 14px;
+  border: 0;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: "DotGothic16", monospace;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: var(--px) var(--px) 0 0 var(--shadow);
+}
+
+.manual-skip {
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.manual-next:focus-visible,
+.manual-skip:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+/* ちいさな えの ぶたい（ゲームの せつめいしょの 画面の しゃしんが うごく かんじ） */
+.manual-stage {
+  position: relative;
+  width: 260px;
+  max-width: 100%;
+  height: 96px;
+  margin: 0 auto 12px;
+  overflow: hidden;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--bg-grid) 2px, transparent 2px),
+    linear-gradient(90deg, var(--bg-grid) 2px, transparent 2px);
+  background-size: 16px 16px;
+  box-shadow: 0 0 0 2px var(--btn);
+}
+
+.manual-stage .ms-pixe,
+.manual-point .ms-pixe {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
+.manual-stage svg,
+.manual-point svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ms-btn {
+  display: block;
+  padding: 3px 8px;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  line-height: 1.6;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--fg);
+}
+
+/* 1 まいめ：ピクセが リンクの よこで ぴょんぴょん */
+.stage-what {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.stage-what .ms-pixe {
+  animation: ms-hop 0.8s steps(2) infinite;
+}
+
+.stage-what .ms-links {
+  display: grid;
+  gap: 8px;
+  width: 120px;
+}
+
+@keyframes ms-hop {
+  50% { translate: 0 -6px; }
+}
+
+/* 2 まいめ：ボタンを おす → ピクセが あなへ → ワープ！ → かえってくる（4 びょうで くりかえす） */
+.stage-how > * {
+  position: absolute;
+}
+
+.stage-how .ms-pixe {
+  left: 16px;
+  top: 40px;
+  animation: ms-dive 4s infinite;
+}
+
+.stage-how .ms-target {
+  left: 112px;
+  top: 52px;
+  animation: ms-press 4s steps(1) infinite;
+}
+
+.stage-how .ms-hole {
+  left: 166px;
+  top: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--bg) 0 35%, var(--accent) 36% 55%, var(--accent-2) 56% 70%, transparent 71%);
+  scale: 0;
+  animation: ms-hole 4s steps(4) infinite;
+}
+
+.stage-how .ms-cursor {
+  left: 170px;
+  top: 60px;
+  width: 14px;
+  height: 22px;
+  animation: ms-cursor 4s infinite;
+}
+
+.stage-how .ms-warp {
+  left: 10px;
+  top: 8px;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  color: var(--gold);
+  opacity: 0;
+  animation: ms-warp 4s steps(1) infinite;
+}
+
+@keyframes ms-cursor {
+  0% { translate: 60px 30px; opacity: 1; }
+  25% { translate: 0 0; scale: 1; }
+  30% { scale: 0.8; }
+  35% { scale: 1; }
+  60% { opacity: 1; }
+  70%, 100% { translate: 0 0; opacity: 0; }
+}
+
+@keyframes ms-press {
+  0%, 28% { translate: 0 0; }
+  30%, 36% { translate: 2px 2px; }
+  38%, 100% { translate: 0 0; }
+}
+
+@keyframes ms-hole {
+  0%, 34% { scale: 0; }
+  42%, 68% { scale: 1; }
+  76%, 100% { scale: 0; }
+}
+
+@keyframes ms-dive {
+  0%, 38% { translate: 0 0; scale: 1; rotate: 0deg; }
+  58% { translate: 150px -34px; scale: 0; rotate: 540deg; }
+  80% { translate: 150px -34px; scale: 0; rotate: 540deg; }
+  92%, 100% { translate: 0 0; scale: 1; rotate: 0deg; }
+}
+
+@keyframes ms-warp {
+  0% { opacity: 0; }
+  58% { opacity: 1; }
+  84% { opacity: 0; }
+}
+
+/* 3 まいめ（iPhone の Safari）：ピクセが 画面の 下の ボタンの あたりを ゆびさす */
+.manual-point {
+  position: fixed;
+  left: 50%;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  translate: -50% 0;
+  pointer-events: none;
+  animation: ms-hop 0.8s steps(2) infinite;
+}
+
+.manual-point[hidden] {
+  display: none;
+}
+
+.manual-arrow {
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--accent-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manual-stage *,
+  .manual-point {
+    animation: none !important;
+  }
+}

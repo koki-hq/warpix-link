@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>warpix-link</title>
-  <meta name="description" content="ピクセが まってる、ドットの リンク集。ピクセルアート・レトロゲーム・チップチューンの せかいで、リンクを えらぶと その せかいへ ワープ。">
+  <meta name="description" content="いつものアプリを、ちょっと楽しくひらく入口。ピクセが まってる、ドットの リンク集。ピクセルアート・レトロゲーム・チップチューンの せかいで、リンクを えらぶと その せかいへ ワープ。">
 
   <!-- リンクを共有したときのカード（X・Discord・LINE など）。画像の元は tools/og-card.html -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="WARPIX-LINK">
   <meta property="og:title" content="WARPIX-LINK">
-  <meta property="og:description" content="ピクセが まってる、ドットの リンク集。リンクを えらぶと その せかいへ ワープ。">
+  <meta property="og:description" content="いつものアプリを、ちょっと楽しくひらく入口。ピクセが まってる、ドットの リンク集。リンクを えらぶと その せかいへ ワープ。">
   <meta property="og:url" content="https://link.warpix.app/">
   <meta property="og:image" content="https://link.warpix.app/og.png">
   <meta property="og:image:width" content="1200">
@@ -54,6 +54,8 @@
       const settings = JSON.parse(localStorage.getItem("warpix-settings") || "{}");
       if (settings.motion === "reduce") document.documentElement.classList.add("reduce-motion");
       if (settings.font === "plain") document.documentElement.classList.add("plain-font");
+      // はじめての 人か（せつめいしょ manual.js、v1.48）。warpix- の きろくが ひとつも なく、ひっこしで きた のでも ない
+      window.WARPIX_FIRST = !location.hash.startsWith("#move=") && !Object.keys(localStorage).some((k) => k.startsWith("warpix-"));
       // ひっこしで とどいた きろく（#move=…、move.js）。ほかの スクリプトが かきこむ まえに、もう きろくが あったかを みておく
       if (location.hash.startsWith("#move=")) {
         window.WARPIX_MOVE_IN = { code: location.hash.slice(6), had: Object.keys(localStorage).some((k) => k.startsWith("warpix-")) };
@@ -68,6 +70,8 @@
   <canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
   <section class="start-screen" id="start-screen" aria-label="スタート" hidden>
+    <!-- ひとことで なにの アプリか（v1.48、おたより #4）。宣伝文・せつめいしょ・このページについて と おなじ ことば -->
+    <p class="start-tagline">いつものアプリを、ちょっと楽しくひらく入口。</p>
     <button class="start-btn" id="start-btn" type="button">PRESS START</button>
     <p class="start-hint">CLICK OR PRESS ENTER</p>
     <button class="simple-enter" id="simple-enter" type="button">リンクだけ みる ▶</button>
@@ -385,13 +389,61 @@
     </div>
   </dialog>
 
+  <!-- はじめての 人への とりあつかい せつめいしょ（v1.48、おたより #4・#6）。なかみの うごきと ホーム画面の やりかたは manual.js -->
+  <dialog class="about manual" id="manual" aria-labelledby="manual-title">
+    <div class="about-top">
+      <h2 id="manual-title">とりあつかい せつめいしょ</h2>
+      <span class="manual-page" id="manual-page"></span>
+    </div>
+    <div class="manual-body">
+      <section class="manual-sheet" data-sheet="what">
+        <div class="manual-stage stage-what" aria-hidden="true">
+          <span class="ms-pixe"></span>
+          <span class="ms-links"><span class="ms-btn">YouTube</span><span class="ms-btn">Instagram</span><span class="ms-btn">X</span></span>
+        </div>
+        <h3>これは なに？</h3>
+        <p class="manual-lead">いつものアプリを、ちょっと楽しくひらく入口。</p>
+        <p>YouTube や Instagram など、いつも使うアプリやサイトを、ここからひらけます。ひらくまでの間に、ピクセとちょっと寄り道できます。</p>
+        <p class="manual-pixe">ピクセ「ゆっくり していってね。」</p>
+      </section>
+      <section class="manual-sheet" data-sheet="how" hidden>
+        <div class="manual-stage stage-how" aria-hidden="true">
+          <span class="ms-pixe"></span>
+          <span class="ms-hole"></span>
+          <span class="ms-btn ms-target">▶ YouTube</span>
+          <span class="ms-cursor"></span>
+          <span class="ms-warp">YouTube へ ワープ！</span>
+        </div>
+        <h3>つかいかた</h3>
+        <ol class="manual-steps">
+          <li>リンクのボタンを押すと、そのアプリやサイトがひらきます。ピクセもワープでついていきます。</li>
+          <li>戻ってくると、ピクセも帰ってきます。</li>
+          <li>ミニゲームやおみくじは寄り道。しなくても大丈夫。リンクだけ見たい日は、右上の SIMPLE へ。</li>
+        </ol>
+      </section>
+      <section class="manual-sheet" data-sheet="home" hidden>
+        <h3>ホーム画面に入れよう</h3>
+        <p>ホーム画面に入れると、アプリみたいにすぐひらけます。</p>
+        <p class="manual-how" id="manual-how"></p>
+        <button class="save-btn" id="manual-install" type="button" hidden>ホーム画面に入れる</button>
+        <div class="manual-point" id="manual-point" aria-hidden="true" hidden><span class="ms-pixe"></span><span class="manual-arrow">ここ！<br>▼</span></div>
+      </section>
+    </div>
+    <div class="manual-nav">
+      <button class="manual-skip" id="manual-skip" type="button">とばす</button>
+      <button class="manual-next" id="manual-next" type="button">つぎへ ▶</button>
+    </div>
+  </dialog>
+
   <dialog class="about" id="about" aria-labelledby="about-title">
     <div class="about-top">
       <h2 id="about-title">このページについて</h2>
       <button class="about-close" id="about-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <div class="about-body">
+      <p class="manual-lead">いつものアプリを、ちょっと楽しくひらく入口。</p>
       <p>いつもの 公式サイトへ、ピクセの いる 空間を とおって ワープする 踏み台リンク集です。ピクセルアートと チップチューンで できています。</p>
+      <button class="save-btn" id="about-manual" type="button">とりあつかい せつめいしょを よむ</button>
 
       <!-- ホームがめんに いれる（v1.37）：いまの きかいの やりかたに しるし -->
       <h3>ホームがめんに いれる</h3>
@@ -411,7 +463,7 @@
       <p class="about-note">メールの アプリが ひらきます。したがきに いまの 版と きかいの しゅるいが はいって いるので、バグの ときに たすかります（けしても だいじょうぶ）。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき、きょうと さいきん 2 しゅうかんの ワープや つついた かず（こんやの 3ぎょうと てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセット、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき、きょうと さいきん 2 しゅうかんの ワープや つついた かず（こんやの 3ぎょうと てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセット、よく いく リンク、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、さいごに ページを みていた じこく（おるすばんの ため）、BGM や シンプルモードの せってい、せつめいしょを よんだか。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -503,5 +555,6 @@
   <script src="tonight.js" defer></script>
   <script src="letter.js" defer></script>
   <script src="about.js" defer></script>
+  <script src="manual.js" defer></script>
 </body>
 </html>

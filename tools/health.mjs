@@ -110,7 +110,9 @@ async function axe(p, label, setup = "") {
   await axe(p, "おへや：ぼうし", `document.getElementById("tab-hat").click()`);
   await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "このページについて", `document.getElementById("about-btn").click()`);
-  await p.ev(`document.getElementById("about").close()`);
+  await axe(p, "とりあつかい せつめいしょ（1 まいめ）", `document.getElementById("about-manual").click()`);
+  await axe(p, "とりあつかい せつめいしょ（2 まいめ）", `document.getElementById("manual-next").click()`);
+  await p.ev(`document.getElementById("manual").close()`);
   await axe(p, "せってい", `document.getElementById("settings-btn").click()`);
   await p.ev(`document.getElementById("settings").close()`);
   await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); document.getElementById("compose-btn").click()`);

@@ -1,7 +1,7 @@
 {
   "name": "WARPIX-LINK",
   "short_name": "WARPIX",
-  "description": "ピクセルアート・レトロゲーム・チップチューンのリンク集。ピクセが まってるよ。",
+  "description": "いつものアプリを、ちょっと楽しくひらく入口。ピクセルアート・レトロゲーム・チップチューンのリンク集。ピクセが まってるよ。",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
