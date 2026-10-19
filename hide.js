@@ -99,7 +99,12 @@ const hide = (() => {
     reposition();
   }
   function reposition() {
+    // レイヤーを ページ ぜんたいの たかさに（じぶんの たかさを ぬいて はかる。いちばん したの ちびピクセが きれない ように）
+    layer.style.height = "0";
+    const page = document.documentElement.scrollHeight;
     for (const [b, spot] of buttons) place(b, spot);
+    const bottom = Math.max(0, ...buttons.map(([b]) => (b.hidden ? 0 : parseFloat(b.style.top) + b.offsetHeight + 8)));
+    layer.style.height = `${Math.max(page, bottom)}px`;
   }
 
   function find([id], btn, e) {

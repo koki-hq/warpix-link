@@ -19,6 +19,11 @@ export default {
     t.ok(side, "みぎに かくれた ちびピクセが いない");
     t.ok(side.seen >= side.w / 2, `はんぶんも みえない: ${JSON.stringify(side)}`);
     t.ok(side.hit, "がめんの ふちの ちびピクセが おせない");
+    // iPhone では「たかさ 0 で よこだけ きる」と ぜんぶ きえた（v1.47.4）。どの ちびピクセも レイヤーの なかに おさまって いる
+    t.ok(await p.ev(`(() => { const L = document.querySelector(".hide-layer").getBoundingClientRect(); return [...document.querySelectorAll(".hide-pixe")].every((b) => { const r = b.getBoundingClientRect(); return r.top >= L.top && r.bottom <= L.bottom; }); })()`), "ちびピクセが レイヤーの そとに いる（iPhone で きれる）");
+    t.eq(await p.ev(`getComputedStyle(document.querySelector(".hide-layer")).overflowY`), "hidden", "レイヤーの きりかた");
+    // レイヤーが ページに かぶっても、リンクは おせる
+    t.ok(await p.ev(`[...document.querySelectorAll(".pixel-btn:not(.secret)")].every((a) => { const r = a.getBoundingClientRect(); return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest(".pixel-btn") === a; })`), "リンクが おせない");
     await p.shot("hide-edge.png");
     t.noErrors(p);
     await server.close();
