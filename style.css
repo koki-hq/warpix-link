@@ -5083,7 +5083,32 @@ a,
   cursor: pointer;
 }
 
+/* まえの ページへ（v1.49.1） */
+.manual-back {
+  padding: 8px 10px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.manual-back[hidden] {
+  display: none;
+}
+
+/* もどる と つぎへ は みぎに ならべる */
+.manual-back {
+  margin-left: auto;
+}
+
+.manual-back:not([hidden]) + .manual-next {
+  margin-left: 0;
+}
+
 .manual-next:focus-visible,
+.manual-back:focus-visible,
 .manual-skip:focus-visible {
   outline: 2px solid var(--accent-2);
   outline-offset: 3px;

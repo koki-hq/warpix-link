@@ -33,6 +33,7 @@ export default {
     await t.sleep(900);
     let s = await state(p);
     t.ok(s.open && s.page === "1/4" && s.next === "つぎへ ▶" && s.skip, `1 まいめ: ${JSON.stringify(s)}`);
+    t.ok(await p.ev(`document.getElementById("manual-back").hidden`), "1 まいめに もどる が ある");
     t.ok((await p.ev(`document.querySelector('[data-sheet="what"]').textContent`)).includes("いつものアプリを、ちょっと楽しくひらく入口。"), "なにの アプリか");
     t.ok(await p.ev(`document.querySelectorAll("#manual .ms-pixe svg").length === 3 && !!document.querySelector("#manual .ms-cursor svg")`), "ピクセの え");
     await p.shot("manual-1.png");
@@ -40,6 +41,11 @@ export default {
     // 2 まいめ：きみの いつもは？（えらばなくても つぎへ いける）
     s = await state(p);
     t.ok(s.page === "2/4" && (await p.ev(`document.getElementById("manual-mine").textContent`)) === "YOUTUBE・TWITTER・INSTAGRAM・BOOTH・TUMBLR・SPOTIFY", `2 まいめ: ${JSON.stringify(s)}`);
+    // もどる で 1 まいめへ、また つぎへ（v1.49.1）
+    t.ok(await p.ev(`!document.getElementById("manual-back").hidden`), "2 まいめに もどる が ない");
+    await p.ev(`document.getElementById("manual-back").click()`);
+    t.eq([(await state(p)).page, await p.ev(`document.getElementById("manual-back").hidden`)], ["1/4", true], "もどる で 1 まいめに もどらない");
+    await p.ev(`document.getElementById("manual-next").click()`);
     await p.ev(`document.querySelector('[data-where="yes"]').click()`);
     t.ok((await p.ev(`document.getElementById("manual-answer").textContent`)).includes("そのまま") && (await p.ev(`document.getElementById("manual-door").hidden`)), "この なかに ある の こたえ");
     await p.ev(`document.getElementById("manual-next").click()`);
@@ -150,8 +156,12 @@ export default {
     await p.ev(`for (let i = 0; i < 2; i++) document.getElementById("manual-next").click()`);
     t.eq(await p.ev(`document.getElementById("manual-next").textContent`), "はじめる ▶", "さいごの ページ");
     await p.ev(`document.getElementById("manual-next").click()`);
+    // ピクセの あいさつの とちゅうでは ひらかない。よみおわったら ひらく（v1.49.1）
     await t.sleep(3200);
-    t.ok(await p.ev(`document.body.classList.contains("booted") && document.getElementById("cassette").open`), "はじめても たなが ひらかない");
+    t.ok(await p.ev(`document.body.classList.contains("booted") && !npc.ready() && !document.getElementById("cassette").open`), "あいさつの とちゅうで たなが ひらいた");
+    await p.readIntro();
+    await t.sleep(2000);
+    t.ok(await p.ev(`document.getElementById("cassette").open`), "あいさつの あとに たなが ひらかない");
     await p.ev(`document.getElementById("cassette").close()`);
 
     // リンク集の 下にも となりの へや

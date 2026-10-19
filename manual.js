@@ -9,6 +9,7 @@ const manual = (() => {
   const pageEl = document.getElementById("manual-page");
   const nextBtn = document.getElementById("manual-next");
   const skipBtn = document.getElementById("manual-skip");
+  const backBtn = document.getElementById("manual-back");
   const installBtn = document.getElementById("manual-install");
   const point = document.getElementById("manual-point");
   const startScreen = document.getElementById("start-screen");
@@ -82,6 +83,7 @@ const manual = (() => {
     const last = page === pages.length - 1;
     nextBtn.textContent = last ? (fromStart ? "はじめる ▶" : "とじる") : "つぎへ ▶";
     skipBtn.hidden = last;
+    backBtn.hidden = page === 0; // まえの ページに もどれる（v1.49.1）
     if (pages[page].dataset.sheet === "home") document.getElementById("manual-how").textContent = homeHow();
     else point.hidden = true;
     if (pages[page].dataset.sheet === "where") mineEl.textContent = CASSETTES.current().map((id) => CASSETTES.byId(id).label).join("・");
@@ -116,9 +118,26 @@ const manual = (() => {
     close();
     // はじめての 人は「はじめる」で そのまま PRESS START と おなじに
     if (fromStart && !startScreen.hidden) document.getElementById("start-btn").click();
-    // 「ほかの アプリが いい」：たなを ひらく（はじめる ときは 起動の 演出が おわってから）
-    if (wantShelf) setTimeout(() => cassetteUi.open(), fromStart ? 2600 : 0);
+    // 「ほかの アプリが いい」：たなを ひらく。はじめる ときは ピクセの あいさつを さいごまで よんでから（v1.49.1）
+    if (wantShelf) (fromStart ? afterHello : (fn) => fn())(() => cassetteUi.open());
   });
+  backBtn.addEventListener("click", () => {
+    if (page === 0) return;
+    page--;
+    show();
+    (backBtn.hidden ? nextBtn : backBtn).focus();
+  });
+
+  // ピクセの さいしょの あいさつが おわって、ゲームなども して いない ときに fn（2 ふん まって こなければ やめる）
+  function afterHello(fn) {
+    const until = Date.now() + 120000;
+    const tick = () => {
+      if (Date.now() > until) return;
+      if (!npc.ready() || playing() || document.querySelector("dialog[open]")) return setTimeout(tick, 500);
+      setTimeout(fn, 400);
+    };
+    setTimeout(tick, 1000);
+  }
   skipBtn.addEventListener("click", () => {
     close();
     if (fromStart) document.getElementById("start-btn").focus();
