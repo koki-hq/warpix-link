@@ -27,12 +27,13 @@ export default {
   async "もどって 音が タップまち なら BGM ボタンが「TAP」。おしても OFF に ならず 音が もどる"(t) {
     const { server, p } = await page(t);
     t.eq(await p.ev(`document.getElementById("bgm-toggle").textContent`), "BGM ON", "はじめ");
-    // iPhone の ように、タップを もらうまで 音を おこさない AudioContext に する
+    // iPhone の ように、ゆびを はなした とき（click・touchend）しか 音を おこさない AudioContext に する。
+    // pointerdown では おきない（v1.50.2 は これで「TAP」の まま だった）
     await p.ev(`(() => {
       const AC = window.AudioContext;
       window.AudioContext = class extends AC {
         constructor() { super(); super.suspend(); }
-        resume() { return window.__allow ? super.resume() : Promise.resolve(); }
+        resume() { return ["click", "touchend"].includes(window.event?.type) ? super.resume() : Promise.resolve(); }
       };
       let hid = false;
       Object.defineProperty(document, "hidden", { get: () => hid, configurable: true });
@@ -43,9 +44,9 @@ export default {
     await t.sleep(1200);
     t.eq(await p.ev(`document.getElementById("bgm-toggle").textContent`), "BGM TAP!", "タップまちを みせない");
     t.ok(await p.ev(`document.getElementById("bgm-toggle").classList.contains("waiting")`), "クラス");
-    await p.ev(`window.__allow = true`);
     await p.click("#bgm-toggle");
-    await t.sleep(800);
+    // パソコンが こんで いると 音が おきるのが おそい（5 並列で 0.8 びょうでは まにあわなかった）。4 びょう まで まつ
+    for (let i = 0; i < 20 && (await p.ev(`sound.waiting()`)); i++) await t.sleep(200);
     t.eq(await p.ev(`document.getElementById("bgm-toggle").textContent`), "BGM ON", "音が もどらない／OFF に なった");
     t.ok(await p.ev(`sound.playing()`), "BGM が とまった");
     t.ok((await p.ev(`localStorage.getItem("warpix-bgm")`)) !== "off", "OFF を ほぞん した");

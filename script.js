@@ -485,9 +485,13 @@ const sound = (() => {
       if (now !== ctx || now.state === "running" || document.hidden) return;
       setWaiting(true);
       now.addEventListener("statechange", () => now === ctx && now.state === "running" && setWaiting(false));
-      addEventListener("pointerdown", () => ctx?.state !== "running" && ctx?.resume().catch(() => {}), { once: true, capture: true });
     }, 500);
   }
+  // iPhone は ゆびを はなした とき（touchend・click）しか 音を おこさせて くれない。
+  // pointerdown では むしされて、「TAP」の まま なおらなかった（v1.50.3）
+  const wake = () => waiting && ensure();
+  addEventListener("touchend", wake, { capture: true, passive: true });
+  addEventListener("click", wake, { capture: true });
   let waiting = false;
   let onWaiting = () => {};
   function setWaiting(v) {
@@ -1088,7 +1092,7 @@ const simple = (() => {
   });
 
   bgmToggle.addEventListener("click", () => {
-    // 「TAP」の ときに おしたら、とめずに 音を おこす だけ（おこすのは pointerdown が もう やって いる）
+    // 「TAP」の ときに おしたら、とめずに 音を おこす だけ（おこすのは click の wake が もう やって いる）
     if (bgmOn && sound.waiting()) return;
     bgmOn = !bgmOn;
     renderToggle();
