@@ -415,6 +415,7 @@ const composer = (() => {
     const wait = () => {
       if (!npc.ready() || playing() || npc.isAway()) return setTimeout(wait, 1000);
       npc.ask("だれかから きょくが\nとどいてる！ きいてみる？", ["きく", "あとで"]).then((i) => {
+        if (i === 1) npc.say(["じゃあ また あとでね。"]);
         if (i !== 0) return;
         received = gift;
         current = gift;

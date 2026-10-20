@@ -198,7 +198,9 @@ const rusuban = (() => {
     const img = dialog.querySelector("img");
     const url = cv.toDataURL("image/png");
     img.src = url;
-    dialog.querySelector(".rusuban-save").href = url;
+    const save = dialog.querySelector(".rusuban-save");
+    save.href = url;
+    cv.toBlob((blob) => blob && postcard.saveLink(save, blob, save.getAttribute("download")), "image/png");
     const msg = dialog.querySelector(".rusuban-msg");
     const play = dialog.querySelector(".rusuban-play");
     play.addEventListener("click", () => {

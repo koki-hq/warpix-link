@@ -108,7 +108,10 @@ const rta = (() => {
       if (playing() || !npc.ready() || npc.busy() || simple.on || postcard.isOpen()) return;
       if (document.querySelector(".credits, dialog[open], .postcard")) return;
       clearInterval(timer);
-      npc.ask("きょうの きろく、\nカードに する？", ["つくる", "いい"]).then((i) => i === 0 && open());
+      npc.ask("きょうの きろく、\nカードに する？", ["つくる", "いい"]).then((i) => {
+        if (i === 0) open();
+        else if (i === 1) npc.say(["わかった！"]); // ことわっても、きいた ことばが のこらない ように
+      });
     }, 800);
     setTimeout(() => clearInterval(timer), 60000);
   }

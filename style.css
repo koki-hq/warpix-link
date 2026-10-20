@@ -342,6 +342,18 @@ body::after {
   color: var(--muted);
 }
 
+/* もどった あと、タップで 音を おこす のを まって いる（v1.50.2） */
+.bgm-toggle.waiting {
+  color: var(--accent, #ff4fa3);
+  animation: bgm-wait 1s steps(2) infinite;
+}
+@keyframes bgm-wait {
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bgm-toggle.waiting { animation: none; }
+}
+
 .bgm-toggle:hover,
 .bgm-toggle:focus-visible {
   background: var(--btn-hover);

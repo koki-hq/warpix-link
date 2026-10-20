@@ -118,7 +118,11 @@ export default {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
+    // まいかい はじめての 人に して くらべる。2 かいめは ピクセの あいさつが かわり（v1.50 なれ）、
+    // 足場の 高さが ずれる ことが ある（v1.50.2 で 6px ずれて こけた。main でも おなじ）
     const spotsOn = async (date) => {
+      await p.goto(server.url);
+      await p.ev(`localStorage.clear()`);
       await p.goto(`${server.url}?date=${date}`);
       await p.boot({ readIntro: false });
       await p.ev(`adventure.start()`);

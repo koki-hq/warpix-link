@@ -181,7 +181,10 @@ const opening = (() => {
     const timer = setInterval(() => {
       if (playing() || npc.busy() || simple.on || postcard.isOpen() || document.querySelector(".credits, dialog[open]")) return;
       clearInterval(timer);
-      npc.ask("みんなで きねんしゃしん とろう！", ["とる", "いい"]).then((i) => i === 0 && openPhoto(entry));
+      npc.ask("みんなで きねんしゃしん とろう！", ["とる", "いい"]).then((i) => {
+        if (i === 0) openPhoto(entry);
+        else if (i === 1) npc.say(["わかった！"]);
+      });
     }, 800);
     setTimeout(() => clearInterval(timer), 60000);
   }

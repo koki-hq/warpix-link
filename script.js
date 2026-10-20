@@ -262,6 +262,11 @@ const sound = (() => {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return false;
+      // iPhone に「BGM は 背景の 音」と つたえる。Spotify など ほかの 音を とめたり、
+      // 音の つかいかたを うばったり しない（マナーモードでは 鳴らない）（v1.50.2）
+      try {
+        if (navigator.audioSession) navigator.audioSession.type = "ambient";
+      } catch {}
       ctx = new AC();
       bgmGain = ctx.createGain();
       bgmGain.gain.value = 0;
@@ -465,14 +470,30 @@ const sound = (() => {
   // もどった あとの 音が ゆっくり・かさなって くずれる ことが ある（v1.47.2）。せっていと BGM は ひきつぐ
   function resume() {
     if (!ctx) return;
+    setWaiting(false);
     const old = ctx;
     ctx = null;
     old.close().catch(() => {});
     if (!ensure()) return;
     nextTime = ctx.currentTime + 0.05;
     if (timer) bgmGain.gain.setValueAtTime(bgmVol, ctx.currentTime);
-    // タップを もらうまで 音を ださせて くれない ときは、つぎの タップで おこす
-    if (ctx.state !== "running") addEventListener("pointerdown", () => ctx?.state !== "running" && ctx?.resume().catch(() => {}), { once: true, capture: true });
+    // タップを もらうまで 音を ださせて くれない ときは、つぎの タップで おこす。
+    // まつ あいだは BGM ボタンに「TAP」と だす。ON なのに しずかだと、こわれたかと ふあんに なるから（v1.50.2）
+    // （つくりたては すこしの あいだ suspended なので、0.5 びょう まって から きめる）
+    const now = ctx;
+    setTimeout(() => {
+      if (now !== ctx || now.state === "running" || document.hidden) return;
+      setWaiting(true);
+      now.addEventListener("statechange", () => now === ctx && now.state === "running" && setWaiting(false));
+      addEventListener("pointerdown", () => ctx?.state !== "running" && ctx?.resume().catch(() => {}), { once: true, capture: true });
+    }, 500);
+  }
+  let waiting = false;
+  let onWaiting = () => {};
+  function setWaiting(v) {
+    if (waiting === v) return;
+    waiting = v;
+    onWaiting(v);
   }
 
   // 1 = ふつう、1.5 = 1.5倍速（パーティーやスタッフロールで一時的に変える。自分の曲のテンポにかけ算する）
@@ -496,7 +517,9 @@ const sound = (() => {
   }
 
   return {
-    sfx, bgmPlay, bgmStop, pause, resume, setTempo, setBpm, setSong, setVolumes,
+    sfx, bgmPlay, bgmStop, pause, resume, setTempo,
+    waiting: () => waiting,
+    onWaiting: (fn) => (onWaiting = fn), setBpm, setSong, setVolumes,
     volumes: () => ({ bgm: bgmVol, se: seVol }),
     defaultSong: DEFAULT_SONG,
     song: () => ({ lead: LEAD, bass: BASS }),
@@ -1035,10 +1058,13 @@ const simple = (() => {
   } catch {}
 
   function renderToggle() {
-    bgmToggle.textContent = bgmOn ? "BGM ON" : "BGM OFF";
+    const wait = bgmOn && sound.waiting();
+    bgmToggle.textContent = wait ? "BGM TAP!" : bgmOn ? "BGM ON" : "BGM OFF";
+    bgmToggle.classList.toggle("waiting", wait);
     bgmToggle.setAttribute("aria-pressed", String(bgmOn));
   }
   renderToggle();
+  sound.onWaiting(renderToggle);
 
   document.querySelectorAll(".pixel-btn").forEach((btn, i) => {
     btn.style.setProperty("--i", i);
@@ -1062,6 +1088,8 @@ const simple = (() => {
   });
 
   bgmToggle.addEventListener("click", () => {
+    // 「TAP」の ときに おしたら、とめずに 音を おこす だけ（おこすのは pointerdown が もう やって いる）
+    if (bgmOn && sound.waiting()) return;
     bgmOn = !bgmOn;
     renderToggle();
     try {

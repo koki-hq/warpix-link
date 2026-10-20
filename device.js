@@ -57,6 +57,7 @@ const pocket = (() => {
       if (!npc.ready() || playing() || npc.isAway()) return setTimeout(offer, 10000);
       npc.ask("ぼくを ホームがめんに\nつれていける みたい！", ["つれていく", "あとで"]).then((i) => {
         if (i === 0) install();
+        else if (i === 1) npc.say(["わかった！"]);
       });
     }, 90000);
   });

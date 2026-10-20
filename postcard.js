@@ -151,6 +151,20 @@ const postcard = (() => {
     overlay = null;
   };
 
+  // 「ほぞん」：スマホでは 共有の まどを ひらく。そこの「画像を 保存」で しゃしんに はいる。
+  // iPhone の ホーム画面の アプリでは、ふつうの ダウンロードが しゃしんに はいらない から（v1.50.2）。
+  // パソコンや 共有できない ブラウザでは、そのまま ダウンロード
+  function saveLink(a, blob, name) {
+    const file = new File([blob], name, { type: "image/png" });
+    a.addEventListener("click", async (e) => {
+      if (!matchMedia("(pointer: coarse)").matches || !navigator.canShare?.({ files: [file] })) return;
+      e.preventDefault();
+      try {
+        await navigator.share({ files: [file] }); // 文や URL を つけると「画像を 保存」が でない ことが ある
+      } catch {}
+    });
+  }
+
   // canvas の 画像を、ほぞん・シェアできる まどで みせる（ぼうけんの きろくカードも つかう、v1.39）
   async function show(cv, { name, title, alt }) {
     const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
@@ -170,6 +184,7 @@ const postcard = (() => {
         </div>
       </div>`;
     const file = new File([blob], name, { type: "image/png" });
+    saveLink(overlay.querySelector(".postcard-save"), blob, name);
     const share = overlay.querySelector(".postcard-share");
     if (!(navigator.canShare && navigator.canShare({ files: [file] }))) share.hidden = true;
     share.addEventListener("click", async () => {
@@ -198,5 +213,5 @@ const postcard = (() => {
   });
   cheats.add("postcard", open);
 
-  return { render, open, show, drawSprite, fontsReady, isOpen: () => Boolean(overlay) };
+  return { render, open, show, saveLink, drawSprite, fontsReady, isOpen: () => Boolean(overlay) };
 })();

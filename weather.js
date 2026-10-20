@@ -2,6 +2,7 @@
 // 天気は Open-Meteo（無料・キー不要）から取る。位置は 0.1 度（約 10km）に丸めてから送る
 const weather = (() => {
   const CACHE_MS = 30 * 60 * 1000;
+  const PLACE_MS = 24 * 60 * 60 * 1000;
   const UMBRELLA = {
     name: "かさ", top: 0,
     rows: [
@@ -192,12 +193,17 @@ const weather = (() => {
   async function fetchWeather() {
     const cached = store.get("warpix-weather-cache", null);
     if (cached && Date.now() - cached.at < CACHE_MS) return cached;
-    const { lat, lon } = await locate();
+    // ばしょは 1 にち つかいまわす。iPhone の アプリだと、ききに いく たびに「ばしょを つかう？」が 出て しまうから（v1.50.2）
+    const fresh = cached?.lat != null && Date.now() - cached.placeAt < PLACE_MS;
+    const { lat, lon } = fresh ? cached : await locate();
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=weather_code,is_day,temperature_2m&timezone=auto`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`weather ${res.status}`);
     const j = await res.json();
-    const data = { at: Date.now(), code: j.current.weather_code, day: j.current.is_day === 1, temp: j.current.temperature_2m };
+    const data = {
+      at: Date.now(), code: j.current.weather_code, day: j.current.is_day === 1, temp: j.current.temperature_2m,
+      lat, lon, placeAt: fresh ? cached.placeAt : Date.now(),
+    };
     store.set("warpix-weather-cache", data);
     return data;
   }
