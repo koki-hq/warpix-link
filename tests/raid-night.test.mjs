@@ -80,16 +80,13 @@ export default {
     await server.close();
   },
 
-  async "ふつうの にちようびの 21:00 は いつもの マザーシップ（HP 30・60 びょう）"(t) {
+  async "ふつうの 日は マザーシップが こない（v1.51 で 10 ぷんごとの レイドを やめた）。WORLD RECORD は つぎの しゅうらいの よるの 日"(t) {
     const { server, p } = await open(t, ORDINARY - 3000);
     await p.boot();
-    let hp = "";
-    for (let i = 0; i < 20 && !hp.startsWith("HP 30"); i++) {
-      await t.sleep(500);
-      hp = await p.ev(`document.querySelector(".raid-hp")?.textContent ?? ""`);
-    }
-    t.eq(hp, "HP 30/30", "いつもの HP");
-    t.ok(!(await p.ev(`document.querySelector(".raid").classList.contains("night")`)), "きんいろに なった");
+    await t.sleep(6000);
+    t.ok(!(await p.ev(`Boolean(document.querySelector(".raid"))`)), "ふつうの 日に マザーシップが きた");
+    t.ok(!(await p.text()).includes("なにか くる"), "ふつうの 日に 予告した");
+    t.eq(await p.ev(`document.getElementById("raid-next").textContent`), "12/6 21:00", "つぎの しゅうらいの よる");
     t.noErrors(p);
     await server.close();
   },

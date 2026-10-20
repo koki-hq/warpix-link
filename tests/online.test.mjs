@@ -20,11 +20,11 @@ const SOLO_FAKE = `${FAKE_CONFIG}
     rpc: async (name, args) => { window.__rpc.push([name, args]); return { data: 1 }; },
   }) };`;
 
-// 同じブラウザの中のページどうしを BroadcastChannel でつなぐにせもの ＋ 時計を「次の 10 分の 3 秒前」に進める
+// 同じブラウザの中のページどうしを BroadcastChannel でつなぐにせもの ＋ 時計を「しゅうらいの よる（2026-11-01 21:00）の 3 秒前」に する
+// （v1.51 から ふだんの 10 ぷんごとの レイドは ない）
 const LINKED_FAKE = `${FAKE_CONFIG}
   const realNow = Date.now.bind(Date);
-  const P = 10 * 60 * 1000;
-  const target = Math.ceil((realNow() + 4000) / P) * P - 3000;
+  const target = Date.UTC(2026, 10, 1, 12) - 3000;
   const offset = target - realNow();
   Date.now = () => realNow() + offset;
   const bc = new BroadcastChannel("fake-sky");
@@ -186,19 +186,22 @@ export default {
     await p.goto(`${server.url}tests/fixtures/pair.html`, 2500);
     const inFrame = (i, expr) => p.ev(`document.querySelectorAll("iframe")[${i}].contentWindow.eval(${JSON.stringify(expr)})`);
     for (const i of [0, 1]) await inFrame(i, `document.getElementById("start-btn").click()`);
-    // 時計は「次の 10 分の 3 秒前」から始まっている。レイドが始まって HP がそろうまで待つ
+    // 時計は「しゅうらいの よるの 3 秒前」から始まっている。レイドが始まって HP がそろうまで待つ
     let ready = false;
+    let hp = "";
     for (let k = 0; k < 20 && !ready; k++) {
       await t.sleep(500);
-      ready = (await inFrame(0, `document.querySelector(".raid-hp")?.textContent ?? ""`)).startsWith("HP 30") &&
-        (await inFrame(1, `document.querySelector(".raid-hp")?.textContent ?? ""`)).startsWith("HP 30");
+      hp = await inFrame(0, `document.querySelector(".raid-hp")?.textContent ?? ""`);
+      ready = /^HP \d+\/\d+$/.test(hp) && hp === (await inFrame(1, `document.querySelector(".raid-hp")?.textContent ?? ""`));
     }
-    t.ok(ready, "ふたりの画面に HP 30 のマザーシップが出ない");
+    t.ok(ready, `ふたりの画面に おなじ HP の マザーシップが出ない: ${hp}`);
+    const max = Number(hp.split("/")[1]);
+    t.ok(max === 90 || max === 180, `HP が ひとり 90 で ない: ${max}`);
     await p.shot("online-raid-pair.png");
     for (let i = 0; i < 5; i++) { await inFrame(0, `document.querySelector(".raid-ship").click()`); await t.sleep(40); }
     await t.sleep(800);
-    t.eq(await inFrame(1, `document.querySelector(".raid-hp").textContent`), "HP 25/30", "相手の攻撃が届かない");
-    for (let i = 0; i < 40; i++) {
+    t.eq(await inFrame(1, `document.querySelector(".raid-hp").textContent`), `HP ${max - 5}/${max}`, "相手の攻撃が届かない");
+    for (let i = 0; i < max + 20; i++) {
       const left = await inFrame(1, `(() => { const s = document.querySelector(".raid:not(.down) .raid-ship"); if (!s) return -1; s.click(); return 1; })()`);
       if (left < 0) break;
       await t.sleep(30);
@@ -208,7 +211,7 @@ export default {
       t.ok(await inFrame(i, `achievements.has("raid")`), `${i + 1} 人目に実績「きょうの ヒーローたち」がない`);
       t.ok(await inFrame(i, `!raid.active()`), `${i + 1} 人目のレイドが終わらない`);
     }
-    t.ok((await inFrame(0, `grow.state.diary.at(-1)?.text ?? ""`)).includes("みんなで マザーシップ"), "日記に書かれない");
+    t.ok(await inFrame(0, `grow.state.diary.some((d) => d.text.includes("マザーシップ"))`), "日記に書かれない");
     t.noErrors(p);
     await server.close();
   },
