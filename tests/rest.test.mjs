@@ -1,7 +1,6 @@
-// アプリの ショートカット（?go=）と、ピクセの「きゅうけい しよう」
+// アプリの ショートカット（?go=）と、とおくを みる きゅうけい（rest）
 import { readFileSync } from "node:fs";
 
-const choose = (p, label) => p.ev(`[...document.querySelectorAll(".dialog-choices button")].find((b) => b.textContent === ${JSON.stringify(label)})?.click()`);
 async function waitFor(t, p, expr, ms = 8000) {
   for (let i = 0; i < ms / 200; i++) {
     if (await p.ev(expr)) return true;
@@ -36,7 +35,7 @@ export default {
     await server.close();
   },
 
-  async "50 ぷん あそぶと きゅうけいを すすめ、20 びょう とおくを みる"(t) {
+  async "ピクセは きゅうけいを すすめない（v1.52）。rest と うつと 20 びょう とおくを みる"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
@@ -44,14 +43,8 @@ export default {
     await p.ev(`localStorage.clear()`);
     await p.goto(server.url);
     await p.boot();
-    // さわっていない あいだは かぞえない
-    await p.ev(`rest.state.lastInput = Date.now() - 6 * 60000; rest.state.lastTick = Date.now() - 15000; rest.tick()`);
-    t.eq(await p.ev(`rest.state.active`), 0, "さわっていないのに かぞえた");
-    // 50 ぷん あそんだ ことに する
-    await p.ev(`rest.state.lastInput = Date.now(); rest.state.active = rest.ASK_AFTER; rest.tick()`);
-    t.ok(await waitFor(t, p, `document.body.innerText.includes("めを やすめない") && document.querySelectorAll(".dialog-choices button").length === 2`), "きゅうけいを すすめない");
-    t.ok((await p.text()).includes("50ぷん"), "あそんだ 時間を いわない");
-    await choose(p, "やすむ");
+    t.ok(await p.ev(`rest.tick === undefined && rest.state === undefined`), "きゅうけいを かぞえる しかけが のこって いる");
+    await p.type("rest");
     await t.sleep(300);
     t.eq(await p.ev(`document.querySelector(".rest .rest-count")?.textContent`), "20", "20 びょうの カウント");
     t.ok(await p.ev(`document.querySelector(".rest").getAttribute("role") === "status" && document.activeElement.classList.contains("rest-stop")`), "読み上げ・フォーカス");
@@ -69,23 +62,6 @@ export default {
     t.ok(await p.ev(`!document.querySelector(".rest")`), "20 びょうで おわらない");
     t.ok(await p.ev(`achievements.has("rest") && grow.state.diary.some((e) => e.type === "rest")`), "実績・日記");
     t.ok(await waitFor(t, p, `document.getElementById("dialog-text").textContent.includes("すっきり")`, 3000), "おわりの ひとこと");
-    t.ok(await p.ev(`rest.state.active < 60000`), "やすんだら また 0 から");
-    t.noErrors(p);
-    await server.close();
-  },
-
-  async "「まだ だいじょうぶ」なら 20 ぷん あとに また きく"(t) {
-    const server = await t.startServer();
-    const b = await t.launchBrowser();
-    const p = await b.firstPage();
-    await p.goto(server.url);
-    await p.boot();
-    await p.ev(`rest.state.lastInput = Date.now(); rest.state.active = rest.ASK_AFTER; rest.tick()`);
-    t.ok(await waitFor(t, p, `document.querySelectorAll(".dialog-choices button").length === 2`), "きかない");
-    await choose(p, "まだ だいじょうぶ");
-    await t.sleep(300);
-    t.eq(await p.ev(`rest.ASK_AFTER - rest.state.active`), 20 * 60000, "つぎまで 20 ぷん");
-    t.ok(await p.ev(`!document.querySelector(".rest")`), "やすむ がめんが でた");
     t.noErrors(p);
     await server.close();
   },

@@ -206,8 +206,14 @@ const raid = (() => {
     if (cur && cur.slot === p.slot) win();
   });
 
+  // おなじ そらに つながるのは、しゅうらいの よるの 10 ぷん まえ から おわるまで だけ（v1.52）
+  const OPEN_BEFORE = 10 * 60 * 1000;
+  const skyCheck = () => online.open(nextNight() - Date.now() <= OPEN_BEFORE);
+  skyCheck();
+
   // ---------- 1 秒ごとに時計を見る ----------
   setInterval(() => {
+    skyCheck();
     const now = Date.now();
     const slot = slotOf(now);
     const into = now - startOf(slot);

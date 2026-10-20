@@ -158,7 +158,8 @@ const weather = (() => {
   };
 
   let applied = false;
-  function apply(data) {
+  // asked：じぶんで「いいよ」と こたえた すぐ あと。その へんじ なので「1 かい 1 つ」には かぞえない
+  function apply(data, { asked = false } = {}) {
     if (applied) return;
     applied = true;
     const kind = kindOf(data.code);
@@ -173,6 +174,7 @@ const weather = (() => {
     if (store.get("warpix-weather-said", null) === said) return;
     const say = () => {
       if (!npc.ready() || playing()) return setTimeout(say, 4000);
+      if (!asked && !npc.turn()) return; // 1 かい ひらいて 1 つ まで（v1.52）。いえなかったら、つぎに きた ときに
       store.set("warpix-weather-said", said);
       npc.say(LINES[kind](Math.round(data.temp), data.day));
     };
@@ -214,7 +216,7 @@ const weather = (() => {
       return;
     }
     try {
-      apply(await fetchWeather());
+      apply(await fetchWeather(), { asked: !quiet });
     } catch {
       if (!quiet) npc.say(["てんきが わからなかった……\nまた こんど ためしてみてね。"]);
     }
@@ -222,18 +224,21 @@ const weather = (() => {
 
   function ask() {
     npc.ask("そっちの てんき、しらべても いい？\n（ばしょの じょうほうを つかうよ）", ["いいよ", "やめとく"]).then((i) => {
+      if (i >= 0) npc.answered("weather", i === 0);
       if (i === 0) {
         store.set("warpix-weather", "yes");
         check();
       } else if (i === 1) {
         store.set("warpix-weather", "no");
         npc.say(["わかった！\nきが かわったら weather って うってね。"]);
-      } else setTimeout(offer, 30000);
+      } else setTimeout(() => offer(true), 30000);
     });
   }
 
-  function offer() {
-    if (!npc.ready() || playing() || npc.isAway()) return setTimeout(offer, 8000);
+  // 1 かい ひらいて 1 つ まで。ことわられたら 1 しゅうかん あけて もう 1 かい、2 かいで おわり（v1.52）
+  function offer(mine = false) {
+    if (!npc.ready() || playing() || npc.isAway()) return setTimeout(() => offer(mine), 8000);
+    if (!mine && !npc.turn()) return;
     ask();
   }
 
@@ -242,8 +247,11 @@ const weather = (() => {
   on("boot", () => {
     const consent = store.get("warpix-weather", null);
     if (consent === "yes") check({ quiet: true });
-    // 冒険のおさそい（25 秒後）とかぶらないよう、1 分後に聞く
-    else if (consent === null && "geolocation" in navigator) setTimeout(offer, 60000);
+    if (consent === "yes" || !("geolocation" in navigator)) return;
+    // v1.51 までに ことわった 人は、1 かい ことわった ことに する
+    if (consent === "no" && !store.get("warpix-asked", {}).weather) npc.answered("weather", false);
+    // 冒険のおさそい（25 秒後）より あとに 聞く
+    if (npc.mayAsk("weather")) setTimeout(offer, 60000);
   });
   cheats.add("weather", () => {
     store.set("warpix-weather", null);

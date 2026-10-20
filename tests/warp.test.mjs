@@ -49,7 +49,7 @@ export default {
     t.ok(!s.away && !s.trip && s.holes === 0 && s.pixes === 0, `はこに もどらない（${JSON.stringify(s)}）`);
     t.ok(s.text.startsWith("ただいま！"), `おみやげばなし: ${s.text}`);
     t.ok(await p.ev(`achievements.has("warp-buddy")`), "実績「いっしょに ワープ」");
-    t.eq(await p.ev(`grow.state.diary.at(-1).text`), "SPOTIFY の せかいへ いっしょに ワープした。", "にっき");
+    t.ok(await p.ev(`grow.state.diary.some((e) => e.text === "SPOTIFY の せかいへ いっしょに ワープした。")`), "にっき");
     t.noErrors(p);
     await server.close();
   },

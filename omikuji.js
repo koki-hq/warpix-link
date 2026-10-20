@@ -1,4 +1,4 @@
-// ---------- ピクセの おみくじ：1 日 1 回。きょうの ラッキーリンクを おしえてくれる ----------
+// ---------- ピクセの おみくじ：1 日 1 回。きょうの うんせいと ラッキーカラー ----------
 // 結果は「日付 ＋ このブラウザだけの種」で決まるので、同じ日に何回ひらいても同じ。
 const omikuji = (() => {
   const KEY = "warpix-omikuji";
@@ -45,14 +45,11 @@ const omikuji = (() => {
     const total = FORTUNES.reduce((a, f) => a + f.weight, 0);
     let x = r() * total;
     const fortune = FORTUNES.find((f) => (x -= f.weight) < 0) ?? FORTUNES[0];
-    // ラッキーリンク：あまり行っていないリンクほど出やすい
-    const links = [...document.querySelectorAll(".pixel-btn:not(.secret)")];
-    const counts = favorite.stats ?? {};
-    const weights = links.map((el) => 1 / (1 + (counts[el.querySelector("[data-icon]").dataset.icon]?.n ?? 0)));
-    let y = r() * weights.reduce((a, b) => a + b, 0);
-    const link = links.find((_, i) => (y -= weights[i]) < 0) ?? links[0];
+    // v1.51 までの ラッキーリンク（あまり 行って いない リンクを すすめる）は やめた。行き先に 口を ださない
+    // （本人「うざいと 同じ 理由で きもい」、2026-10-20 チューニング）
+    r();
     const color = COLORS[Math.floor(r() * COLORS.length)];
-    return { fortune, link, label: linkLabel(link), color };
+    return { fortune, color };
   }
 
   // ---------- 画面 ----------
@@ -92,7 +89,6 @@ const omikuji = (() => {
           <p class="omikuji-fortune">${result.fortune.name}</p>
           <p class="omikuji-line">${result.fortune.line}</p>
           <dl>
-            <dt>ラッキーリンク</dt><dd><button type="button" class="omikuji-link">${result.label} ▶</button></dd>
             <dt>ラッキーカラー</dt><dd><span class="omikuji-color" style="background:${result.color.css}"></span>${result.color.name}</dd>
           </dl>
           <p class="omikuji-from">— ピクセ</p>
@@ -101,16 +97,6 @@ const omikuji = (() => {
       </div>`;
     overlay.querySelector(".omikuji-close").addEventListener("click", close);
     overlay.addEventListener("click", (e) => e.target === overlay && close());
-    overlay.querySelector(".omikuji-link").addEventListener("click", (e) => {
-      // おみくじから行くとボーナス（1 日 1 回）
-      if (state.bonus !== ymd) {
-        state.bonus = ymd;
-        save();
-        score.add(777, e.clientX, e.clientY);
-      }
-      close();
-      result.link.click();
-    });
     document.body.append(overlay);
     overlay.querySelector(".omikuji-close").focus({ preventScroll: true });
     if (fresh && !reduceMotion) {
@@ -133,7 +119,7 @@ const omikuji = (() => {
       save();
       achievements.unlock("omikuji");
       if (result.fortune.name === "だいきち") achievements.unlock("daikichi");
-      grow.write("omikuji", `おみくじは ${result.fortune.name}。ラッキーリンクは ${result.label}。`);
+      grow.write("omikuji", `おみくじは ${result.fortune.name}。`);
     }
     show(result, fresh);
     emit("omikuji", { name: result.fortune.name });

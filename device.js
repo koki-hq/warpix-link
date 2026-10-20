@@ -55,7 +55,10 @@ const pocket = (() => {
     setTimeout(function offer() {
       if (!deferred || standalone()) return;
       if (!npc.ready() || playing() || npc.isAway()) return setTimeout(offer, 10000);
+      // 1 かい ひらいて 1 つ まで。こたえたら 1 しゅうかん あけて、2 かい ことわられたら おわり（v1.52）
+      if (!npc.mayAsk("install") || !npc.turn()) return;
       npc.ask("ぼくを ホームがめんに\nつれていける みたい！", ["つれていく", "あとで"]).then((i) => {
+        if (i >= 0) npc.answered("install", i === 0);
         if (i === 0) install();
         else if (i === 1) npc.say(["わかった！"]);
       });

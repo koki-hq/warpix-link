@@ -912,10 +912,42 @@ const npc = (() => {
     }
   });
 
+  // ---------- むこうから 話しかける のは、1 かい ひらいて 1 つ まで（v1.52 チューニング） ----------
+  // 本人「次から 次へ べつの わだいが 降って くる。バグってる 感じ、きかいてき」。おさそいは それぞれ
+  // ここで「いま 話して いい？」と きく。さきに きいた もの だけ が 話せる（だいじな ものほど はやく きく）。
+  // はじめての 日は じこしょうかい だけ（おさそいは 2 かいめ から）。10 ぷん いじょう はなれて もどったら、また 1 つ
+  let talked = false;
+  let leftAt = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) leftAt = Date.now();
+    else if (leftAt && Date.now() - leftAt >= 10 * 60000) talked = false;
+  });
+  function turn({ evenFirst = false } = {}) {
+    if (talked) return false;
+    if (!evenFirst && store.get("warpix-visits", 1) <= 1) return false;
+    talked = true;
+    return true;
+  }
+  // おさそいの へんじ：こたえたら 1 しゅうかんは きかない。2 かい ことわられたら もう きかない（本人「2 回目で 決まりそう」）
+  const ASKED_KEY = "warpix-asked";
+  const WEEK = 7 * 24 * 60 * 60000;
+  function mayAsk(id) {
+    const a = store.get(ASKED_KEY, {})[id];
+    return !a || (a.no < 2 && Date.now() >= a.next);
+  }
+  function answered(id, yes) {
+    const all = store.get(ASKED_KEY, {});
+    all[id] = { no: (all[id]?.no ?? 0) + (yes ? 0 : 1), next: Date.now() + WEEK };
+    store.set(ASKED_KEY, all);
+  }
+
   return {
     say,
     jump,
     ask,
+    turn,
+    mayAsk,
+    answered,
     intro() {
       introStarted = true;
       say([...greeting(), ...extraIntro]);

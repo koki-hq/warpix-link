@@ -1,8 +1,12 @@
 // オンライン：同じ空とレイド。本物の Supabase は使わず、にせものを差しこむ（世界の記録も増えない）
 const FAKE_CONFIG = `Object.defineProperty(window, "WARPIX_ONLINE", { value: { url: "https://fake.supabase.co", key: "fake" }, writable: false });`;
 
-// 1 ページだけで使う、手で合図を流せるにせもの
+// 1 ページだけで使う、手で合図を流せるにせもの。
+// v1.52 から おなじ そらに つながるのは しゅうらいの よる だけ なので、時計は 2026-11-01 20:55（日本時間）から（いつでも かえられる）
 const SOLO_FAKE = `${FAKE_CONFIG}
+  const __realNow = Date.now.bind(Date);
+  window.__clock = Date.UTC(2026, 10, 1, 11, 55) - __realNow();
+  Date.now = () => __realNow() + window.__clock;
   window.__sent = []; window.__rpc = []; window.__presence = {};
   const handlers = {};
   const ch = {
@@ -59,6 +63,36 @@ const HIDE_AND_AUDIO = `
   };`;
 
 export default {
+  async "ふだんは おなじ そらに つながらない（だれも うかばない）。しゅうらいの よるの 10 ぷん まえから つながる"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    // 2 しゅうめの にちようびの ひる
+    await p.send("Page.addScriptToEvaluateOnNewDocument", { source: SOLO_FAKE + `; window.__clock = Date.UTC(2026, 10, 8, 3) - __realNow();` });
+    await p.goto(server.url);
+    await p.boot();
+    await t.sleep(1500);
+    t.ok(await p.ev(`online.enabled && !online.isOpen()`), "ふだんなのに つながった");
+    t.eq(await p.ev(`window.__me ?? null`), null, "ふだんなのに チャンネルを つくった");
+    t.ok(await p.ev(`document.getElementById("online-count").hidden`), "ONLINE の 人数が でて いる");
+    // せかいの きろく（かず だけ）は ふだんも かぞえる
+    for (let i = 0; i < 2; i++) await p.ev(`document.getElementById("npc").click()`);
+    await t.sleep(3500);
+    t.eq(await p.ev(`window.__rpc`), [["bump", { counter: "pokes", n: 2 }]], "つついた かずを おくらない");
+    // しゅうらいの よる（12/6 21:00）の 9 ふん まえ → つながる。おわったら はなれる
+    await p.ev(`window.__clock = Date.UTC(2026, 11, 6, 11, 51) - __realNow()`);
+    await t.sleep(1500);
+    t.ok(await p.ev(`online.isOpen()`), "しゅうらいの よるの まえに つながらない");
+    await p.ev(`window.__presence = { [window.__me]: [{ hat: null }], stranger: [{ hat: "party" }] }; __fire("presence:sync")`);
+    await t.sleep(300);
+    t.eq(await p.ev(`document.querySelectorAll(".ghost").length`), 1, "しゅうらいの よるに だれも うかばない");
+    await p.ev(`window.__clock = Date.UTC(2026, 11, 6, 12, 4) - __realNow()`);
+    await t.sleep(1500);
+    t.ok(await p.ev(`!online.isOpen() && document.querySelectorAll(".ghost").length === 0 && document.getElementById("online-count").hidden`), "おわっても そらに のこった");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ほかの人が来ると空に浮かび、手を振り合える"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();

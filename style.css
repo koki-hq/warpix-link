@@ -2947,16 +2947,6 @@ a,
   margin: 0;
 }
 
-.omikuji-link {
-  padding: 2px 8px;
-  border: 0;
-  background: #1a1433;
-  color: #fffaf0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 9px;
-  cursor: pointer;
-}
-
 .omikuji-color {
   display: inline-block;
   width: 14px;
@@ -4855,28 +4845,30 @@ a,
 }
 
 /* =====================================================================
-   ピクセの ワープえにっき（v1.44）：ROOM の にっきの なかに ページが たまる
+   WARPIX カード（v1.52）：ROOM の にっきの なかに たまる。きん・にじは きらっと ひかる
    ===================================================================== */
-.enikki-count {
+.cards-count {
   font-size: 12px;
   color: var(--muted);
 }
 
-.enikki-list {
+.cards-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 8px;
   margin: 6px 0 12px;
 }
 
-.enikki-btn {
+.cards-btn {
+  position: relative;
+  overflow: hidden;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
 }
 
-.enikki-btn img {
+.cards-btn img {
   display: block;
   width: 100%;
   height: auto;
@@ -4884,9 +4876,32 @@ a,
   outline: 2px solid var(--fg);
 }
 
-.enikki-btn:hover img,
-.enikki-btn:focus-visible img {
+.cards-btn:hover img,
+.cards-btn:focus-visible img {
   outline-color: var(--accent-2);
+}
+
+.cards-btn.tier-gold::after,
+.cards-btn.tier-rainbow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+  transform: translateX(-100%);
+  animation: card-shine 3.2s steps(16) infinite;
+  pointer-events: none;
+}
+
+.cards-btn.tier-rainbow::after {
+  animation-duration: 2s;
+}
+
+@keyframes card-shine {
+  60%, 100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-btn::after { animation: none; display: none; }
 }
 
 /* しゅうらいの よるの きねんしゃしん（v1.45）：WORLD RECORD の せいざを おすと しゃしん */

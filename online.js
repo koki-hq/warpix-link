@@ -4,6 +4,9 @@
 // - 浮かんでいるピクセをクリックすると、その人に「てを ふる」
 // - 世界中でつつかれた回数などを数える（counters テーブルと bump 関数）
 // 送るのはランダムな番号と帽子の種類だけ。名前や場所は送らない。
+// v1.52 から おなじ そらに つながるのは しゅうらいの よる（21:00 の 10 ぷん まえ から おわるまで）だけ。
+// ふだんは だれも うかばない（本人「しょうじき 気に なっちゃう 人 いると」、2026-10-20 チューニング）。
+// いつ つなぐかは raid.js が open() で きめる。世界の きろく（かず だけ）は ふだんも かぞえる
 const online = (() => {
   const cfg = window.WARPIX_ONLINE ?? {};
   const countEl = document.getElementById("online-count");
@@ -196,9 +199,26 @@ const online = (() => {
       return; // オフラインなど。オンライン機能なしでそのまま遊べる
     }
     client = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: false } });
+    hat = wardrobe.currentId();
+    setInterval(flush, 3000);
+    loadCounters();
+    if (wantSky) join();
+  }
+
+  // しゅうらいの よるの あいだ だけ、おなじ そらに つながる
+  let wantSky = false;
+  function open(on) {
+    wantSky = on;
+    if (!client) return;
+    if (on) join();
+    else leave();
+  }
+  function join() {
+    if (channel) return;
     channel = client.channel("warpix-sky", { config: { presence: { key: me }, broadcast: { self: false } } });
+    const mine = channel;
     channel
-      .on("presence", { event: "sync" }, () => render(channel.presenceState()))
+      .on("presence", { event: "sync" }, () => mine === channel && render(mine.presenceState()))
       .on("broadcast", { event: "poke" }, ({ payload }) => {
         const el = ghosts.get(payload.from);
         if (el) bounce(el);
@@ -210,14 +230,23 @@ const online = (() => {
       channel.on("broadcast", { event }, ({ payload }) => fns.forEach((fn) => fn(payload)));
     }
     channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") {
+      if (status === "SUBSCRIBED" && mine === channel) {
         subscribed = true;
         show();
       }
     });
-    hat = wardrobe.currentId();
-    setInterval(flush, 3000);
-    loadCounters();
+  }
+  function leave() {
+    if (!channel) return;
+    channel.untrack();
+    (client.removeChannel?.(channel) ?? channel.unsubscribe?.())?.catch?.(() => {});
+    channel = null;
+    subscribed = false;
+    for (const el of ghosts.values()) el.remove();
+    ghosts.clear();
+    othersHats = [];
+    peopleNow = 1;
+    countEl.hidden = true;
   }
 
   // そらに うかぶのは、いま この がめんを みて いる ひと だけ（v1.47.2）。
@@ -229,7 +258,7 @@ const online = (() => {
   }
   document.addEventListener("visibilitychange", () => {
     if (!subscribed) return;
-    if (document.hidden) channel.untrack();
+    if (document.hidden) channel?.untrack();
     else show();
   });
 
@@ -253,6 +282,8 @@ const online = (() => {
   return {
     enabled: true,
     me,
+    open,
+    isOpen: () => !!channel,
     // いま同じ空を見ている人数（自分をふくむ）
     count: () => peopleNow,
     // じぶんと、いま おなじ そらに いる ひとの ぼうし

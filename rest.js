@@ -1,7 +1,7 @@
 // ---------- アプリの ショートカット と、ピクセの「きゅうけい しよう」 ----------
 // ショートカット：ホーム画面の アイコンを ながおしすると「ミニゲーム」「さっきょく」「おみくじ」（?go=◯◯ で ひらく）。
 // ?go=manual（とりあつかい せつめいしょ）は PRESS START の まえに ひらく ので manual.js が うけもつ。
-// きゅうけい：ずっと あそんで 50 ぷん たつと、ピクセが めを やすめようと いう。「やすむ」で 20 びょう とおくを みる。
+// きゅうけい：rest と うつと、ピクセと 20 びょう とおくを みる（v1.52 から ピクセの ほうからは きかない）。
 const rest = (() => {
   // ---------- ショートカット ----------
   const GO = {
@@ -18,48 +18,9 @@ const rest = (() => {
   });
 
   // ---------- きゅうけい ----------
-  const ASK_AFTER = 50 * 60000; // つづけて あそんだ 時間
-  const IDLE_GAP = 5 * 60000; // これより 長く さわらなければ、「あそんでいない」
-  const RESET_GAP = 10 * 60000; // これより 長く はなれたら、もう やすんだ ことに する
+  // v1.51 までは 50 ぷん あそぶと ピクセが「めを やすめない？」と きいて いたが、やめた
+  // （本人「いらん すぎる だまれって 感じ」、2026-10-20 チューニング）。とおくを みる がめんは rest と うつと みられる
   const SECONDS = 20;
-  const state = { active: 0, lastInput: Date.now(), lastTick: Date.now(), asking: false };
-
-  ["pointerdown", "keydown", "wheel", "touchstart"].forEach((type) =>
-    addEventListener(type, () => {
-      const now = Date.now();
-      if (now - state.lastInput > RESET_GAP) state.active = 0;
-      state.lastInput = now;
-    }, { passive: true })
-  );
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && Date.now() - state.lastTick > RESET_GAP) state.active = 0;
-  });
-
-  function tick() {
-    const now = Date.now();
-    const dt = Math.min(now - state.lastTick, 60000);
-    state.lastTick = now;
-    if (document.hidden || !document.body.classList.contains("booted") || simple.on) return;
-    if (now - state.lastInput > IDLE_GAP) return;
-    state.active += dt;
-    if (state.active >= ASK_AFTER && !state.asking) offer();
-  }
-  setInterval(tick, 15000);
-
-  function offer() {
-    state.asking = true;
-    const wait = () => {
-      if (!npc.ready() || playing() || npc.isAway() || document.querySelector("dialog[open]")) return setTimeout(wait, 5000);
-      const mins = Math.round(state.active / 60000);
-      npc.ask(`もう ${mins}ぷん いっしょに いるね。\nちょっと めを やすめない？`, ["やすむ", "まだ だいじょうぶ"]).then((i) => {
-        state.asking = false;
-        if (i === 0) return lookFar();
-        state.active = ASK_AFTER - 20 * 60000; // つぎは 20 ぷん あとに また きく
-        if (i === 1) npc.say(["わかった。\nむりは しないでね。"]);
-      });
-    };
-    wait();
-  }
 
   // 20 びょう、とおくを みる（ピクセも めを とじる）
   let box = null;
@@ -97,8 +58,6 @@ const rest = (() => {
       box.remove();
       box = null;
       npc.sleep(false);
-      state.active = 0;
-      state.lastInput = Date.now();
       if (done) {
         sound.sfx.powerup();
         npc.say(["おつかれさま！\nめが すっきり したね。"]);
@@ -113,5 +72,6 @@ const rest = (() => {
     box.querySelector(".rest-stop").focus({ preventScroll: true });
   }
 
-  return { state, tick, lookFar, ASK_AFTER };
+  cheats.add("rest", lookFar);
+  return { lookFar };
 })();

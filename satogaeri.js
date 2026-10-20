@@ -74,7 +74,7 @@ const satogaeri = (() => {
     setTimeout(function tryGo() {
       if (state.last === day || out) return;
       if (!free() || nearRaidNight()) return setTimeout(tryGo, 30000);
-      go();
+      if (npc.turn()) go(); // 1 かい ひらいて 1 つ まで（v1.52）。ほかの 話を したら この かいは いかない
     }, WAIT);
   });
 

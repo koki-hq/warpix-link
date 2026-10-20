@@ -242,6 +242,9 @@ const rusuban = (() => {
     giftBtn.hidden = false;
     const wait = () => {
       if (!npc.ready() || playing() || npc.isAway() || document.querySelector("dialog[open]")) return setTimeout(wait, 1500);
+      // 1 かい ひらいて 1 つ まで（v1.52）。ほかの 話が さきなら きかない（おみやげは ROOM に かざって ある）
+      // おみやげが ある のは まえに きた 人 だけ なので、はじめての 日の しばりは いらない
+      if (!npc.turn({ evenFirst: true })) return;
       npc.ask(`おかえり！ ${fmtAway(mins)}\nまってたよ。おみやげ あるんだ。`, ["みる！", "あとで"]).then((i) => {
         if (i === 0) show(gift);
         else if (i === 1) npc.say(["じゃあ おへやに かざっておくね。\n（ROOM の「おみやげ」から みられるよ）"]);

@@ -422,21 +422,19 @@ const favicon = (() => {
 
 // ---------- ピクセのおねがい → PIXE ADVENTURE ----------
 (() => {
-  let asked = false;
+  let mine = false; // この かいの はなす ばんを もらった
   function ask() {
-    if (asked) return;
     if (!npc.ready() || playing() || npc.isAway() || document.hidden || document.getElementById("npc").classList.contains("asleep")) {
       return setTimeout(ask, 5000);
     }
-    asked = true;
+    // 1 かい ひらいて 1 つ まで。こたえたら 1 しゅうかん あけて、2 かい ことわられたら おわり（v1.52）
+    if (!mine && (!npc.mayAsk("adventure") || !npc.turn())) return;
+    mine = true;
     npc.ask("ねえ…… ぼく この まどの そとに\nでてみたいな。 いっても いい？", ["いいよ！", "だめ"]).then((i) => {
+      if (i >= 0) npc.answered("adventure", i === 0);
       if (i === 0) adventure.start();
       else if (i === 1) npc.say(["そっかあ……", "きが かわったら\nadventure って うってね。"]);
-      else {
-        // ほかのセリフに割りこまれたら、あとでもう一回
-        asked = false;
-        setTimeout(ask, 30000);
-      }
+      else setTimeout(ask, 30000); // ほかのセリフに割りこまれたら、あとでもう一回
     });
   }
   on("boot", () => setTimeout(ask, 25000));
