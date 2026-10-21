@@ -126,6 +126,8 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("cassette").close()`);
   await axe(p, "ピクセの てがみ", `room.open("diary"); letter.letters().unshift({ week: "2026-10-18", from: "2026-10-12", lines: letter.write().lines, unread: false }); letter.read("2026-10-18")`);
   await p.ev(`document.getElementById("letter").close(); document.getElementById("diary").close()`);
+  await axe(p, "WARPIX カード（でる しゅんかん）", `cards.show({ kind: "lucky", tier: "gold", date: "2026-11-01", line: "きんいろの ひかり" }).then(() => document.querySelector(".card-flip").click())`);
+  await p.ev(`document.querySelector(".card-reveal-close")?.click()`);
   await axe(p, "きゅうけい（とおくを みる）", `rest.lookFar()`);
   await p.ev(`document.querySelector(".rest-stop").click()`);
   await p.goto(`${server.url}?simple=1`);

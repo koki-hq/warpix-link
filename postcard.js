@@ -168,7 +168,8 @@ const postcard = (() => {
   }
 
   // canvas の 画像を、ほぞん・シェアできる まどで みせる（ぼうけんの きろくカードも つかう、v1.39）
-  async function show(cv, { name, title, alt }) {
+  // holo：WARPIX カードの きん・にじ など。ひかりの おびが ながれる（v1.53）
+  async function show(cv, { name, title, alt, holo = false }) {
     const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
     const url = URL.createObjectURL(blob);
     close();
@@ -178,7 +179,8 @@ const postcard = (() => {
     overlay.setAttribute("aria-label", title);
     overlay.innerHTML = `
       <div class="postcard-box">
-        <img class="postcard-img" alt="${alt}" src="${url}">
+        <span class="postcard-art${holo ? " holo" : ""}"><img class="postcard-img" alt="${alt}" src="${url}"></span>
+        <p class="postcard-note" hidden></p>
         <div class="postcard-row">
           <a class="postcard-save" href="${url}" download="${name}">ほぞん</a>
           <button type="button" class="postcard-share">シェア</button>
@@ -198,6 +200,14 @@ const postcard = (() => {
     overlay.addEventListener("click", (e) => e.target === overlay && close());
     document.body.append(overlay);
     overlay.querySelector(".postcard-close").focus({ preventScroll: true });
+    const art = overlay.querySelector(".postcard-art.holo");
+    if (art && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      art.addEventListener("pointermove", (e) => {
+        const r = art.getBoundingClientRect();
+        art.style.setProperty("--hx", `${Math.round(((e.clientX - r.left) / r.width) * 100)}%`);
+        art.classList.add("follow");
+      });
+    }
     sound.sfx.coin();
   }
 
@@ -215,5 +225,13 @@ const postcard = (() => {
   });
   cheats.add("postcard", open);
 
-  return { render, open, show, saveLink, drawSprite, fontsReady, isOpen: () => Boolean(overlay) };
+  // まどの したに ひとこと（WARPIX カードの「もっている ひと」など）
+  function note(text) {
+    const p = overlay?.querySelector(".postcard-note");
+    if (!p) return;
+    p.textContent = text;
+    p.hidden = false;
+  }
+
+  return { render, open, show, note, saveLink, drawSprite, fontsReady, isOpen: () => Boolean(overlay) };
 })();

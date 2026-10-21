@@ -4703,7 +4703,7 @@ a,
 }
 
 /* =====================================================================
-   WARPIX カード（v1.52）：ROOM の にっきの なかに たまる。きん・にじは きらっと ひかる
+   WARPIX カード（v1.52、v1.53 で コレクションの たな）：ROOM の にっきの なか。ホロは きらっと ひかる
    ===================================================================== */
 .cards-count {
   font-size: 12px;
@@ -4739,8 +4739,7 @@ a,
   outline-color: var(--accent-2);
 }
 
-.cards-btn.tier-gold::after,
-.cards-btn.tier-rainbow::after {
+.cards-btn.holo::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -4760,6 +4759,234 @@ a,
 
 @media (prefers-reduced-motion: reduce) {
   .cards-btn::after { animation: none; display: none; }
+}
+
+/* まだ ない ばんごう：うらむきで うすく（v1.53） */
+.cards-none {
+  cursor: default;
+}
+
+.cards-none img {
+  opacity: 0.35;
+  outline-color: var(--muted);
+}
+
+.cards-no,
+.cards-n {
+  position: absolute;
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  color: var(--fg);
+  text-shadow: 1px 1px 0 #000;
+}
+
+.cards-no {
+  inset: auto 0 8px;
+  text-align: center;
+}
+
+.cards-n {
+  top: 4px;
+  right: 4px;
+  padding: 2px 3px;
+  background: rgba(15, 11, 30, 0.8);
+}
+
+/* =====================================================================
+   WARPIX カードが でる しゅんかん（v1.53）：うらむきで おちて きて、タップで めくる
+   ===================================================================== */
+.card-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 36;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(15, 11, 30, 0.88);
+}
+
+.card-flip {
+  position: relative;
+  width: min(280px, 70vw);
+  aspect-ratio: 420 / 588;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  perspective: 900px;
+  animation: card-drop 0.7s steps(10) both;
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transition: transform 0.6s steps(8);
+}
+
+.card-face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.card-back {
+  box-shadow: 0 0 18px 6px var(--glow);
+  animation: card-glow 1s steps(4) infinite alternate;
+}
+
+.card-reveal.rainbow .card-back {
+  animation: card-glow-rainbow 0.8s steps(5) infinite;
+}
+
+.card-front {
+  transform: rotateY(180deg);
+}
+
+.card-reveal.flipped .card-back {
+  transform: rotateY(-180deg);
+}
+
+.card-reveal.flipped .card-front {
+  transform: rotateY(0deg);
+  box-shadow: 0 0 24px 4px var(--glow);
+}
+
+.card-reveal-talk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.card-reveal-pixe {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+.card-reveal-pixe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.card-reveal-pixe.jump {
+  animation: card-hop 0.4s steps(4);
+}
+
+@keyframes card-hop {
+  50% { transform: translateY(-16px); }
+}
+
+.card-reveal-msg {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.card-reveal-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+.card-reveal-note[hidden] {
+  display: none;
+}
+
+.card-reveal-row {
+  display: flex;
+  gap: 10px;
+}
+
+.card-reveal-row[hidden] {
+  display: none;
+}
+
+@keyframes card-drop {
+  from { transform: translateY(-60vh) rotate(-12deg); }
+  70% { transform: translateY(12px) rotate(2deg); }
+  to { transform: none; }
+}
+
+@keyframes card-glow {
+  from { box-shadow: 0 0 8px 2px var(--glow); }
+  to { box-shadow: 0 0 28px 10px var(--glow); }
+}
+
+@keyframes card-glow-rainbow {
+  0% { box-shadow: 0 0 26px 10px #ff4fa3; }
+  25% { box-shadow: 0 0 26px 10px #ffd84a; }
+  50% { box-shadow: 0 0 26px 10px #3ee8ff; }
+  75% { box-shadow: 0 0 26px 10px #8bf06a; }
+  100% { box-shadow: 0 0 26px 10px #b07cff; }
+}
+
+/* ホロ：ひかりの おびが ながれる。ゆびや マウスの ところへ よる（--hx） */
+.card-front.holo,
+.postcard-art.holo {
+  overflow: hidden;
+}
+
+.postcard-art {
+  position: relative;
+  display: block;
+}
+
+.card-front.holo::after,
+.postcard-art.holo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 42%, rgba(62, 232, 255, 0.25) 48%, rgba(255, 79, 163, 0.25) 54%, transparent 66%);
+  background-size: 300% 100%;
+  background-position: var(--hx, 50%) 0;
+  mix-blend-mode: screen;
+  animation: holo-flow 3s linear infinite;
+  pointer-events: none;
+}
+
+/* ゆびで なぞって いる あいだは、ひかりが ゆびに ついて くる */
+.card-front.holo.follow::after,
+.postcard-art.holo.follow::after {
+  animation: none;
+}
+
+@keyframes holo-flow {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
+}
+
+.postcard-note {
+  margin: 10px 0 0;
+  font-size: 14px;
+  text-align: center;
+  color: var(--fg);
+}
+
+/* ポケットが ひかってる（ラッキーの まえぶれ） */
+#npc.card-omen {
+  filter: drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 12px var(--gold));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flip,
+  .card-back,
+  .card-reveal.rainbow .card-back,
+  .card-front.holo::after,
+  .postcard-art.holo::after,
+  .card-reveal-pixe.jump {
+    animation: none;
+  }
+
+  .card-face {
+    transition: none;
+  }
 }
 
 /* しゅうらいの よるの きねんしゃしん（v1.45）：WORLD RECORD の せいざを おすと しゃしん */
