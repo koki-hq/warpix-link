@@ -57,8 +57,6 @@ const tonight = (() => {
     save();
   });
 
-  const labelOf = (icon) => (icon === "key" ? "ひみつの ワープゾーン" : CASSETTES.byId(icon)?.label ?? icon.toUpperCase());
-
   // ---------- 3 ぎょうを かく ----------
   const FEELINGS = [
     "あしたも ここで まってるね。",
@@ -69,13 +67,12 @@ const tonight = (() => {
   ];
   function lines() {
     const warps = Object.values(tally.warps).reduce((a, b) => a + b, 0);
-    const [topIcon, topN] = Object.entries(tally.warps).sort((a, b) => b[1] - a[1])[0] ?? [];
 
     // 1. いちばんの できごと
     let first;
     if (tally.ach.length === 1) first = `きょうは じっせき「${tally.ach[0]}」を とった ひ！`;
     else if (tally.ach.length > 1) first = `きょうは じっせきを ${tally.ach.length}こも とった ひ！`;
-    else if (topIcon) first = `きょうは ${labelOf(topIcon)}へ ${topN}かい ワープした。`;
+    else if (warps) first = "きょうも いっしょに ワープした。"; // いきさきの なまえは いわない。かずは 2 ぎょうめ（v1.52.1）
     else if (tally.pokes) first = `きょうは ${tally.pokes}かい つつかれた。`;
     else first = "きょうは のんびり ほしを みてた。";
 

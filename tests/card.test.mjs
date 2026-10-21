@@ -71,10 +71,10 @@ export default {
     await r.server.close();
   },
 
-  async "ROOM の にっきに たまって、おすと 大きく みられる。え は 420×588、わくの いろ"(t) {
+  async "ROOM の にっきに たまって、おすと 大きく みられる。え は 840×1176（2 ばいで くっきり）、わくの いろ。とじると おへやに もどる"(t) {
     const { server, p } = await page(t);
     await back(p);
-    t.eq(await p.ev(`(() => { const cv = cards.draw(cards.state().list[0]); return [cv.width, cv.height]; })()`), [420, 588], "えの 大きさ");
+    t.eq(await p.ev(`(() => { const cv = cards.draw(cards.state().list[0]); return [cv.width, cv.height]; })()`), [840, 1176], "えの 大きさ");
     t.eq(await p.ev(`(() => { const d = cards.draw({ kind: "rare", tier: "gold", date: "2026-11-01", line: "x" }).getContext("2d").getImageData(2, 2, 1, 1).data; return [d[0], d[1], d[2]]; })()`), [0xc9, 0x96, 0x1a], "きんの わく");
     await p.ev(`room.open("diary")`);
     await t.sleep(500);
@@ -85,6 +85,22 @@ export default {
     t.eq(await p.ev(`document.querySelector(".postcard")?.getAttribute("aria-label")`), "WARPIX カード", "大きく みられない");
     t.ok(await p.ev(`document.querySelector(".postcard-save").download.startsWith("warpix-card-")`), "ほぞんの なまえ");
     await p.shot("card.png");
+    await p.ev(`document.querySelector(".postcard-close").click()`);
+    await t.sleep(300);
+    t.ok(await p.ev(`document.getElementById("diary").open`), "とじたら おへやに もどらない");
+    t.eq(await p.ev(`document.querySelector('.diary-tab[aria-selected="true"]').dataset.tab`), "diary", "もどった タブ");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "おなじ 日の 1 かいめと 10 かいめは、べつの えに なる（v1.52.1）"(t) {
+    const { server, p } = await page(t);
+    for (let i = 0; i < 10; i++) await back(p);
+    await p.ev(`room.open("diary")`);
+    await t.sleep(500);
+    const srcs = await p.ev(`[...document.querySelectorAll(".cards-btn img")].map((i) => i.src)`);
+    t.eq(srcs.length, 2, "カードが 2 まい ない");
+    t.ok(srcs[0] !== srcs[1], "2 まいが おなじ え");
     t.noErrors(p);
     await server.close();
   },

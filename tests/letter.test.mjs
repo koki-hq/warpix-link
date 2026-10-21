@@ -28,9 +28,9 @@ export default {
     await t.sleep(200);
     t.ok(await p.ev(`document.getElementById("letter").open`), "てがみが ひらかない");
     const lines = await p.ev(`[...document.querySelectorAll("#letter-body p")].map((e) => e.textContent)`);
-    t.eq(lines.slice(0, 5), ["10/12 〜 10/18", "きみへ", "こんしゅうは 4にち あえたね。", "いちばん いった せかいは SPOTIFY（6かい）。", "ワープは ぜんぶで 12かい、ぼくが つつかれたのは 4かい。"], "てがみの なかみ");
-    t.ok(/^じっせきを \d+こ とったね。その ちょうし！$/.test(lines[5]), `じっせきの ぎょう: ${lines[5]}`);
-    t.eq(lines.slice(6), ["らいしゅうも いっしょに ワープしようね。", "ピクセより"], "おわり");
+    t.eq(lines.slice(0, 4), ["10/12 〜 10/18", "きみへ", "こんしゅうは 4にち あえたね。", "ワープは ぜんぶで 12かい、ぼくが つつかれたのは 4かい。"], "てがみの なかみ（いきさきの なまえは かかない、v1.52.1）");
+    t.ok(/^じっせきを \d+こ とったね。その ちょうし！$/.test(lines[4]), `じっせきの ぎょう: ${lines[4]}`);
+    t.eq(lines.slice(5), ["らいしゅうも いっしょに ワープしようね。", "ピクセより"], "おわり");
     t.ok(await p.ev(`achievements.has("letter")`), "実績「ピクセからの てがみ」");
     t.ok(await p.ev(`!document.querySelector(".letter-btn.unread")`), "よんだのに NEW");
     t.eq(await p.ev(`localStorage.getItem("warpix-letters")`), null, "のぞいているのに のこした");

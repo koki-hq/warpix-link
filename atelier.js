@@ -195,11 +195,12 @@ const atelier = (() => {
 
   dialog.querySelector(".atelier-close").addEventListener("click", () => dialog.close());
   // とじたら、ひらく まえに いた ところ（おへやは とじているので ROOM ボタン）へ フォーカスを もどす
-  dialog.addEventListener("close", () => document.getElementById("room-btn").focus({ preventScroll: true }));
+  // おへやから きた ときは おへやに もどる（v1.52.1）
+  dialog.addEventListener("close", () => room.back() || document.getElementById("room-btn").focus({ preventScroll: true }));
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
 
   function open() {
-    document.getElementById("diary").close?.();
+    room.leave();
     cells = (saved?.rows ?? Array(H).fill(".".repeat(W))).map((r) => [...r]);
     nameEl.value = saved?.name ?? "じぶんの ぼうし";
     focus = [0, 0];

@@ -64,11 +64,6 @@ const zukan = (() => {
       ],
     },
     {
-      // ワープから もどった ピクセが もって かえる もの（v1.30、warp.js が しるす）
-      id: "souvenir", title: "ワープの おみやげ",
-      entries: Object.entries(CASSETTES.GIFTS).map(([id, g]) => ({ id, name: g.name, draw: () => pixelSvg(g.rows) })),
-    },
-    {
       id: "moon", title: "みた つき",
       entries: [
         ["しんげつ", 0.02], ["みかづき", 0.12], ["じょうげんの つき", 0.25], ["まんげつ ちょっと まえ", 0.4],
@@ -197,5 +192,21 @@ const room = {
   open(tab = "diary") {
     if (!document.getElementById("diary").open) grow.open();
     zukan.show(tab);
+  },
+  // おへやから ポストカード・カード・ぼうし・きねんしゃしんを ひらく ときは、とじたら おへやに もどる（v1.52.1）
+  // 本人「閉じたら リンクの 画面に 戻るの なんか やだ。おへやに いたいのに」
+  backTab: null,
+  leave() {
+    const d = document.getElementById("diary");
+    if (!d.open) return;
+    room.backTab = document.querySelector('.diary-tab[aria-selected="true"]')?.dataset.tab ?? "diary";
+    d.close();
+  },
+  back() {
+    const tab = room.backTab;
+    if (!tab) return false;
+    room.backTab = null;
+    room.open(tab);
+    return true;
   },
 };

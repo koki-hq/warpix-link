@@ -69,19 +69,6 @@ export default {
     await server.close();
   },
 
-  async "おみやげを きいたら、ぼうけんの おさそいは こない（1 かい ひらいて 1 つ）"(t) {
-    const { server, p } = await open(t, { "warpix-visits": 4 }, "?away=180");
-    for (let i = 0; i < 30 && (await p.ev(`document.querySelectorAll(".dialog-choices button").length`)) < 2; i++) await t.sleep(300);
-    t.ok((await p.text()).includes("おみやげ"), `おみやげを きかない: ${await p.text()}`);
-    await p.ev(`[...document.querySelectorAll(".dialog-choices button")][1].click()`);
-    // ぼうけんの おさそいは ひらいて 25 びょう
-    await t.sleep(27000);
-    t.ok(!(await p.ev(`document.getElementById("dialog-text").textContent`)).includes("そとに"), "おみやげの あとに ぼうけんにも さそった");
-    t.eq(await p.ev(`document.querySelectorAll(".dialog-choices button").length`), 0, "まだ なにか きいて いる");
-    t.noErrors(p);
-    await server.close();
-  },
-
   async "ことわった ぼうけんは 1 しゅうかん きかない。v1.51 までに てんきを ことわった 人は 1 かい ことわった ことに"(t) {
     const { server, p } = await open(t, { "warpix-visits": 4, "warpix-weather": "no", "warpix-asked": { adventure: { no: 1, next: Date.now() + 86400000 } } }, "?away=0");
     t.eq(await p.ev(`JSON.parse(localStorage.getItem("warpix-asked")).weather?.no`), 1, "てんきの ことわりを かぞえない");

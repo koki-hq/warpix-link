@@ -31,7 +31,7 @@ export default {
     await t.sleep(300);
     const c = await card(p);
     t.ok(c && !c.waiting, "よるなのに 3 ぎょうが ない");
-    t.eq(c?.lines.slice(0, 2), ["きょうは SPOTIFYへ 2かい ワープした。", "ワープ 3かい・つつかれた 3かい・UFO 1き。"], "1・2 ぎょうめ");
+    t.eq(c?.lines.slice(0, 2), ["きょうも いっしょに ワープした。", "ワープ 3かい・つつかれた 3かい・UFO 1き。"], "1・2 ぎょうめ");
     t.ok(await p.ev(`["あしたも ここで まってるね。", "ほしが きれいな よる。おやすみ。", "きみと あえて よかった。", "あしたは どの せかいへ いこうか。", "ねむく なってきた……zzz"].includes(${JSON.stringify(c?.lines[2])})`), `3 ぎょうめ: ${c?.lines[2]}`);
     t.ok(await p.ev(`document.querySelector("#diary-body .diary-head + .tonight") !== null`), "なまえの したに ない");
     t.ok(await p.ev(`achievements.has("tonight")`), "実績「よるの 3ぎょう」");
@@ -64,7 +64,7 @@ export default {
     ({ server, p } = await open(t, { hour: 23, before: `localStorage.setItem("warpix-today", JSON.stringify({ date: "${day}", warps: { tiktok: 7, key: 4 }, pokes: 0, ufos: 0, ach: [] }))` }));
     await p.click("#room-btn");
     await t.sleep(300);
-    t.eq((await card(p))?.lines, ["きょうは TIKTOKへ 7かい ワープした。", "ワープ 11かい。", "たくさん ワープして つかれたね。ゆっくり ねてね。"], "たくさん ワープした ひ");
+    t.eq((await card(p))?.lines, ["きょうも いっしょに ワープした。", "ワープ 11かい。", "たくさん ワープして つかれたね。ゆっくり ねてね。"], "たくさん ワープした ひ");
     t.noErrors(p);
     await server.close();
   },

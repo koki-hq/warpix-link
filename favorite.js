@@ -1,4 +1,6 @@
-// ---------- お気に入りのリンク：ピクセが覚えていて、しるしで みせる（すすめない、v1.52） ----------
+// ---------- ワープした かず：リンクごとに かぞえる（ハートの しるしは v1.52.1 で やめた） ----------
+// 本人「ハートも 正直 いらん」。行き先を かぞえて みせるのは、ピクセが しゅやくで なくなる（2026-10-21 だい 2 かい かいぎ）。
+// にっきの プロフィールは「ワープした かず」だけ。かずは 実績「いつもの せかい」にも つかう
 // どのリンクに何回行ったかは、このブラウザの中だけに保存する（どこにも送らない）。
 // リンクの並び順は変えない。
 const favorite = (() => {
@@ -20,25 +22,8 @@ const favorite = (() => {
   }));
   const byIcon = (icon) => linksNow().find((l) => l.icon === icon);
 
-  // いちばん多く行っていて、MIN_FAV 回以上なら「お気に入り」（同点ならなし）
-  function fav() {
-    const ranked = linksNow().map((l) => ({ ...l, n: stats[l.icon]?.n ?? 0 })).sort((a, b) => b.n - a.n);
-    if (ranked[0].n < MIN_FAV || ranked[0].n === ranked[1]?.n) return null;
-    return ranked[0];
-  }
-
-  // ---------- ハートのしるし ----------
-  const HEART = [".pp.pp.", "ppppppp", "ppppppp", ".ppppp.", "..ppp..", "...p..."];
-  function renderMark() {
-    document.querySelectorAll(".fav-mark").forEach((m) => m.remove());
-    const f = fav();
-    if (!f) return;
-    const mark = document.createElement("span");
-    mark.className = "fav-mark";
-    mark.title = "よく いく せかい";
-    mark.innerHTML = `${pixelSvg(HEART)}<span class="sr-only">（よく いく せかい）</span>`;
-    f.el.append(mark);
-  }
+  // ぜんぶの リンクへ ワープした かず
+  const total = () => Object.values(stats).reduce((a, x) => a + (x?.n ?? 0), 0);
 
   // ---------- 行ったリンクを数える ----------
   on("link", ({ icon }) => {
@@ -48,16 +33,12 @@ const favorite = (() => {
     s.n++;
     s.last = ymd;
     saveStats();
-    renderMark();
     grow.write("warp", `${l.label}へ ワープした。`);
     if (s.n >= REGULAR) achievements.unlock("regular");
   });
 
   // v1.51 までは あいさつの あと「きょうも 〜に いく？」「さいきん 〜に いってないね」「〜は まだ いったこと ないよね？」と
   // そっと すすめて いたが、やめた（本人「うざい。行き先は 自分で わかってる」、2026-10-20 チューニング）。
-  // おぼえて いる ことは、リンクの しるしで だまって みせる
 
-  on("cassette", renderMark);
-  renderMark();
-  return { fav, stats };
+  return { total, stats };
 })();

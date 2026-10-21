@@ -17,7 +17,6 @@ const letter = (() => {
   const isSundayNight = () => today().getDay() === 0 && tonight.hourNow() >= 19.5;
 
   let letters = store.get(KEY, []);
-  const labelOf = (icon) => (icon === "key" ? "ひみつの ワープゾーン" : CASSETTES.byId(icon)?.label ?? icon.toUpperCase());
 
   // ---------- この しゅう（きょうを いれて 7 にち）の てがみを かく ----------
   function write() {
@@ -33,11 +32,10 @@ const letter = (() => {
       ach += d.ach?.length ?? 0;
     }
     const total = Object.values(warps).reduce((a, b) => a + b, 0);
-    const [top, topN] = Object.entries(warps).sort((a, b) => b[1] - a[1])[0] ?? [];
     const lines = [
       "きみへ",
       met >= 7 ? "こんしゅうは まいにち あえたね。すごく うれしかった。" : `こんしゅうは ${Math.max(met, 1)}にち あえたね。`,
-      top ? `いちばん いった せかいは ${labelOf(top)}（${topN}かい）。` : "こんしゅうは どこにも ワープ しなかったね。",
+      ...(total ? [] : ["こんしゅうは どこにも ワープ しなかったね。"]), // いきさきの なまえは かかない（v1.52.1）
       total || pokes ? `ワープは ぜんぶで ${total}かい、ぼくが つつかれたのは ${pokes}かい。` : "ふたりで のんびり ほしを みた しゅうだった。",
       ach ? `じっせきを ${ach}こ とったね。その ちょうし！` : "じっせきは おやすみの しゅう。それも いいね。",
       "らいしゅうも いっしょに ワープしようね。",

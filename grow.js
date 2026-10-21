@@ -206,7 +206,8 @@ const grow = (() => {
       if (!groups.has(e.date)) groups.set(e.date, []);
       groups.get(e.date).push(e.text);
     }
-    const days = [...groups.entries()].reverse();
+    // みせるのは さいきんの 7 にち だけ。したに ずっと つづいて いた（v1.52.1）
+    const days = [...groups.entries()].reverse().slice(0, 7);
     const fmtDate = (s) => `${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
     body.innerHTML = `
       <div class="diary-head">
@@ -215,7 +216,7 @@ const grow = (() => {
           <dt>なまえ</dt><dd>${stage.name}</dd>
           <dt>であって</dt><dd>${age + 1}にちめ</dd>
           <dt>あえた ひ</dt><dd>${state.days.length}にち</dd>
-          <dt>よく いく せかい</dt><dd>${typeof favorite !== "undefined" && favorite.fav() ? `${favorite.fav().label}（${favorite.fav().n}かい）` : "まだ ない"}</dd>
+          <dt>ワープした かず</dt><dd>${typeof favorite !== "undefined" ? favorite.total() : 0}かい</dd>
           <dt>つぎの せいちょう</dt><dd>${STAGES[state.stage + 1] ? `あと ${STAGES[state.stage + 1].days - state.days.length}にち` : "もう さいこう！"}</dd>
           ${typeof ticket !== "undefined" && ticket.has() ? `<dt>きっぷ</dt><dd class="diary-ticket">1きせい（${ticket.since()} から）</dd>` : ""}
         </dl>

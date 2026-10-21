@@ -381,10 +381,11 @@ const favicon = (() => {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) return (hiddenAt = Date.now());
     const sec = (Date.now() - hiddenAt) / 1000;
-    if (!hiddenAt || sec < 30) return;
-    const span = sec < 60 ? `${Math.round(sec)}びょう` : sec < 3600 ? `${Math.round(sec / 60)}ふん` : `${Math.round(sec / 3600)}じかん`;
+    // しつもんの とちゅうなら わりこまない（v1.52.1）
+    if (!hiddenAt || sec < 30 || npc.busy()) return;
     // いつも おなじ だと くどいので、まえと ちがう いいかたで（v1.50）
-    const BACK = [`おかえり！ ${span}も\nどこ いってたの？`, `おかえり。${span}、\nちょっと さみしかった。`, "あ、もどってきた！", "おかえりー！"];
+    // じかんは いわない。かぞえて いる かんじは こわい（v1.52.1）
+    const BACK = ["あ、もどってきた！", "おかえりー！", "おかえり。\nちょっと さみしかった。", "あ、おかえり！"];
     const i = lastBack < 0 ? Math.floor(Math.random() * BACK.length) : (lastBack + 1 + Math.floor(Math.random() * (BACK.length - 1))) % BACK.length;
     if (notice([BACK[i]])) lastBack = i;
   });

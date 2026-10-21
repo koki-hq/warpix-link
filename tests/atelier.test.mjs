@@ -57,7 +57,8 @@ export default {
     t.eq(await p.ev(`wardrobe.currentId()`), "mine", "かぶっていない");
     t.eq(await p.ev(`dress(NPC.idle)[4].slice(4, 7)`), "yyy", "ピクセの え に ぼうしが ない");
     t.ok(await p.ev(`achievements.has("designer") && achievements.has("fashion")`), "実績");
-    t.ok(await p.ev(`document.activeElement.id === "room-btn"`), "とじたあと フォーカスが もどらない");
+    // おへやから ひらいたので、とじたら おへやの おなじ タブに もどる（v1.52.1）
+    t.ok(await p.ev(`document.getElementById("diary").open && document.querySelector('.diary-tab[aria-selected="true"]').dataset.tab === "hat"`), "とじたら おへやに もどらない");
     // ひらきなおしても かぶっている。WARDROBE にも ある
     await p.goto(server.url);
     await p.boot({ readIntro: false });

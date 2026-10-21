@@ -97,7 +97,6 @@ const achievements = (() => {
     { id: "postcard", name: "ポストカード", desc: "ピクセの ポストカードを つくった", hint: "ピクセの おへやの うえの ほうに……" },
     { id: "boss", name: "ボス げきは", desc: "ミニゲームの ボスを たおした", hint: "ミニゲームで 3ウェーブめまで いくと……" },
     { id: "ranker", name: "なまえを きざめ", desc: "ミニゲームの ランキングに なまえを のこした", hint: "ミニゲームで いい てんを とると……" },
-    { id: "rusuban", name: "おるすばん ありがとう", desc: "るすばんした ピクセから おみやげを もらった", hint: "しばらく るすに して、もどってくると……" },
     { id: "streak7", name: "まいにち スタンプ", desc: "7にち つづけて ピクセに あった", hint: "スタンプカードを うめていくと……" },
     { id: "dreamer", name: "ゆめみる ピクセ", desc: "ピクセの ゆめを のぞいた", hint: "ピクセが ねむったら、あたまの うえを……" },
     { id: "rest", name: "きゅうけい じょうず", desc: "ピクセと いっしょに めを やすめた", hint: "rest と うつと、ピクセと……" },
@@ -205,7 +204,8 @@ const achievements = (() => {
     unlock,
     has: (id) => unlocked.has(id),
     randomHint,
-    count: () => unlocked.size,
+    // いまの いちらんに ある ものだけ かぞえる（なくなった じっせきの きろくは のこす。v1.52.1 おるすばん）
+    count: () => LIST.filter((a) => unlocked.has(a.id)).length,
     total: LIST.length,
     unlockedNames: () => LIST.filter((a) => unlocked.has(a.id)).map((a) => a.name),
     nameOf: (id) => LIST.find((a) => a.id === id)?.name ?? id,

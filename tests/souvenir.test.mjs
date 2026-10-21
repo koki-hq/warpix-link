@@ -1,4 +1,4 @@
-// ワープの おみやげ（v1.30）：たなごとに ワープあなの いろが かわり、もどってきた ピクセが おみやげを もって かえる
+// ワープあなの いろ（v1.30）：たなごとに かわる。ピクセが もって かえる「ワープの おみやげ」は v1.52.1 で やめた
 const setup = (p) => p.ev(`(() => {
   addEventListener("click", (e) => e.target.closest(".pixel-btn") && e.preventDefault());
   let hid = false;
@@ -20,7 +20,7 @@ async function open(t, cassette) {
 }
 
 export default {
-  async "おんがくの リンクは きんいろの あな。もどると おんぷを もって きて、ずかんに"(t) {
+  async "おんがくの リンクは きんいろの あな。もどっても おみやげは もって こない（v1.52.1）"(t) {
     const { server, p } = await open(t, ["youtube", "twitter", "applemusic", "booth", "tumblr", "spotify"]);
     await p.ev(`${link("applemusic")}.click()`);
     await t.sleep(150);
@@ -30,33 +30,19 @@ export default {
     await t.sleep(900);
     await p.ev(`__hide(false)`);
     await t.sleep(700);
-    t.ok(await p.ev(`!!document.querySelector(".warp-pixe .warp-gift-on")`), "とんでくる ピクセが おみやげを もっていない");
-    await t.sleep(900);
-    t.ok(await p.ev(`!!document.querySelector(".warp-gift")`), "はこの うえに おみやげが うかばない");
-    t.ok(await p.ev(`!!zukan.state.seen["souvenir:music"]`), "ずかんに はいらない");
-    // （ずかんの にっきは 1 日 1 ぎょう。きょうは もう「よる」などで かいているので、ここでは みない）
-    await t.sleep(2200);
-    t.eq(await p.ev(`document.querySelectorAll(".warp-gift, .warp-pixe, .warp-hole").length`), 0, "おみやげや あなが のこっている");
+    t.ok(await p.ev(`!!document.querySelector(".warp-pixe") && !document.querySelector(".warp-gift-on, .warp-gift")`), "おみやげを もって きた");
+    await t.sleep(3100);
+    t.eq(await p.ev(`document.querySelectorAll(".warp-gift, .warp-pixe, .warp-hole").length`), 0, "あなが のこっている");
+    t.ok(await p.ev(`(() => { room.open("zukan"); return ![...document.querySelectorAll(".zukan-section h3")].some((x) => x.textContent === "ワープの おみやげ"); })()`), "ずかんに おみやげの らんが ある");
     t.noErrors(p);
     await server.close();
   },
 
-  async "タブを うつらなければ おみやげは ない"(t) {
+  async "たなと あなの いろの きまり（ぜんぶの たなに ある・ひみつの ワープゾーン）"(t) {
     const { server, p } = await open(t);
-    await p.ev(`${link("youtube")}.click()`);
-    await t.sleep(3600);
-    t.ok(await p.ev(`!warpDive.trip() && !document.querySelector(".warp-gift")`), "おみやげが でた");
-    t.ok(await p.ev(`!Object.keys(zukan.state.seen).some((k) => k.startsWith("souvenir:"))`), "いってないのに ずかんに");
-    t.noErrors(p);
-    await server.close();
-  },
-
-  async "たなと おみやげの きまり（ぜんぶの たなに ある・8×8・ひみつの ワープゾーン）"(t) {
-    const { server, p } = await open(t);
-    t.ok(await p.ev(`CASSETTES.SHELVES.every((s) => CASSETTES.GIFTS[s.id]) && !!CASSETTES.GIFTS.secret`), "おみやげの ない たな");
-    t.ok(await p.ev(`Object.values(CASSETTES.GIFTS).every((g) => g.rows.length === 8 && g.rows.every((r) => r.length === 8) && g.hole.c && g.hole.p)`), "おみやげの え か あなの いろが おかしい");
+    t.ok(await p.ev(`CASSETTES.SHELVES.every((s) => CASSETTES.GIFTS[s.id]) && !!CASSETTES.GIFTS.secret`), "あなの いろが ない たな");
+    t.ok(await p.ev(`Object.values(CASSETTES.GIFTS).every((g) => g.hole.c && g.hole.p && !g.rows)`), "あなの いろが おかしい");
     t.eq(await p.ev(`["key", "youtube", "tiktok", "studyplus", "nope"].map(CASSETTES.shelfOf)`), ["secret", "default", "sns", "study", "default"], "shelfOf");
-    t.eq(await p.ev(`(() => { room.open("zukan"); const h = [...document.querySelectorAll(".zukan-section h3")].find((x) => x.textContent === "ワープの おみやげ"); return h?.parentElement.querySelectorAll("li").length; })()`), 7, "ずかんの おみやげの らん");
     t.noErrors(p);
     await server.close();
   },

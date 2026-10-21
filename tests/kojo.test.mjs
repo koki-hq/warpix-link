@@ -32,7 +32,7 @@ export default {
     await server.close();
   },
 
-  async "「もどる」で とじると、ピクセが ひみつの かぎを もって かえってくる"(t) {
+  async "「もどる」で とじると、ピクセが かえってくる"(t) {
     const { server, p } = await page(t);
     await p.ev(`document.getElementById("secret-link").click()`);
     await t.sleep(1500);

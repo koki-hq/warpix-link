@@ -94,11 +94,13 @@ const cards = (() => {
     const css = getComputedStyle(document.body);
     const v = (name) => css.getPropertyValue(name).trim();
     const pal = { o: "#000000", w: v("--fg"), p: v("--accent"), c: v("--accent-2"), y: v("--gold"), k: v("--pumpkin"), v: v("--muted") };
+    // 2 ばいの おおきさで かく。スマホで みると もじが ぼやけて いた から（v1.52.1）
     const cv = document.createElement("canvas");
-    cv.width = W;
-    cv.height = H;
+    cv.width = W * 2;
+    cv.height = H * 2;
     const c = cv.getContext("2d");
-    let seed = [...`${card.date}${card.kind}`].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7) || 7;
+    c.scale(2, 2);
+    let seed = [...`${card.date}${card.kind}${card.n ?? ""}`].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7) || 7;
     const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
     // わく（レア度）
@@ -160,7 +162,7 @@ const cards = (() => {
 
   // ---------- ROOM の にっきの なか ----------
   const thumbs = new Map();
-  const keyOf = (card) => `${card.date}:${card.kind}`;
+  const keyOf = (card) => `${card.date}:${card.kind}:${card.n ?? ""}`; // おなじ ひの 1・10 かいめが おなじ えに ならない ように n も（v1.52.1）
   function thumb(card) {
     if (!thumbs.has(keyOf(card))) thumbs.set(keyOf(card), draw(card).toDataURL("image/png"));
     return thumbs.get(keyOf(card));
@@ -185,7 +187,7 @@ const cards = (() => {
   }
   async function open(card) {
     await postcard.fontsReady();
-    document.getElementById("diary").close();
+    room.leave();
     await postcard.show(draw(card), {
       name: `warpix-card-${card.date}.png`,
       title: "WARPIX カード",

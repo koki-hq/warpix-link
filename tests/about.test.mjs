@@ -45,9 +45,8 @@ export default {
     await p.ev(`document.getElementById("about-reset").click()`);
     await t.sleep(2000);
     t.eq(await p.ev(`[localStorage.getItem("warpix-hi"), localStorage.getItem("warpix-links")]`), [null, null], "消す前の記録が残っている");
-    // 読みなおした瞬間に始まる記録（新しい出会い、きょうの空・月の図鑑、いま見ている時刻）だけがある
-    t.eq(await p.ev(`Object.keys(localStorage).filter((k) => k.startsWith("warpix-") && !["warpix-pixe", "warpix-zukan", "warpix-lastseen"].includes(k))`), [], "はじめから以外の記録がある");
-    t.ok(await p.ev(`Date.now() - JSON.parse(localStorage.getItem("warpix-lastseen")) < 60000`), "けしたあとの 時刻が 古い（おるすばんが 出てしまう）");
+    // 読みなおした瞬間に始まる記録（新しい出会い、きょうの空・月の図鑑）だけがある。いま見ている時刻は もう のこさない（v1.52.1）
+    t.eq(await p.ev(`Object.keys(localStorage).filter((k) => k.startsWith("warpix-") && !["warpix-pixe", "warpix-zukan"].includes(k))`), [], "はじめから以外の記録がある");
     t.eq(await p.ev(`localStorage.getItem("not-ours")`), "keep", "このサイト以外の記録まで消した");
     t.eq(await p.ev(`JSON.parse(localStorage.getItem("warpix-pixe")).diary[0].text`), "はじめて あった。ドキドキした。", "はじめからに なっていない");
     t.noErrors(p);

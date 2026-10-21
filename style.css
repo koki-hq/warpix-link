@@ -2402,24 +2402,6 @@ body.party {
   opacity: 0.55;
 }
 
-/* =====================================================================
-   お気に入りのリンク（v1.7）
-   ===================================================================== */
-.pixel-btn .fav-mark {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 21px;
-  height: 18px;
-  translate: 0 -50%;
-}
-
-.pixel-btn .fav-mark svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 /* 画面には出さず、スクリーンリーダーにだけ読ませる文字 */
 .sr-only {
   position: absolute;
@@ -3329,7 +3311,7 @@ a,
 }
 
 /* =====================================================================
-   ピクセの おるすばん（v1.17）：もどってきたら、え と きょくの おみやげ
+   おへやの どうぐ（ポストカード など）
    ===================================================================== */
 .diary-tools {
   display: flex;
@@ -3338,98 +3320,6 @@ a,
 
 .diary-tools [hidden] {
   display: none;
-}
-
-.rusuban {
-  width: min(420px, calc(100vw - 16px));
-  max-height: calc(100vh - 32px);
-  padding: 16px;
-  border: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  text-align: center;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--gold),
-    0 var(--px) 0 0 var(--gold),
-    calc(var(--px) * -1) 0 0 0 var(--gold),
-    var(--px) 0 0 0 var(--gold);
-}
-
-.rusuban::backdrop {
-  background: rgba(15, 11, 30, 0.8);
-}
-
-.rusuban h2 {
-  margin: 0 0 6px;
-  font-size: 18px;
-  font-weight: normal;
-  color: var(--gold);
-}
-
-.rusuban-away {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.rusuban-away b {
-  font-weight: normal;
-  color: var(--fg);
-}
-
-.rusuban-art {
-  margin: 0 auto;
-}
-
-.rusuban-art img {
-  display: block;
-  width: min(256px, 100%);
-  height: auto;
-  margin: 0 auto;
-  image-rendering: pixelated;
-  animation: rusuban-in 0.6s steps(6) both;
-}
-
-@keyframes rusuban-in {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-.rusuban-art figcaption {
-  margin-top: 6px;
-  font-size: 14px;
-  color: var(--accent);
-}
-
-.rusuban-stats {
-  margin: 12px auto 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  line-height: 1.8;
-}
-
-.rusuban-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.rusuban-row a {
-  text-decoration: none;
-}
-
-.rusuban-msg {
-  min-height: 1.4em;
-  margin: 10px 0 0;
-  font-size: 13px;
 }
 
 /* =====================================================================
@@ -4398,31 +4288,6 @@ a,
 }
 
 /* =====================================================================
-   ワープの おみやげ（v1.30）：もどってきた ピクセが あたまに のせて くる
-   ===================================================================== */
-.warp-pixe .warp-gift-on {
-  position: absolute;
-  top: -18px;
-  left: 22px;
-  width: 20px;
-  height: 20px;
-}
-
-.warp-gift {
-  position: fixed;
-  z-index: 6;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-}
-
-.warp-gift svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* =====================================================================
    カセットの おすそわけ（v1.32）
    ===================================================================== */
 .cas-tools {
@@ -4618,13 +4483,6 @@ a,
     color: var(--accent-2);
     outline: 2px solid var(--accent-2);
     outline-offset: -2px;
-  }
-}
-
-/* よく いく せかいの ハートは みぎはしに かさねて おくので、ばんごうは その ひだりに */
-@media (hover: hover) and (pointer: fine) {
-  .pixel-btn:has(.fav-mark) .link-key {
-    margin-right: 28px;
   }
 }
 

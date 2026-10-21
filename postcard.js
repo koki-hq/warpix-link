@@ -147,8 +147,10 @@ const postcard = (() => {
   // ---------- 画面 ----------
   let overlay = null;
   const close = () => {
-    overlay?.remove();
+    if (!overlay) return;
+    overlay.remove();
     overlay = null;
+    room.back();
   };
 
   // 「ほぞん」：スマホでは 共有の まどを ひらく。そこの「画像を 保存」で しゃしんに はいる。
@@ -208,7 +210,7 @@ const postcard = (() => {
 
   addEventListener("keydown", (e) => e.key === "Escape" && overlay && close());
   document.getElementById("postcard-btn").addEventListener("click", () => {
-    document.getElementById("diary").close();
+    room.leave();
     open();
   });
   cheats.add("postcard", open);

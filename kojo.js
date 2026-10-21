@@ -1,7 +1,7 @@
 // ---------- ひみつの こうじょう（v1.43）：ワープゾーンの いきさき ----------
 // まえは ワープゾーンを おすと いきなり GitHub（プログラムの おきば）が ひらいて、ふつうの ひとには なにが おきたか わからなかった（おたより #2）。
 // いまは アプリの なかの「ひみつの こうじょう」に つく。ピクセが「せっけいず（プログラム）」の ことを せつめいして、
-// みたい ひとだけ GitHub へ。まどを とじると、ピクセが「ひみつの かぎ」を もって かえってくる（ワープ ダイブの おみやげ）。
+// みたい ひとだけ GitHub へ。まどを とじると、ワープ ダイブの ピクセが かえってくる。
 const kojo = (() => {
   const link = document.getElementById("secret-link");
   const dialog = document.getElementById("kojo");
@@ -35,7 +35,7 @@ const kojo = (() => {
 
   function close() {
     dialog.close();
-    // ワープ ダイブの とちゅうなら、「むこうに いって きた」ことに して おみやげを もって かえる
+    // ワープ ダイブの とちゅうなら、「むこうに いって きた」ことに して かえってくる
     const trip = typeof warpDive !== "undefined" ? warpDive.trip() : null;
     if (trip && trip.icon === "key") {
       trip.left = true;

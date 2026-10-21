@@ -51,12 +51,11 @@ const warpDive = (() => {
   }
 
   // ピクセの コピーを とばす（from → to、からだの まんなか どうし）
-  // gift を わたすと、あたまの うえに のせて とぶ
-  function fly(from, to, frames, duration, gift = null) {
+  function fly(from, to, frames, duration) {
     const el = document.createElement("div");
     el.className = "warp-pixe";
     el.setAttribute("aria-hidden", "true");
-    el.innerHTML = pixelSvg(dress(NPC.idle)) + (gift ? `<span class="warp-gift-on">${pixelSvg(gift.rows)}</span>` : "");
+    el.innerHTML = pixelSvg(dress(NPC.idle));
     el.style.left = `${from.x - 32}px`;
     el.style.top = `${from.y - 32}px`;
     document.body.append(el);
@@ -64,23 +63,6 @@ const warpDive = (() => {
     const dy = to.y - from.y;
     const a = el.animate(frames(dx, dy), { duration, easing: "steps(14)", fill: "forwards" });
     return a.finished.then(() => el.remove(), () => el.remove());
-  }
-
-  // はこに もどったら、おみやげを あたまの うえに ふわっと うかべて けす（1.8 びょう）
-  function showGift(gift, sprite) {
-    const c = center(sprite);
-    const el = document.createElement("div");
-    el.className = "warp-gift";
-    el.setAttribute("aria-hidden", "true");
-    el.innerHTML = pixelSvg(gift.rows);
-    el.style.left = `${c.x - 12}px`;
-    el.style.top = `${c.y - 64}px`;
-    document.body.append(el);
-    const a = el.animate(
-      [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-8px)", opacity: 1, offset: 0.7 }, { transform: "translateY(-16px)", opacity: 0 }],
-      { duration: 1800, easing: "steps(9)", fill: "forwards" }
-    );
-    a.finished.then(() => el.remove(), () => el.remove());
   }
 
   function dive(btn, icon) {
@@ -113,9 +95,6 @@ const warpDive = (() => {
     const sprite = document.getElementById("npc");
     // リンクが みえなく なっていたら（スクロールや まどの かわり）、あなは ださずに はこへ もどる
     const visible = t.btn.isConnected && t.btn.getClientRects().length && sprite.getClientRects().length;
-    // ほんとうに むこうへ いって きた ときだけ、おみやげを もって かえる
-    const shelf = CASSETTES.shelfOf(t.icon);
-    const gift = t.left ? CASSETTES.GIFTS[shelf] : null;
     if (visible) {
       const hole = openHole(t.btn, t.icon);
       sound.sfx.coin();
@@ -123,15 +102,11 @@ const warpDive = (() => {
         { transform: "translate(0, 0) scale(0) rotate(-540deg)" },
         { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 90}px) scale(0.9) rotate(-180deg)` },
         { transform: `translate(${dx}px, ${dy}px) scale(1) rotate(0deg)` },
-      ], 650, gift);
+      ], 650);
       closeHole(hole);
     }
     npc.setAway(false);
     trip = null;
-    if (gift) {
-      showGift(gift, sprite);
-      zukan.mark("souvenir", shelf);
-    }
     let line = null;
     if (t.left) {
       // ほんとうに むこうへ いって もどってきた ときだけ、おみやげばなし

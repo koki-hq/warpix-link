@@ -168,7 +168,7 @@ const opening = (() => {
     return cv;
   }
   async function openPhoto(entry) {
-    document.getElementById("diary").close();
+    room.leave();
     await postcard.show(await photo(entry), {
       name: `warpix-raid-night-${entry.date}.png`,
       title: "しゅうらいの よるの きねんしゃしん",

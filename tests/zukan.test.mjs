@@ -59,8 +59,7 @@ export default {
     await p.ev(`for (const id of ["ufo", "bat", "mothership", "star", "raid", "visitor", "guest", "adv-ghost"]) emit("seen", { id });
       for (const k of ["clear", "cloudy", "fog", "rain", "snow", "thunder"]) emit("weather", { kind: k, temp: 10 });
       for (const n of ["だいきち", "ちゅうきち", "しょうきち", "きち", "すえきち"]) emit("omikuji", { name: n });
-      for (const m of ["しんげつ", "まんげつ"]) zukan.mark("moon", m);
-      for (const g of ["default", "sns", "music", "play"]) zukan.mark("souvenir", g);`);
+      for (const m of ["しんげつ", "まんげつ"]) zukan.mark("moon", m);`);
     const { got, total } = await p.ev(`zukan.counts()`);
     t.ok(got * 2 >= total, `前提：半分以上になっていない ${got}/${total}`);
     t.ok(await p.ev(`achievements.has("zukan-half")`), "実績がない");
