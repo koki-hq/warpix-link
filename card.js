@@ -246,7 +246,8 @@ const cards = (() => {
   // ---------- もっている ひとの わりあい（Supabase に かずだけ。だれが もって いるかは おくらない） ----------
   const counter = (() => {
     const cfg = window.WARPIX_ONLINE ?? {};
-    const on = () => !!(cfg.url && cfg.key) && !peek();
+    // かぞえるのは ほんばんの アドレス だけ（てもとで ためした ときに ふえない ように）
+    const on = () => !!(cfg.url && cfg.key) && !peek() && location.hostname === "link.warpix.app";
     const headers = () => ({ apikey: cfg.key, Authorization: `Bearer ${cfg.key}`, "Content-Type": "application/json" });
     const bump = (id) => on() && fetch(`${cfg.url}/rest/v1/rpc/bump`, { method: "POST", headers: headers(), body: JSON.stringify({ counter: id, n: 1 }) }).catch(() => {});
     // この ブラウザを 1 にんと して かぞえる（わりあいの ぶんぼ）

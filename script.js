@@ -950,6 +950,9 @@ const npc = (() => {
     answered,
     intro() {
       introStarted = true;
+      // オープニングの あとは、こちらに きづいた ところから。ほかの はなし（きっぷ など）は まだ しない（v1.54）
+      // 本人「はじめての 人は セリフが ながれて いって めが まわる。おいてけぼり」
+      if (document.body.classList.contains("prologue-done")) return say(["……あ。\nやあ、ぼく ピクセ。", "したの ボタンを えらぶと\nその せかいへ ワープできるよ。"]);
       say([...greeting(), ...extraIntro]);
     },
     // あいさつの最後に1行足す（boot のときに呼ぶ）
@@ -1182,14 +1185,21 @@ const simple = (() => {
     startX = e?.clientX ?? null;
     startY = e?.clientY ?? null;
     sound.sfx.start();
-    if (bgmOn) sound.bgmPlay(0.8);
+    // はじめての 人は、いつもの がめんの まえに オープニング（prologue.js、v1.54）。BGM は さいごの ロゴから
+    const film = typeof prologue !== "undefined" && prologue.should();
+    if (bgmOn && !film) sound.bgmPlay(0.8);
     startScreen.classList.add("leaving");
-    setTimeout(() => {
-      startScreen.hidden = true;
+    const boot = () => {
       document.body.classList.add("booted");
-      setTimeout(npc.intro, reduceMotion ? 0 : 1600);
+      if (film && bgmOn) sound.bgmPlay(0.8);
+      setTimeout(npc.intro, reduceMotion ? 0 : film ? 900 : 1600);
       ufo.start();
       emit("boot");
+    };
+    setTimeout(() => {
+      startScreen.hidden = true;
+      if (film) prologue.run(boot);
+      else boot();
     }, 450);
   }
 
