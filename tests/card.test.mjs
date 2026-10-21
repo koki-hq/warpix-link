@@ -12,9 +12,11 @@ async function page(t, query = "") {
   await p.ev(`Math.random = () => 0.5`);
   return { server, p };
 }
+// リンクを おして ワープした（favorite.js が かぞえる。プロフィールの「ワープした かず」と おなじ）
+const link = (p, times = 1) => p.ev(`for (let i = 0; i < ${times}; i++) emit("link", { icon: "youtube" })`);
 const back = (p, left = true) => p.ev(`emit("warp-back", { icon: "youtube", left: ${left}, label: "YOUTUBE", line: "ただいま！" })`);
 // でて きた カードを とじる（めくらずに）
-const closeReveal = (p) => p.ev(`document.querySelectorAll(".card-reveal").forEach((e) => e.remove())`);
+const closeReveal = (p) => p.ev(`document.querySelectorAll(".card-reveal-close").forEach((b) => b.click())`);
 async function waitReveal(t, p, ms = 8000) {
   for (let i = 0; i < ms / 200; i++) {
     if (await p.ev(`!!document.querySelector(".card-reveal")`)) return true;
@@ -24,22 +26,18 @@ async function waitReveal(t, p, ms = 8000) {
 }
 
 export default {
-  async "ふしめ：ほんとうに もどった 1・10 かいめに しろ、100 で ぎん。あいだは なし。いかなかった ときは かぞえない"(t) {
+  async "ふしめ：ワープの 1・10 かいめに しろ、100 で ぎん。かずは プロフィールの「ワープした かず」と おなじ（v1.53.1）"(t) {
     const { server, p } = await page(t);
-    await back(p, false);
-    t.eq(await p.ev(`cards.state().warps`), 0, "いかなかったのに かぞえた");
     await back(p);
+    t.eq(await p.ev(`cards.state().list.length`), 0, "ダイブの かえりで ふしめが でた");
+    await link(p);
     t.eq(await p.ev(`cards.state().list.map((c) => [c.kind, c.n, c.tier])`), [["warps", 1, "white"]], "1 かいめ");
-    for (let i = 0; i < 8; i++) await back(p);
+    await link(p, 8);
     t.eq(await p.ev(`cards.state().list.length`), 1, "2〜9 かいめに できた");
-    await back(p);
+    await link(p);
     t.eq(await p.ev(`cards.state().list.map((c) => [c.n, c.tier])`), [[10, "white"], [1, "white"]], "10 かいめ（おなじ 日でも できる）");
-    await p.ev(`(() => { const s = JSON.parse(localStorage.getItem("warpix-cards")); s.warps = 99; localStorage.setItem("warpix-cards", JSON.stringify(s)); })()`);
-    await p.goto(server.url + "?away=0");
-    await p.boot();
-    await p.ev(`Math.random = () => 0.5`);
-    await back(p);
-    t.eq(await p.ev(`[cards.state().list[0].n, cards.state().list[0].tier]`), [100, "silver"], "100 かいめ");
+    await link(p, 90);
+    t.eq(await p.ev(`[cards.state().list[0].n, cards.state().list[0].tier, favorite.total()]`), [100, "silver", 100], "100 かいめ");
     t.ok(await p.ev(`achievements.has("enikki")`), "3 まいで 実績「WARPIX カード」");
     t.ok(!(await p.ev(`JSON.stringify(cards.state().list)`)).includes("YOUTUBE"), "せかいの なまえが カードに はいった");
     t.eq(await p.ev(`cards.state().list.map(cards.numberOf)`), [3, 2, 1], "コレクションの ばんごう");
@@ -47,11 +45,29 @@ export default {
     await server.close();
   },
 
+  async "もう すぎた ふしめは、ひらいた とき 1・10・100 の じゅんに 1 まいずつ うらむきで でる（v1.53.1）"(t) {
+    const { server, p } = await page(t);
+    await p.ev(`localStorage.setItem("warpix-links", JSON.stringify({ youtube: { n: 120, last: "2026-10-01" } }))`);
+    await p.goto(server.url + "?away=0");
+    await p.boot();
+    t.eq(await p.ev(`cards.state().list.map((c) => c.n)`), [100, 10, 1], "さかのぼって もらえない");
+    const seen = [];
+    for (let i = 0; i < 3; i++) {
+      t.ok(await waitReveal(t, p), `${i + 1} まいめが でない`);
+      t.eq(await p.ev(`document.querySelectorAll(".card-reveal").length`), 1, "いっぺんに でた");
+      seen.push(await p.ev(`document.querySelector(".card-front img").alt.includes("はじめての") ? 1 : document.querySelector(".card-front img").alt.includes("100かいめ") ? 100 : 10`));
+      await closeReveal(p);
+    }
+    t.eq(seen, [1, 10, 100], "でる じゅんばん");
+    await p.goto(server.url + "?away=0");
+    await p.boot();
+    t.eq(await p.ev(`cards.state().list.length`), 3, "もう いちど ひらくと また でた");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ラッキー：ポケットが ひかって、カードが でる（ランクは うん）。1 日 1 まい"(t) {
     const { server, p } = await page(t);
-    await back(p); // 1 かいめ（ふしめ）
-    await t.sleep(300);
-    await closeReveal(p);
     t.eq(await p.ev(`[0.01, 0.05, 0.2, 0.9].map((r) => cards.rollTier(r))`), ["rainbow", "gold", "silver", "white"], "ランクの きまり");
     await p.ev(`Math.random = () => 0.01`);
     await back(p);
@@ -61,12 +77,12 @@ export default {
       said = (await p.ev(`document.getElementById("dialog-text").textContent`)).includes("ひかってる");
     }
     t.ok(said, "ポケットが ひかってる と いわない");
-    for (let i = 0; i < 30 && (await p.ev(`cards.state().list.length`)) < 2; i++) await t.sleep(250);
+    for (let i = 0; i < 30 && (await p.ev(`cards.state().list.length`)) < 1; i++) await t.sleep(250);
     t.eq(await p.ev(`[cards.state().list[0].kind, cards.state().list[0].tier]`), ["lucky", "rainbow"], "ラッキーの カード");
     t.eq(await p.ev(`cards.numberOf(cards.state().list[0])`), 9, "にじの ラッキーは No.09");
     await back(p);
     await t.sleep(5500);
-    t.eq(await p.ev(`cards.state().list.length`), 2, "おなじ 日に ラッキーが 2 まい");
+    t.eq(await p.ev(`cards.state().list.length`), 1, "おなじ 日に ラッキーが 2 まい");
     await closeReveal(p);
     t.noErrors(p);
     await server.close();
@@ -74,9 +90,9 @@ export default {
 
   async "とくべつな ひ：クリスマスは ランクの そと、その としに 1 まい。しゅうらいの よるに たおすと 1 まい"(t) {
     const { server, p } = await page(t, "&date=2026-12-24");
-    await p.ev(`cards.state().warps = 5`);
-    await back(p);
-    t.eq(await p.ev(`cards.state().list.map((c) => [c.kind, c.tier])`), [["christmas", null]], "クリスマスの カード");
+    await p.ev(`localStorage.setItem("warpix-links", JSON.stringify({ youtube: { n: 5 } }))`);
+    await link(p);
+    t.eq(await p.ev(`cards.state().list.filter((c) => c.kind !== "warps").map((c) => [c.kind, c.tier])`), [["christmas", null]], "クリスマスの カード");
     t.ok(await p.ev(`cards.state().got["christmas-2026"] === true`), "その としに もらった しるし");
     t.eq(await p.ev(`localStorage.getItem("warpix-cards")`), null, "?date= で のぞいて いるのに ほぞん した");
     await server.close();
@@ -128,9 +144,7 @@ export default {
 
   async "ROOM の にっきに コレクションの たな（16 ばん）。もって いない ばんごうは うら。え は 840×1176、わくの いろ。とじると おへやに もどる"(t) {
     const { server, p } = await page(t);
-    await back(p);
-    await t.sleep(300);
-    await closeReveal(p);
+    await link(p);
     t.eq(await p.ev(`(() => { const cv = cards.draw(cards.state().list[0]); return [cv.width, cv.height]; })()`), [840, 1176], "えの 大きさ");
     t.eq(await p.ev(`(() => { const d = cards.draw({ kind: "lucky", tier: "gold", date: "2026-11-01", line: "x" }).getContext("2d").getImageData(2, 2, 1, 1).data; return [d[0], d[1], d[2]]; })()`), [0xa8, 0x74, 0x0a], "きんの わく");
     await p.ev(`room.open("diary")`);
@@ -155,9 +169,7 @@ export default {
 
   async "おなじ 日の 1 かいめと 10 かいめは、べつの えに なる（v1.52.1）"(t) {
     const { server, p } = await page(t);
-    for (let i = 0; i < 10; i++) await back(p);
-    await t.sleep(300);
-    await closeReveal(p);
+    await link(p, 10);
     await p.ev(`room.open("diary")`);
     await t.sleep(500);
     const srcs = await p.ev(`[...document.querySelectorAll("button.cards-btn img")].map((i) => i.src)`);

@@ -2,13 +2,13 @@
 // v1.51 までの ワープえにっき（もどる たびに せかいごとに 1 ページ）を やめて、ピクセが しゅやくの カードに した（v1.52）。
 // v1.53：本人「てに はいっても うれしくないし わくわく しないし 見せびらかしたいとも おもわない」（2026-10-21 だい 2 かい かいぎ）。
 // 3 つの わく：
-//   ふしめ：ピクセと いっしょに ほんとうに いって もどった ワープの 1・10・100・500・1000 かいめ（かいすうで ランク）
+//   ふしめ：ワープの 1・10・100・500・1000 かいめ（かいすうで ランク）。かずは にっきの プロフィールの「ワープした かず」と おなじ（v1.53.1）
 //   ラッキー：ふだんの ワープの かえりに きまぐれ。ピクセが「ポケットが ひかってる」と いったら でる かも。ランクは うん
 //   とくべつな ひ：きせつ・しゅうらいの よる・オープン きねん（2026/11/1〜7）・しゅうねん（まいとし 11/1〜7）。ランクの そと
 // でる ときは うらむきで おちて きて、タップで めくる（ガチャの かくてい えんしゅつ）。ピクセの はんのうと 音も レアで かわる。
 // ピクセの かお・ポーズは かえない（本人「キャラ ほうかい する」）。ラベルの ことば（レア など）は かかない
 const cards = (() => {
-  const KEY = "warpix-cards"; // { warps, list: [{ kind, n, date, tier, line }]（あたらしい ものが さき）, got: { "christmas-2026": true }, counted: ["card-01"] }
+  const KEY = "warpix-cards"; // { list: [{ kind, n, date, tier, line }]（あたらしい ものが さき）, got: { "christmas-2026": true }, counted: ["card-01"] }
   const W = 420;
   const H = 588;
   const MILESTONES = { 1: "white", 10: "white", 100: "silver", 500: "gold", 1000: "rainbow" };
@@ -60,12 +60,12 @@ const cards = (() => {
     return card;
   }
 
-  on("warp-back", ({ left }) => {
-    if (!left) return;
-    state.warps++;
-    save();
-    const n = state.warps;
-    if (MILESTONES[n]) return add("warps", MILESTONES[n], { n, line: LINES[n], always: true });
+  // ふしめ：リンクを おして ワープした かず（favorite.js が かぞえる。プロフィールの かずと おなじ）。
+  // v1.53 までは ピクセが いっしょに いって もどった かいすうを べつに かぞえて いて、プロフィールが 100 でも カードが でなかった（本人、v1.53.1）
+  const hasMilestone = (n) => state.list.some((c) => c.kind === "warps" && c.n === n);
+  on("link", () => {
+    const n = favorite.total();
+    if (MILESTONES[n] && !hasMilestone(n)) add("warps", MILESTONES[n], { n, line: LINES[n], always: true });
     const s = season.current;
     const year = today().getFullYear();
     if (s && LINES[s] && !state.got[`${s}-${year}`]) {
@@ -74,10 +74,15 @@ const cards = (() => {
         state.got[`${s}-${year}`] = true;
         save();
       }
-      return;
     }
-    if (Math.random() < OMEN) omen();
   });
+  // もう すぎた ふしめは、つぎに ひらいた とき ちいさい じゅんに 1 まいずつ（v1.53.1）
+  on("boot", () => {
+    const n = favorite.total();
+    Object.keys(MILESTONES).map(Number).filter((m) => m <= n && !hasMilestone(m)).forEach((m) => add("warps", MILESTONES[m], { n: m, line: LINES[m], always: true }));
+  });
+  // ラッキー：ワープ ダイブで ほんとうに むこうへ いって もどって きた とき
+  on("warp-back", ({ left }) => left && Math.random() < OMEN && omen());
   on("raid-win", ({ night, hits }) => night && hits > 0 && add("raid", null, { line: LINES.raid }));
 
   // オープン きねん・しゅうねん：その しゅうかんに ひらいた ひと ぜんいん
@@ -129,18 +134,29 @@ const cards = (() => {
   let revealing = null;
   const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // なんまいも いっぺんに できた ときは、1 まいずつ じゅんばんに（さかのぼった ふしめ など、v1.53.1）
+  const line = [];
+  let waiting = false;
   function reveal(card) {
+    line.push(card);
+    pump();
+  }
+  function pump() {
+    if (waiting || !line.length) return;
+    waiting = true;
     const wait = () => {
       if (!npc.ready() || playing() || npc.isAway() || revealing || postcard.isOpen() || document.querySelector("dialog[open]")) return setTimeout(wait, 1500);
-      show(card);
+      waiting = false;
+      show(line.shift());
+      pump();
     };
     setTimeout(wait, 1500);
   }
 
   async function show(card) {
-    await postcard.fontsReady();
     const el = document.createElement("div");
     revealing = el;
+    await postcard.fontsReady();
     el.className = `card-reveal tier-${card.tier ?? "event"}${card.tier === "rainbow" ? " rainbow" : ""}`;
     el.setAttribute("role", "dialog");
     el.setAttribute("aria-label", "WARPIX カード");

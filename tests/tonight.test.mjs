@@ -27,6 +27,8 @@ export default {
     // はじめての ワープで もらった 実績も かぞえている。ここでは リンクの ぎょうを みたいので、いちど からに
     t.ok((await p.ev(`tonight.tally().ach`)).includes("はじめての ワープ"), "とった 実績を かぞえていない");
     await p.ev(`tonight.tally().ach.length = 0`);
+    // はじめての ワープで WARPIX カードが うらむきで でて いる ので、とじてから（v1.53.1）
+    await p.ev(`document.querySelectorAll(".card-reveal-close").forEach((b) => b.click())`);
     await p.click("#room-btn");
     await t.sleep(300);
     const c = await card(p);
