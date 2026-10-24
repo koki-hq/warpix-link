@@ -150,7 +150,7 @@ fonts/       日本語の ドット文字（DotGothic16 の つかう 文字 だ
 tests/       テスト一式（node tests/run.mjs）
 tools/health.mjs  健康診断
 tools/fonts.mjs   日本語の ドット文字を つくりなおす（--check で たりない 文字を しらべる）
-docs/spec/     バージョン別の仕様メモ（点数、タイミング、イベント、実績の条件、保存するデータなど）
+CHANGELOG.md   版ごとの かわった こと（くわしい 仕様メモは 事務所に）
 ```
 
 `script.js` はできごと（`warp`、`poke`、`ufo-down`、`score` など）をイベントバスで知らせます。
