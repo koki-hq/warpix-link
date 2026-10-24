@@ -52,26 +52,8 @@ const manual = (() => {
     return "ブラウザのメニュー（︙）から「ホーム画面に追加」か「アプリをインストール」。";
   }
 
-  // きみが いつも いく せかいは？（v1.49、おたより #4・#7）。「いつもの」が ない 人には、となりの ゲームセンターを すすめる
-  const mineEl = document.getElementById("manual-mine");
-  const answerEl = document.getElementById("manual-answer");
-  const door = document.getElementById("manual-door");
-  const choices = [...dialog.querySelectorAll("[data-where]")];
-  const ANSWERS = {
-    yes: "ピクセ「よかった！ そのまま つかってね。」",
-    other: "ピクセ「さいごに たなを ひらくね。すきな 6こに いれかえられるよ。」",
-    none: "ピクセ「それなら となりの ゲームセンターは どう？ リンクが なくても、ピクセと ゲームで あそべるよ。」",
-  };
-  let wantShelf = false; // とじたら カセットの たなを ひらく
-  function answer(where) {
-    for (const b of choices) b.setAttribute("aria-pressed", String(b.dataset.where === where));
-    answerEl.textContent = ANSWERS[where];
-    door.hidden = where !== "none";
-    wantShelf = where === "other";
-    sound.sfx.select();
-  }
-  for (const b of choices) b.addEventListener("click", () => answer(b.dataset.where));
-  door.addEventListener("click", () => store.set(KEY, true)); // ゲームセンターへ いっても、もう よんだ ことに
+  // v1.63：「きみが いつも いく せかいは？」（この なかに ある／ほかの アプリ／とくに ない → となりの ゲームセンター）は やめた。
+  // リンクは つかう ぜんてい で「こう つかえるよ」を せつめい する（だい 6 かい 会議）
 
   let pages = [];
   let page = 0;
@@ -86,15 +68,10 @@ const manual = (() => {
     backBtn.hidden = page === 0; // まえの ページに もどれる（v1.49.1）
     if (pages[page].dataset.sheet === "home") document.getElementById("manual-how").textContent = homeHow();
     else point.hidden = true;
-    if (pages[page].dataset.sheet === "where") mineEl.textContent = CASSETTES.current().map((id) => CASSETTES.byId(id).label).join("・");
   }
 
   function open(first = false) {
     fromStart = first;
-    wantShelf = false;
-    for (const b of choices) b.setAttribute("aria-pressed", "false");
-    answerEl.textContent = "";
-    door.hidden = true;
     pages = sheets.filter((s) => s.dataset.sheet !== "home" || homeShown());
     page = 0;
     show();
@@ -118,8 +95,6 @@ const manual = (() => {
     close();
     // はじめての 人は「はじめる」で そのまま PRESS START と おなじに
     if (fromStart && !startScreen.hidden) document.getElementById("start-btn").click();
-    // 「ほかの アプリが いい」：たなを ひらく。はじめる ときは ピクセの あいさつを さいごまで よんでから（v1.49.1）
-    if (wantShelf) (fromStart ? afterHello : (fn) => fn())(() => cassetteUi.open());
   });
   backBtn.addEventListener("click", () => {
     if (page === 0) return;

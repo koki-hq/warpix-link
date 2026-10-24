@@ -19,7 +19,7 @@ export default {
     t.eq([s.w, s.h], [1200, 630], "画像の大きさ");
     t.ok(s.download?.startsWith("warpix-pixe-") && s.download.endsWith(".png"), `保存のファイル名: ${s.download}`);
     t.ok(s.href, "保存用のリンクがない");
-    t.ok(s.alt?.includes("ちびピクセ"), "画像の説明（alt）に今の姿の名前がない");
+    t.ok(s.alt?.includes("ピクセ"), "画像の説明（alt）に ピクセが ない");
     t.ok(await p.ev(`achievements.has("postcard")`), "実績「ポストカード」がない");
     t.ok(await p.ev(`!document.getElementById("diary").open`), "ノートが閉じない");
     // できた画像そのものを保存して、見た目を確かめられるようにする

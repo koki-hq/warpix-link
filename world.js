@@ -382,6 +382,16 @@ const closet = (() => {
     worn: () => ({ ...worn }),
     // へやの ハンガーラックを ひからせる
     hasNew: () => owned().some(isNew),
+    // あえた ひの プレゼント（v1.63）：[{ days, names: [...] }] を ひにちの じゅんに
+    presents() {
+      const all = [
+        ...Object.values(wardrobe.hats()).filter((h) => !h.variantOf && h.unlock?.startsWith("days:")).map((h) => [Number(h.unlock.slice(5)), h.name]),
+        ...Object.values(ITEMS).filter((it) => it.unlock?.startsWith("days:")).map((it) => [Number(it.unlock.slice(5)), it.name]),
+      ];
+      const byDay = new Map();
+      for (const [d, n] of all) byDay.set(d, [...(byDay.get(d) ?? []), n]);
+      return [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([days, names]) => ({ days, names }));
+    },
     ITEMS,
     HATS,
     render,

@@ -808,7 +808,7 @@ const npc = (() => {
   const extraIntro = [];
   function introLines() {
     const main = extraIntro.filter((x) => !x.topic).map((x) => x.line);
-    if (main.length >= 2) return main;
+    if (main.length >= 3) return main;
     const first = extraIntro.find((x) => x.topic)?.topic;
     return [...main, ...extraIntro.filter((x) => x.topic === first).map((x) => x.line)];
   }
@@ -1000,7 +1000,7 @@ const npc = (() => {
     },
     // あいさつの最後に1行足す（boot のときに呼ぶ）
     // topic を つけた ものは「かるい わだい」（きせつ・きょうの ヒント・きた かいすう など）。
-    // だいじな もの（そだった・きっぷ・てがみ・しゅうらいの よる など）が 2 ぎょう いじょう ある ひは いわない。いうのは 1 わだい だけ（v1.60）
+    // だいじな もの（プレゼント・きっぷ・てがみ・しゅうらいの よる など）が 3 ぎょう いじょう ある ひは いわない（v1.63 で 2 → 3。プレゼントの 2 ぎょう だけで ヒントが きえた）。いうのは 1 わだい だけ（v1.60）
     addIntro: (line, { topic = null } = {}) => extraIntro.push({ line, topic }),
     busy: () => !!typing || queue.length > 0 || !!pending,
     // あいさつを最後まで言い終えたか
@@ -1148,11 +1148,18 @@ const simple = (() => {
     bgmOn = localStorage.getItem("warpix-bgm") !== "off";
   } catch {}
 
+  // 音が ねて いる（iPhone で アプリから もどった あと、タップする まで 音を だせない）ときは、
+  // ピクセの あたまに「♪z」。タップで おきると ぽん と きえて ピクセが はねる。セリフは ださない（v1.63）
+  let wasWaiting = false;
   function renderToggle() {
     const wait = bgmOn && sound.waiting();
-    bgmToggle.textContent = wait ? "BGM TAP!" : bgmOn ? "BGM ON" : "BGM OFF";
+    bgmToggle.textContent = wait ? "BGM ♪z" : bgmOn ? "BGM ON" : "BGM OFF";
     bgmToggle.classList.toggle("waiting", wait);
     bgmToggle.setAttribute("aria-pressed", String(bgmOn));
+    bgmToggle.setAttribute("aria-label", wait ? "おとが ねてるよ。どこかを タップすると おきるよ" : bgmToggle.textContent);
+    document.body.classList.toggle("sound-asleep", wait);
+    if (wasWaiting && !wait && bgmOn) npc.jump();
+    wasWaiting = wait;
   }
   renderToggle();
   sound.onWaiting(renderToggle);

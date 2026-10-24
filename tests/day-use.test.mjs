@@ -42,7 +42,7 @@ export default {
     await p.ev(`__away(true)`);
     await p.ev(`__away(false)`);
     await t.sleep(1200);
-    t.eq(await p.ev(`document.getElementById("bgm-toggle").textContent`), "BGM TAP!", "タップまちを みせない");
+    t.eq(await p.ev(`document.getElementById("bgm-toggle").textContent`), "BGM ♪z", "タップまちを みせない");
     t.ok(await p.ev(`document.getElementById("bgm-toggle").classList.contains("waiting")`), "クラス");
     await p.click("#bgm-toggle");
     // パソコンが こんで いると 音が おきるのが おそい（5 並列で 0.8 びょうでは まにあわなかった）。4 びょう まで まつ

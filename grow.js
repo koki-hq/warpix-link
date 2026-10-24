@@ -78,15 +78,21 @@ const grow = (() => {
       intro.push(`ひさしぶり！ ${gap}にちぶり だね。\nまってたよ。`);
     }
 
-    // 成長
+    // であった ひの プレゼント（v1.63）：「せいちょう」と だんかいの なまえ（ちびピクセ・マントの ピクセ など）は やめた。
+    // 本人「何日か 来たら コスチューム もらえる だけ だよね 実態は」。なまえは ずっと ピクセ。
+    // スカーフ・マント・きんの アンテナ は もらった ひに きる（stage は うらで のこす：でんせつの キラキラ など）
     const reached = STAGES.reduce((acc, s, i) => (state.days.length >= s.days ? i : acc), 0);
     if (reached > state.stage) {
       state.stage = reached;
       stageUp = STAGES[reached];
       if (stageUp.gift) closet.gift(stageUp.gift);
-      if (state.sulk) intro.push(`……${stageUp.item}を てにいれた。`, "……べつに うれしくないし。");
-      else intro.push("……からだが あったかい……！", `${stageUp.item}を てにいれた！\n（${stageUp.name}に なった）`);
-      write("grow", `${state.days.length}にち あえた。${stageUp.item}を てにいれた！`, { force: true });
+    }
+    const gift = closet.presents().find((p) => p.days === state.days.length);
+    if (gift) {
+      const names = gift.names.join("と ");
+      if (state.sulk) intro.push(`……${names}、とどいてた。`, "……べつに うれしくないし。");
+      else intro.push(`${state.days.length}にち あえた プレゼント！\n${names}が とどいたよ。`, "へやの ハンガーラックに\nいれといたね。");
+      write("grow", `${state.days.length}にち あえた。${names}が とどいた。`, { force: true });
     }
 
     // 記念日（出会ってからの日数）
@@ -252,5 +258,10 @@ const grow = (() => {
   renderBadge();
 
   // firstToday：きょう はじめて 来たか（あいさつの なれ v1.50 が つかう）
-  return { state, open, write, firstToday, stageName: () => STAGES[state.stage].name, stages: () => STAGES, age: () => dayDiff(state.born, ymd), readToday: () => readToday };
+  return { state, open, write, firstToday, stageName: () => "ピクセ",
+    // つぎの プレゼントまで あと なんにち（もう ない ときは null）
+    nextPresent: () => {
+      const p = closet.presents().find((x) => x.days > state.days.length);
+      return p ? p.days - state.days.length : null;
+    }, stages: () => STAGES, age: () => dayDiff(state.born, ymd), readToday: () => readToday };
 })();

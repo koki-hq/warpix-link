@@ -111,8 +111,8 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("diary").close()`);
   await axe(p, "このページについて", `document.getElementById("about-btn").click()`);
   await axe(p, "とりあつかい せつめいしょ（1 まいめ）", `document.getElementById("about-manual").click()`);
-  await axe(p, "とりあつかい せつめいしょ（2 まいめ：きみの いつもは？）", `document.getElementById("manual-next").click(); document.querySelector('[data-where="none"]').click()`);
-  await axe(p, "とりあつかい せつめいしょ（3 まいめ）", `document.getElementById("manual-next").click()`);
+  await axe(p, "とりあつかい せつめいしょ（2 まいめ：つかいかた）", `document.getElementById("manual-next").click()`);
+  await axe(p, "とりあつかい せつめいしょ（3 まいめ：リンクは じぶん好みに）", `document.getElementById("manual-next").click()`);
   await p.ev(`document.getElementById("manual").close()`);
   await axe(p, "せってい", `document.getElementById("settings-btn").click()`);
   await p.ev(`document.getElementById("settings").close()`);

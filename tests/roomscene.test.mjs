@@ -39,7 +39,7 @@ export default {
     await t.sleep(200);
     t.ok(await p.ev(`!document.getElementById("room-scene").hidden`), "からっぽ なのに ひらいた");
     t.eq(await p.ev(`document.querySelector(".rs-say").textContent`), "まだ からっぽ。", "ひとこと");
-    t.eq(await p.ev(`[...document.querySelectorAll(".rs-status dt")].map((d) => d.textContent)`), ["なまえ", "であって", "あえた ひ", "ワープした かず", "つぎの せいちょう"], "ステータス");
+    t.eq(await p.ev(`[...document.querySelectorAll(".rs-status dt")].map((d) => d.textContent)`), ["であって", "あえた ひ", "ワープした かず", "つぎの プレゼント"], "ステータス");
     // てがみが とどくと ポストが ひかって、ひらくと てがみ だけ
     await p.ev(`letter.add({ kind: "test", title: "ためしの てがみ", lines: ["きみへ", "やあ"] }); document.getElementById("room-back").click()`);
     await t.sleep(300);

@@ -83,7 +83,7 @@ const achievements = (() => {
     { id: "online", name: "おなじ そら", desc: "ほかの だれかと おなじ そらを みた", hint: "だれかと おなじ じかんに ここに いると……" },
     { id: "hello", name: "はじめまして", desc: "ほかの だれかと てを ふりあった", hint: "そらに うかぶ ピクセを クリック" },
     { id: "diary", name: "ピクセの つぶやき", desc: "ピクセの つぶやきを よんだ", hint: "ピクセは まいにち なにかを つぶやいている" },
-    { id: "growup", name: "おおきく なったね", desc: "7にち あって ピクセが マントを てにいれた", hint: "なんにちも あいに くると……" },
+    { id: "growup", name: "7にち あえたね", desc: "7にち あって、マントが とどいた", hint: "なんにちも あいに くると……" },
     { id: "reunion", name: "ただいま", desc: "ひさしぶりに あいにきて、ピクセと なかなおり した", hint: "しばらく あわないと ピクセは……" },
     { id: "raid", name: "きょうの ヒーローたち", desc: "みんなで マザーシップを たおした", hint: "まいつき さいしょの にちようびの よる 9じに、みんなで……" },
     { id: "regular", name: "いつもの せかい", desc: "おなじ リンクへ 10かい ワープした", hint: "おなじ せかいに なんども……" },
@@ -519,6 +519,11 @@ function mothership() {
   ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"].forEach((type) =>
     addEventListener(type, wake, { passive: true })
   );
+  // ワープで ほかの アプリに いって いた あいだは「なにも して いない じかん」に いれない（v1.63。もどった とたんに
+  // 「ねむく なってきた」と「ただいま」が ぶつかって いた、本人）
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) lastInput = performance.now();
+  });
 
   setInterval(() => {
     if (document.hidden || !document.body.classList.contains("booted")) return;
@@ -540,6 +545,8 @@ function mothership() {
       return;
     }
     if (playing() || npc.isAway() || now - lastInput < (firstDay() ? IDLE_FIRST_MS : IDLE_MS)) return;
+    // ほかの セリフを よみおわって、すこし まが あいて から（npc.free、v1.63）
+    if (!npc.free()) return;
     sleeping = true;
     sleptAt = now;
     npc.sleep(true);

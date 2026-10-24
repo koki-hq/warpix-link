@@ -5745,8 +5745,8 @@ a,
 .rs-shelf    { right: 5%; top: 36%; width: 20%; }
 .rs-post     { left: 7%;  top: 70%; width: 12%; }
 .rs-camera   { left: 27%; top: 86%; width: 12%; }
-.rs-record   { left: 21%; top: 64%; width: 14%; }
-.rs-cardbox  { right: 8%; top: 76%; width: 15%; }
+.rs-record   { left: 64%; top: 63%; width: 14%; }
+.rs-cardbox  { right: 5%; top: 81%; width: 15%; }
 .rs-pixe     { left: 38%; top: 59%; width: 24%; }
 
 .rs-pixe svg {
@@ -6218,4 +6218,41 @@ a,
 
 .cas-shelf:not([open]) {
   padding-bottom: 2px;
+}
+
+/* まどを ひらいて いる あいだは、うしろの がめんを スクロール させない（v1.63） */
+html:has(dialog[open]),
+html:has(dialog[open]) body {
+  overflow: hidden;
+}
+
+dialog .diary-body,
+dialog .about-body {
+  overscroll-behavior: contain;
+}
+
+/* おとが ねて いる とき：ピクセの あたまに「♪z」（v1.63） */
+.npc-sprite::after {
+  content: "♪z";
+  position: absolute;
+  top: -14px;
+  right: -10px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  color: var(--accent-2);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sound-asleep .npc-sprite::after {
+  opacity: 1;
+  animation: zz-float 1.6s steps(4) infinite;
+}
+
+@keyframes zz-float {
+  50% { translate: 0 -4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-asleep .npc-sprite::after { animation: none; }
 }

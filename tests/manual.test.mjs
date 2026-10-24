@@ -38,21 +38,22 @@ export default {
     t.ok(await p.ev(`document.querySelectorAll("#manual .ms-pixe svg").length === 3 && !!document.querySelector("#manual .ms-cursor svg")`), "ピクセの え");
     await p.shot("manual-1.png");
     await p.ev(`document.getElementById("manual-next").click()`);
-    // 2 まいめ：きみの いつもは？（えらばなくても つぎへ いける）
+    // 2 まいめ：つかいかた（ワープ）。v1.63 で「きみが いつも いく せかいは？」を やめて、リンクは つかう ぜんてい
     s = await state(p);
-    t.ok(s.page === "2/4" && (await p.ev(`document.getElementById("manual-mine").textContent`)) === "YOUTUBE・TWITTER・INSTAGRAM・BOOTH・TUMBLR・SPOTIFY", `2 まいめ: ${JSON.stringify(s)}`);
+    t.ok(s.page === "2/4" && (await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("ワープ"), `2 まいめ: ${JSON.stringify(s)}`);
+    t.ok(await p.ev(`!document.querySelector("[data-where]") && !document.getElementById("manual-door")`), "まえの「いつもは？」が のこって いる");
     // もどる で 1 まいめへ、また つぎへ（v1.49.1）
     t.ok(await p.ev(`!document.getElementById("manual-back").hidden`), "2 まいめに もどる が ない");
     await p.ev(`document.getElementById("manual-back").click()`);
     t.eq([(await state(p)).page, await p.ev(`document.getElementById("manual-back").hidden`)], ["1/4", true], "もどる で 1 まいめに もどらない");
     await p.ev(`document.getElementById("manual-next").click()`);
-    await p.ev(`document.querySelector('[data-where="yes"]').click()`);
-    t.ok((await p.ev(`document.getElementById("manual-answer").textContent`)).includes("そのまま") && (await p.ev(`document.getElementById("manual-door").hidden`)), "この なかに ある の こたえ");
-    await p.ev(`document.getElementById("manual-next").click()`);
-    s = await state(p);
-    t.ok(s.page === "3/4" && (await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("ミニゲーム") && !(await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("SIMPLE"), `3 まいめ: ${JSON.stringify(s)}`);
     await t.sleep(2300); // ピクセが あなに とびこんで「ワープ！」の ところ
     await p.shot("manual-2.png");
+    await p.ev(`document.getElementById("manual-next").click()`);
+    // 3 まいめ：リンクは じぶん このみに（へんせい・じぶんの リンク・パーティ）
+    s = await state(p);
+    const links = await p.ev(`document.querySelector('[data-sheet="links"]').textContent`);
+    t.ok(s.page === "3/4" && links.includes("リンクの へんせい") && links.includes("じぶんの リンク") && links.includes("パーティ"), `3 まいめ: ${JSON.stringify(s)}`);
     await p.ev(`document.getElementById("manual-next").click()`);
     s = await state(p);
     t.ok(s.page === "4/4" && s.next === "はじめる ▶" && !s.skip, `4 まいめ: ${JSON.stringify(s)}`);
@@ -132,38 +133,11 @@ export default {
     await server.close();
   },
 
-  async "いつも いく ところが「とくに ない」人は、となりの ゲームセンターへ。「ほかの アプリ」なら はじめたら たなが ひらく"(t) {
+  async "となりの へや（WARPIX ARCADE）の いりぐちは リンク集の したと このページについて に のこる"(t) {
     const server = await t.startServer();
-    let p = await fresh(t);
+    const p = await fresh(t);
     await p.goto(server.url);
     await t.sleep(1000);
-    await p.ev(`document.getElementById("manual-next").click()`);
-    await p.ev(`document.querySelector('[data-where="none"]').click()`);
-    const s = await p.ev(`({ answer: document.getElementById("manual-answer").textContent, door: !document.getElementById("manual-door").hidden, href: document.getElementById("manual-door").href, pressed: document.querySelector('[data-where="none"]').getAttribute("aria-pressed") })`);
-    t.ok(s.answer.includes("ゲームセンター") && s.door && s.href === "https://arcade.warpix.app/" && s.pressed === "true", `とくに ない: ${JSON.stringify(s)}`);
-    await p.shot("manual-where-none.png");
-    // ゲームセンターへ いっても、もう よんだ ことに（つぎに 来ても せつめいしょは 出ない）
-    await p.ev(`document.getElementById("manual-door").addEventListener("click", (e) => e.preventDefault()); document.getElementById("manual-door").click()`);
-    t.eq(await p.ev(`localStorage.getItem("warpix-manual")`), "true", "ゲームセンターへ いったら よんだ ことに ならない");
-
-    // ほかの アプリが いい → はじめる → 起動の あとで カセットの たな
-    p = await fresh(t);
-    await p.goto(server.url);
-    await t.sleep(1000);
-    await p.ev(`document.getElementById("manual-next").click()`);
-    await p.ev(`document.querySelector('[data-where="other"]').click()`);
-    t.ok((await p.ev(`document.getElementById("manual-answer").textContent`)).includes("たな"), "ほかの アプリ の こたえ");
-    await p.ev(`for (let i = 0; i < 2; i++) document.getElementById("manual-next").click()`);
-    t.eq(await p.ev(`document.getElementById("manual-next").textContent`), "はじめる ▶", "さいごの ページ");
-    await p.ev(`document.getElementById("manual-next").click()`);
-    // ピクセの あいさつの とちゅうでは ひらかない。よみおわったら ひらく（v1.49.1）
-    await t.sleep(3200);
-    t.ok(await p.ev(`document.body.classList.contains("booted") && !npc.ready() && !document.getElementById("cassette").open`), "あいさつの とちゅうで たなが ひらいた");
-    await p.readIntro();
-    await t.sleep(2000);
-    t.ok(await p.ev(`document.getElementById("cassette").open`), "あいさつの あとに たなが ひらかない");
-    await p.ev(`document.getElementById("cassette").close()`);
-
     // リンク集の 下にも となりの へや
     t.eq(await p.ev(`document.querySelector(".arcade-door").href`), "https://arcade.warpix.app/", "となりの へやの いりぐち");
     t.ok(await p.ev(`document.getElementById("about").textContent.includes("WARPIX ARCADE")`), "このページについて に となりの へや が ない");

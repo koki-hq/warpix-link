@@ -129,8 +129,6 @@ const roomScene = (() => {
   const el = document.getElementById("room-scene");
   function render() {
     const s = grow.state;
-    const stages = grow.stages();
-    const next = stages[s.stage + 1];
     const tweetNew = !grow.readToday();
     const letterNew = letter.letters().some((l) => l.unread);
     const glow = { window: tweetNew, post: letterNew, closet: closet.hasNew() };
@@ -148,11 +146,10 @@ const roomScene = (() => {
         <p class="rs-say" aria-live="polite"></p>
       </div>
       <dl class="rs-status">
-        <div><dt>なまえ</dt><dd>${grow.stageName()}</dd></div>
         <div><dt>であって</dt><dd>${grow.age() + 1}にちめ</dd></div>
         <div><dt>あえた ひ</dt><dd>${s.days.length}にち</dd></div>
         <div><dt>ワープした かず</dt><dd>${favorite.total()}かい</dd></div>
-        <div><dt>つぎの せいちょう</dt><dd>${next ? `あと ${next.days - s.days.length}にち` : "もう さいこう！"}</dd></div>
+        <div><dt>つぎの プレゼント</dt><dd>${grow.nextPresent() ? `あと ${grow.nextPresent()}にち` : "ぜんぶ とどいた！"}</dd></div>
       </dl>`;
   }
 
