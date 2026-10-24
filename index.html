@@ -315,6 +315,30 @@
     </div>
   </dialog>
 
+  <!-- じぶんの リンク（v1.61）：なまえ・アドレス・アイコン -->
+  <dialog class="about mylink" id="mylink" aria-labelledby="mylink-title">
+    <div class="about-top">
+      <h2 id="mylink-title">じぶんの リンクを つくる</h2>
+      <button class="about-close" id="mylink-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <form class="mylink-form" id="mylink-form" novalidate>
+        <label for="mylink-name">なまえ（10 もじ まで）</label>
+        <input id="mylink-name" type="text" maxlength="10" autocomplete="off">
+        <label for="mylink-url">アドレス（https:// で はじまる もの）</label>
+        <input id="mylink-url" type="url" inputmode="url" autocomplete="off" spellcheck="false">
+        <p class="mylink-label" id="mylink-icon-label">アイコン</p>
+        <div class="mylink-icons" id="mylink-icons" role="group" aria-labelledby="mylink-icon-label"></div>
+        <p class="mylink-msg" id="mylink-msg" aria-live="polite"></p>
+        <div class="save-row">
+          <button class="save-btn" type="submit">きめる</button>
+          <button class="save-btn hensei-remove" id="mylink-delete" type="button" hidden>この リンクを けす</button>
+        </div>
+        <p class="about-note">この ブラウザの なか だけに のこります。どこにも おくりません。</p>
+      </form>
+    </div>
+  </dialog>
+
   <!-- リンクの へんせい（v1.56）：パーティの メニュー -->
   <dialog class="about hensei" id="hensei" aria-labelledby="hensei-title">
     <div class="about-top">
@@ -526,7 +550,7 @@
       <p class="about-note">メールの アプリが ひらきます。したがきに いまの 版と きかいの しゅるいが はいって いるので、バグの ときに たすかります（けしても だいじょうぶ）。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、リンクごとの ワープした かず、ぼうしと コスチューム（じぶんで かいた ぼうしも）と クローゼットで みた もの、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ おしらせ、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、じぶんで つくった リンク（なまえ・アドレス・アイコン）、リンクごとの ワープした かず、ぼうしと コスチューム（じぶんで かいた ぼうしも）と クローゼットで みた もの、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ おしらせ、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>

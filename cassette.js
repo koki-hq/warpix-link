@@ -1,10 +1,12 @@
 // ---------- カセット えらび（v1.28）：6 この リンクを、たなの 公式リンクから えらんで いれかえる ----------
-// リンクは いつも 6 こ。自由に URL は いれられない（こちらで よういした 公式の トップページだけ）。
+// リンクは いつも 6 こ。たなは こちらで よういした 公式の トップページと、じぶんで つくった リンク（v1.61）。
 // script.js より さきに よみこんで、ページを かく まえに えらんだ リンクへ さしかえる。
 // アイコンは 12×12 の オリジナルの ドット絵（"#" が ぬり）。公式ロゴは つかわない。
 const CASSETTES = (() => {
   const SHELVES = [
     { id: "default", name: "いつもの" },
+    // じぶんの リンク（v1.61）は いつもの の すぐ した（いちばん したでは みつからない）
+    { id: "mine", name: "じぶんの リンク" },
     { id: "sns", name: "SNS・あつまる" },
     { id: "music", name: "おんがく" },
     { id: "play", name: "みる・あそぶ" },
@@ -98,12 +100,77 @@ const CASSETTES = (() => {
     play: { hole: { c: "var(--accent-2)", p: "var(--gold)" } },
     make: { hole: { c: "var(--pumpkin)", p: "var(--gold)" } },
     study: { hole: { c: "var(--accent-2)", p: "var(--fg)" } },
+    mine: { hole: { c: "var(--gold)", p: "var(--accent-2)" } },
     secret: { hole: { c: "var(--gold)", p: "var(--gold)" } },
+  };
+
+
+  // ---------- じぶんの リンク（v1.61）：すきな https の アドレスを 18 こまで（パーティ 3 つ × 6 こ を ぜんぶ じぶんの リンクに できる） ----------
+  // ユーザー登録 なし、この ブラウザの なか だけ（ふっかつの じゅもんで もちはこべる）。おすそわけ なし。
+  // アイコンは よういした ドット絵から えらぶ（あいての サイトから とって こない。とると あいてに「だれかが ひらいた」と つたわる）
+  const MINE_KEY = "warpix-mylinks";
+  const MINE_MAX = 18;
+  const MINE_ICONS = {
+    home: { name: "おうち", rows: ["............", ".....##.....", "....####....", "...######...", "..########..", ".##########.", "..########..", "..##.##.##..", "..##.##.##..", "..##....##..", "..########..", "............"] },
+    star: { name: "ほし", rows: ["............", ".....##.....", ".....##.....", "....####....", "############", ".##########.", "..########..", "..###..###..", ".###....###.", ".##......##.", "............", "............"] },
+    heart: { name: "ハート", rows: ["............", "..##....##..", ".####..####.", "############", "############", "############", ".##########.", "..########..", "...######...", "....####....", ".....##.....", "............"] },
+    book: { name: "ほん", rows: ["............", ".####..####.", "#....##....#", "#.##.##.##.#", "#....##....#", "#.##.##.##.#", "#....##....#", "#.##.##.##.#", "#....##....#", ".####..####.", "............", "............"] },
+    music: { name: "おんがく", rows: ["............", "....#######.", "....#######.", "....#.....#.", "....#.....#.", "....#.....#.", "....#.....#.", "..###...###.", ".####..####.", ".####..####.", "..##....##..", "............"] },
+    game: { name: "ゲーム", rows: ["............", "............", "..########..", ".##########.", "##.#####.###", "#...###.#.##", "##.#####.###", "############", "###......###", ".##......##.", "............", "............"] },
+    cart: { name: "おかいもの", rows: ["............", "##..........", ".#.########.", ".#.#......#.", ".#.#......#.", ".#..######..", ".#..........", ".##########.", "............", "...##...##..", "...##...##..", "............"] },
+    camera: { name: "カメラ", rows: ["............", "....####....", ".##########.", "#..........#", "#...####...#", "#..#....#..#", "#..#....#..#", "#...####...#", "#..........#", ".##########.", "............", "............"] },
+    chat: { name: "おしゃべり", rows: ["............", ".##########.", "#..........#", "#..##..##..#", "#..........#", "#..........#", ".######.###.", "......#.#...", ".......##...", "............", "............", "............"] },
+    pin: { name: "ばしょ", rows: ["............", "....####....", "...######...", "..###..###..", "..##....##..", "..###..###..", "...######...", "....####....", ".....##.....", ".....##.....", "............", "............"] },
+    film: { name: "えいが", rows: ["............", "############", "#.#.#.#.#.##", "############", "#....#.....#", "#....##....#", "#....###...#", "#....##....#", "############", "#.#.#.#.#.##", "############", "............"] },
+    globe: { name: "せかい", rows: ["............", "....####....", "..##.##.##..", ".#...##...#.", ".##########.", "#....##....#", "#....##....#", ".##########.", ".#...##...#.", "..##.##.##..", "....####....", "............"] },
+  };
+  // ピクセの ひとこと（なまえは いれない きょうつうの もの、なんパターンか）
+  const MINE_HI = ["ここは きみが えらんだ せかい。\nいってらっしゃい！", "きみの とっておきの せかいだね。", "この せかいの こと、\nこんど おしえてね。", "きみの せかいへ\nワープの じゅんび OK！"];
+  const MINE_BACK = ["ただいま！ きみの せかい、\nたのしかった？", "おかえり！\nいい ところ だったね。", "ただいま！ ぼくも\nいっしょに みてきたよ。", "おかえり！ また いこうね。"];
+  const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+  // https の アドレス だけ（javascript: などは いれない）
+  function cleanUrl(text) {
+    try {
+      const u = new URL(String(text ?? "").trim());
+      return u.protocol === "https:" && u.hostname.includes(".") && u.href.length <= 500 ? u.href : null;
+    } catch {
+      return null;
+    }
+  }
+  const asCassette = (m) => ({
+    id: m.id,
+    label: m.label,
+    url: m.url,
+    iconKey: m.icon,
+    icon: (MINE_ICONS[m.icon] ?? MINE_ICONS.star).rows,
+    shelf: "mine",
+    mine: true,
+    get hi() {
+      return pickOne(MINE_HI);
+    },
+    get back() {
+      return pickOne(MINE_BACK);
+    },
+  });
+  let mine = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(MINE_KEY) ?? "[]");
+    if (Array.isArray(saved))
+      mine = saved
+        .filter((m) => m && /^my-\d+$/.test(m.id) && cleanUrl(m.url) && typeof m.label === "string")
+        .slice(0, MINE_MAX)
+        .map((m) => asCassette({ id: m.id, label: m.label.slice(0, 10), url: cleanUrl(m.url), icon: MINE_ICONS[m.icon] ? m.icon : "star" }));
+  } catch {}
+  const saveMine = () => {
+    try {
+      if (mine.length) localStorage.setItem(MINE_KEY, JSON.stringify(mine.map((c) => ({ id: c.id, label: c.label, url: c.url, icon: c.iconKey }))));
+      else localStorage.removeItem(MINE_KEY);
+    } catch {}
   };
 
   const DEFAULT = LIST.filter((c) => c.shelf === "default").map((c) => c.id);
   const KEY = "warpix-cassette";
-  const byId = (id) => LIST.find((c) => c.id === id);
+  const byId = (id) => LIST.find((c) => c.id === id) ?? mine.find((c) => c.id === id);
 
   // 6 こ、ぜんぶ しっている カセットで、おなじ ものが ない ときだけ つかう
   const valid = (ids) => Array.isArray(ids) && ids.length === 6 && new Set(ids).size === 6 && ids.every(byId);
@@ -210,6 +277,48 @@ const CASSETTES = (() => {
       party.list.splice(i, 1);
       party.at = 0;
       current = party.list[0].ids;
+      this.save();
+      return true;
+    },
+    // ---------- じぶんの リンク ----------
+    MINE_MAX,
+    MINE_ICONS,
+    mine: () => [...mine],
+    cleanUrl,
+    // つくる：なまえ（10 もじ）・https の アドレス・アイコン。できたら その カセットを かえす
+    addMine({ label, url, icon }) {
+      const href = cleanUrl(url);
+      const name = String(label ?? "").trim().slice(0, 10);
+      if (mine.length >= MINE_MAX || !href || !name) return null;
+      let n = 1;
+      while (mine.some((c) => c.id === `my-${n}`)) n++;
+      const c = asCassette({ id: `my-${n}`, label: name, url: href, icon: MINE_ICONS[icon] ? icon : "star" });
+      mine.push(c);
+      saveMine();
+      return c;
+    },
+    updateMine(id, { label, url, icon }) {
+      const i = mine.findIndex((c) => c.id === id);
+      const href = cleanUrl(url);
+      const name = String(label ?? "").trim().slice(0, 10);
+      if (i < 0 || !href || !name) return null;
+      mine[i] = asCassette({ id, label: name, url: href, icon: MINE_ICONS[icon] ? icon : "star" });
+      saveMine();
+      return mine[i];
+    },
+    // その リンクが はいって いる パーティの なまえ
+    partiesWith: (id) => party.list.map((p, i) => (p.ids.includes(id) ? p.name || `PARTY ${i + 1}` : null)).filter(Boolean),
+    // けすと、はいって いた パーティでは いつもの リンクの まだ ない ものを いつもの じゅんで 1 つ いれる
+    removeMine(id) {
+      const i = mine.findIndex((c) => c.id === id);
+      if (i < 0) return false;
+      for (const p of party.list) {
+        const at = p.ids.indexOf(id);
+        if (at < 0) continue;
+        p.ids[at] = [...DEFAULT, ...LIST.map((c) => c.id)].find((d) => !p.ids.includes(d));
+      }
+      mine.splice(i, 1);
+      saveMine();
       this.save();
       return true;
     },

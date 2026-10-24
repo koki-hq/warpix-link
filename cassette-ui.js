@@ -32,16 +32,22 @@ const cassetteUi = (() => {
           <span class="cas-no" aria-hidden="true">${i + 1}</span>${c ? `<span class="icon" data-icon="${id}"></span><span class="cas-name${CASSETTES.jp(c) ? " jp" : ""}" aria-hidden="true">${c.label}</span>` : `<span class="cas-name jp" aria-hidden="true">？</span>`}</button></li>`;
       })
       .join("");
-    shelvesEl.innerHTML = CASSETTES.SHELVES.map(
-      (s) => `<section class="cas-shelf" aria-labelledby="cas-shelf-${s.id}">
-        <h3 id="cas-shelf-${s.id}">${s.name}</h3>
-        <div class="cas-grid">${CASSETTES.LIST.filter((c) => c.shelf === s.id)
-          .map((c) => {
-            const at = cur.indexOf(c.id);
-            return `<button type="button" class="cas-item${at >= 0 ? " in" : ""}" data-id="${c.id}" aria-label="${c.label}${at >= 0 ? `（${at + 1}ばんめに はいってる）` : ""}">
+    const item = (c) => {
+      const at = cur.indexOf(c.id);
+      return `<button type="button" class="cas-item${at >= 0 ? " in" : ""}" data-id="${c.id}" aria-label="${c.label}${at >= 0 ? `（${at + 1}ばんめに はいってる）` : ""}">
               <span class="icon" data-icon="${c.id}"></span><span class="cas-name${CASSETTES.jp(c) ? " jp" : ""}" aria-hidden="true">${c.label}</span>${at >= 0 ? `<span class="cas-at" aria-hidden="true">${at + 1}</span>` : ""}</button>`;
-          })
-          .join("")}</div>
+    };
+    // じぶんの リンク（v1.61）：みぎうえの えんぴつで なおす・けす、さいごに「＋ つくる」
+    const mine = () => {
+      const list = CASSETTES.mine();
+      return `${list.map((c) => `<div class="cas-mine">${item(c)}<button type="button" class="cas-edit" data-edit="${c.id}" aria-label="${c.label} を なおす">✎</button></div>`).join("")}${
+        list.length < CASSETTES.MINE_MAX ? `<button type="button" class="cas-add" id="cas-add"><span aria-hidden="true">＋</span><span class="cas-name jp">つくる</span></button>` : ""
+      }`;
+    };
+    shelvesEl.innerHTML = CASSETTES.SHELVES.map(
+      (s) => `<section class="cas-shelf${s.id === "mine" ? " cas-shelf-mine" : ""}" aria-labelledby="cas-shelf-${s.id}">
+        <h3 id="cas-shelf-${s.id}">${s.name}${s.id === "mine" ? ` <small>${CASSETTES.mine().length} / ${CASSETTES.MINE_MAX}</small>` : ""}</h3>
+        <div class="cas-grid">${s.id === "mine" ? mine() : CASSETTES.LIST.filter((c) => c.shelf === s.id).map(item).join("")}</div>
       </section>`
     ).join("");
     if (draft) makeBtn.disabled = draft.some((id) => !id);
@@ -66,6 +72,9 @@ const cassetteUi = (() => {
   });
 
   shelvesEl.addEventListener("click", (e) => {
+    if (e.target.closest("#cas-add")) return mylink.open();
+    const ed = e.target.closest(".cas-edit");
+    if (ed) return mylink.open(ed.dataset.edit);
     const b = e.target.closest(".cas-item");
     if (!b) return;
     const id = b.dataset.id;
@@ -232,6 +241,86 @@ const cassetteUi = (() => {
   document.getElementById("party-next").addEventListener("click", () => step(1));
   bar();
 
+  // ---------- じぶんの リンクを つくる・なおす（v1.61） ----------
+  const mylink = (() => {
+    const dlg = document.getElementById("mylink");
+    const titleEl = document.getElementById("mylink-title");
+    const form = document.getElementById("mylink-form");
+    const nameIn = document.getElementById("mylink-name");
+    const urlIn = document.getElementById("mylink-url");
+    const iconsEl = document.getElementById("mylink-icons");
+    const msgEl = document.getElementById("mylink-msg");
+    const delBtn = document.getElementById("mylink-delete");
+    let editing = null;
+    let icon = "star";
+    let armed = false;
+    function drawIcons() {
+      iconsEl.innerHTML = Object.entries(CASSETTES.MINE_ICONS)
+        .map(([k, v]) => `<button type="button" class="mylink-icon" data-icon-key="${k}" aria-pressed="${k === icon}" aria-label="${v.name}">${pixelSvg(v.rows)}</button>`)
+        .join("");
+    }
+    function open(id = null) {
+      const c = id ? CASSETTES.byId(id) : null;
+      editing = c ? id : null;
+      icon = c?.iconKey ?? "star";
+      armed = false;
+      titleEl.textContent = c ? "じぶんの リンクを なおす" : "じぶんの リンクを つくる";
+      nameIn.value = c?.label ?? "";
+      urlIn.value = c?.url ?? "https://";
+      msgEl.textContent = "";
+      delBtn.hidden = !c;
+      delBtn.textContent = "この リンクを けす";
+      drawIcons();
+      dlg.showModal();
+      nameIn.focus();
+    }
+    iconsEl.addEventListener("click", (e) => {
+      const b = e.target.closest(".mylink-icon");
+      if (!b) return;
+      icon = b.dataset.iconKey;
+      sound.sfx.hover();
+      drawIcons();
+    });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const label = nameIn.value.trim();
+      if (!label) return (msgEl.textContent = "なまえを いれてね。");
+      if (!CASSETTES.cleanUrl(urlIn.value)) return (msgEl.textContent = "https:// で はじまる アドレスを いれてね。");
+      const wasEditing = editing;
+      const c = editing ? CASSETTES.updateMine(editing, { label, url: urlIn.value, icon }) : CASSETTES.addMine({ label, url: urlIn.value, icon });
+      if (!c) return (msgEl.textContent = "つくれなかった……");
+      ICONS[c.id] = c.icon;
+      dlg.close();
+      sound.sfx.coin();
+      applyToPage();
+      render();
+      msg.textContent = wasEditing ? `${c.label} を なおした。` : `${c.label} が できた！ いれる ばしょを えらんで おしてね。`;
+    });
+    // けすのは 2 かい おし。パーティに はいって いたら、どこかを いう
+    delBtn.addEventListener("click", () => {
+      if (!editing) return;
+      if (!armed) {
+        armed = true;
+        const where = CASSETTES.partiesWith(editing);
+        const many = CASSETTES.parties().length > 1;
+        msgEl.textContent = where.length
+          ? `${many ? `${where.join("・")} に` : "いまの リンクに"} はいってるよ。けすと、そこは いつもの リンクに もどるよ。もう いちど おすと けす。`
+          : "ほんとうに けす？ もう いちど おしてね。";
+        delBtn.textContent = "ほんとうに けす";
+        return;
+      }
+      const name = CASSETTES.byId(editing)?.label;
+      CASSETTES.removeMine(editing);
+      dlg.close();
+      applyToPage();
+      render();
+      msg.textContent = `${name} を けした。`;
+    });
+    document.getElementById("mylink-close").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", (e) => e.target === dlg && dlg.close());
+    return { open };
+  })();
+
   // ---------- すうじキーで ワープ（v1.35）：1〜6 で その ばんごうの リンクへ ----------
   // もじを うっている とき・まどや かさねた がめん（おみくじ・スタッフロール など）が ひらいている とき・
   // ミニゲームや ぼうけんの とちゅうは はんのう しない。シンプルモードでも つかえる
@@ -252,5 +341,5 @@ const cassetteUi = (() => {
   document.getElementById("cassette-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
 
-  return { open, openMenu };
+  return { open, openMenu, mylink };
 })();

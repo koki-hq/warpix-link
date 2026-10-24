@@ -6086,3 +6086,105 @@ a,
 .mail-action {
   margin-top: 8px;
 }
+
+/* =====================================================================
+   じぶんの リンク（v1.61）
+   ===================================================================== */
+.cas-shelf h3 small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.cas-mine {
+  position: relative;
+}
+
+.cas-edit {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent-2);
+  color: var(--bg);
+  font-size: 13px;
+  line-height: 24px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cas-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 68px;
+  border: 0;
+  background: none;
+  outline: 2px dashed var(--accent-2);
+  outline-offset: -2px;
+  color: var(--accent-2);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.mylink-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mylink-form label,
+.mylink-label {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mylink-form input {
+  padding: 8px;
+  border: 2px solid var(--muted);
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px "DotGothic16", monospace;
+}
+
+.mylink-icons {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.mylink-icon {
+  padding: 6px;
+  border: 0;
+  background: var(--btn);
+  color: var(--accent-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mylink-icon svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.mylink-icon[aria-pressed="true"] {
+  outline: 2px solid var(--gold);
+}
+
+.mylink-msg {
+  min-height: 1.4em;
+  margin: 4px 0 0;
+  color: var(--gold);
+}
+
+#mylink-delete[hidden] {
+  display: none;
+}
