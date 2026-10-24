@@ -86,7 +86,7 @@ export async function launchBrowser({ width = 480, height = 1000 } = {}) {
     ...(process.env.CI ? ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--blink-settings=primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2"] : []),
     "about:blank",
   ], { stdio: "ignore" });
-  const browser = { port, profile, proc, pages: [] };
+  const browser = { port, profile, proc, pages: [], width, height };
   live.add(browser);
 
   let targets = null;
@@ -99,10 +99,16 @@ export async function launchBrowser({ width = 480, height = 1000 } = {}) {
   }
   if (!targets) throw new Error("Chrome に接続できませんでした");
 
-  browser.firstPage = () => connectPage(browser, targets.find((t) => t.type === "page").webSocketDebuggerUrl);
+  // GitHub Actions には ほんものの がめんが ない ので、ウィンドウの おおきさが ちいさく されて がめんの したを おせなかった。
+  // ページの おおきさを はっきり きめる（v1.62.1）
+  const sized = async (page) => {
+    if (process.env.CI) await page.size(width, height);
+    return page;
+  };
+  browser.firstPage = async () => sized(await connectPage(browser, targets.find((t) => t.type === "page").webSocketDebuggerUrl));
   browser.newPage = async (url = "about:blank") => {
     const t = await (await fetch(`http://127.0.0.1:${port}/json/new?${url}`, { method: "PUT" })).json();
-    return connectPage(browser, t.webSocketDebuggerUrl);
+    return sized(await connectPage(browser, t.webSocketDebuggerUrl));
   };
   browser.close = () => closeBrowser(browser);
   return browser;
