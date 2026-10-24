@@ -1,0 +1,26 @@
+# ぜんぶの テストを GitHub の パソコンで ながす（v1.62.1）。じぶんたちが push した とき だけ（ほかの 人の 提案では うごかない）。
+# ひみつの じょうほうは なにも あずけない（テストは てもとの にせもの サーバーで うごく）。スクリーンショットは のこさない
+name: test
+on:
+  push:
+    branches: [main, "custom/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: ぜんぶの テスト
+        run: node tests/run.mjs --jobs 4
+        env:
+          CI: "true"
+          TZ: Asia/Tokyo
