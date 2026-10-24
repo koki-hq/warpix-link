@@ -319,7 +319,7 @@ const closet = (() => {
       b.dataset.id = o.t.hat ?? o.t.cos ?? "none";
       const key = "hat" in o.t ? `h:${o.t.hat}` : `c:${o.t.cos}`;
       const fresh = o.open && o.t[kind === "hat" ? "hat" : "cos"] !== null && isNew(key);
-      b.innerHTML = (o.open ? pixelSvg(lookOf(o.t)) : "?") + (fresh ? '<span class="closet-new">NEW</span>' : "");
+      b.innerHTML = (o.open ? pixelSvg(lookOf(o.t)) : "?") + (fresh ? '<span class="closet-new">NEW</span>' : "") + (on ? '<span class="closet-worn" aria-hidden="true">きてる</span>' : "");
       b.addEventListener("click", () => {
         markSeen(key);
         // ぼうしは、いま かぶって いる いろちがいが あれば その いろから

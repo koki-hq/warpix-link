@@ -276,6 +276,10 @@ const cheats = (() => {
     invaders() {
       game.open();
     },
+    // リンクだけの しずかな ページ（v1.58 から ここ だけ）
+    simple() {
+      simple.set(true);
+    },
   };
 
   function run(word, opts) {
@@ -607,7 +611,7 @@ console.log("%c ここまで のぞきに きたの？ じゃあ pixe() って �
 window.pixe = () => {
   sound.sfx.coin();
   npc.jump();
-  npc.say(["コンソールから よんだ？\nのぞきみは ほどほどに ね。", "ひみつの コマンド：\ngameboy / party / pixe / warp / help"]);
+  npc.say(["コンソールから よんだ？\nのぞきみは ほどほどに ね。", "ひみつの コマンドは、\nひみつの こうじょうに しまって あるよ。"]);
   achievements.unlock("hacker");
   return "🕹 HELLO, HACKER.";
 };

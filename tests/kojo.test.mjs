@@ -26,8 +26,13 @@ export default {
     t.ok(/^v\d+\.\d+$/.test(v) && readFileSync(new URL("../sw.js", import.meta.url), "utf8").includes(`warpix-${v}.`), `いまの 版: ${v}`);
     t.eq(await p.ev(`document.getElementById("kojo-warps").textContent`), "5かい", "ワープの かいすう");
     t.ok(await p.ev(`document.querySelector("#kojo-pixe svg path") !== null`), "せっけいずの ピクセが ない");
-    const code = await p.ev(`(() => { const a = document.querySelector(".kojo-code"); return { href: a.href, target: a.target }; })()`);
-    t.eq([code.href, code.target], ["https://github.com/koki-hq/warpix-link", "_blank"], "せっけいずの リンク");
+    // v1.58：ソースコードは みせない。みたい ひと だけ かくしコマンド集
+    t.ok(await p.ev(`!document.querySelector('#kojo a[href*="github"]') && document.getElementById("kojo-cheats").hidden`), "ソースコードの リンクが のこって いる");
+    await p.click("#kojo-cheats-btn");
+    t.ok(await p.ev(`!document.getElementById("kojo-cheats").hidden && document.querySelectorAll("#kojo-list dt").length >= 10`), "かくしコマンド集が でない");
+    t.ok((await p.ev(`document.getElementById("kojo-list").textContent`)).includes("gameboy"), "コマンドが ならばない");
+    await p.click("#kojo-cheats-back");
+    t.ok(await p.ev(`!document.getElementById("kojo-main").hidden`), "こうじょうに もどれない");
     t.noErrors(p);
     await server.close();
   },

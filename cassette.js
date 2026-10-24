@@ -79,9 +79,6 @@ const CASSETTES = (() => {
     { id: "studyplus", label: "STUDYPLUS", url: "https://www.studyplus.jp/", shelf: "study",
       hi: "STUDYPLUSは べんきょうの きろく。\nきょうは なんぷん がんばる？", back: "ただいま！ がんばった じかん、\nちゃんと きろく できた？",
       icon: ["............", ".........##.", ".........##.", "......##.##.", "......##.##.", "...##.##.##.", "...##.##.##.", "##.##.##.##.", "##.##.##.##.", "##.##.##.##.", "############", "............"] },
-    { id: "studysapuri", label: "スタディサプリ", url: "https://studysapuri.jp/", shelf: "study",
-      hi: "スタディサプリは じゅぎょうの せかい。\nいつでも せんせいに あえる。", back: "ただいま！ じゅぎょうを のぞいて\nちょっと かしこく なった きがする。",
-      icon: ["............", "............", ".....##.....", "...######...", ".##########.", "############", ".##########.", "...######.#.", "...######.#.", "...######.#.", "..........#.", "............"] },
     { id: "duolingo", label: "DUOLINGO", url: "https://www.duolingo.com/", shelf: "study",
       hi: "DUOLINGOは ことばの れんしゅう。\nまいにち つづけるのが コツ。", back: "ただいま！ ぼくも ひとこと\nおぼえたよ。HELLO！",
       icon: [".#........#.", ".##########.", "############", "##..####..##", "#.##.##.##.#", "#.##.##.##.#", "##..#..#..##", "#####..#####", ".##########.", ".##########.", "..########..", "..#..##..#.."] },
@@ -110,9 +107,17 @@ const CASSETTES = (() => {
 
   // 6 こ、ぜんぶ しっている カセットで、おなじ ものが ない ときだけ つかう
   const valid = (ids) => Array.isArray(ids) && ids.length === 6 && new Set(ids).size === 6 && ids.every(byId);
+  // たなから なくした カセット（v1.58 スタディサプリ）は、いつもの 6 この まだ ない ものに おきかえる
+  const REMOVED = new Set(["studysapuri"]);
+  const mend = (ids) => {
+    if (!Array.isArray(ids) || !ids.some((id) => REMOVED.has(id))) return ids;
+    const out = ids.filter((id) => !REMOVED.has(id));
+    const spare = [...DEFAULT, ...LIST.map((c) => c.id)].filter((d) => !out.includes(d));
+    return ids.map((id) => (REMOVED.has(id) ? spare.shift() : id));
+  };
   function load() {
     try {
-      const ids = JSON.parse(localStorage.getItem(KEY));
+      const ids = mend(JSON.parse(localStorage.getItem(KEY)));
       if (valid(ids)) return ids;
     } catch {}
     return [...DEFAULT];
@@ -127,7 +132,7 @@ const CASSETTES = (() => {
     const first = { name: "", ids: load() };
     try {
       const p = JSON.parse(localStorage.getItem(PARTIES));
-      const more = (p?.more ?? []).filter((x) => valid(x?.ids)).slice(0, MAX - 1).map((x) => ({ name: String(x.name ?? "").slice(0, 10), ids: x.ids }));
+      const more = (p?.more ?? []).map((x) => ({ ...x, ids: mend(x?.ids) })).filter((x) => valid(x?.ids)).slice(0, MAX - 1).map((x) => ({ name: String(x.name ?? "").slice(0, 10), ids: x.ids }));
       const list = [{ ...first, name: String(p?.name ?? "").slice(0, 10) }, ...more];
       const at = Number.isInteger(p?.at) && p.at >= 0 && p.at < list.length ? p.at : 0;
       return { list, at };

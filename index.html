@@ -74,7 +74,6 @@
     <p class="start-tagline"><span>いつものアプリを、</span><span>ちょっと楽しくひらく入口。</span></p>
     <button class="start-btn" id="start-btn" type="button">PRESS START</button>
     <p class="start-hint">CLICK OR PRESS ENTER</p>
-    <button class="simple-enter" id="simple-enter" type="button">リンクだけ みる ▶</button>
     <p class="start-hi">HI-SCORE <span data-hiscore>000000</span></p>
   </section>
 
@@ -199,12 +198,6 @@
       </div>
     </section>
 
-    <!-- パーティ きりかえ（v1.56）：パーティが 2 つ いじょう ある とき だけ でる。じぶんで きりかえる -->
-    <div class="party-bar" id="party-bar" hidden>
-      <button class="party-arrow" id="party-prev" type="button" aria-label="まえの パーティ">◀</button>
-      <span class="party-name" id="party-name" aria-live="polite"></span>
-      <button class="party-arrow" id="party-next" type="button" aria-label="つぎの パーティ">▶</button>
-    </div>
     <nav class="links">
       <a class="pixel-btn" href="https://www.youtube.com/" target="_blank" rel="noopener">
         <span class="arrow">▶</span><span class="icon" data-icon="youtube"></span>YOUTUBE<span class="sr-only">（あたらしい タブで ひらく）</span>
@@ -225,10 +218,16 @@
         <span class="arrow">▶</span><span class="icon" data-icon="spotify"></span>SPOTIFY<span class="sr-only">（あたらしい タブで ひらく）</span>
       </a>
       <!-- ひみつの ワープゾーン：おすと アプリの なかの「ひみつの こうじょう」へ（kojo.js、v1.43）。href は スクリプトが ない とき だけ -->
-      <a class="pixel-btn secret" id="secret-link" href="https://github.com/koki-hq/warpix-link" hidden>
+      <a class="pixel-btn secret" id="secret-link" href="#" hidden>
         <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE<span class="sr-only">（ひみつの こうじょうへ）</span>
       </a>
     </nav>
+    <!-- パーティ きりかえ（v1.56）：パーティが 2 つ いじょう ある とき だけ でる。じぶんで きりかえる。v1.58 で リンクの したへ（リンクの いちを もとに もどす） -->
+    <div class="party-bar" id="party-bar" hidden>
+      <button class="party-arrow" id="party-prev" type="button" aria-label="まえの パーティ">◀</button>
+      <span class="party-name" id="party-name" aria-live="polite"></span>
+      <button class="party-arrow" id="party-next" type="button" aria-label="つぎの パーティ">▶</button>
+    </div>
     <!-- リンクの へんせい（v1.56）：いれかえる・パーティを ふやす・なまえ・けす -->
     <button class="cassette-btn" id="cassette-btn" type="button" aria-haspopup="dialog">⇄ リンクの へんせい</button>
 
@@ -364,17 +363,26 @@
     </div>
     <div class="about-body">
       <div class="kojo-blueprint"><div class="kojo-pixe" id="kojo-pixe" aria-hidden="true"></div><p class="kojo-stamp">PIXE / DESIGN No.1</p></div>
-      <p>ピクセ「ようこそ、ワーピックスの ひみつの こうじょうへ！」</p>
-      <p>WARPIX LINK は、ここに ある <b>せっけいず</b>（プログラム）で うごいてるんだ。だれでも みられる ように、おいて あるよ。</p>
-      <dl class="keys kojo-facts">
-        <dt>いまの はん</dt><dd id="kojo-version">…</dd>
-        <dt>きみと であって</dt><dd id="kojo-days">-</dd>
-        <dt>きみが ワープした かいすう</dt><dd id="kojo-warps">-</dd>
-      </dl>
-      <p class="about-note">せっけいずは えいごと プログラムの ページ（GitHub）です。むずかしいけど、のぞいても だいじょうぶ。</p>
-      <div class="save-row">
-        <a class="save-btn kojo-code" href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener">せっけいずを みる<span class="sr-only">（GitHub、あたらしい タブで ひらく）</span></a>
-        <button class="save-btn move-no" id="kojo-back" type="button">もどる</button>
+      <div class="kojo-main" id="kojo-main">
+        <p>ピクセ「ようこそ、ワーピックスの ひみつの こうじょうへ！」</p>
+        <p>ここには、WARPIX LINK の <b>かくしコマンド</b> の せっけいずが しまって あるんだ。じぶんで みつけたい ひとは、みないで おいてね。</p>
+        <dl class="keys kojo-facts">
+          <dt>いまの はん</dt><dd id="kojo-version">…</dd>
+          <dt>きみと であって</dt><dd id="kojo-days">-</dd>
+          <dt>きみが ワープした かいすう</dt><dd id="kojo-warps">-</dd>
+        </dl>
+        <div class="save-row">
+          <button class="save-btn kojo-code" id="kojo-cheats-btn" type="button">かくしコマンドを みる</button>
+          <button class="save-btn move-no" id="kojo-back" type="button">もどる</button>
+        </div>
+      </div>
+      <!-- かくしコマンド集（v1.58）：みたい ひと だけ。まえは ソースコード（GitHub）を みせて いた -->
+      <div class="kojo-cheats" id="kojo-cheats" hidden>
+        <p class="about-note">パソコンは キーボードで そのまま うつ。スマホは ROOM の トロフィー（じっせき）の したの CHEAT CODE に うつ。</p>
+        <dl class="keys kojo-list" id="kojo-list"></dl>
+        <div class="save-row">
+          <button class="save-btn move-no" id="kojo-cheats-back" type="button">こうじょうに もどる</button>
+        </div>
       </div>
     </div>
   </dialog>
@@ -458,7 +466,7 @@
         <ol class="manual-steps">
           <li>リンクのボタンを押すと、そのアプリやサイトがひらきます。ピクセもワープでついていきます。</li>
           <li>戻ってくると、ピクセも帰ってきます。</li>
-          <li>ミニゲームやおみくじは寄り道。しなくても大丈夫。リンクだけ見たい日は、右上の SIMPLE へ。</li>
+          <li>ミニゲームやおみくじは寄り道。しなくても大丈夫。</li>
         </ol>
       </section>
       <section class="manual-sheet" data-sheet="home" hidden>
@@ -546,8 +554,7 @@
       <p class="about-reset-msg" id="about-reset-msg" aria-live="polite"></p>
 
       <p class="about-credit">© 2026 <a href="https://warpix.app/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（あたらしい タブで ひらく）</span></a> ／ いっしょに つくった：Claude<br>
-        プログラムは MIT ライセンス。ピクセ と WARPIX の 名前・絵は WARPIX製作所の ものです。<br>
-        <a href="https://github.com/koki-hq/warpix-link" target="_blank" rel="noopener">ソースコード（GitHub）</a></p>
+        プログラム・ピクセ・WARPIX の 名前と 絵は WARPIX製作所の ものです（All rights reserved）。</p>
     </div>
   </dialog>
 

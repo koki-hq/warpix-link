@@ -50,7 +50,7 @@ export default {
     t.ok((await p.ev(`document.getElementById("manual-answer").textContent`)).includes("そのまま") && (await p.ev(`document.getElementById("manual-door").hidden`)), "この なかに ある の こたえ");
     await p.ev(`document.getElementById("manual-next").click()`);
     s = await state(p);
-    t.ok(s.page === "3/4" && (await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("SIMPLE"), `3 まいめ: ${JSON.stringify(s)}`);
+    t.ok(s.page === "3/4" && (await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("ミニゲーム") && !(await p.ev(`document.querySelector('[data-sheet="how"]').textContent`)).includes("SIMPLE"), `3 まいめ: ${JSON.stringify(s)}`);
     await t.sleep(2300); // ピクセが あなに とびこんで「ワープ！」の ところ
     await p.shot("manual-2.png");
     await p.ev(`document.getElementById("manual-next").click()`);

@@ -1451,12 +1451,12 @@ body.party {
   cursor: pointer;
 }
 
-/* タッチ端末だけに出す操作ボタン */
+/* タッチ端末だけに出す操作ボタン。iPhone の したの ホームバーの ぶん うえに（v1.58、本人「こんな下の位置だったっけ」） */
 .adv-pad {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
-  left: 16px;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(32px + env(safe-area-inset-bottom));
+  left: calc(16px + env(safe-area-inset-left));
   z-index: 18;
   display: none;
   justify-content: space-between;
@@ -1469,8 +1469,8 @@ body.party {
 }
 
 .adv-pad button {
-  width: 56px;
-  height: 56px;
+  width: 62px;
+  height: 62px;
   border: 0;
   background: rgba(42, 33, 80, 0.85);
   color: var(--fg);
@@ -1659,10 +1659,16 @@ body.party {
   outline: 2px solid var(--gold);
 }
 
-.wardrobe-item:not(:disabled):hover,
-.wardrobe-item:focus-visible {
-  background: var(--btn-hover);
-  outline: 2px solid var(--accent-2);
+/* わくは「ためして いる もの」の きいろ 1 つ だけ（v1.58、本人「同時に３つの枠がある感じ」）。
+   ゆびを のせた ひょうじは マウスの ある たんまつ だけ（スマホでは おした あとも のこって しまう） */
+@media (hover: hover) {
+  .wardrobe-item:not(:disabled):not([aria-pressed="true"]):hover {
+    background: var(--btn-hover);
+  }
+}
+
+.wardrobe-item:focus-visible:not([aria-pressed="true"]) {
+  outline: 2px dashed var(--muted);
 }
 
 /* ---------- 印刷すると認定証 ---------- */
@@ -2193,8 +2199,9 @@ body.party {
    シンプルモード：リンクだけの静かなページ（v1.6）
    ===================================================================== */
 
-/* いつもの画面の右上、BGM ボタンのとなり */
+/* シンプルモードの ときだけ、みぎうえに「▶ あそぶ」（v1.58） */
 .simple-toggle {
+  display: none;
   position: fixed;
   top: 16px;
   right: 104px;
@@ -2221,26 +2228,6 @@ body.party {
 
 .booted .simple-toggle {
   animation: fade-in 0.3s steps(3) 0.5s both;
-}
-
-/* スタート画面の「リンクだけ みる」 */
-.simple-enter {
-  margin-top: 8px;
-  padding: 6px 8px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.simple-enter:hover,
-.simple-enter:focus-visible {
-  color: var(--fg);
-  outline: none;
 }
 
 /* シンプルモード中：遊びの部品をぜんぶ隠して、リンクをすぐ見せる */
@@ -2276,6 +2263,7 @@ body.party {
 }
 
 .simple .simple-toggle {
+  display: block;
   right: 16px;
   color: var(--accent-2);
   outline-color: var(--accent-2);
@@ -4372,7 +4360,25 @@ a,
   justify-content: center;
   gap: 12px;
   width: 100%;
-  margin-bottom: 12px;
+  margin-top: 16px;
+}
+
+/* スタート がめんでは みせない（ほかの ぶひんと おなじく、はじまってから でる） */
+.js .party-bar {
+  opacity: 0;
+}
+
+.booted .party-bar {
+  animation: fade-in 0.3s steps(3) 0.5s both;
+}
+
+.simple .party-bar {
+  opacity: 1;
+  animation: none;
+}
+
+.party-bar:not([hidden]) + .cassette-btn {
+  margin-top: 8px;
 }
 
 .party-bar[hidden] {
@@ -5754,9 +5760,23 @@ a,
 
 /* そだちの ステータス（ゲームの がめんの した） */
 .rs-room,
-.rs-status {
+.rs-status,
+.diary-top {
   user-select: none;
   -webkit-user-select: none;
+  /* ながおしで でる メニュー（コピー など）も ださない（v1.58） */
+  -webkit-touch-callout: none;
+}
+
+/* スマホで おした ところに でる くろい わく（タップハイライト）を ださない。ジャンプで おした ことは わかる（v1.58） */
+.rs-thing,
+.rs-pixe,
+.closet-kind,
+.closet-color,
+.wardrobe-item,
+.room-back,
+.diary-close {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .rs-status {
@@ -5906,8 +5926,17 @@ a,
 }
 
 /* いま きて いる もの */
-.wardrobe-item.worn {
-  box-shadow: inset 0 0 0 2px var(--accent-2);
+/* きて いる ものは わくでは なく「きてる」の ふだ */
+.closet-worn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  padding: 1px 3px;
+  background: var(--accent-2);
+  color: var(--bg);
+  font-family: "DotGothic16", monospace;
+  font-size: 9px;
+  line-height: 1.2;
 }
 
 .closet .atelier-btn {
@@ -5915,5 +5944,18 @@ a,
 }
 
 .atelier-btn[hidden] {
+  display: none;
+}
+
+/* ひみつの こうじょうの かくしコマンド集（v1.58） */
+.kojo-list code {
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  color: var(--gold);
+  overflow-wrap: anywhere;
+}
+
+.kojo-cheats[hidden],
+.kojo-main[hidden] {
   display: none;
 }

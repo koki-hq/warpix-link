@@ -25,7 +25,7 @@ const FITS = `(() => {
 })()`;
 // うえの ボタンたちが、ちゃんと おせる（ほかの ものに かくれていない）
 // （リンクの いれかえは がめんの したに かくれている ことが あるので、みえている ときだけ）
-const PRESSABLE = `[...document.querySelectorAll("#room-btn, .compose-btn, .simple-toggle, .bgm-toggle, #cassette-btn")].filter((el) => {
+const PRESSABLE = `[...document.querySelectorAll("#room-btn, .compose-btn, .bgm-toggle, #cassette-btn")].filter((el) => {
   const r = el.getBoundingClientRect();
   if (r.bottom > innerHeight) return false;
   const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -39,7 +39,7 @@ async function rehearse(t, w, h) {
   await p.size(w, h, true);
   await p.goto(server.url);
   // いちばん ながい なまえの カセットと、にほんごの カセットを いれておく
-  await p.ev(`localStorage.clear(); localStorage.setItem("warpix-cassette", JSON.stringify(["ytmusic", "twitter", "studysapuri", "niconico", "applemusic", "pinterest"]))`);
+  await p.ev(`localStorage.clear(); localStorage.setItem("warpix-cassette", JSON.stringify(["ytmusic", "twitter", "duolingo", "niconico", "applemusic", "pinterest"]))`);
   await p.goto(server.url);
   await p.boot();
   await t.sleep(1200);

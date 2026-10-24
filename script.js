@@ -1113,9 +1113,10 @@ const simple = (() => {
     location.replace(url.href);
   }
 
+  // v1.58：いりぐちは かくしコマンド「simple」だけ（スタートの「リンクだけ みる」と みぎうえの SIMPLE は けした。
+  // 本人「シンプルを えらぶ ような ひとは こんな よりみちの アプリは つかわない」）。もどる「▶ あそぶ」は シンプルモードの ときだけ でる
   toggle.addEventListener("click", () => set(!on));
-  document.getElementById("simple-enter").addEventListener("click", () => set(true));
-  return { on };
+  return { on, set };
 })();
 
 // ---------- PRESS START → 起動演出 ----------
@@ -1240,7 +1241,7 @@ const simple = (() => {
   if (simple.on) return;
   startScreen.hidden = false;
   startScreen.addEventListener("click", (e) => {
-    if (!e.target.closest(".simple-enter")) start(e);
+    start(e);
   });
   startBtn.focus();
 })();

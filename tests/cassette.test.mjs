@@ -25,7 +25,7 @@ export default {
     t.eq([l[1].href, l[1].label, l[1].sub], ["https://x.com/", "TWITTER", "(X)"], "TWITTER");
     t.eq(await p.ev(`localStorage.getItem("warpix-cassette")`), null, "いつものままなのに ほぞんした");
     // カタログ：28 こ、URL は https で かぶらない、アイコンは ぜんぶ ある
-    t.eq(await p.ev(`CASSETTES.LIST.length`), 28, "カセットの かず");
+    t.eq(await p.ev(`CASSETTES.LIST.length`), 27, "カセットの かず");
     t.ok(await p.ev(`CASSETTES.LIST.every((c) => c.url.startsWith("https://") && ICONS[c.id]) && new Set(CASSETTES.LIST.map((c) => c.url)).size === CASSETTES.LIST.length`), "URL か アイコンが おかしい");
     t.ok(await p.ev(`CASSETTES.LIST.filter((c) => c.shelf !== "default").every((c) => c.hi && c.back)`), "ピクセの しょうかいか おみやげばなしが ない");
     t.noErrors(p);
@@ -38,7 +38,7 @@ export default {
     await p.click("#hensei-swap");
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("cassette").open`), "まどが ひらかない");
-    t.eq(await p.ev(`document.querySelectorAll(".cas-slot").length + "," + document.querySelectorAll(".cas-item").length`), "6,28", "スロットと カセットの かず");
+    t.eq(await p.ev(`document.querySelectorAll(".cas-slot").length + "," + document.querySelectorAll(".cas-item").length`), "6,27", "スロットと カセットの かず");
     await put(p, 3, "studyplus");
     await t.sleep(200);
     let l = await links(p);

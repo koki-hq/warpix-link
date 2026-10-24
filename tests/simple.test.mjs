@@ -26,16 +26,19 @@ export default {
     await server.close();
   },
 
-  async "スタート画面から入って、保存され、「▶ あそぶ」で戻る"(t) {
+  async "いりぐちは かくしコマンド「simple」だけ（v1.58）。保存され、「▶ あそぶ」で戻る"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
     await p.goto(server.url);
     await p.ev(`localStorage.clear()`);
     await p.goto(server.url);
-    await p.ev(`document.getElementById("simple-enter").click()`);
+    t.ok(await p.ev(`!document.getElementById("simple-enter")`), "スタート画面に「リンクだけ みる」が のこって いる");
+    await p.boot();
+    t.ok(await p.ev(`getComputedStyle(document.getElementById("simple-toggle")).display === "none"`), "いつもの がめんに SIMPLE が みえる");
+    await p.type("simple");
     await t.sleep(1500);
-    t.ok((await look(p)).simple, "スタート画面から入れない");
+    t.ok((await look(p)).simple, "かくしコマンドで 入れない");
     await p.send("Page.reload");
     await t.sleep(1200);
     t.ok((await look(p)).simple, "開き直すとシンプルモードでなくなる");

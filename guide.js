@@ -16,12 +16,11 @@ const guide = (() => {
     ["compose", "みぎうえの ♪ で、ぼくと いっしょに\nさっきょく できるよ。", () => has("composer") || store.get("warpix-song", null)],
     ["omikuji", "いちばん したの「おみくじ」、\nまいにち 1かい ひけるよ。", () => has("omikuji")],
     ["invaders", "INSERT COIN を おすと、\nミニゲームで あそべるよ。", () => has("invader") || has("invader-pro")],
-    ["wardrobe", "おへやの「ぼうし」で、\nぼくの ぼうしを かえられるよ。", () => has("fashion")],
-    ["postcard", "おへやの「ポストカード」で、\nぼくの えはがきが つくれるよ。", () => has("postcard")],
+    ["wardrobe", "おへやの ハンガーラックで、\nぼくの きせかえが できるよ。", () => has("fashion")],
+    ["postcard", "おへやの カメラで、\nぼくの えはがきが つくれるよ。", () => has("postcard")],
     ["settings", "おとが おおきかったら、いちばん したの\n「せってい」で かえられるよ。", () => store.get("warpix-settings", null)],
     ["adventure", "ぼくが「そとに でてみたい」って きいたら、\n「いいよ」って いってみて。", () => has("adventure")],
     ["hide", "まいにち 3びきの ちびピクセが、\nページの どこかに かくれてるよ。", () => has("hideseek")],
-    ["simple", "リンクだけ みたい ひは、\nみぎうえの SIMPLE で しずかに なるよ。", () => store.get("warpix-simple", null) === "on"],
   ];
 
   // きょう言うヒント（なければ null）
