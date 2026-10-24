@@ -82,7 +82,8 @@ export async function launchBrowser({ width = 480, height = 1000 } = {}) {
     "--no-first-run",
     "--no-default-browser-check",
     // GitHub Actions（Linux）では サンドボックスと きょうゆう メモリが つかえない ことが ある（v1.62.1）
-    ...(process.env.CI ? ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"] : []),
+    // マウスも がめんも ない ので、そのままだと「マウスの ない たんまつ」あつかいに なる。てもとの パソコンと おなじ に する
+    ...(process.env.CI ? ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--blink-settings=primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2"] : []),
     "about:blank",
   ], { stdio: "ignore" });
   const browser = { port, profile, proc, pages: [] };
