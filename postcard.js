@@ -45,7 +45,7 @@ const postcard = (() => {
     await fontsReady();
     const css = getComputedStyle(document.body);
     const v = (n) => css.getPropertyValue(n).trim();
-    const pal = { o: "#000000", w: v("--fg"), p: v("--accent"), c: v("--accent-2"), y: v("--gold"), k: v("--pumpkin"), v: v("--muted") };
+    const pal = { o: "#000000", w: v("--fg"), p: v("--accent"), c: v("--accent-2"), y: v("--gold"), k: v("--pumpkin"), v: v("--muted"), R: v("--cos-red"), G: v("--cos-green"), D: v("--cos-deep"), B: v("--cos-brown"), N: v("--cos-navy") };
     const cv = document.createElement("canvas");
     cv.width = W;
     cv.height = H;

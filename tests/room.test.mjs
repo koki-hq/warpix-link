@@ -1,8 +1,8 @@
 // ピクセの おへや（v1.26）：にっき・ずかん・スタンプ・じっせき・ぼうしを ひとつの まどに
-const panel = (p) => p.ev(`["diary-body", "zukan-body", "stamp-body", "trophy-body", "hat-body"].find((id) => !document.getElementById(id).hidden)`);
+const panel = (p) => p.ev(`["room-scene", "diary-body", "letters-body", "cards-body", "zukan-body", "stamp-body", "trophy-body", "hat-body"].find((id) => !document.getElementById(id).hidden)`);
 
 export default {
-  async "ひだりうえは ROOM ボタン 1 つで、ひらくと つぶやきから"(t) {
+  async "ひだりうえは ROOM ボタン 1 つで、ひらくと ピクセの へや（v1.57）"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
@@ -18,10 +18,10 @@ export default {
     await p.click("#room-btn");
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("diary").open`), "おへやが ひらかない");
-    t.eq(await panel(p), "diary-body", "さいしょは にっき");
+    t.eq(await panel(p), "room-scene", "さいしょは へや");
     t.eq(await p.ev(`document.getElementById("diary-title").textContent`), "ピクセの おへや", "みだし");
-    t.eq(await p.ev(`[...document.querySelectorAll(".diary-tab")].map((t) => t.textContent)`), ["つぶやき", "ずかん", "スタンプ", "じっせき", "ぼうし"], "タブ");
-    t.ok(await p.ev(`achievements.has("diary")`), "にっきを よんだ じっせきが つかない");
+    t.eq(await p.ev(`[...document.querySelectorAll(".rs-label")].map((t) => t.textContent)`), ["つぶやき", "スタンプ", "じっせき", "クローゼット", "ずかん", "てがみ", "ポストカード", "カード"], "へやの もの");
+    t.ok(await p.ev(`getComputedStyle(document.querySelector(".diary-bar")).display === "none"`), "タブが みえて いる");
 
     // じっせき：ぜんぶの じっせきが ならび、ないコマンドには へんじ
     await p.ev(`document.getElementById("tab-trophy").click()`);
@@ -30,17 +30,17 @@ export default {
     t.ok(await p.ev(`document.querySelectorAll("#trophy-list li").length === achievements.total`), "じっせきの 行の かず");
     t.ok(await p.ev(`document.getElementById("trophies-count").textContent === document.getElementById("trophy-count").textContent`), "おへやと ボタンで かずが ちがう");
 
-    // ぼうし：WARDROBE が ならぶ
+    // クローゼット：ぼうしが ならぶ
     await p.ev(`document.getElementById("tab-hat").click()`);
     await t.sleep(200);
-    t.eq(await panel(p), "hat-body", "ぼうしの ページ");
+    t.eq(await panel(p), "hat-body", "クローゼットの ページ");
     t.ok(await p.ev(`document.querySelectorAll("#hat-body .wardrobe-item").length >= 2`), "ぼうしが ならばない");
 
-    // とじて また ROOM を おすと、にっきに もどる
+    // とじて また ROOM を おすと、へやに もどる
     await p.ev(`document.getElementById("diary-close").click()`);
     await p.click("#room-btn");
     await t.sleep(200);
-    t.eq(await panel(p), "diary-body", "ひらきなおすと にっきに もどらない");
+    t.eq(await panel(p), "room-scene", "ひらきなおすと へやに もどらない");
     t.noErrors(p);
     await server.close();
   },
@@ -96,7 +96,7 @@ export default {
     await server.close();
   },
 
-  async "スマホ（390px）で タブが 1 だんに おさまる"(t) {
+  async "スマホ（390px）で へやの もの が へやに おさまり、うえの ボタンも はみださない"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser({ width: 390, height: 844 });
     const p = await b.firstPage();
@@ -105,9 +105,14 @@ export default {
     await p.boot();
     await p.click("#room-btn");
     await t.sleep(300);
-    const tops = await p.ev(`[...document.querySelectorAll(".diary-tab")].map((t) => Math.round(t.getBoundingClientRect().top))`);
-    t.eq(new Set(tops).size, 1, `タブが おりかえしている（${tops}）`);
-    t.ok(await p.ev(`(() => { const d = document.getElementById("diary").getBoundingClientRect(); return [...document.querySelectorAll(".diary-tab, .diary-top button:not([hidden])")].every((e) => { const r = e.getBoundingClientRect(); return r.left >= d.left && r.right <= d.right; }); })()`), "タブや ボタンが まどから はみでた");
+    // へやの もの が ぜんぶ へやの なかに おさまる
+    t.ok(await p.ev(`(() => { const r = document.querySelector(".rs-room").getBoundingClientRect(); return [...document.querySelectorAll(".rs-thing, .rs-pixe")].every((e) => { const b = e.getBoundingClientRect(); return b.left >= r.left - 1 && b.right <= r.right + 1 && b.top >= r.top - 1 && b.bottom <= r.bottom + 1; }); })()`), "へやの そとに はみでた もの が ある");
+    // ページに いる ときの「◀ へや」も まどから はみださない
+    await p.click(".rs-calendar");
+    await t.sleep(200);
+    t.ok(await p.ev(`(() => { const d = document.getElementById("diary").getBoundingClientRect(); return [...document.querySelectorAll(".diary-top button:not([hidden])")].every((e) => { const r = e.getBoundingClientRect(); return !r.width || (r.left >= d.left && r.right <= d.right); }); })()`), "うえの ボタンが まどから はみでた");
+    await p.click("#room-back");
+    await t.sleep(200);
     await p.shot("room-390.png");
     t.noErrors(p);
     await server.close();

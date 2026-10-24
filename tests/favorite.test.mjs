@@ -29,10 +29,10 @@ export default {
     t.ok(await p.ev(`!document.querySelector(".fav-mark")`), "ハートが ついた");
     t.eq(await p.ev(`favorite.total()`), 3, "ワープした かず");
     t.eq(await p.ev(`grow.state.diary.filter((e) => e.type === "warp").map((e) => e.text)`), ["YOUTUBEへ ワープした。"], "日記（1 日 1 行）");
-    await p.ev(`room.open("diary")`);
+    await p.ev(`room.open("home")`);
     await t.sleep(300);
-    t.ok((await p.ev(`document.querySelector(".diary-head").innerText`)).includes("ワープした かず\n3かい"), "プロフィールに ワープした かず が ない");
-    t.ok(!(await p.ev(`document.querySelector(".diary-head").innerText`)).includes("よく いく"), "よく いく せかい が のこって いる");
+    t.ok((await p.ev(`document.querySelector(".rs-status").innerText`)).includes("ワープした かず\n3かい"), "へやの ステータスに ワープした かず が ない");
+    t.ok(!(await p.ev(`document.querySelector(".rs-status").innerText`)).includes("よく いく"), "よく いく せかい が のこって いる");
     t.noErrors(p);
     await server.close();
   },

@@ -11,15 +11,16 @@ async function page(t, born) {
 }
 
 export default {
-  async "開店まえに きた ひと：ピクセが きっぷを わたし、にっきの プロフィールに「1きせい」"(t) {
+  async "開店まえに きた ひと：ピクセが きっぷを わたし、へやの かべに「1きせいの きっぷ」"(t) {
     const { server, p } = await page(t, "2026-10-12");
     await p.boot({ readIntro: false });
     const lines = await p.readIntro();
     t.ok(lines.some((l) => l.includes("1きせい")), `わたさない: ${JSON.stringify(lines)}`);
     t.ok(await p.ev(`ticket.has()`), "1きせいに ならない");
-    await p.ev(`room.open("diary")`);
+    await p.ev(`room.open("home")`);
     await t.sleep(300);
-    t.eq(await p.ev(`document.querySelector(".diary-ticket")?.textContent`), "1きせい（10/12 から）", "プロフィール");
+    await p.click(".rs-ticket");
+    t.ok((await p.ev(`document.querySelector(".rs-say").textContent`)).includes("10/12 に きてくれた"), "かべの きっぷ");
     t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "ticket")`), "にっき");
     t.ok(await p.ev(`Boolean(JSON.parse(localStorage.getItem("warpix-ticket")))`), "ほぞん");
     // 2 かいめは もう いわない

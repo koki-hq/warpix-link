@@ -15,15 +15,15 @@ async function open(t, query, { days = DAYS } = {}) {
   await p.ev(`localStorage.clear(); localStorage.setItem("warpix-days", ${JSON.stringify(JSON.stringify(days))}); localStorage.setItem("warpix-pixe", ${JSON.stringify(JSON.stringify(PIXE))})`);
   await p.goto(server.url + query);
   await p.boot();
-  await p.ev(`room.open("diary")`);
+  await p.ev(`room.open("letters")`);
   await t.sleep(300);
   return { server, p };
 }
 
 export default {
-  async "にちようの よる：つぶやきの ページに てがみが とどき、ひらくと その しゅうの こと"(t) {
+  async "にちようの よる：ポストに てがみが とどき、ひらくと その しゅうの こと"(t) {
     const { server, p } = await open(t, "?date=2026-10-18&hour=21");
-    t.ok(await p.ev(`!!document.querySelector("#diary-body .diary-head + .letters .letter-btn.unread")`), "プロフィールの したに NEW の てがみが ない");
+    t.ok(await p.ev(`!!document.querySelector("#letters-body .letters .letter-btn.unread")`), "ポストの ページに NEW の てがみが ない");
     await p.ev(`document.querySelector(".letter-btn").click()`);
     await t.sleep(200);
     t.ok(await p.ev(`document.getElementById("letter").open`), "てがみが ひらかない");

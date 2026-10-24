@@ -13,7 +13,7 @@ export default {
     await p.boot();
     await p.click("#room-btn");
     await t.sleep(300);
-    await p.click("#postcard-btn");
+    await p.click(".rs-camera");
     await t.sleep(1500);
     const s = await p.ev(`(() => { const img = document.querySelector(".postcard-img"); const a = document.querySelector(".postcard-save"); return { w: img?.naturalWidth, h: img?.naturalHeight, download: a?.getAttribute("download"), href: a?.href.startsWith("blob:"), alt: img?.alt }; })()`);
     t.eq([s.w, s.h], [1200, 630], "画像の大きさ");

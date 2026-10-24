@@ -119,6 +119,12 @@ const PALETTE = {
   y: "var(--gold)",
   v: "var(--muted)",
   k: "var(--pumpkin)",
+  // コスチューム だけの いろ（v1.57）
+  R: "var(--cos-red)",
+  G: "var(--cos-green)",
+  D: "var(--cos-deep)",
+  B: "var(--cos-brown)",
+  N: "var(--cos-navy)",
 };
 
 // ナビゲーター「ピクセ」（16x16）。目を閉じたコマと2枚
@@ -163,8 +169,10 @@ const NPC = {
 
 // ピクセに帽子などを重ねる。hat = { top: 何行目から, rows: [...] }、"." は透明
 let currentHat = null;
-// 成長して手に入れたもの（スカーフ・マントなど。grow.js が決める）も、帽子の下に重ねる
+// 成長して手に入れたもの（きんの アンテナなど。grow.js が決める）も、帽子の下に重ねる
 let growthLayers = [];
+// クローゼットで きている もの（スカーフ・マント・マフラーなど、world.js の closet が決める。v1.57）
+let wearLayers = [];
 function overlay(frame, layer) {
   return frame.map((row, y) => {
     const over = layer.rows[y - layer.top];
@@ -172,7 +180,7 @@ function overlay(frame, layer) {
     return [...row].map((ch, x) => (over[x] && over[x] !== "." ? over[x] : ch)).join("");
   });
 }
-function dress(frame, hat = currentHat, layers = growthLayers) {
+function dress(frame, hat = currentHat, layers = [...wearLayers, ...growthLayers]) {
   let rows = frame;
   for (const layer of layers) rows = overlay(rows, layer);
   return hat ? overlay(rows, hat) : rows;

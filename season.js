@@ -29,8 +29,8 @@ const season = (() => {
     name: "サンタぼう", unlock: "season:christmas", hint: "クリスマスの じきに あえるかも", top: 0,
     rows: [
       "..........ww....",
-      "......pppppw....",
-      ".....ppppppp....",
+      "......RRRRRw....",
+      ".....RRRRRRR....",
       "....wwwwwwww....",
     ],
   });

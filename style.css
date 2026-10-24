@@ -18,6 +18,12 @@
   --muted: #8a80b8;
   --gold: #ffd84a;
   --pumpkin: #ff8a1f;
+  /* コスチューム だけの いろ（v1.57）。ほかの ところには つかわない */
+  --cos-red: #e8463c;
+  --cos-green: #4caf50;
+  --cos-deep: #2e7d4f;
+  --cos-brown: #8a5a2e;
+  --cos-navy: #2f3f8f;
   --px: 4px;
 }
 
@@ -34,6 +40,11 @@ body.gb {
   --muted: #8bac0f;
   --gold: #9bbc0f;
   --pumpkin: #8bac0f;
+  --cos-red: #306230;
+  --cos-green: #8bac0f;
+  --cos-deep: #306230;
+  --cos-brown: #306230;
+  --cos-navy: #0f380f;
 }
 
 * {
@@ -5553,4 +5564,356 @@ a,
   .manual-point {
     animation: none !important;
   }
+}
+
+/* =====================================================================
+   ピクセの へや（v1.57）：ROOM を ひらくと まず へやの え。もの が 入口
+   ===================================================================== */
+/* タブは もう みせない（もの から いく）。ページに いる ときは「◀ へや」で もどる */
+.diary .diary-bar,
+.diary .diary-tools {
+  display: none;
+}
+
+.room-back {
+  padding: 2px 8px;
+  border: 0;
+  background: #fffaf0;
+  color: var(--accent);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.room-back[hidden] {
+  display: none;
+}
+
+.room-scene {
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* かべ（うえ 6 わり）と ゆか */
+.rs-room {
+  position: relative;
+  aspect-ratio: 1 / 1.05;
+  overflow: hidden;
+  background:
+    radial-gradient(circle, var(--btn-hover) 1px, transparent 1.5px) 0 0 / 16px 16px,
+    linear-gradient(var(--btn) 0 60%, var(--btn-hover) 60% calc(60% + 4px), var(--bg-grid) calc(60% + 4px) 100%);
+}
+
+/* ゆかの いた め */
+.rs-room::before {
+  content: "";
+  position: absolute;
+  inset: calc(60% + 4px) 0 0;
+  background: repeating-linear-gradient(90deg, transparent 0 46px, var(--bg) 46px 48px);
+  opacity: 0.6;
+}
+
+/* ピクセの したの まるい ラグ */
+.rs-room::after {
+  content: "";
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  top: 76%;
+  height: 9%;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.35;
+}
+
+.rs-thing,
+.rs-pixe {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.rs-art {
+  display: block;
+  width: 100%;
+}
+
+.rs-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rs-label {
+  padding: 1px 5px;
+  background: rgba(15, 11, 30, 0.75);
+  font-family: "DotGothic16", monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.rs-thing:hover .rs-art,
+.rs-thing:focus-visible .rs-art {
+  translate: 0 -2px;
+}
+
+.rs-thing:focus-visible,
+.rs-pixe:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* あたらしい ものが ある もの だけ ひかる（ことばの NEW では なく） */
+.rs-thing.glow .rs-art {
+  filter: drop-shadow(0 0 3px var(--gold)) drop-shadow(0 0 6px var(--gold));
+  animation: rs-glow 1.6s steps(2) infinite;
+}
+
+.rs-thing.glow .rs-label {
+  color: var(--gold);
+}
+
+@keyframes rs-glow {
+  50% { filter: drop-shadow(0 0 1px var(--gold)); }
+}
+
+.rs-count {
+  position: absolute;
+  top: 30%;
+  font-family: "Press Start 2P", monospace;
+  font-size: 7px;
+  color: var(--bg);
+}
+
+.rs-window   { left: 6%;  top: 7%;  width: 26%; }
+.rs-ticket   { left: 38%; top: 12%; width: 12%; }
+.rs-calendar { left: 56%; top: 8%;  width: 14%; }
+.rs-trophy   { right: 6%; top: 10%; width: 16%; }
+.rs-closet   { left: 4%;  top: 38%; width: 20%; }
+.rs-shelf    { right: 5%; top: 36%; width: 20%; }
+.rs-post     { left: 7%;  top: 70%; width: 12%; }
+.rs-camera   { left: 30%; top: 86%; width: 12%; }
+.rs-cardbox  { right: 8%; top: 76%; width: 15%; }
+.rs-pixe     { left: 38%; top: 59%; width: 24%; }
+
+.rs-pixe svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rs-pixe.jump {
+  animation: rs-jump 0.4s steps(4);
+}
+
+@keyframes rs-jump {
+  50% { translate: 0 -18%; }
+}
+
+.rs-say {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 34%;
+  z-index: 2;
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--bg);
+  outline: 2px solid var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  visibility: hidden;
+}
+
+.rs-say.show {
+  visibility: visible;
+  animation: rs-say 4s steps(1) forwards;
+}
+
+@keyframes rs-say {
+  100% { visibility: hidden; }
+}
+
+/* からっぽの もの（てがみ・カードが まだ ない）は すこし くらく */
+.rs-thing.empty .rs-art {
+  opacity: 0.45;
+}
+
+.rs-thing.empty .rs-label {
+  color: var(--muted);
+}
+
+/* そだちの ステータス（ゲームの がめんの した） */
+.rs-room,
+.rs-status {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rs-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 8px 14px;
+  margin: 0;
+  padding: 10px 12px 12px;
+  border-top: 4px solid var(--accent);
+  font-family: "DotGothic16", monospace;
+  text-align: center;
+}
+
+.rs-status dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.rs-status dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rs-thing.glow .rs-art,
+  .rs-pixe.jump { animation: none; }
+}
+
+.reduce-motion .rs-thing.glow .rs-art,
+.reduce-motion .rs-pixe.jump {
+  animation: none;
+}
+
+/* クローゼット：うえに ためしに きた おおきな ピクセ、したに アイテムが ずらっと */
+.closet-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 12px;
+}
+
+.closet-preview {
+  width: 112px;
+  height: 112px;
+  padding: 8px;
+  background: var(--btn);
+}
+
+.closet-preview svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.closet-name {
+  min-height: 1.5em;
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+}
+
+.closet-decide {
+  margin: 0;
+}
+
+/* いろちがい（ベレー など）の まる */
+.closet-colors {
+  display: flex;
+  gap: 8px;
+}
+
+.closet-colors:empty {
+  display: none;
+}
+
+.closet-color {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 3px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--btn);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.closet-color span {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.closet-color[aria-pressed="true"] {
+  outline: 2px solid var(--fg);
+}
+
+.closet-color:disabled {
+  cursor: default;
+}
+
+.closet-decide[hidden] {
+  display: none;
+}
+
+.closet-kinds {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.closet-kind {
+  flex: 1;
+  padding: 6px 4px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.closet-kind[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* あたらしく もらった もの */
+.wardrobe-item {
+  position: relative;
+}
+
+.closet-new {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  padding: 1px 3px;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+  line-height: 1.2;
+}
+
+/* いま きて いる もの */
+.wardrobe-item.worn {
+  box-shadow: inset 0 0 0 2px var(--accent-2);
+}
+
+.closet .atelier-btn {
+  margin-top: 12px;
+}
+
+.atelier-btn[hidden] {
+  display: none;
 }

@@ -15,7 +15,7 @@ export default {
     await p.boot({ readIntro: false });
     const lines = await p.readIntro();
     t.ok(lines.some((l) => l.includes("とくべつな")), `いわない: ${JSON.stringify(lines)}`);
-    await p.ev(`room.open("diary")`);
+    await p.ev(`room.open("letters")`);
     await t.sleep(400);
     t.ok((await p.ev(`document.querySelector(".letter-btn.special")?.textContent ?? ""`)).includes("ひらく ひの てがみ"), "てがみの たばに ない");
     await p.ev(`document.querySelector(".letter-btn.special").click()`);

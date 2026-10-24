@@ -329,7 +329,7 @@ const cards = (() => {
   function draw(card) {
     const css = getComputedStyle(document.body);
     const v = (name) => css.getPropertyValue(name).trim();
-    const pal = { o: "#000000", w: v("--fg"), p: v("--accent"), c: v("--accent-2"), y: v("--gold"), k: v("--pumpkin"), v: v("--muted") };
+    const pal = { o: "#000000", w: v("--fg"), p: v("--accent"), c: v("--accent-2"), y: v("--gold"), k: v("--pumpkin"), v: v("--muted"), R: v("--cos-red"), G: v("--cos-green"), D: v("--cos-deep"), B: v("--cos-brown"), N: v("--cos-navy") };
     // 2 ばいの おおきさで かく。スマホで みると もじが ぼやけて いた から（v1.52.1）
     const cv = document.createElement("canvas");
     cv.width = W * 2;
@@ -619,7 +619,7 @@ const cards = (() => {
     return backUrl;
   }
 
-  // ---------- ROOM の にっきの なか：コレクションの たな ----------
+  // ---------- ROOM の カードばこ（v1.57）：コレクションの たな ----------
   const thumbs = new Map();
   const keyOf = (card) => `${card.date}:${card.kind}:${card.n ?? ""}:${card.tier ?? ""}`; // おなじ ひの 1・10 かいめが おなじ えに ならない ように n も（v1.52.1）
   function thumb(card) {
@@ -641,8 +641,8 @@ const cards = (() => {
     });
   }
   function shelf() {
-    const body = document.getElementById("diary-body");
-    body.querySelector(".cards")?.remove();
+    const body = document.getElementById("cards-body");
+    body.innerHTML = "";
     if (!state.list.length) return;
     const all = slots();
     const have = all.filter((s) => s.card).length;
@@ -660,8 +660,7 @@ const cards = (() => {
       const b = e.target.closest("button.cards-btn");
       if (b) open(all[Number(b.dataset.no) - 1].card);
     });
-    const after = body.querySelector(".letters") ?? body.querySelector(".tonight") ?? body.querySelector(".diary-head");
-    after ? after.after(el) : body.prepend(el);
+    body.append(el);
   }
   async function open(card) {
     await postcard.fontsReady();
@@ -675,7 +674,7 @@ const cards = (() => {
     const note = await counter.note(card);
     if (note) postcard.note(note);
   }
-  on("notebook-tab", ({ which }) => which === "diary" && shelf());
+  on("notebook-tab", ({ which }) => which === "cards" && shelf());
 
   return { state: () => state, draw, open, add, show, back, numberOf, rollTier, ORDER };
 })();

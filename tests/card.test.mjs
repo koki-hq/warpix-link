@@ -142,12 +142,12 @@ export default {
     await server.close();
   },
 
-  async "ROOM の にっきに コレクションの たな（16 ばん）。もって いない ばんごうは うら。え は 840×1176、わくの いろ。とじると おへやに もどる"(t) {
+  async "ROOM の カードばこに コレクションの たな（16 ばん）。もって いない ばんごうは うら。え は 840×1176、わくの いろ。とじると おへやに もどる"(t) {
     const { server, p } = await page(t);
     await link(p);
     t.eq(await p.ev(`(() => { const cv = cards.draw(cards.state().list[0]); return [cv.width, cv.height]; })()`), [840, 1176], "えの 大きさ");
     t.eq(await p.ev(`(() => { const d = cards.draw({ kind: "lucky", tier: "gold", date: "2026-11-01", line: "x" }).getContext("2d").getImageData(2, 2, 1, 1).data; return [d[0], d[1], d[2]]; })()`), [0xa8, 0x74, 0x0a], "きんの わく");
-    await p.ev(`room.open("diary")`);
+    await p.ev(`room.open("cards")`);
     await t.sleep(500);
     t.eq(await p.ev(`document.querySelectorAll(".cards-list > *").length`), 16, "たなの ばんごうの かず");
     t.eq(await p.ev(`document.querySelectorAll("button.cards-btn").length`), 1, "もって いる カード");
@@ -162,7 +162,7 @@ export default {
     await p.ev(`document.querySelector(".postcard-close").click()`);
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("diary").open`), "とじたら おへやに もどらない");
-    t.eq(await p.ev(`document.querySelector('.diary-tab[aria-selected="true"]').dataset.tab`), "diary", "もどった タブ");
+    t.eq(await p.ev(`document.querySelector('.diary-tab[aria-selected="true"]').dataset.tab`), "cards", "もどった タブ");
     t.noErrors(p);
     await server.close();
   },
@@ -170,7 +170,7 @@ export default {
   async "おなじ 日の 1 かいめと 10 かいめは、べつの えに なる（v1.52.1）"(t) {
     const { server, p } = await page(t);
     await link(p, 10);
-    await p.ev(`room.open("diary")`);
+    await p.ev(`room.open("cards")`);
     await t.sleep(500);
     const srcs = await p.ev(`[...document.querySelectorAll("button.cards-btn img")].map((i) => i.src)`);
     t.eq(srcs.length, 2, "カードが 2 まい ない");

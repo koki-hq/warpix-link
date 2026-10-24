@@ -77,11 +77,11 @@ const letter = (() => {
   document.getElementById("letter-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
 
-  // ---------- にっきの なか：てがみの たば ----------
+  // ---------- おへやの ポスト（v1.57）：てがみの たば。まえは にっきの なかに あった ----------
   const ENVELOPE = ["wwwwwwwwww", "wpwwwwwwpw", "wwpwwwwpww", "wwwppppwww", "wwwwwwwwww", "wwwwwwwwww", "wwwwwwwwww"];
   function card() {
-    const body = document.getElementById("diary-body");
-    body.querySelector(".letters")?.remove();
+    const body = document.getElementById("letters-body");
+    body.innerHTML = "";
     deliver();
     if (!letters.length) return;
     const el = document.createElement("section");
@@ -95,10 +95,11 @@ const letter = (() => {
       const b = e.target.closest(".letter-btn");
       if (b) read(b.dataset.week);
     });
-    const after = body.querySelector(".tonight") ?? body.querySelector(".diary-head");
-    after ? after.after(el) : body.prepend(el);
+    body.append(el);
   }
-  on("notebook-tab", ({ which }) => which === "diary" && card());
+  on("notebook-tab", ({ which }) => which === "letters" && card());
+  // へやを ひらいた ときにも とどける（ポストが ひかる）
+  on("notebook-tab", ({ which }) => which === "home" && deliver());
 
   // とくべつな てがみ（開店の ひ など、v1.42）。おなじ kind は 1 かい だけ
   function add({ kind, title, lines }) {

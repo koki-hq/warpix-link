@@ -99,6 +99,7 @@
 
   <dialog class="diary" id="diary" aria-labelledby="diary-title">
     <div class="diary-top">
+      <button class="room-back" id="room-back" type="button" hidden>◀ へや</button>
       <h2 id="diary-title">ピクセの おへや</h2>
       <span class="diary-tools">
         <button type="button" class="postcard-btn" id="postcard-btn">ポストカード</button>
@@ -107,15 +108,22 @@
     </div>
     <div class="diary-bar">
       <div class="diary-tabs" role="tablist" aria-label="おへやの ページ">
+        <button type="button" class="diary-tab" role="tab" id="tab-home" data-tab="home" aria-selected="false" aria-controls="room-scene">へや</button>
         <button type="button" class="diary-tab" role="tab" id="tab-diary" data-tab="diary" aria-selected="true" aria-controls="diary-body">つぶやき</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-letters" data-tab="letters" aria-selected="false" aria-controls="letters-body">てがみ</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-cards" data-tab="cards" aria-selected="false" aria-controls="cards-body">WARPIX カード</button>
         <button type="button" class="diary-tab" role="tab" id="tab-zukan" data-tab="zukan" aria-selected="false" aria-controls="zukan-body">ずかん</button>
         <button type="button" class="diary-tab" role="tab" id="tab-stamp" data-tab="stamp" aria-selected="false" aria-controls="stamp-body">スタンプ</button>
         <button type="button" class="diary-tab" role="tab" id="tab-trophy" data-tab="trophy" aria-selected="false" aria-controls="trophy-body">じっせき</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-hat" data-tab="hat" aria-selected="false" aria-controls="hat-body">ぼうし</button>
+        <button type="button" class="diary-tab" role="tab" id="tab-hat" data-tab="hat" aria-selected="false" aria-controls="hat-body">クローゼット</button>
       </div>
     </div>
     <!-- ページは長くてスクロールするので、キーボードでも選んでスクロールできるよう tabindex をつける -->
+    <!-- ピクセの へや（v1.57）：ROOM を ひらくと まず ここ。もの を おすと それぞれの ページへ -->
+    <div class="diary-body room-scene" id="room-scene" role="tabpanel" aria-labelledby="tab-home" hidden></div>
     <div class="diary-body" id="diary-body" role="tabpanel" aria-labelledby="tab-diary" tabindex="0"></div>
+    <div class="diary-body" id="letters-body" role="tabpanel" aria-labelledby="tab-letters" tabindex="0" hidden></div>
+    <div class="diary-body" id="cards-body" role="tabpanel" aria-labelledby="tab-cards" tabindex="0" hidden></div>
     <div class="diary-body zukan-body" id="zukan-body" role="tabpanel" aria-labelledby="tab-zukan" tabindex="0" hidden></div>
     <div class="diary-body stamp-body" id="stamp-body" role="tabpanel" aria-labelledby="tab-stamp" tabindex="0" hidden></div>
     <!-- じっせきと ぼうしは、ゲームの がめんみたいな こい いろの ページ -->
@@ -146,12 +154,18 @@
       </form>
     </div>
     <div class="diary-body room-dark hat-body" id="hat-body" role="tabpanel" aria-labelledby="tab-hat" tabindex="0" hidden>
-      <section class="wardrobe" aria-labelledby="wardrobe-title">
-        <div class="wardrobe-head">
-          <h3 id="wardrobe-title" class="room-sub">WARDROBE</h3>
-          <button type="button" class="atelier-btn" id="atelier-btn">＋ ぼうしを つくる</button>
+      <!-- クローゼット（v1.57）：おすと おおきな ピクセが ためしに きる。「これに する」で きまり -->
+      <section class="wardrobe closet" aria-labelledby="wardrobe-title">
+        <h3 id="wardrobe-title" class="sr-only">クローゼット</h3>
+        <div class="closet-stage">
+          <div class="closet-preview" id="closet-preview"></div>
+          <p class="closet-name" id="closet-name" aria-live="polite"></p>
+          <div class="closet-colors" id="closet-colors" role="group" aria-label="いろ"></div>
+          <button type="button" class="save-btn closet-decide" id="closet-decide" hidden>これに する</button>
         </div>
-        <div class="wardrobe-list" id="wardrobe-list"></div>
+        <div class="closet-kinds" id="closet-kinds" role="group" aria-label="ぶんるい"></div>
+        <div class="wardrobe-list" id="closet-list"></div>
+        <button type="button" class="atelier-btn" id="atelier-btn">＋ ぼうしを つくる</button>
       </section>
     </div>
   </dialog>
@@ -492,7 +506,7 @@
       <p class="about-note">メールの アプリが ひらきます。したがきに いまの 版と きかいの しゅるいが はいって いるので、バグの ときに たすかります（けしても だいじょうぶ）。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、リンクごとの ワープした かず、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、リンクごとの ワープした かず、ぼうしと コスチューム（じぶんで かいた ぼうしも）と クローゼットで みた もの、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -584,6 +598,7 @@
   <script src="cassette-ui.js" defer></script>
   <script src="tonight.js" defer></script>
   <script src="letter.js" defer></script>
+  <script src="roomscene.js" defer></script>
   <script src="about.js" defer></script>
   <script src="manual.js" defer></script>
   <script src="prologue.js" defer></script>

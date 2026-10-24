@@ -35,7 +35,7 @@ export default {
     await p.ev(`document.querySelector(".omikuji-close")?.click()`);
     await p.click("#room-btn");
     await t.sleep(300);
-    t.ok(await p.ev(`!document.getElementById("diary-body").hidden && document.getElementById("zukan-body").hidden`), "最初は日記のページ");
+    t.ok(await p.ev(`!document.getElementById("room-scene").hidden && document.getElementById("zukan-body").hidden`), "最初は へや");
     await p.ev(`document.querySelector('.diary-tab[data-tab="zukan"]').click()`);
     await t.sleep(200);
     t.ok(await p.ev(`document.getElementById("diary-body").hidden && !document.getElementById("zukan-body").hidden`), "ずかんのページに切りかわらない");
@@ -49,14 +49,16 @@ export default {
     // もう一度ひらくと、日記のページから
     await p.ev(`document.getElementById("diary").close()`);
     await p.ev(`document.getElementById("room-btn").click()`);
-    t.ok(await p.ev(`!document.getElementById("diary-body").hidden`), "ひらき直すと日記のページに戻らない");
+    t.ok(await p.ev(`!document.getElementById("room-scene").hidden`), "ひらき直すと へやに 戻らない");
     t.noErrors(p);
     await server.close();
   },
 
   async "半分うめると実績「ずかん はんぶん」"(t) {
     const { server, p } = await openSite(t);
-    await p.ev(`for (const id of ["ufo", "bat", "mothership", "star", "raid", "visitor", "guest", "adv-ghost"]) emit("seen", { id });
+    // v1.57 で ぼうしが ふえた ぶん、きせつの ぼうしと コックさん（さっきょく）も さきに
+    await p.ev(`for (const k of ["autumn", "winter", "summer"]) wardrobe.seeSeason("season:" + k); achievements.unlock("composer");
+      for (const id of ["ufo", "bat", "mothership", "star", "raid", "visitor", "guest", "adv-ghost"]) emit("seen", { id });
       for (const k of ["clear", "cloudy", "fog", "rain", "snow", "thunder"]) emit("weather", { kind: k, temp: 10 });
       for (const n of ["だいきち", "ちゅうきち", "しょうきち", "きち", "すえきち"]) emit("omikuji", { name: n });
       for (const m of ["しんげつ", "まんげつ"]) zukan.mark("moon", m);`);

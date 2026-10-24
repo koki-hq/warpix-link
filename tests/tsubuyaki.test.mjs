@@ -19,6 +19,8 @@ export default {
     t.ok(await p.ev(`!document.querySelector("#room-btn .diary-new").hidden`), "よむ まえに NEW が ない");
     await p.click("#room-btn");
     await t.sleep(300);
+    await p.click(".rs-window");
+    await t.sleep(200);
     const list = await shown(p);
     t.eq(list.length, 7, "7 にち ぶん");
     t.eq(list.map(([d]) => d), ["10/20", "10/19", "10/18", "10/17", "10/16", "10/15", "10/14"], "あたらしい じゅん");
@@ -36,6 +38,8 @@ export default {
     const again = await open(t, { date: "2026-10-03", before: born("2026-10-01") });
     await again.p.click("#room-btn");
     await t.sleep(300);
+    await again.p.click(".rs-window");
+    await t.sleep(200);
     t.eq((await shown(again.p)).map(([d]) => d), ["10/3", "10/2", "10/1"], "であう まえの 日が ある");
     t.noErrors(again.p);
     await again.server.close();
@@ -43,7 +47,7 @@ export default {
 
   async "きまった 日は きまった つぶやき（ハロウィン）。60 こ ぜんぶ でて くる"(t) {
     const { server, p } = await open(t, { date: "2026-10-31", before: born("2026-10-01") });
-    await p.click("#room-btn");
+    await p.ev(`room.open("diary")`);
     await t.sleep(300);
     t.ok((await shown(p))[0][1].startsWith("トリック オア トリート！"), "ハロウィンの つぶやき で ない");
     // 60 にち つづけると 60 こ ぜんぶ 1 かいずつ（きまった 日は のぞく）

@@ -16,20 +16,11 @@ const grow = (() => {
   // ---------- 成長の段階（会った日数＝来てくれた日の数） ----------
   const STAGES = [
     { days: 1, name: "ちびピクセ" },
+    // スカーフと マントは クローゼットの アクセサリー（v1.57、ぬげる。world.js の closet）。もらった ときは きる
+    { days: 3, name: "スカーフの ピクセ", item: "スカーフ", gift: "scarf" },
+    { days: 7, name: "マントの ピクセ", item: "マント", gift: "cape" },
     {
-      days: 3, name: "スカーフの ピクセ", item: "スカーフ",
-      layer: { top: 12, rows: ["..cccccccccccc..", ".........ccc...."] },
-    },
-    {
-      days: 7, name: "マントの ピクセ", item: "マント",
-      layer: {
-        top: 6,
-        rows: ["p..............p", "p..............p", "p..............p", "p..............p", "p..............p", "p..............p", "p..............p", "pp............pp"],
-      },
-    },
-    {
-      days: 14, name: "きんの アンテナの ピクセ", item: "きんの アンテナ",
-      layer: { top: 0, rows: ["......yyyy......", ".......yy.......", ".......yy......."] },
+      days: 14, name: "きんの アンテナの ピクセ", item: "きんの アンテナ", gift: "antenna",
     },
     { days: 30, name: "でんせつの ピクセ", item: "かがやき" },
   ];
@@ -92,6 +83,7 @@ const grow = (() => {
     if (reached > state.stage) {
       state.stage = reached;
       stageUp = STAGES[reached];
+      if (stageUp.gift) closet.gift(stageUp.gift);
       if (state.sulk) intro.push(`……${stageUp.item}を てにいれた。`, "……べつに うれしくないし。");
       else intro.push("……からだが あったかい……！", `${stageUp.item}を てにいれた！\n（${stageUp.name}に なった）`);
       write("grow", `${state.days.length}にち あえた。${stageUp.item}を てにいれた！`, { force: true });
@@ -214,17 +206,6 @@ const grow = (() => {
     }
     const fmtDate = (s) => `${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
     body.innerHTML = `
-      <div class="diary-head">
-        <div class="diary-pixe">${pixelSvg(dress(NPC.idle))}</div>
-        <dl>
-          <dt>なまえ</dt><dd>${stage.name}</dd>
-          <dt>であって</dt><dd>${age + 1}にちめ</dd>
-          <dt>あえた ひ</dt><dd>${state.days.length}にち</dd>
-          <dt>ワープした かず</dt><dd>${typeof favorite !== "undefined" ? favorite.total() : 0}かい</dd>
-          <dt>つぎの せいちょう</dt><dd>${STAGES[state.stage + 1] ? `あと ${STAGES[state.stage + 1].days - state.days.length}にち` : "もう さいこう！"}</dd>
-          ${typeof ticket !== "undefined" && ticket.has() ? `<dt>きっぷ</dt><dd class="diary-ticket">1きせい（${ticket.since()} から）</dd>` : ""}
-        </dl>
-      </div>
       <h3 class="tsubuyaki-title">ピクセの つぶやき</h3>
       ${days.map((date) => `
         <section class="diary-day tsubuyaki">
@@ -237,11 +218,17 @@ const grow = (() => {
     render();
     dialog.showModal();
     body.scrollTop = 0;
+  }
+  // つぶやきを よんだ ことに なるのは、まどから つぶやきの ページを ひらいた とき（v1.57：ROOM は さいしょ へやの え）
+  on("notebook-tab", ({ which }) => {
+    if (which !== "diary") return;
+    render();
+    body.scrollTop = 0;
     readToday = true;
     if (!preview) store.set(READ, ymd);
     renderBadge();
     achievements.unlock("diary");
-  }
+  });
 
   // ROOM ボタンの おうち（えんとつ つき）
   btn.querySelector(".room-icon").innerHTML = pixelSvg([
@@ -265,5 +252,5 @@ const grow = (() => {
   renderBadge();
 
   // firstToday：きょう はじめて 来たか（あいさつの なれ v1.50 が つかう）
-  return { state, open, write, firstToday, stageName: () => STAGES[state.stage].name };
+  return { state, open, write, firstToday, stageName: () => STAGES[state.stage].name, stages: () => STAGES, age: () => dayDiff(state.born, ymd), readToday: () => readToday };
 })();

@@ -59,7 +59,7 @@ export default {
     await server.close();
   },
 
-  async "ノートの タブは ←→ と Home/End で うごける"(t) {
+  async "へやの もの は ボタン（Tab で とまる）。カレンダーで スタンプ、◀ へや で もどる"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
@@ -67,18 +67,14 @@ export default {
     await p.boot();
     await p.click("#room-btn");
     await t.sleep(300);
-    await p.ev(`document.getElementById("tab-diary").focus()`);
-    const state = () => p.ev(`[document.activeElement.id, ["diary-body", "zukan-body", "stamp-body", "trophy-body", "hat-body"].find((id) => !document.getElementById(id).hidden), [...document.querySelectorAll(".diary-tab")].map((t) => t.tabIndex).join()]`);
-    await p.key("ArrowRight");
-    t.eq(await state(), ["tab-zukan", "zukan-body", "-1,0,-1,-1,-1"], "→ で ずかん");
-    await p.key("End");
-    t.eq(await state(), ["tab-hat", "hat-body", "-1,-1,-1,-1,0"], "End で ぼうし");
-    await p.key("ArrowRight");
-    t.eq(await state(), ["tab-diary", "diary-body", "0,-1,-1,-1,-1"], "はしから → で さいしょへ");
-    await p.key("ArrowLeft");
-    t.eq(await state(), ["tab-hat", "hat-body", "-1,-1,-1,-1,0"], "← で さいごへ");
-    await p.key("Home");
-    t.eq(await state(), ["tab-diary", "diary-body", "0,-1,-1,-1,-1"], "Home で にっき");
+    // もの は ぜんぶ ボタン（Tab で とまる）
+    t.ok(await p.ev(`[...document.querySelectorAll(".rs-thing")].every((b) => b.tagName === "BUTTON" && b.tabIndex === 0)`), "Tab で とまらない もの が ある");
+    await p.ev(`document.querySelector(".rs-calendar").click()`);
+    await t.sleep(200);
+    t.ok(await p.ev(`!document.getElementById("stamp-body").hidden`), "カレンダーで スタンプが ひらかない");
+    await p.ev(`document.getElementById("room-back").click()`);
+    await t.sleep(200);
+    t.ok(await p.ev(`!document.getElementById("room-scene").hidden`), "◀ へや で もどらない");
     t.noErrors(p);
     await server.close();
   },

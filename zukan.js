@@ -95,13 +95,13 @@ const zukan = (() => {
     },
     {
       id: "hat", title: "ぼうし",
-      entries: Object.entries(wardrobe.hats()).map(([id, hat]) => ({ id, name: hat.name, draw: hatOn(id), has: () => wardrobe.opened(id) })),
+      entries: Object.entries(wardrobe.hats()).filter(([, hat]) => !hat.variantOf).map(([id, hat]) => ({ id, name: hat.name, draw: hatOn(id), has: () => wardrobe.opened(id) })),
     },
   ];
   // 帽子は季節・天気の帽子があとから足されるので、ひらくたびに作り直す
   function hatSection() {
     const s = SECTIONS.find((x) => x.id === "hat");
-    s.entries = Object.entries(wardrobe.hats()).map(([id, hat]) => ({ id, name: hat.name, draw: hatOn(id), has: () => wardrobe.opened(id) }));
+    s.entries = Object.entries(wardrobe.hats()).filter(([, hat]) => !hat.variantOf).map(([id, hat]) => ({ id, name: hat.name, draw: hatOn(id), has: () => wardrobe.opened(id) }));
   }
 
   const has = (section, entry) => (entry.has ? entry.has() : !!state.seen[`${section.id}:${entry.id}`]);
@@ -163,6 +163,12 @@ const zukan = (() => {
     for (const t of tabs) t.setAttribute("aria-selected", String(t.dataset.tab === which));
     for (const t of tabs) document.getElementById(t.getAttribute("aria-controls")).hidden = t.dataset.tab !== which;
     if (which === "zukan") render();
+    // へやに いる ときは タイトルだけ、ページの ときは「◀ へや」で もどれる（v1.57）
+    const dlg = document.getElementById("diary");
+    dlg.classList.toggle("at-home", which === "home");
+    document.getElementById("room-back").hidden = which === "home";
+    const t = tabs.find((x) => x.dataset.tab === which);
+    document.getElementById("diary-title").textContent = which === "home" ? "ピクセの おへや" : t?.textContent ?? "ピクセの おへや";
     emit("notebook-tab", { which });
   }
   tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.tab)));
@@ -180,7 +186,11 @@ const zukan = (() => {
       next.focus();
     })
   );
-  document.getElementById("room-btn").addEventListener("click", () => room.open("diary"));
+  document.getElementById("room-btn").addEventListener("click", () => room.open("home"));
+  document.getElementById("room-back").addEventListener("click", () => {
+    sound.sfx.select();
+    show("home");
+  });
   cheats.add("zukan", () => room.open("zukan"));
 
   return { mark, counts, show, state };

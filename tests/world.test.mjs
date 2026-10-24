@@ -57,7 +57,7 @@ export default {
     const favBefore = await p.ev(`document.getElementById("favicon").href`);
     await p.ev(`document.getElementById("room-btn").click(); document.getElementById("tab-hat").click()`);
     await t.sleep(300);
-    await p.ev(`[...document.querySelectorAll(".wardrobe-item")].find((b) => b.title === "パーティーハット").click()`);
+    await p.ev(`[...document.querySelectorAll(".wardrobe-item")].find((b) => b.title === "パーティーハット").click(); document.getElementById("closet-decide").click()`);
     await t.sleep(3500);
     t.eq(await p.ev(`wardrobe.currentId()`), "party", "帽子");
     t.ok(await p.ev(`achievements.has("fashion")`), "実績「おしゃれさん」がない");
