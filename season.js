@@ -172,24 +172,24 @@ const season = (() => {
     halloween() {
       ufoLook = BAT;
       wardrobe.wearSeasonal("pumpkin");
-      npc.addIntro("トリック オア トリート！\nいまは ハロウィン ウィーク だよ。");
-      npc.addIntro("……そらを とんでるの、\nUFOじゃなくて コウモリ かも。");
+      npc.addIntro("トリック オア トリート！\nいまは ハロウィン ウィーク だよ。", { topic: "season" });
+      npc.addIntro("……そらを とんでるの、\nUFOじゃなくて コウモリ かも。", { topic: "season" });
     },
     christmas() {
       snow();
       wardrobe.wearSeasonal("santa");
       sound.setSong(JINGLE);
-      npc.addIntro("メリー クリスマス！\nそとは ゆきが ふってるよ。");
+      npc.addIntro("メリー クリスマス！\nそとは ゆきが ふってるよ。", { topic: "season" });
     },
     newyear() {
       wardrobe.wearSeasonal("hachimaki");
-      npc.addIntro("あけまして おめでとう！\nことしも よろしくね。");
+      npc.addIntro("あけまして おめでとう！\nことしも よろしくね。", { topic: "season" });
     },
     tanabata() {
       milkyWay();
       wardrobe.wearSeasonal("tanzaku");
-      npc.addIntro("きょうは たなばた。\nあまのがわが みえるかな？");
-      npc.addIntro("ねがいごと、こころの なかで\nとなえておいてね。");
+      npc.addIntro("きょうは たなばた。\nあまのがわが みえるかな？", { topic: "season" });
+      npc.addIntro("ねがいごと、こころの なかで\nとなえておいてね。", { topic: "season" });
     },
   };
 

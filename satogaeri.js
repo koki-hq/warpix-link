@@ -30,7 +30,7 @@ const satogaeri = (() => {
     return at !== null && at !== undefined && Math.abs(Date.now() - at) < 20 * 60 * 1000;
   };
   const free = () =>
-    document.body.classList.contains("booted") && !simple.on && !playing() && !dozing() && npc.ready() && !npc.busy() &&
+    document.body.classList.contains("booted") && !simple.on && !playing() && !dozing() && npc.free() && !npc.busy() &&
     !npc.isAway() && !adventure.isActive() && !(raid.active?.() ?? false) && !postcard.isOpen() && !document.querySelector("dialog[open], .credits");
 
   function go({ away = AWAY } = {}) {

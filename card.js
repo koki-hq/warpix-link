@@ -104,7 +104,7 @@ const cards = (() => {
     if (omenOn || state.list.some((c) => c.date === ymdOf(today()) && c.kind !== "warps")) return;
     omenOn = true;
     const wait = () => {
-      if (!npc.ready() || playing() || npc.isAway()) return setTimeout(wait, 1200);
+      if (!npc.free() || playing() || npc.isAway()) return setTimeout(wait, 1200);
       sound.sfx.twinkle?.();
       npc.say(["……ん？ ポケットが\nひかってる。"]);
       document.getElementById("npc")?.classList.add("card-omen");
@@ -145,7 +145,7 @@ const cards = (() => {
     if (waiting || !line.length) return;
     waiting = true;
     const wait = () => {
-      if (!npc.ready() || playing() || npc.isAway() || revealing || postcard.isOpen() || document.querySelector("dialog[open]")) return setTimeout(wait, 1500);
+      if (!npc.free() || playing() || npc.isAway() || revealing || postcard.isOpen() || document.querySelector("dialog[open]")) return setTimeout(wait, 1500);
       waiting = false;
       show(line.shift());
       pump();

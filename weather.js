@@ -173,7 +173,7 @@ const weather = (() => {
     const said = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}:${kind}`;
     if (store.get("warpix-weather-said", null) === said) return;
     const say = () => {
-      if (!npc.ready() || playing()) return setTimeout(say, 4000);
+      if (!npc.free() || playing()) return setTimeout(say, 4000);
       if (!asked && !npc.turn()) return; // 1 かい ひらいて 1 つ まで（v1.52）。いえなかったら、つぎに きた ときに
       store.set("warpix-weather-said", said);
       npc.say(LINES[kind](Math.round(data.temp), data.day));
@@ -237,7 +237,7 @@ const weather = (() => {
 
   // 1 かい ひらいて 1 つ まで。ことわられたら 1 しゅうかん あけて もう 1 かい、2 かいで おわり（v1.52）
   function offer(mine = false) {
-    if (!npc.ready() || playing() || npc.isAway()) return setTimeout(() => offer(mine), 8000);
+    if (!npc.free() || playing() || npc.isAway()) return setTimeout(() => offer(mine), 8000);
     if (!mine && !npc.turn()) return;
     ask();
   }

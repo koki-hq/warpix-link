@@ -133,7 +133,7 @@ const manual = (() => {
     const until = Date.now() + 120000;
     const tick = () => {
       if (Date.now() > until) return;
-      if (!npc.ready() || playing() || document.querySelector("dialog[open]")) return setTimeout(tick, 500);
+      if (!npc.free() || playing() || document.querySelector("dialog[open]")) return setTimeout(tick, 500);
       setTimeout(fn, 400);
     };
     setTimeout(tick, 1000);

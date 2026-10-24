@@ -415,7 +415,7 @@ const composer = (() => {
   on("boot", () => {
     if (!gift) return;
     const wait = () => {
-      if (!npc.ready() || playing() || npc.isAway()) return setTimeout(wait, 1000);
+      if (!npc.free() || playing() || npc.isAway()) return setTimeout(wait, 1000);
       // きょくの リンクで きた 人は、それが めあて。はじめての 人にも、ほかの 話より さきに きく（v1.52）
       npc.turn({ evenFirst: true });
       npc.ask("だれかから きょくが\nとどいてる！ きいてみる？", ["きく", "あとで"]).then((i) => {

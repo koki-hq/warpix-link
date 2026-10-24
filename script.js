@@ -806,9 +806,18 @@ const npc = (() => {
   let introStarted = false;
   let pokeHook = null;
   const extraIntro = [];
+  function introLines() {
+    const main = extraIntro.filter((x) => !x.topic).map((x) => x.line);
+    if (main.length >= 2) return main;
+    const first = extraIntro.find((x) => x.topic)?.topic;
+    return [...main, ...extraIntro.filter((x) => x.topic === first).map((x) => x.line)];
+  }
   // うち おわっても、よむ じかんを まってから「ひま」に なる（もじの かずぶん）。ほかの しかけが わりこまない（v1.54）
   const READ_MS = window.WARPIX_READ_MS ?? 100;
   let readUntil = 0;
+  // むこうから はなしかける ものは、よみおわって から さらに すこし まを あける（v1.60。わだいが つぎつぎ ふって こない ように）
+  const GAP_MS = READ_MS ? 2500 : 0;
+  let quietUntil = 0;
 
   function render() {
     box.classList.toggle("more", !typing && queue.length > 0);
@@ -819,6 +828,7 @@ const npc = (() => {
     typing = null;
     textEl.textContent = full;
     readUntil = READ_MS ? Date.now() + 1000 + full.length * READ_MS : 0;
+    quietUntil = readUntil ? readUntil + GAP_MS : Date.now() + GAP_MS;
     render();
     if (pending && !pending.shown && queue.length === 0) {
       pending.shown = true;
@@ -986,13 +996,21 @@ const npc = (() => {
       if (document.body.classList.contains("prologue-done")) {
         return say(firstDay() ? ["……あ。\nやあ、ぼく ピクセ。", "したの ボタンを えらぶと\nその せかいへ ワープできるよ。"] : ["……あ。\nおかえり。まってたよ。"]);
       }
-      say([...greeting(), ...extraIntro]);
+      say([...greeting(), ...introLines()]);
     },
     // あいさつの最後に1行足す（boot のときに呼ぶ）
-    addIntro: (line) => extraIntro.push(line),
+    // topic を つけた ものは「かるい わだい」（きせつ・きょうの ヒント・きた かいすう など）。
+    // だいじな もの（そだった・きっぷ・てがみ・しゅうらいの よる など）が 2 ぎょう いじょう ある ひは いわない。いうのは 1 わだい だけ（v1.60）
+    addIntro: (line, { topic = null } = {}) => extraIntro.push({ line, topic }),
     busy: () => !!typing || queue.length > 0 || !!pending,
     // あいさつを最後まで言い終えたか
     ready: () => introStarted && !typing && queue.length === 0 && !pending && Date.now() >= readUntil,
+    // むこうから はなしかけて いいか（v1.60、本人「いろいろ 発火 タイミング 重なって ごちゃごちゃに ならない ように　バグに 見える」）。
+    // おさそい・てんき・カードの よかん・だれかと おなじ そら・きづく ひとこと などは ぜんぶ ここを とおる。
+    // じぶんが した ことへの へんじ（つついた・コマンド など）は say で すぐ いう
+    free: () =>
+      introStarted && !typing && queue.length === 0 && !pending && Date.now() >= quietUntil &&
+      !away && !playing() && !document.querySelector("dialog[open]") && !document.querySelector(".card-reveal, .credits, .postcard"),
     sleep(on) {
       asleep = on;
       sprite.classList.toggle("asleep", on);

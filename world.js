@@ -518,7 +518,7 @@ const favicon = (() => {
     achievements.unlock("parallel");
     const tell = () => {
       if (guest) return; // もう本人（お客さん）が来ているなら言うまでもない
-      if (!npc.ready() || playing()) return setTimeout(tell, 3000);
+      if (!npc.free() || playing()) return setTimeout(tell, 3000);
       npc.say(["あれ？ ほかの タブにも\nぼくが いる きがする……", "ぼくを ダブルクリックすると\nあそびに いけるかも。"]);
     };
     tell();
@@ -623,7 +623,7 @@ const favicon = (() => {
 (() => {
   // あいさつを言い終えていて、ほかに何もしていないときだけしゃべる
   const notice = (lines) => {
-    if (!npc.ready() || npc.isAway() || playing()) return false;
+    if (!npc.free() || npc.isAway() || playing()) return false;
     npc.say(lines);
     return true;
   };
@@ -635,9 +635,9 @@ const favicon = (() => {
     const visits = store.get("warpix-visits", 0) + 1;
     store.set("warpix-visits", visits);
     // まいかい かぞえると くどいので、ふしめの かいだけ（v1.50）
-    if (visits >= 100 && visits % 100 === 0) npc.addIntro(`${visits}かいめ！？\nもう ここに すんでるでしょ。`);
-    else if (visits === 10 || visits === 50) npc.addIntro(`もう ${visits}かいめ！\nすっかり じょうれんさん だね。`);
-    else if (visits === 2) npc.addIntro("また きてくれたんだ！\n2かいめ だね。");
+    if (visits >= 100 && visits % 100 === 0) npc.addIntro(`${visits}かいめ！？\nもう ここに すんでるでしょ。`, { topic: "visits" });
+    else if (visits === 10 || visits === 50) npc.addIntro(`もう ${visits}かいめ！\nすっかり じょうれんさん だね。`, { topic: "visits" });
+    else if (visits === 2) npc.addIntro("また きてくれたんだ！\n2かいめ だね。", { topic: "visits" });
   });
 
   // 別のタブに行って、戻ってきたとき
@@ -690,7 +690,7 @@ const favicon = (() => {
 (() => {
   let mine = false; // この かいの はなす ばんを もらった
   function ask() {
-    if (!npc.ready() || playing() || npc.isAway() || document.hidden || document.getElementById("npc").classList.contains("asleep")) {
+    if (!npc.free() || playing() || npc.isAway() || document.hidden || document.getElementById("npc").classList.contains("asleep")) {
       return setTimeout(ask, 5000);
     }
     // 1 かい ひらいて 1 つ まで。こたえたら 1 しゅうかん あけて、2 かい ことわられたら おわり（v1.52）

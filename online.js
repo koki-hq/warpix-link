@@ -107,7 +107,7 @@ const online = (() => {
       metSomeone = true;
       achievements.unlock("online");
       const tell = () => {
-        if (!npc.ready() || playing()) return setTimeout(tell, 4000);
+        if (!npc.free() || playing()) return setTimeout(tell, 4000);
         npc.say([
           ids.length === 1 ? "あれ？ いま ほかにも\nだれかが みてる！" : `いま ${ids.length + 1}にんで\nおなじ そらを みてる！`,
           "そらに うかんでる ピクセを\nクリックすると てを ふれるよ。",
@@ -161,7 +161,7 @@ const online = (() => {
     npc.jump();
     if (wavesLater++) return; // もう まって いる
     const tell = () => {
-      if (!npc.ready() || playing()) return setTimeout(tell, 4000);
+      if (!npc.free() || playing()) return setTimeout(tell, 4000);
       const n = wavesLater;
       wavesLater = 0;
       sound.sfx.coin();

@@ -55,7 +55,8 @@ export default {
   },
 
   async "来た かいすうは ふしめ だけ（100 かいめ）"(t) {
-    const { server, p, intro: lines } = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify(pixe(20, 1))}); localStorage.setItem("warpix-visits", "99")`);
+    // だいじな はなし（そだつ・きっぷ・じゅもん）が おおい ひは かるい わだいを いわない（v1.60）ので、それらは すんだ ことに
+    const { server, p, intro: lines } = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify({ ...pixe(20, 1), stage: 3 })}); localStorage.setItem("warpix-visits", "99"); localStorage.setItem("warpix-ticket", JSON.stringify({ got: "2026-10-01" })); localStorage.setItem("warpix-save-told", "true")`);
     t.ok(lines.some((l) => l.includes("100かいめ")), `100 かいめを いわない: ${JSON.stringify(lines)}`);
     t.ok(!(await again(p, server)).some((l) => l.includes("かいめ")), "101 かいめも いった");
     t.noErrors(p);

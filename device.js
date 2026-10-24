@@ -49,12 +49,12 @@ const pocket = (() => {
       const first = !achievements.has("pocket");
       achievements.unlock("pocket");
       if (first) npc.addIntro("ホームがめんから きてくれたんだ！\nアプリの ぼく、どう？");
-      else if (grow.firstToday && Math.random() < 0.15) npc.addIntro(["ポケットの なか、\nあったかいね。", "アイコンの なかで\nまってたよ。"][Math.floor(Math.random() * 2)]);
+      else if (grow.firstToday && Math.random() < 0.15) npc.addIntro(["ポケットの なか、\nあったかいね。", "アイコンの なかで\nまってたよ。"][Math.floor(Math.random() * 2)], { topic: "device" });
     }
     // しばらくして、インストールできそうならおさそい
     setTimeout(function offer() {
       if (!deferred || standalone()) return;
-      if (!npc.ready() || playing() || npc.isAway()) return setTimeout(offer, 10000);
+      if (!npc.free() || playing() || npc.isAway()) return setTimeout(offer, 10000);
       // 1 かい ひらいて 1 つ まで。こたえたら 1 しゅうかん あけて、2 かい ことわられたら おわり（v1.52）
       if (!npc.mayAsk("install") || !npc.turn()) return;
       npc.ask("ぼくを ホームがめんに\nつれていける みたい！", ["つれていく", "あとで"]).then((i) => {

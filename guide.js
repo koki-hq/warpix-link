@@ -33,7 +33,7 @@ const guide = (() => {
   const tip = pick();
   if (tip) {
     const [id, text] = tip;
-    npc.addIntro(`きょうの ヒント：\n${text}`);
+    npc.addIntro(`きょうの ヒント：\n${text}`, { topic: "tip" });
     state.last = ymd;
     state.told.push(id);
     save();

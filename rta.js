@@ -105,7 +105,7 @@ const rta = (() => {
   // ピクセが ひまに なって、ほかの まどが ひらいて いない ときに きく（スタッフロールの あとでも）
   function offer() {
     const timer = setInterval(() => {
-      if (playing() || !npc.ready() || npc.busy() || simple.on || postcard.isOpen()) return;
+      if (playing() || !npc.free() || npc.busy() || simple.on || postcard.isOpen()) return;
       if (document.querySelector(".credits, dialog[open], .postcard")) return;
       clearInterval(timer);
       npc.ask("きょうの きろく、\nカードに する？", ["つくる", "いい"]).then((i) => {

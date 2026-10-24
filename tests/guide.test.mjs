@@ -11,7 +11,8 @@ async function visit(t, storage) {
   const b = await t.launchBrowser();
   const p = await b.firstPage();
   await p.goto(server.url);
-  await p.ev(`localStorage.clear(); ${storage}`);
+  // v1.60：だいじな はなし（1きせいの きっぷ・ふっかつの じゅもん）が 2 ぎょう いじょう ある ひは ヒントを いわない ので、もう すんだ ことに する
+  await p.ev(`localStorage.clear(); localStorage.setItem("warpix-ticket", JSON.stringify({ got: "2026-10-01" })); localStorage.setItem("warpix-save-told", "true"); ${storage}`);
   await p.goto(server.url);
   await p.ev(`document.getElementById("start-btn").click()`);
   await t.sleep(2600);
@@ -36,7 +37,7 @@ export default {
   },
 
   async "使ったことのある機能と、もう言ったヒントはとばす"(t) {
-    const r = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify(pixe(5))});
+    const r = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify(JSON.stringify({ ...JSON.parse(pixe(5)), stage: 1 }))});
       localStorage.setItem("warpix-achievements", JSON.stringify(["diary"]));
       localStorage.setItem("warpix-guide", JSON.stringify({ last: "${dayAgo(1)}", told: ["compose"] }));`);
     const tip = tipOf(r.intro);

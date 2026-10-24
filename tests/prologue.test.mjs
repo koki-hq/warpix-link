@@ -110,4 +110,23 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "むこうから はなしかけるのは、よみおわって すこし まを あけて から。まどが ひらいて いる ときは まつ（v1.60）"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    await p.send("Page.addScriptToEvaluateOnNewDocument", { source: `window.WARPIX_READ_MS = 100;` });
+    await p.goto(server.url);
+    await p.boot({ readIntro: false });
+    await p.ev(`npc.say(["したの ボタンを えらぶと その せかいへ ワープできるよ。"])`);
+    await p.ev(`document.getElementById("dialog").click()`);
+    await t.sleep(4500);
+    t.ok(await p.ev(`npc.ready() && !npc.free()`), "よみおわった すぐ あとに はなしかけて しまう");
+    await t.sleep(3000);
+    t.ok(await p.ev(`npc.free()`), "まを あけても はなせない");
+    await p.ev(`document.getElementById("about-btn").click()`);
+    t.ok(!(await p.ev(`npc.free()`)), "まどが ひらいて いるのに はなす");
+    t.noErrors(p);
+    await server.close();
+  },
 };
