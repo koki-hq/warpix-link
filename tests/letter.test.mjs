@@ -21,9 +21,9 @@ async function open(t, query, { days = DAYS } = {}) {
 }
 
 export default {
-  async "にちようの よる：にっきに てがみが とどき、ひらくと その しゅうの こと"(t) {
+  async "にちようの よる：つぶやきの ページに てがみが とどき、ひらくと その しゅうの こと"(t) {
     const { server, p } = await open(t, "?date=2026-10-18&hour=21");
-    t.ok(await p.ev(`!!document.querySelector("#diary-body .tonight + .letters .letter-btn.unread")`), "こんやの 3ぎょうの したに NEW の てがみが ない");
+    t.ok(await p.ev(`!!document.querySelector("#diary-body .diary-head + .letters .letter-btn.unread")`), "プロフィールの したに NEW の てがみが ない");
     await p.ev(`document.querySelector(".letter-btn").click()`);
     await t.sleep(200);
     t.ok(await p.ev(`document.getElementById("letter").open`), "てがみが ひらかない");

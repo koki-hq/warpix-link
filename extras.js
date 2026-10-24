@@ -82,7 +82,7 @@ const achievements = (() => {
     { id: "gamepad", name: "コントローラー", desc: "ゲームの コントローラーを つないだ", hint: "ゲームきの コントローラーを つないでみて" },
     { id: "online", name: "おなじ そら", desc: "ほかの だれかと おなじ そらを みた", hint: "だれかと おなじ じかんに ここに いると……" },
     { id: "hello", name: "はじめまして", desc: "ほかの だれかと てを ふりあった", hint: "そらに うかぶ ピクセを クリック" },
-    { id: "diary", name: "ピクセの にっき", desc: "ピクセの にっきを よんだ", hint: "ピクセは まいにち なにかを かいている" },
+    { id: "diary", name: "ピクセの つぶやき", desc: "ピクセの つぶやきを よんだ", hint: "ピクセは まいにち なにかを つぶやいている" },
     { id: "growup", name: "おおきく なったね", desc: "7にち あって ピクセが マントを てにいれた", hint: "なんにちも あいに くると……" },
     { id: "reunion", name: "ただいま", desc: "ひさしぶりに あいにきて、ピクセと なかなおり した", hint: "しばらく あわないと ピクセは……" },
     { id: "raid", name: "きょうの ヒーローたち", desc: "みんなで マザーシップを たおした", hint: "まいつき さいしょの にちようびの よる 9じに、みんなで……" },
@@ -107,7 +107,6 @@ const achievements = (() => {
     { id: "spell", name: "ふっかつの じゅもん", desc: "ふっかつの じゅもんを つくった", hint: "このページについての なかに、まほうの ことばが……" },
     { id: "warp-buddy", name: "いっしょに ワープ", desc: "ワープあなから もどってきた ピクセに「ただいま」を いわれた", hint: "リンクを おして、また もどってくると……" },
     { id: "cassette", name: "カセット こうかん", desc: "リンクの カセットを いれかえた", hint: "リンクの したに、いれかえる ボタンが……" },
-    { id: "tonight", name: "よるの 3ぎょう", desc: "ピクセが よるに かいた 3ぎょうの にっきを よんだ", hint: "よるに なってから、ROOM の にっきを……" },
     { id: "cassette-share", name: "カセットの おすそわけ", desc: "カセットを ともだちに わたした・ともだちから もらった", hint: "カセット えらびの まどの したに……" },
     { id: "letter", name: "ピクセからの てがみ", desc: "にちようの よるに とどいた てがみを よんだ", hint: "にちようびの よるに、にっきを ひらくと……" },
     { id: "keywarp", name: "すうじで ワープ", desc: "すうじキーで リンクへ ワープした", hint: "キーボードの すうじを おすと……" },
@@ -118,7 +117,8 @@ const achievements = (() => {
     { id: "master", name: "WARPIX マスター", desc: "すべての じっせきを あつめた", hint: "ぜんぶ あつめると……" },
   ];
 
-  const unlocked = new Set(store.get("warpix-achievements", []));
+  // もう ない 実績（v1.55 で やめた「よるの 3ぎょう」など）は かぞえない
+  const unlocked = new Set(store.get("warpix-achievements", []).filter((id) => LIST.some((a) => a.id === id)));
   const btn = document.getElementById("room-btn"); // じっせきは ピクセの おへやの「じっせき」タブに ある
   const countEl = document.getElementById("trophy-count");
   const listEl = document.getElementById("trophy-list");
@@ -169,7 +169,7 @@ const achievements = (() => {
   }
 
   // じかんや ほうって おいた ことで もらえる 実績は、はじめての 日は まだ（2 日め から。v1.54）
-  const LATER = new Set(["season", "night-owl", "sleepy", "demo", "dreamer", "tonight"]);
+  const LATER = new Set(["season", "night-owl", "sleepy", "demo", "dreamer"]);
   function unlock(id) {
     if (unlocked.has(id) || !LIST.some((a) => a.id === id)) return;
     if (LATER.has(id) && firstDay()) return;

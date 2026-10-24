@@ -192,22 +192,26 @@ const grow = (() => {
   const dialog = document.getElementById("diary");
   const body = document.getElementById("diary-body");
   const btn = document.getElementById("room-btn");
-  let readCount = store.get("warpix-diary-read", 0);
+  // ROOM の NEW：きょうの つぶやきを まだ よんで いない とき
+  const READ = "warpix-tsubuyaki-read";
+  let readToday = store.get(READ, null) === ymd;
 
   function renderBadge() {
-    if (badge) badge.hidden = state.diary.length <= readCount;
+    if (badge) badge.hidden = readToday;
   }
 
   function render() {
     const stage = STAGES[state.stage];
     const age = dayDiff(state.born, ymd);
-    const groups = new Map();
-    for (const e of state.diary) {
-      if (!groups.has(e.date)) groups.set(e.date, []);
-      groups.get(e.date).push(e.text);
+    // ピクセの つぶやき（v1.55）：さいきんの 7 にち。こなかった 日の ぶんも ある（ピクセは ピクセで くらして いる）。であう まえの 日は ない
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const day = ymdOf(d);
+      if (day < state.born) break;
+      days.push(day);
     }
-    // みせるのは さいきんの 7 にち だけ。したに ずっと つづいて いた（v1.52.1）
-    const days = [...groups.entries()].reverse().slice(0, 7);
     const fmtDate = (s) => `${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
     body.innerHTML = `
       <div class="diary-head">
@@ -221,20 +225,20 @@ const grow = (() => {
           ${typeof ticket !== "undefined" && ticket.has() ? `<dt>きっぷ</dt><dd class="diary-ticket">1きせい（${ticket.since()} から）</dd>` : ""}
         </dl>
       </div>
-      ${days.length ? days.map(([date, lines]) => `
-        <section class="diary-day">
+      <h3 class="tsubuyaki-title">ピクセの つぶやき</h3>
+      ${days.map((date) => `
+        <section class="diary-day tsubuyaki">
           <h3>${fmtDate(date)}</h3>
-          ${lines.map((t) => `<p>${t}</p>`).join("")}
-        </section>`).join("") : `<p class="diary-empty">まだ なにも かいてない。</p>`}
-      ${preview ? `<p class="diary-preview">（?date= で みらいを のぞいてるので、この ひの にっきは のこらないよ）</p>` : ""}`;
+          <p>${tsubuyaki.of(date).replace(/\n/g, "<br>")}</p>
+        </section>`).join("")}`;
   }
 
   function open() {
     render();
     dialog.showModal();
     body.scrollTop = 0;
-    readCount = state.diary.length;
-    store.set("warpix-diary-read", readCount);
+    readToday = true;
+    if (!preview) store.set(READ, ymd);
     renderBadge();
     achievements.unlock("diary");
   }

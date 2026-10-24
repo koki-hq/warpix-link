@@ -2,7 +2,7 @@
 const panel = (p) => p.ev(`["diary-body", "zukan-body", "stamp-body", "trophy-body", "hat-body"].find((id) => !document.getElementById(id).hidden)`);
 
 export default {
-  async "ひだりうえは ROOM ボタン 1 つで、ひらくと にっきから"(t) {
+  async "ひだりうえは ROOM ボタン 1 つで、ひらくと つぶやきから"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
@@ -20,7 +20,7 @@ export default {
     t.ok(await p.ev(`document.getElementById("diary").open`), "おへやが ひらかない");
     t.eq(await panel(p), "diary-body", "さいしょは にっき");
     t.eq(await p.ev(`document.getElementById("diary-title").textContent`), "ピクセの おへや", "みだし");
-    t.eq(await p.ev(`[...document.querySelectorAll(".diary-tab")].map((t) => t.textContent)`), ["にっき", "ずかん", "スタンプ", "じっせき", "ぼうし"], "タブ");
+    t.eq(await p.ev(`[...document.querySelectorAll(".diary-tab")].map((t) => t.textContent)`), ["つぶやき", "ずかん", "スタンプ", "じっせき", "ぼうし"], "タブ");
     t.ok(await p.ev(`achievements.has("diary")`), "にっきを よんだ じっせきが つかない");
 
     // じっせき：ぜんぶの じっせきが ならび、ないコマンドには へんじ
