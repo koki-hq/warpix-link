@@ -65,9 +65,10 @@ export default {
     const all = lines.join(" / ");
     t.ok(all.includes("とくべつな"), `ひらく ひの てがみの しらせが ない: ${all}`);
     t.ok(all.includes("こんや 21じ"), `しゅうらいの よるの 予告が ない: ${all}`);
-    t.ok(all.includes("開店しました"), `開店の おしらせを いわない: ${all}`);
+    // 開店の おしらせは ピクセが いうのでは なく、みぎうえの ふうとうに とどく（v1.59）
+    t.ok(await p.ev(`mail.unread().some((m) => m.id === "2026-11-01-open")`), "開店の おしらせが ふうとうに ない");
     t.ok(await p.ev(`letter.letters().some((l) => l.kind === "opening" && l.lines.join("").includes("おみせを ひらく ひ"))`), "てがみが 開店の 日の ことばに ならない");
-    t.ok(await p.ev(`!document.querySelector("#news-link .news-new").hidden`), "製作所だよりに NEW が ない");
+    t.ok(await p.ev(`document.getElementById("mail-btn").classList.contains("has-new")`), "ふうとうが ひからない");
     t.noErrors(p);
     await server.close();
   },

@@ -4,7 +4,7 @@ const DIALOGS = [
   ["カセット", `cassetteUi.open()`], ["へんせい", `cassetteUi.openMenu()`], ["パーティを つくる", `cassetteUi.open({ fresh: true })`],
   ["このページについて", `document.getElementById("about-btn").click()`],
   ["せってい", `document.getElementById("settings-btn").click()`],
-  ["さっきょく", `document.getElementById("compose-btn").click()`],
+  ["さっきょく", `composer.open()`], ["おしらせ", `mail.open()`],
   ["アトリエ", `atelier.open()`],
   ["てがみ", `room.open("diary"); letter.letters().unshift({ week: "2026-10-18", from: "2026-10-12", lines: letter.write().lines, unread: false }); letter.read("2026-10-18")`],
 ];
@@ -25,7 +25,7 @@ const FITS = `(() => {
 })()`;
 // うえの ボタンたちが、ちゃんと おせる（ほかの ものに かくれていない）
 // （リンクの いれかえは がめんの したに かくれている ことが あるので、みえている ときだけ）
-const PRESSABLE = `[...document.querySelectorAll("#room-btn, .compose-btn, .bgm-toggle, #cassette-btn")].filter((el) => {
+const PRESSABLE = `[...document.querySelectorAll("#room-btn, .mail-btn, .bgm-toggle, #cassette-btn")].filter((el) => {
   const r = el.getBoundingClientRect();
   if (r.bottom > innerHeight) return false;
   const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);

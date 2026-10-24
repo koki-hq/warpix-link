@@ -293,7 +293,9 @@ const composer = (() => {
     }
   });
 
+  // v1.59：いりぐちは ピクセの へやの レコードプレーヤー（みぎうえの ♪ は けした）。とじると へやに もどる
   function open() {
+    room.leave();
     wasPlaying = sound.playing();
     draft = { ...current, steps: [...current.steps] };
     dialog.showModal();
@@ -311,11 +313,11 @@ const composer = (() => {
     const bgmOn = document.getElementById("bgm-toggle").getAttribute("aria-pressed") === "true";
     if (sound.playing() && !(wasPlaying && bgmOn)) sound.bgmStop();
     if (!sound.playing() && wasPlaying && bgmOn) sound.bgmPlay();
+    room.back();
   });
   document.getElementById("composer-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
   addEventListener("resize", () => dialog.open && size());
-  document.getElementById("compose-btn").addEventListener("click", open);
   cheats.add("compose", open);
 
   // ---------- レコードだな：つくった曲を 6 まいまで しまっておける ----------
@@ -425,7 +427,7 @@ const composer = (() => {
         sound.bgmPlay();
         achievements.unlock("listener");
         grow.write("gift", "だれかから きょくが とどいた。");
-        npc.say(["♪♪♪", "ずっと きくなら、みぎうえの ♪ から\n「これを BGM に する」を おしてね。"]);
+        npc.say(["♪♪♪", "ずっと きくなら、おへやの レコードプレーヤーで\n「これを BGM に する」を おしてね。"]);
       });
     };
     setTimeout(wait, 1200);

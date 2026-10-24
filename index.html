@@ -180,7 +180,8 @@
 
   <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
   <button class="simple-toggle" id="simple-toggle" type="button"></button>
-  <button class="compose-btn" id="compose-btn" type="button" aria-label="ピクセと さっきょく">♪</button>
+  <!-- おしらせ（v1.59）：WARPIX製作所からの メールボックス -->
+  <button class="mail-btn" id="mail-btn" type="button" aria-haspopup="dialog" aria-label="おしらせ"></button>
 
   <button class="moon" id="moon" type="button" aria-label="きょうの つき"></button>
 
@@ -242,8 +243,6 @@
         <button class="about-btn" id="about-btn" type="button">このページについて</button>
         <span class="sep-settings" aria-hidden="true">・</span>
         <button class="settings-btn" id="settings-btn" type="button">せってい</button>
-        <span aria-hidden="true">・</span>
-        <a class="copyright news-link" id="news-link" href="https://warpix.app/#news" target="_blank" rel="noopener">製作所だより<span class="news-new" hidden>NEW</span><span class="sr-only">（あたらしい タブで ひらく）</span></a>
       </div>
       <!-- となりの へや（v1.49）：リンクが いらない 日は ゲームセンターへ -->
       <a class="arcade-door" href="https://arcade.warpix.app/">となりの へや：WARPIX ARCADE（ゲームセンター） ▶</a>
@@ -336,6 +335,19 @@
         <button class="save-btn" type="submit">きめる</button>
       </form>
       <p class="hensei-msg" id="hensei-msg" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <!-- おしらせ（v1.59）：けんめいの いちらん → しょうさい -->
+  <dialog class="about mail" id="mail" aria-labelledby="mail-title">
+    <div class="about-top">
+      <button class="room-back" id="mail-back" type="button" hidden>◀ いちらん</button>
+      <h2 id="mail-title">おしらせ</h2>
+      <button class="about-close" id="mail-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <div class="about-body">
+      <ul class="mail-list" id="mail-list"></ul>
+      <div class="mail-read" id="mail-read" hidden></div>
     </div>
   </dialog>
 
@@ -514,7 +526,7 @@
       <p class="about-note">メールの アプリが ひらきます。したがきに いまの 版と きかいの しゅるいが はいって いるので、バグの ときに たすかります（けしても だいじょうぶ）。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、リンクごとの ワープした かず、ぼうしと コスチューム（じぶんで かいた ぼうしも）と クローゼットで みた もの、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、リンクごとの ワープした かず、ぼうしと コスチューム（じぶんで かいた ぼうしも）と クローゼットで みた もの、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ おしらせ、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>
@@ -523,7 +535,6 @@
         <li><b>おなじ そら・レイド・せかいの きろく</b>：おなじ そらに つながるのは しゅうらいの よる（まいつき さいしょの にちようびの 21:00 まえあと）だけ。<strong>ランダムな ばんごうと ぼうしの しゅるい</strong>、つついた かいすうや ぼうけんの タイム（ピクセ RTA）などを Supabase に おくります。なまえや ばしょ、スコアは おくりません。</li>
         <li><b>WARPIX カードの かず</b>：はじめて ひらいた とき「1 にん ふえた」、カードを はじめて もらった とき「その ばんごうの カードが 1 まい ふえた」とだけ Supabase に おくります。「この カードを もっている ひと：ぜんたいの なん%」を だす ためです。だれが どの カードを もって いるかは おくりません。</li>
         <li><b>もじ</b>：英字の ドットの もじは Google Fonts から よみこみます（日本語の もじは この サイトに おいています）。</li>
-        <li><b>製作所だより</b>：WARPIX製作所の ホームページ（warpix.app、おなじ GitHub Pages）から、おしらせの ファイルを よみこみます。なにも おくりません。</li>
         <li><b>ピクセの こえ</b>：せっていで オンに した ときだけ、ブラウザの よみあげを つかいます。その きかいの なかの こえを さきに えらびますが、ない ときは ブラウザの 会社の サーバーで よみあげる こえに なり、セリフの もじが そこへ おくられる ことが あります。</li>
       </ul>
       <p class="about-note">※ この ページを おいている GitHub Pages も ふくめ、どの サービスも、つなぐ ときに ふつうは あなたの IP アドレスを うけとります。</p>
@@ -590,7 +601,7 @@
   <script src="hide.js" defer></script>
   <script src="voice.js" defer></script>
   <script src="rest.js" defer></script>
-  <script src="news.js" defer></script>
+  <script src="mail.js" defer></script>
   <script src="guide.js" defer></script>
   <script src="save.js" defer></script>
   <script src="move.js" defer></script>

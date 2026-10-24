@@ -24,7 +24,9 @@ const savedSong = (p) => p.ev(`composer.decode(JSON.parse(localStorage.getItem("
 export default {
   async "♪ から開いて、マスを押して曲を作り、BGM にする（開き直しても残る）"(t) {
     const { server, p } = await openComposer(t);
-    await p.click("#compose-btn");
+    await p.click("#room-btn");
+    await t.sleep(300);
+    await p.click(".rs-record");
     await t.sleep(400);
     t.ok(await p.ev(`document.getElementById("composer").open`), "作曲画面が開かない");
     t.ok(await p.ev(`document.getElementById("roll").getBoundingClientRect().width > 300`), "ピアノロールが小さすぎる");
@@ -110,7 +112,9 @@ export default {
 
   async "レコードだなに しまって、名前がつき、ひらく・BGM・だす ができる（開き直しても残る）"(t) {
     const { server, p } = await openComposer(t);
-    await p.click("#compose-btn");
+    await p.click("#room-btn");
+    await t.sleep(300);
+    await p.click(".rs-record");
     await t.sleep(400);
     t.ok(await p.ev(`!document.getElementById("shelf-empty").hidden`), "からっぽの説明が出ない");
     // からっぽの曲は しまえない

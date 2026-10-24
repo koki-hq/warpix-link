@@ -2,7 +2,7 @@
 const ON = `window.WARPIX_PROLOGUE = true;`;
 // ほんとうの「はじめての 日」の はんてい を つかう（テストの ふだんの なし を うけつけない）
 const REAL_FIRSTDAY = `Object.defineProperty(window, "WARPIX_FIRSTDAY", { get: () => undefined, set() {}, configurable: true });`;
-const NEWS = `window.WARPIX_NEWS = "tests/fixtures/news.json";`;
+const NEWS = "";
 const said = (p) => p.ev(`document.getElementById("dialog-text").textContent`);
 
 export default {
@@ -53,7 +53,7 @@ export default {
     await server.close();
   },
 
-  async "はじめての 日は じかんの 実績（きせつの ピクセ）も 製作所だより も まだ。つぎの 日には くる"(t) {
+  async "はじめての 日は じかんの 実績（きせつの ピクセ）も おしらせの ひかり も まだ。つぎの 日には くる"(t) {
     const server = await t.startServer();
     const b = await t.launchBrowser();
     const p = await b.firstPage();
@@ -65,8 +65,7 @@ export default {
     await t.sleep(3500);
     t.ok(await p.ev(`firstDay()`), "はじめての 日に ならない");
     t.ok(!(await p.ev(`achievements.has("season")`)), "はじめての 日に「きせつの ピクセ」");
-    t.eq(await p.ev(`news.state.told`), [], "はじめての 日に 製作所だより");
-    t.ok(await p.ev(`!document.querySelector("#news-link .news-new").hidden`), "NEW の しるしは つく");
+    t.ok(!(await p.ev(`document.getElementById("mail-btn").classList.contains("has-new")`)), "はじめての 日に ふうとうが ひかる");
     // つぎの 日
     // ?date= の あいだは ピクセの きろくを のこさない ので、きのう うまれた ことに する
     await p.ev(`localStorage.setItem("warpix-pixe", JSON.stringify({ born: "2026-10-29", days: ["2026-10-29"], last: "2026-10-29", stage: 0, sulk: false, pokeMark: 0, diary: [] }))`);
@@ -74,12 +73,7 @@ export default {
     await p.boot();
     t.ok(!(await p.ev(`firstDay()`)), "つぎの 日も はじめての 日");
     t.ok(await p.ev(`achievements.has("season")`), "つぎの 日に「きせつの ピクセ」が こない");
-    let told = false;
-    for (let i = 0; i < 15 && !told; i++) {
-      told = (await p.ev(`news.state.told`)).includes("fresh");
-      await t.sleep(400);
-    }
-    t.ok(told, "つぎの 日に 製作所だより が こない");
+    t.ok(await p.ev(`document.getElementById("mail-btn").classList.contains("has-new")`), "つぎの 日に ふうとうが ひからない");
     t.noErrors(p);
     await server.close();
   },

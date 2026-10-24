@@ -60,7 +60,8 @@ const satogaeri = (() => {
     sound.sfx.coin?.();
     const story = STORIES[(state.n - 1 + STORIES.length) % STORIES.length];
     // 「こうじょう」が つづかない ように（v1.47.1）
-    npc.say(["ただいま！ むこうで ね、", story.join("\n"), "むこうの ようすは、いちばん したの\n「製作所だより」の さきで みられるよ。"]);
+    // 「製作所だより」の リンクは v1.59 で けした ので、むこうの ようすの あんないも なし
+    npc.say(["ただいま！ むこうで ね、", story.join("\n")]);
     grow.write("satogaeri", `うまれた こうじょうに さとがえり。${story.join("")}`, { force: true });
     achievements.unlock("satogaeri");
   }

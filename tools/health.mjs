@@ -116,7 +116,7 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.getElementById("manual").close()`);
   await axe(p, "せってい", `document.getElementById("settings-btn").click()`);
   await p.ev(`document.getElementById("settings").close()`);
-  await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); document.getElementById("compose-btn").click()`);
+  await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); composer.open()`);
   await p.ev(`document.getElementById("composer").close()`);
   await axe(p, "スタンプカード", `document.getElementById("room-btn").click(); document.getElementById("tab-stamp").click()`);
   await p.ev(`document.getElementById("diary").close()`);
@@ -130,6 +130,11 @@ async function axe(p, label, setup = "") {
   await p.ev(`document.querySelector(".card-reveal-close")?.click()`);
   await axe(p, "きゅうけい（とおくを みる）", `rest.lookFar()`);
   await p.ev(`document.querySelector(".rest-stop").click()`);
+  await axe(p, "おしらせ", `mail.open()`);
+  await p.ev(`document.getElementById("mail").close()`);
+  await axe(p, "ピクセの へや", `room.open("home")`);
+  await axe(p, "クローゼット", `room.open("hat")`);
+  await p.ev(`document.getElementById("diary").close()`);
   await p.goto(`${server.url}?simple=1`);
   await axe(p, "シンプルモード");
   await closeAll();

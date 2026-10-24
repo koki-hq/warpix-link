@@ -20,7 +20,7 @@ export default {
     t.ok(await p.ev(`document.getElementById("diary").open`), "おへやが ひらかない");
     t.eq(await panel(p), "room-scene", "さいしょは へや");
     t.eq(await p.ev(`document.getElementById("diary-title").textContent`), "ピクセの おへや", "みだし");
-    t.eq(await p.ev(`[...document.querySelectorAll(".rs-label")].map((t) => t.textContent)`), ["つぶやき", "スタンプ", "じっせき", "クローゼット", "ずかん", "てがみ", "ポストカード", "カード"], "へやの もの");
+    t.eq(await p.ev(`[...document.querySelectorAll(".rs-label")].map((t) => t.textContent)`), ["つぶやき", "スタンプ", "じっせき", "クローゼット", "ずかん", "てがみ", "ポストカード", "さっきょく", "カード"], "へやの もの");
     t.ok(await p.ev(`getComputedStyle(document.querySelector(".diary-bar")).display === "none"`), "タブが みえて いる");
 
     // じっせき：ぜんぶの じっせきが ならび、ないコマンドには へんじ

@@ -72,6 +72,19 @@ const roomScene = (() => {
       "....vv....",
       "...vvvv...",
     ],
+    // レコードプレーヤー（さっきょくと レコードだな、v1.59）
+    record: [
+      "vvvvvvvvvvvvvv",
+      "vbbbbbbbbbbbwv",
+      "vbbnnnnnnbbbwv",
+      "vbnnnpppnnbbwv",
+      "vbnnpwwpnnbbvv",
+      "vbnnnpppnnbbbv",
+      "vbbnnnnnnbbbbv",
+      "vbbbbbbbbbbbbv",
+      "vvvvvvvvvvvvvv",
+      ".v..........v.",
+    ],
     camera: [
       "...www......",
       "wwwwwwwwwwww",
@@ -109,6 +122,7 @@ const roomScene = (() => {
     { id: "shelf", label: "ずかん", name: "ほんだな", go: () => room.open("zukan") },
     { id: "post", label: "てがみ", name: "ポスト", go: () => room.open("letters"), empty: () => !letter.letters().length },
     { id: "camera", label: "ポストカード", name: "カメラ", go: () => document.getElementById("postcard-btn").click() },
+    { id: "record", label: "さっきょく", name: "レコードプレーヤー", go: () => composer.open() },
     { id: "cardbox", label: "カード", name: "カードばこ", go: () => room.open("cards"), empty: () => !cards.state().list.length },
   ];
 
