@@ -90,7 +90,8 @@ export async function launchBrowser({ width = 480, height = 1000 } = {}) {
   live.add(browser);
 
   let targets = null;
-  for (let i = 0; i < 100 && !targets; i++) {
+  // GitHub Actions は こんで いると Chrome の おきあがりが 10 びょうを こえる ことが ある ので 30 びょう まつ（v1.63.2）
+  for (let i = 0; i < (process.env.CI ? 300 : 100) && !targets; i++) {
     try {
       targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
     } catch {
