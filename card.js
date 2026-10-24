@@ -90,7 +90,7 @@ const cards = (() => {
     const d = today();
     const md = (d.getMonth() + 1) * 100 + d.getDate();
     const y = d.getFullYear();
-    if (md < 1101 || md > 1107 || y < 2026) return;
+    if (!eventDays() || md < 1101 || md > 1107 || y < 2026) return;
     const key = y === 2026 ? "open" : `anniv-${y}`;
     if (state.got[key]) return;
     state.got[key] = true;

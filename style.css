@@ -309,7 +309,8 @@ body::after {
   z-index: 40;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  /* したの みえない リンクや ボタンを おさせない（SKIP だけ うえに ある） */
+  cursor: default;
 }
 
 .prologue-skip {

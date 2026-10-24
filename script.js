@@ -246,6 +246,24 @@ const today = (() => {
   return () => (fixed && !isNaN(fixed) ? new Date(fixed) : new Date());
 })();
 
+// きせつの イベントや オープン きねんを ほんものの ひづけで だすか。テストは ?date= を つけた とき だけ だす
+// （ほんものの ハロウィン ウィークに テストを ながすと、かぼちゃや コウモリが まざって しまった、v1.54）
+const eventDays = () => window.WARPIX_EVENT_DAYS !== false || new URLSearchParams(location.search).has("date");
+
+// はじめての 日（ピクセと であう だけの 日、v1.54）：ピクセが うまれた 日（grow の born）が きょう。
+// この 日は じぶんで した ことの 実績 だけ、製作所だより なし、ねむる までを ながく、デモプレイ なし（10/22 の はなしあい）
+let firstDayCache = null;
+const firstDay = () => {
+  if (window.WARPIX_FIRSTDAY !== undefined) return window.WARPIX_FIRSTDAY;
+  if (firstDayCache === null) {
+    const d = today();
+    const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const born = store.get("warpix-pixe", null)?.born;
+    firstDayCache = !born || born === ymd;
+  }
+  return firstDayCache;
+};
+
 // UFO の見た目（季節イベントでコウモリなどに変わる）
 let ufoLook = UFO;
 
@@ -780,6 +798,9 @@ const npc = (() => {
   let introStarted = false;
   let pokeHook = null;
   const extraIntro = [];
+  // うち おわっても、よむ じかんを まってから「ひま」に なる（もじの かずぶん）。ほかの しかけが わりこまない（v1.54）
+  const READ_MS = window.WARPIX_READ_MS ?? 100;
+  let readUntil = 0;
 
   function render() {
     box.classList.toggle("more", !typing && queue.length > 0);
@@ -789,6 +810,7 @@ const npc = (() => {
     clearInterval(typing);
     typing = null;
     textEl.textContent = full;
+    readUntil = READ_MS ? Date.now() + 1000 + full.length * READ_MS : 0;
     render();
     if (pending && !pending.shown && queue.length === 0) {
       pending.shown = true;
@@ -952,14 +974,17 @@ const npc = (() => {
       introStarted = true;
       // オープニングの あとは、こちらに きづいた ところから。ほかの はなし（きっぷ など）は まだ しない（v1.54）
       // 本人「はじめての 人は セリフが ながれて いって めが まわる。おいてけぼり」
-      if (document.body.classList.contains("prologue-done")) return say(["……あ。\nやあ、ぼく ピクセ。", "したの ボタンを えらぶと\nその せかいへ ワープできるよ。"]);
+      // まえから いる 人（v1.54 に あがって はじめて みた 1きせい など）には「おぼえてるよ」
+      if (document.body.classList.contains("prologue-done")) {
+        return say(firstDay() ? ["……あ。\nやあ、ぼく ピクセ。", "したの ボタンを えらぶと\nその せかいへ ワープできるよ。"] : ["……あ。\nおかえり。まってたよ。"]);
+      }
       say([...greeting(), ...extraIntro]);
     },
     // あいさつの最後に1行足す（boot のときに呼ぶ）
     addIntro: (line) => extraIntro.push(line),
     busy: () => !!typing || queue.length > 0 || !!pending,
     // あいさつを最後まで言い終えたか
-    ready: () => introStarted && !typing && queue.length === 0 && !pending,
+    ready: () => introStarted && !typing && queue.length === 0 && !pending && Date.now() >= readUntil,
     sleep(on) {
       asleep = on;
       sprite.classList.toggle("asleep", on);

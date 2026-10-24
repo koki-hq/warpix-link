@@ -10,7 +10,7 @@ const season = (() => {
 
   const d = today();
   const md = (d.getMonth() + 1) * 100 + d.getDate();
-  const current = Object.keys(EVENTS).find((k) => {
+  const current = eventDays() && Object.keys(EVENTS).find((k) => {
     const { from, to } = EVENTS[k];
     return md >= from[0] * 100 + from[1] && md <= to[0] * 100 + to[1];
   });

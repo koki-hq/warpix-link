@@ -48,7 +48,8 @@ const news = (() => {
     recent = items.filter((n) => daysAgo(n.date) < RECENT_DAYS);
     showBadge();
     const untold = recent.find((n) => !state.told.includes(n.id));
-    if (untold) tell(untold);
+    // はじめての 日は ピクセと であう だけ。おしらせは 2 日め から（NEW の しるしは つく）
+    if (untold && !firstDay()) tell(untold);
     return items;
   });
 

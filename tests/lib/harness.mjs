@@ -46,7 +46,10 @@ export async function startServer({ online = false, port = 0 } = {}) {
       res.writeHead(200, { "content-type": TYPES[".js"] });
       // おしらせも 本物は よまない（テストで つかう ときは、さきに window.WARPIX_NEWS を いれておく）
       // はじめての 人への せつめいしょ（manual.js）も ふだんは 出さない（つかう テストは さきに window.WARPIX_MANUAL = true）
-      return res.end('window.WARPIX_ONLINE = {}; window.WARPIX_NEWS ??= "tests/fixtures/no-news.json"; window.WARPIX_MANUAL ??= false;');
+      // オープニング（prologue.js）も おなじ（つかう テストは さきに window.WARPIX_PROLOGUE = true）
+      // はじめての 日（firstDay、v1.54）と よむ じかんの まち（WARPIX_READ_MS）も ふだんは なし
+      // きせつの イベント・オープン きねんも ?date= の ない テストでは ださない（WARPIX_EVENT_DAYS）
+      return res.end('window.WARPIX_ONLINE = {}; window.WARPIX_NEWS ??= "tests/fixtures/no-news.json"; window.WARPIX_MANUAL ??= false; window.WARPIX_PROLOGUE ??= false; window.WARPIX_FIRSTDAY ??= false; window.WARPIX_READ_MS ??= 0; window.WARPIX_EVENT_DAYS ??= false;');
     }
     const file = join(ROOT, path === "/" ? "index.html" : path);
     if (!file.startsWith(ROOT) || !existsSync(file)) {

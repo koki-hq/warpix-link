@@ -168,8 +168,11 @@ const achievements = (() => {
     }, 3000);
   }
 
+  // じかんや ほうって おいた ことで もらえる 実績は、はじめての 日は まだ（2 日め から。v1.54）
+  const LATER = new Set(["season", "night-owl", "sleepy", "demo", "dreamer", "tonight"]);
   function unlock(id) {
     if (unlocked.has(id) || !LIST.some((a) => a.id === id)) return;
+    if (LATER.has(id) && firstDay()) return;
     unlocked.add(id);
     store.set("warpix-achievements", [...unlocked]);
     emit("achievement", { id, name: LIST.find((a) => a.id === id).name });
@@ -479,6 +482,7 @@ function mothership() {
 // ---------- ほうっておくとピクセが寝る ----------
 (() => {
   const IDLE_MS = 40000;
+  const IDLE_FIRST_MS = 180000; // はじめての 日は ねむる までを ながく（ピクセと めが あう じかん）
   const DEMO_MS = 20000; // 寝てからデモプレイが始まるまで
   const DEMO_RUN_MS = 30000; // デモプレイを流す長さ。そのあとはページごと眠る
   let lastInput = performance.now();
@@ -519,7 +523,10 @@ function mothership() {
     // ゲームセンターの筐体みたいに、だれもいないとデモプレイが始まり、しばらくするとページごと眠る
     if (sleeping) {
       if (dozing()) return;
-      if (game.isDemo()) {
+      // はじめての 日は デモプレイ なし。すやすや ねた まま、しばらく して ページごと ねむる
+      if (firstDay()) {
+        if (now - sleptAt > DEMO_MS + DEMO_RUN_MS) doze();
+      } else if (game.isDemo()) {
         if (now - demoAt > DEMO_RUN_MS) doze();
       } else if (now - sleptAt > DEMO_MS && !playing()) {
         if (reduceMotion) return doze();
@@ -529,7 +536,7 @@ function mothership() {
       }
       return;
     }
-    if (playing() || npc.isAway() || now - lastInput < IDLE_MS) return;
+    if (playing() || npc.isAway() || now - lastInput < (firstDay() ? IDLE_FIRST_MS : IDLE_MS)) return;
     sleeping = true;
     sleptAt = now;
     npc.sleep(true);

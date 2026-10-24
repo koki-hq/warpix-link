@@ -11,7 +11,8 @@ const prologue = (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const asked = new URLSearchParams(location.search).get("go") === "prologue";
   // テストでは WARPIX_PROLOGUE = false で とめる
-  const should = () => window.WARPIX_PROLOGUE !== false && !simple.on && (asked || (window.WARPIX_FIRST && !store.get(KEY, false)));
+  // はじめての 人も、まえから いる 人も、まだ みて いなければ 1 かい（v1.54 に あがった 1きせいにも）
+  const should = () => window.WARPIX_PROLOGUE !== false && !simple.on && (asked || !store.get(KEY, false));
 
   // こうじょう（32×24）。g かべ・s えんとつの さき・y まど・p とびら・d じめん
   const FACTORY = [
@@ -42,7 +43,7 @@ const prologue = (() => {
   ];
   const COL = { g: "#2a2058", s: "#5a4fa0", y: "#ffd84a", p: "#ff4fa3", d: "#1a1433" };
   // タイムライン（びょう）
-  const T = { line1: 1.4, line2: 3.2, factory: 5.8, pon: 8.6, warp: 9.4, land: 11.4, look: 13.4, end: 14.2 };
+  const T = { line1: 1.6, line2: 4.4, factory: 9.0, pon: 11.8, warp: 12.6, land: 14.6, look: 16.6, end: 17.4 };
   const ease = (t) => (t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t));
   const seg = (t, a, b) => ease((t - a) / (b - a));
 
@@ -94,6 +95,9 @@ const prologue = (() => {
     const story = document.createElement("p");
     story.className = "sr-only";
     story.setAttribute("aria-live", "polite");
+    // したの がめんは みえて いても、おわるまで おせない（クリックも Tab も）
+    const under = [...body.children].filter((el) => !el.inert && el.tagName !== "SCRIPT");
+    under.forEach((el) => (el.inert = true));
     body.append(cv, skip, story);
     const c = cv.getContext("2d");
     let w = 0;
@@ -134,6 +138,7 @@ const prologue = (() => {
       cv.remove();
       skip.remove();
       story.remove();
+      under.forEach((el) => (el.inert = false));
       store.set(KEY, true);
       npc.sleep(false);
       body.classList.remove("prologue", "prologue-npc", "shake");
@@ -157,12 +162,12 @@ const prologue = (() => {
       // ものがたり
       const out = 1 - seg(t, T.factory - 0.8, T.factory);
       const cy = h * 0.38;
-      // 「なにか」で ひっぱって、えんとつから でて くる ピクセが こたえに なる（本人が えらんだ A）
-      text("ずっと とおくの ほしぞらの かたすみで", w / 2, cy, seg(t, T.line1, T.line1 + 1) * out, 17);
-      text("ちいさな こうじょうが きょうも", w / 2, cy + 42, seg(t, T.line2, T.line2 + 1) * out, 17);
-      text("なにかを つくっています。", w / 2, cy + 72, seg(t, T.line2, T.line2 + 1) * out, 17);
-      if (t >= T.line1) once("s1", () => (story.textContent = "ずっと とおくの ほしぞらの かたすみで"));
-      if (t >= T.line2) once("s2", () => (story.textContent = "ちいさな こうじょうが きょうも なにかを つくっています。"));
+      // 「だれも しらない」：みて いる 人が さいしょに しる 人に なる（10/22 きまった）
+      text("ずっと とおくの ほしぞらに", w / 2, cy, seg(t, T.line1, T.line1 + 1) * out, 17);
+      text("だれも しらない", w / 2, cy + 42, seg(t, T.line2, T.line2 + 1) * out, 17);
+      text("ちいさな こうじょうが ありました。", w / 2, cy + 72, seg(t, T.line2, T.line2 + 1) * out, 17);
+      if (t >= T.line1) once("s1", () => (story.textContent = "ずっと とおくの ほしぞらに"));
+      if (t >= T.line2) once("s2", () => (story.textContent = "だれも しらない ちいさな こうじょうが ありました。"));
 
       // こうじょう（したから のぼって きて、ワープで しずむ）
       const px = Math.max(5, Math.min(9, Math.floor(w / 46)));
