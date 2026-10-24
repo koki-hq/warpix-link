@@ -48,4 +48,20 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "じぶんに かんけい ある もの だけ：きた ひと おなじ ひづけの おしらせと、さいしょから もって いる きせつの 入庫は とどかない（v1.63.2）"(t) {
+    const { server, p } = await open(t, { url: "?date=2026-10-24", before: pixe("2026-10-24") });
+    t.eq(await p.ev(`mail.list().map((m) => m.id)`), ["welcome"], "ようこそ だけ に ならない");
+    t.ok((await p.ev(`mail.list()[0].body.join("")`)).includes("あきの コスチューム"), "ようこそに いまの きせつの ひとこと が ない");
+    // つぎの ひも あきの 入庫は とどかない（さいしょから もって いる）
+    await p.goto(server.url + "?date=2026-10-26");
+    await p.boot();
+    t.ok(!(await p.ev(`mail.list().some((m) => m.id.startsWith("season-autumn"))`)), "さいしょから もって いる きせつの 入庫が とどいた");
+    // ふゆに なったら はじめて もらえる ので とどく。らいねんの あきには とどかない
+    await p.goto(server.url + "?date=2026-12-02");
+    await p.boot();
+    t.ok(await p.ev(`mail.list().some((m) => m.id === "season-winter")`), "ふゆの 入庫が とどかない");
+    t.noErrors(p);
+    await server.close();
+  },
 };

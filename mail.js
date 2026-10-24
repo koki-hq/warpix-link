@@ -57,19 +57,29 @@ const mail = (() => {
     summer: ["なつの コスチュームが 入庫しました", "むぎわら ぼうしと ゆかたが はいりました。"],
   };
   function seasonal() {
-    const year = ymd.slice(0, 4);
+    // きせつの 入庫は、その ひとが はじめて もらえた とき だけ。まいとしは おくらない（v1.63.2）。
+    // はじめて きた ひに もう その きせつ だったら（さいしょから もって いる ので）おくらない
+    const b = born();
     return Object.entries(SEASON_MAIL)
-      .filter(([k]) => wardrobe.seen(`season:${k}`))
       .map(([k, [title, line]]) => {
-        const id = `season-${k}-${year}`;
+        const id = `season-${k}`;
+        // v1.63.1 までの「season-autumn-2026」も おなじ もの と して よむ
+        const old = Object.keys(state.got).find((x) => x.startsWith(`${id}-`));
+        if (!state.got[id] && old) state.got[id] = state.got[old];
         if (!state.got[id] && wardrobe.seen(`season:${k}`) && seasonNow(k)) {
           state.got[id] = ymd;
           save();
         }
-        return state.got[id] ? { id, date: state.got[id], title, body: [line, "へやの ハンガーラックで ためしに きてみてね。"], action: goCloset } : null;
+        const at = state.got[id];
+        return at && at > b ? { id, date: at, title, body: [line, "へやの ハンガーラックで ためしに きてみてね。"], action: goCloset } : null;
       })
       .filter(Boolean);
   }
+  // その ひの きせつ（ようこその ひとこと）
+  const seasonOf = (s) => {
+    const m = Number(s.slice(5, 7));
+    return [9, 10, 11].includes(m) ? "あき" : [12, 1, 2].includes(m) ? "ふゆ" : m === 6 ? "つゆ" : [7, 8].includes(m) ? "なつ" : null;
+  };
   const seasonNow = (k) => {
     const m = today().getMonth() + 1;
     const md = m * 100 + today().getDate();
@@ -80,8 +90,16 @@ const mail = (() => {
   const born = () => (growState() ?? store.get("warpix-pixe", null))?.born ?? ymd;
   function list() {
     const b = born();
-    const welcome = { id: "welcome", date: b, title: "ようこそ、WARPIX LINK へ", body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", "あたらしい ことが あったら、ここで おしらせします。"] };
-    return [welcome, ...MAILS.filter((m) => m.date >= b && m.date <= ymd), ...seasonal()].sort((a, b2) => (a.date === b2.date ? 0 : a.date < b2.date ? 1 : -1));
+    const s = seasonOf(b);
+    const welcome = {
+      id: "welcome",
+      date: b,
+      title: "ようこそ、WARPIX LINK へ",
+      body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", ...(s ? [`いまは ${s}の コスチュームも、へやの ハンガーラックに はいってるよ。`] : []), "あたらしい ことが あったら、ここで おしらせします。"],
+      action: s ? goCloset : undefined,
+    };
+    // じぶんに かんけい ある もの だけ（v1.63.2）：きた ひ より あと に でた おしらせ。きた ひ より まえ・おなじ ひの ことは さいしょから ある ので しらせない
+    return [welcome, ...MAILS.filter((m) => m.date > b && m.date <= ymd), ...seasonal()].sort((a, b2) => (a.date === b2.date ? 0 : a.date < b2.date ? 1 : -1));
   }
   const unread = () => list().filter((m) => !state.read.includes(m.id));
 

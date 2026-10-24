@@ -58,8 +58,8 @@ export default {
   },
 
   async "やめた 実績（よるの 3ぎょう）は かぞえない。きょうの かずは てがみの ために のこす"(t) {
-    const { server, p } = await open(t, { date: "2026-10-20", before: `localStorage.setItem("warpix-achievements", JSON.stringify(["tonight", "first-warp"]))` });
-    t.ok(await p.ev(`document.getElementById("trophy-count").textContent.startsWith("1/")`), `かずが あわない：${await p.ev(`document.getElementById("trophy-count").textContent`)}`);
+    const { server, p } = await open(t, { date: "2026-10-20", before: `localStorage.setItem("warpix-achievements", JSON.stringify(["tonight", "first-warp", "night-owl"]))` });
+    t.ok(await p.ev(`document.getElementById("trophy-count").textContent.startsWith("2/")`), `かずが あわない：${await p.ev(`document.getElementById("trophy-count").textContent`)}`);
     await p.ev(`document.querySelector(".pixel-btn").addEventListener("click", (e) => e.preventDefault(), { once: true }); emit("link", { icon: "youtube" })`);
     t.eq(await p.ev(`tonight.tally().warps.youtube`), 1, "ワープの かずを かぞえない");
     t.noErrors(p);

@@ -535,8 +535,19 @@ const favicon = (() => {
   }
 
   // 自分のピクセを、となりのタブへあそびに行かせる
+  // れんだ（ワープゾーンを ひらく 10 かい つつき など）の とちゅうの ダブルクリックでは でかけない（v1.63.2）。
+  // ダブルクリックの あと 0.6 びょう、もう つつかれなければ でかける
+  let lastPokeAt = 0;
+  on("poke", () => (lastPokeAt = performance.now()));
   sprite.addEventListener("dblclick", () => {
     if (!others.size || npc.isAway() || playing() || visitingTo) return;
+    const at = performance.now();
+    setTimeout(() => {
+      if (lastPokeAt > at + 50 || !others.size || npc.isAway() || playing() || visitingTo) return;
+      go();
+    }, 600);
+  });
+  function go() {
     visitingTo = [...others][0];
     npc.say(["ちょっと となりの タブに\nあそびに いってくる！"]);
     setTimeout(() => {
@@ -548,7 +559,7 @@ const favicon = (() => {
       achievements.unlock("tab-travel");
       emit("tab-travel", { role: "visit" });
     }, 1200);
-  });
+  }
 
   function comeHome(lines) {
     visitingTo = null;

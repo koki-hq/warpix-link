@@ -6256,3 +6256,17 @@ dialog .about-body {
 @media (prefers-reduced-motion: reduce) {
   .sound-asleep .npc-sprite::after { animation: none; }
 }
+
+/* ひらいた WARPIX カード（たてなが）も がめんの たかさに おさまる（v1.63.2。パソコンでは したが みえなかった） */
+.postcard-art {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.postcard-img {
+  width: auto;
+  max-width: 100%;
+  max-height: calc(100dvh - 150px);
+  margin: 0 auto;
+}

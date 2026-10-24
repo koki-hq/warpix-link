@@ -13,7 +13,8 @@ const cassetteUi = (() => {
   const makeBtn = document.getElementById("cas-make");
   const resetBtn = document.getElementById("cas-reset");
   let sel = 0;
-  const openShelves = new Set(["default", "mine"]);
+  // さいしょから ぜんぶ ひらく（v1.63.2、本人「むしろ 開くのが 手間」）。たためるのは そのまま
+  const openShelves = new Set(CASSETTES.SHELVES.map((s) => s.id));
   // あたらしい パーティを つくって いる とちゅう（6 こ そろうまで のこさない）
   let draft = null;
 
@@ -45,7 +46,7 @@ const cassetteUi = (() => {
         list.length < CASSETTES.MINE_MAX ? `<button type="button" class="cas-add" id="cas-add"><span aria-hidden="true">＋</span><span class="cas-name jp">つくる</span></button>` : ""
       }`;
     };
-    // たなは たためる（v1.62、48 こ ある ので）。いつもの と じぶんの リンク だけ ひらいて いる。いま はいって いる かずを みだしに
+    // たなは たためる（v1.62）。いま はいって いる かずを みだしに
     shelvesEl.innerHTML = CASSETTES.SHELVES.map((s) => {
       const items = s.id === "mine" ? CASSETTES.mine() : CASSETTES.LIST.filter((c) => c.shelf === s.id);
       const using = items.filter((c) => cur.includes(c.id)).length;

@@ -99,10 +99,12 @@ export default {
     await server.close();
   },
 
-  async "たなは たためる。いつもの と じぶんの リンク だけ ひらいて いて、いま はいって いる かずが みだしに（v1.62）"(t) {
+  async "たなは さいしょ ぜんぶ ひらいて いて たためる。いま はいって いる かずが みだしに（v1.62・v1.63.2）"(t) {
     const { server, p } = await open(t, `localStorage.setItem("warpix-cassette", JSON.stringify(["youtube", "netflix", "line", "booth", "tumblr", "spotify"]))`);
     await toPicker(p);
-    t.eq(await p.ev(`[...document.querySelectorAll("details.cas-shelf[open]")].map((d) => d.dataset.shelf)`), ["default", "mine"], "ひらいて いる たな");
+    t.eq(await p.ev(`document.querySelectorAll("details.cas-shelf:not([open])").length`), 0, "さいしょから ぜんぶ ひらいて いない（v1.63.2）");
+    await p.ev(`document.querySelector('details[data-shelf="video"] summary').click()`);
+    t.ok(await p.ev(`!document.querySelector('details[data-shelf="video"]').open`), "たためない");
     t.ok((await p.ev(`document.querySelector('details[data-shelf="video"] summary').textContent`)).includes("・1"), "いま はいって いる かず");
     await p.ev(`document.querySelector('details[data-shelf="video"] summary').click()`);
     await t.sleep(200);
