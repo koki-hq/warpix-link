@@ -185,6 +185,12 @@
       </div>
     </section>
 
+    <!-- パーティ きりかえ（v1.56）：パーティが 2 つ いじょう ある とき だけ でる。じぶんで きりかえる -->
+    <div class="party-bar" id="party-bar" hidden>
+      <button class="party-arrow" id="party-prev" type="button" aria-label="まえの パーティ">◀</button>
+      <span class="party-name" id="party-name" aria-live="polite"></span>
+      <button class="party-arrow" id="party-next" type="button" aria-label="つぎの パーティ">▶</button>
+    </div>
     <nav class="links">
       <a class="pixel-btn" href="https://www.youtube.com/" target="_blank" rel="noopener">
         <span class="arrow">▶</span><span class="icon" data-icon="youtube"></span>YOUTUBE<span class="sr-only">（あたらしい タブで ひらく）</span>
@@ -209,8 +215,8 @@
         <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE<span class="sr-only">（ひみつの こうじょうへ）</span>
       </a>
     </nav>
-    <!-- カセット えらび：6 この リンクを、たなの 公式リンクから いれかえる -->
-    <button class="cassette-btn" id="cassette-btn" type="button">⇄ リンクを いれかえる</button>
+    <!-- リンクの へんせい（v1.56）：いれかえる・パーティを ふやす・なまえ・けす -->
+    <button class="cassette-btn" id="cassette-btn" type="button" aria-haspopup="dialog">⇄ リンクの へんせい</button>
 
     <footer class="footer">
       <!-- 上の段：遊ぶもの（2 つで 1 組をまんなかに） -->
@@ -291,26 +297,32 @@
       </div>
       <div class="cas-shelves" id="cas-shelves"></div>
       <div class="save-row cas-tools">
-        <button class="save-btn" id="cas-share" type="button">この 6 こを おすそわけ</button>
+        <button class="save-btn cas-make" id="cas-make" type="button" hidden disabled>この 6 こで つくる</button>
         <button class="save-btn cas-reset" id="cas-reset" type="button">いつもの 6 こに もどす</button>
       </div>
-      <p class="cas-share-msg" id="cas-share-msg" aria-live="polite"></p>
     </div>
   </dialog>
 
-  <!-- ともだちから とどいた カセット（?cassette=…）。かってに いれかえず、きいてから -->
-  <dialog class="about cas-gift" id="cas-gift" aria-labelledby="cas-gift-title">
+  <!-- リンクの へんせい（v1.56）：パーティの メニュー -->
+  <dialog class="about hensei" id="hensei" aria-labelledby="hensei-title">
     <div class="about-top">
-      <h2 id="cas-gift-title">カセットの おすそわけ</h2>
-      <button class="about-close" id="cas-gift-close" type="button" aria-label="閉じる">✕</button>
+      <h2 id="hensei-title">リンクの へんせい</h2>
+      <button class="about-close" id="hensei-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <div class="about-body">
-      <p>ともだちから 6 この カセットが とどいたよ。いまの リンクと いれかえる？</p>
-      <ol class="cas-slots" id="cas-gift-slots" aria-label="とどいた カセット"></ol>
-      <div class="save-row">
-        <button class="save-btn" id="cas-gift-yes" type="button">いれかえる</button>
-        <button class="save-btn cas-gift-no" id="cas-gift-no" type="button">いまの まま</button>
+      <p class="hensei-now" id="hensei-now"></p>
+      <div class="hensei-menu">
+        <button class="save-btn" id="hensei-swap" type="button">リンクを いれかえる</button>
+        <button class="save-btn" id="hensei-add" type="button">パーティを ふやす</button>
+        <button class="save-btn" id="hensei-rename" type="button" hidden>なまえを かえる</button>
+        <button class="save-btn hensei-remove" id="hensei-remove" type="button" hidden>この パーティを けす</button>
       </div>
+      <form class="hensei-name" id="hensei-name" hidden>
+        <label for="hensei-input">あたらしい なまえ（10 もじ まで。からっぽなら PARTY と ばんごう）</label>
+        <input id="hensei-input" type="text" maxlength="10" autocomplete="off">
+        <button class="save-btn" type="submit">きめる</button>
+      </form>
+      <p class="hensei-msg" id="hensei-msg" aria-live="polite"></p>
     </div>
   </dialog>
 
@@ -480,7 +492,7 @@
       <p class="about-note">メールの アプリが ひらきます。したがきに いまの 版と きかいの しゅるいが はいって いるので、バグの ときに たすかります（けしても だいじょうぶ）。</p>
 
       <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセット、リンクごとの ワープした かず、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
+      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、リンクごとの ワープした かず、ぼうし（じぶんで かいた ぼうしも）、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ 製作所だより、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
         <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
 
       <h3>そとに おくるもの</h3>

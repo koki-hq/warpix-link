@@ -34,7 +34,7 @@ export default {
     await p.key("1");
     t.eq(await p.ev(`__went`), [], "スタートまえに ひらいた");
     await p.boot();
-    await p.ev(`document.getElementById("cassette-btn").click()`);
+    await p.ev(`cassetteUi.open()`);
     await p.key("2");
     t.eq(await p.ev(`__went`), [], "まどが ひらいているのに ひらいた");
     await p.ev(`document.getElementById("cassette").close(); room.open("trophy"); document.getElementById("cheat-input").focus()`);

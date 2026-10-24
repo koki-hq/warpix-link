@@ -12,7 +12,7 @@ const guide = (() => {
   // [名前, ヒント, もう使ったか]
   const has = (id) => achievements.has(id);
   const TIPS = [
-    ["diary", "ひだりうえの ROOM が ぼくの おへや。\nにっきや ずかんが あるよ。のぞいてみて。", () => has("diary")],
+    ["diary", "ひだりうえの ROOM が ぼくの おへや。\nつぶやきや ずかんが あるよ。のぞいてみて。", () => has("diary")],
     ["compose", "みぎうえの ♪ で、ぼくと いっしょに\nさっきょく できるよ。", () => has("composer") || store.get("warpix-song", null)],
     ["omikuji", "いちばん したの「おみくじ」、\nまいにち 1かい ひけるよ。", () => has("omikuji")],
     ["invaders", "INSERT COIN を おすと、\nミニゲームで あそべるよ。", () => has("invader") || has("invader-pro")],

@@ -109,14 +109,33 @@ const CASSETTES = (() => {
   const byId = (id) => LIST.find((c) => c.id === id);
 
   // 6 こ、ぜんぶ しっている カセットで、おなじ ものが ない ときだけ つかう
+  const valid = (ids) => Array.isArray(ids) && ids.length === 6 && new Set(ids).size === 6 && ids.every(byId);
   function load() {
     try {
       const ids = JSON.parse(localStorage.getItem(KEY));
-      if (Array.isArray(ids) && ids.length === 6 && new Set(ids).size === 6 && ids.every(byId)) return ids;
+      if (valid(ids)) return ids;
     } catch {}
     return [...DEFAULT];
   }
-  let current = load();
+
+  // ---------- パーティ（v1.56）：6 この くみあわせを 3 つまで。じぶんで きりかえる（じかんで かわったり しない） ----------
+  // 1 つめは いままでの warpix-cassette。2 つめ いこうと なまえ・いま つかって いる ばんごうは warpix-parties に。
+  // なまえは さいしょ なし（PARTY 1・2・3 と でる）。「あさ・よる」の ような なまえを かってに つけない（「へんな プレッシャーに なる」）
+  const PARTIES = "warpix-parties";
+  const MAX = 3;
+  const party = (() => {
+    const first = { name: "", ids: load() };
+    try {
+      const p = JSON.parse(localStorage.getItem(PARTIES));
+      const more = (p?.more ?? []).filter((x) => valid(x?.ids)).slice(0, MAX - 1).map((x) => ({ name: String(x.name ?? "").slice(0, 10), ids: x.ids }));
+      const list = [{ ...first, name: String(p?.name ?? "").slice(0, 10) }, ...more];
+      const at = Number.isInteger(p?.at) && p.at >= 0 && p.at < list.length ? p.at : 0;
+      return { list, at };
+    } catch {
+      return { list: [first], at: 0 };
+    }
+  })();
+  let current = party.list[party.at].ids;
 
   // にほんごの なまえ（ニコニコ動画 など）は ドットの ゴシックで すこし おおきく
   const jp = (c) => /[^\x00-\x7f]/.test(c.label);
@@ -151,26 +170,51 @@ const CASSETTES = (() => {
       return true;
     },
     reset() {
-      current = [...DEFAULT];
+      current.splice(0, 6, ...DEFAULT);
       this.save();
     },
-    // おすそわけ（v1.32）：「youtube,tiktok,…」を よむ。6 こで、ぜんぶ しっていて、かぶりが ない ときだけ
-    parse(text) {
-      const ids = String(text ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-      return ids.length === 6 && new Set(ids).size === 6 && ids.every(byId) ? ids : null;
-    },
-    set(ids) {
-      current = [...ids];
+    // ---------- パーティ ----------
+    MAX,
+    parties: () => party.list.map((p, i) => ({ name: p.name, label: p.name || `PARTY ${i + 1}`, ids: [...p.ids] })),
+    at: () => party.at,
+    valid,
+    // i ばんめの パーティに きりかえる
+    switchTo(i) {
+      if (i < 0 || i >= party.list.length || i === party.at) return false;
+      party.at = i;
+      current = party.list[i].ids;
       this.save();
+      return true;
     },
-    // いまの 6 こが はいった このページの URL
-    shareUrl() {
-      return `${location.origin}${location.pathname}?cassette=${current.join(",")}`;
+    // 6 こ ぜんぶ えらんで、はじめて できる（からっぽの パーティは つくらない）
+    addParty(ids) {
+      if (party.list.length >= MAX || !valid(ids)) return false;
+      party.list.push({ name: "", ids: [...ids] });
+      this.switchTo(party.list.length - 1);
+      return true;
+    },
+    rename(i, name) {
+      if (!party.list[i]) return false;
+      party.list[i].name = String(name ?? "").trim().slice(0, 10);
+      this.save();
+      return true;
+    },
+    // けすと、のこりの さいしょの パーティに。1 つ しか ない ときは けせない
+    removeParty(i) {
+      if (party.list.length <= 1 || !party.list[i]) return false;
+      party.list.splice(i, 1);
+      party.at = 0;
+      current = party.list[0].ids;
+      this.save();
+      return true;
     },
     save() {
       try {
-        if (current.join() === DEFAULT.join()) localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY, JSON.stringify(current));
+        const first = party.list[0];
+        if (first.ids.join() === DEFAULT.join()) localStorage.removeItem(KEY);
+        else localStorage.setItem(KEY, JSON.stringify(first.ids));
+        if (party.list.length === 1 && !first.name) localStorage.removeItem(PARTIES);
+        else localStorage.setItem(PARTIES, JSON.stringify({ at: party.at, name: first.name, more: party.list.slice(1) }));
       } catch {}
     },
     // ページの リンクを いまの カセットに そろえる（アイコンを かくのは よびだした がわ）

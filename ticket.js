@@ -14,7 +14,7 @@ const ticket = (() => {
     if (!has() || store.get(KEY, null) || peek() || simple.on) return;
     store.set(KEY, { got: grow.state.born });
     npc.addIntro("……あっ、きみは 1きせい だね！\nまだ だれも しらない ころに きてくれた。");
-    npc.addIntro("とくべつな きっぷを わたすよ。\nROOM の にっきに はさんで おいたね。");
+    npc.addIntro("とくべつな きっぷを わたすよ。\nROOM に はさんで おいたね。");
     grow.write("ticket", "1きせいの きっぷを わたした。さいしょの おきゃくさん。", { force: true });
   });
 

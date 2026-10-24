@@ -1,7 +1,7 @@
 // 通し稽古（v1.34）：スマホ・よこむき・タブレット・パソコンで、ぜんぶの まどを ひらいて、はみださない・かさならないかを みる
 const DIALOGS = [
   ["にっき", `room.open("diary")`], ["ずかん", `room.open("zukan")`], ["スタンプ", `room.open("stamp")`], ["じっせき", `room.open("trophy")`], ["ぼうし", `room.open("hat")`],
-  ["カセット", `document.getElementById("cassette-btn").click()`],
+  ["カセット", `cassetteUi.open()`], ["へんせい", `cassetteUi.openMenu()`], ["パーティを つくる", `cassetteUi.open({ fresh: true })`],
   ["このページについて", `document.getElementById("about-btn").click()`],
   ["せってい", `document.getElementById("settings-btn").click()`],
   ["さっきょく", `document.getElementById("compose-btn").click()`],
@@ -67,7 +67,7 @@ export default {
     await p.size(667, 375, true);
     await p.goto(server.url);
     await p.boot();
-    await p.ev(`document.getElementById("cassette-btn").click()`);
+    await p.ev(`cassetteUi.open()`);
     await t.sleep(300);
     t.eq(await p.ev(`getComputedStyle(document.querySelector(".cas-head")).position`), "static", "ひくい がめんで いまの 6 こが うえに はりついている");
     // たなを いちばん したまで スクロールしたら、たなが みえる

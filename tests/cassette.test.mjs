@@ -35,6 +35,7 @@ export default {
   async "スロットを えらんで たなの カセットを おすと いれかわり、ひらきなおしても のこる"(t) {
     const { server, p } = await open(t);
     await p.click("#cassette-btn");
+    await p.click("#hensei-swap");
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("cassette").open`), "まどが ひらかない");
     t.eq(await p.ev(`document.querySelectorAll(".cas-slot").length + "," + document.querySelectorAll(".cas-item").length`), "6,28", "スロットと カセットの かず");
@@ -61,6 +62,7 @@ export default {
     // もとに もどす
     await p.boot();
     await p.click("#cassette-btn");
+    await p.click("#hensei-swap");
     await t.sleep(200);
     await p.ev(`document.getElementById("cas-reset").click()`);
     t.eq((await links(p)).map((x) => x.icon), ["youtube", "twitter", "instagram", "booth", "tumblr", "spotify"], "もとに もどらない");
@@ -107,6 +109,7 @@ export default {
     const { server, p } = await open(t, { url: "?simple=1", before: `localStorage.setItem("warpix-cassette", JSON.stringify(["youtube", "twitter", "instagram", "booth", "tumblr", "wikipedia"]))`, boot: false });
     t.eq((await links(p))[5].href, "https://ja.wikipedia.org/", "シンプルモードで えらんだ リンクが でない");
     await p.click("#cassette-btn");
+    await p.click("#hensei-swap");
     await t.sleep(200);
     await put(p, 0, "quizlet");
     t.eq((await links(p))[0].icon, "quizlet", "シンプルモードで いれかえられない");
@@ -130,6 +133,7 @@ export default {
     })()`);
     t.eq(over, [], "はみだした カセット");
     await p.click("#cassette-btn");
+    await p.click("#hensei-swap");
     await t.sleep(300);
     t.ok(await p.ev(`document.documentElement.scrollWidth <= innerWidth && [...document.querySelectorAll(".cas-slot, .cas-item")].every((b) => b.scrollWidth <= b.clientWidth + 1)`), "まどの なかで はみだした");
     await p.shot("cassette-360.png");

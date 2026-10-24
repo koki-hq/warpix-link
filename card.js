@@ -122,11 +122,11 @@ const cards = (() => {
 
   // ---------- でる しゅんかん：うらむきで おちて きて、タップで めくる ----------
   const REACT = {
-    white: ["あっ、カードだ！", "ROOM の にっきに しまって おくね。"],
+    white: ["あっ、カードだ！", "ROOM に しまって おくね。"],
     silver: ["わあ、ぎんいろ！", "きらきら してる……。"],
     gold: ["えっ……！ き、きんいろ！？", "すごい すごい！ たからものに しよう！"],
     rainbow: ["に、にじいろ……！！", "うそでしょ！？ ほんとに！？", "きょうの こと、ずっと わすれないよ！"],
-    event: ["きょう だけの カードだ！", "ROOM の にっきに かざって おくね。"],
+    event: ["きょう だけの カードだ！", "ROOM に かざって おくね。"],
     open: ["オープン きねんの カード！", "きてくれて ほんとうに ありがとう！"],
   };
   const glowOf = (card) => (EVENTS[card.kind] ? EVENTS[card.kind].frame[2] : { white: "#ffffff", silver: "#c4ccd8", gold: "#ffd84a", rainbow: "#ff4fa3" }[card.tier] ?? "#ffffff");

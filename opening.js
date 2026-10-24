@@ -24,7 +24,7 @@ const opening = (() => {
     const day = ymdOf(today());
     if (!ticket.has() || day < ticket.CUTOFF || simple.on) return;
     if (!letter.add({ kind: "opening", title: "ひらく ひの てがみ", lines: letterLines(day) })) return;
-    npc.addIntro("ROOM の にっきに、とくべつな\nてがみが とどいてるよ。");
+    npc.addIntro("ROOM に、とくべつな\nてがみが とどいてるよ。");
     grow.write("opening-letter", "ひらく ひの てがみを わたした。さいしょの おきゃくさんへ。", { force: true });
   });
 

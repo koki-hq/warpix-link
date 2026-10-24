@@ -4261,7 +4261,7 @@ a,
 }
 
 /* =====================================================================
-   カセットの おすそわけ（v1.32）
+   リンクの へんせい・パーティ（v1.56）
    ===================================================================== */
 .cas-tools {
   flex-wrap: wrap;
@@ -4272,26 +4272,138 @@ a,
   margin-top: 0;
 }
 
-.cas-share-msg {
-  min-height: 1.5em;
-  margin: 8px 0 0;
-  color: var(--accent-2);
-  overflow-wrap: anywhere;
+.cas-make:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.cas-slot.static {
-  cursor: default;
+/* まだ えらんでない ばしょ */
+.cas-slot.empty {
+  min-height: 72px;
+  justify-content: center;
+  background: none;
+  outline: 2px dashed var(--muted);
+  outline-offset: -2px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
-.cas-slot.static:hover {
-  background: var(--btn);
-  outline: none;
+.cas-slot.empty[aria-pressed="true"] {
+  outline: 2px dashed var(--accent);
+  color: var(--accent);
 }
 
-.cas-gift-no,
 .move-no {
   background: var(--btn);
   color: var(--fg);
+}
+
+.hensei-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.hensei-menu .save-btn,
+.hensei-name .save-btn {
+  margin-top: 0;
+}
+
+.hensei-now {
+  margin: 0 0 8px;
+  color: var(--accent-2);
+}
+
+.hensei-remove {
+  background: var(--btn);
+  color: var(--fg);
+}
+
+.hensei-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.hensei-name[hidden] {
+  display: none;
+}
+
+.hensei-name label {
+  width: 100%;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.hensei-name input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  border: 2px solid var(--muted);
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px "DotGothic16", monospace;
+}
+
+.hensei-msg {
+  min-height: 1.5em;
+  margin: 10px 0 0;
+  color: var(--accent-2);
+}
+
+/* リンクの うえの きりかえ：◀ PARTY 1 ▶ */
+.party-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.party-bar[hidden] {
+  display: none;
+}
+
+.party-name {
+  min-width: 9em;
+  font-family: "Press Start 2P", "DotGothic16", monospace;
+  font-size: 10px;
+  color: var(--gold);
+  text-align: center;
+}
+
+.party-arrow {
+  padding: 6px 10px;
+  border: 0;
+  background: none;
+  color: var(--accent-2);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.party-arrow:hover,
+.party-arrow:focus-visible {
+  color: var(--fg);
+  outline: 2px solid var(--accent-2);
+}
+
+/* きりかえた とき、リンクが ぱっと ならびなおす */
+.links.party-swap .pixel-btn:not(.secret) {
+  animation: pop-in 0.3s steps(3) both;
+  animation-delay: calc(var(--i, 0) * 0.06s);
+}
+
+.simple .links.party-swap .pixel-btn,
+.reduce-motion .links.party-swap .pixel-btn {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .links.party-swap .pixel-btn { animation: none; }
 }
 
 /* =====================================================================
