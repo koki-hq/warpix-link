@@ -6188,3 +6188,34 @@ a,
 #mylink-delete[hidden] {
   display: none;
 }
+
+/* たたむ たな（v1.62） */
+.cas-shelf > summary {
+  list-style: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cas-shelf > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cas-shelf > summary h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cas-shelf > summary h3::before {
+  content: "▶";
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.cas-shelf[open] > summary h3::before {
+  content: "▼";
+}
+
+.cas-shelf:not([open]) {
+  padding-bottom: 2px;
+}

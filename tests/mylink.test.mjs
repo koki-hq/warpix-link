@@ -82,4 +82,35 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "WARPIX LINK じしん・たなと おなじ アドレス・じぶんの リンク どうしの かさなりは つくれない（v1.62）"(t) {
+    const { server, p } = await open(t, `localStorage.setItem("warpix-mylinks", JSON.stringify([{ id: "my-1", label: "A", url: "https://example.com/a", icon: "star" }]))`);
+    t.eq(await p.ev(`CASSETTES.checkMine("https://link.warpix.app/")`), "それは ぼくの いる ここだよ。", "じぶん");
+    t.eq(await p.ev(`CASSETTES.checkMine("https://www.youtube.com")`), "YOUTUBE は もう たなに あるよ。", "たなと おなじ");
+    t.eq(await p.ev(`CASSETTES.checkMine("https://www.youtube.com/@warpix")`), null, "おなじ サイトの べつの ページは つくれる");
+    t.eq(await p.ev(`CASSETTES.checkMine("https://example.com/a/")`), "おなじ リンクが もう あるよ。", "じぶんの リンク どうし");
+    t.eq(await p.ev(`CASSETTES.checkMine("https://example.com/a", "my-1")`), null, "なおす ときは じぶん じしんを のぞく");
+    await toPicker(p);
+    await p.click("#cas-add");
+    await fill(p, { name: "わたし", url: "https://link.warpix.app/" });
+    t.eq(await p.ev(`document.getElementById("mylink-msg").textContent`), "それは ぼくの いる ここだよ。", "まどの ひとこと");
+    t.eq(await p.ev(`CASSETTES.mine().length`), 1, "つくれて しまった");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "たなは たためる。いつもの と じぶんの リンク だけ ひらいて いて、いま はいって いる かずが みだしに（v1.62）"(t) {
+    const { server, p } = await open(t, `localStorage.setItem("warpix-cassette", JSON.stringify(["youtube", "netflix", "line", "booth", "tumblr", "spotify"]))`);
+    await toPicker(p);
+    t.eq(await p.ev(`[...document.querySelectorAll("details.cas-shelf[open]")].map((d) => d.dataset.shelf)`), ["default", "mine"], "ひらいて いる たな");
+    t.ok((await p.ev(`document.querySelector('details[data-shelf="video"] summary').textContent`)).includes("・1"), "いま はいって いる かず");
+    await p.ev(`document.querySelector('details[data-shelf="video"] summary').click()`);
+    await t.sleep(200);
+    await p.ev(`document.querySelector('.cas-slot[data-slot="5"]').click(); document.querySelector('.cas-item[data-id="hulu"]').click()`);
+    t.ok(await p.ev(`document.querySelector('details[data-shelf="video"]').open`), "いれかえたら たなが とじた");
+    t.eq(await p.ev(`CASSETTES.current()[5]`), "hulu", "あたらしい たなから いれられない");
+    await p.shot("cas-fold.png");
+    t.noErrors(p);
+    await server.close();
+  },
 };

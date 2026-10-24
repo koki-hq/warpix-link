@@ -13,6 +13,7 @@ const cassetteUi = (() => {
   const makeBtn = document.getElementById("cas-make");
   const resetBtn = document.getElementById("cas-reset");
   let sel = 0;
+  const openShelves = new Set(["default", "mine"]);
   // あたらしい パーティを つくって いる とちゅう（6 こ そろうまで のこさない）
   let draft = null;
 
@@ -44,12 +45,16 @@ const cassetteUi = (() => {
         list.length < CASSETTES.MINE_MAX ? `<button type="button" class="cas-add" id="cas-add"><span aria-hidden="true">＋</span><span class="cas-name jp">つくる</span></button>` : ""
       }`;
     };
-    shelvesEl.innerHTML = CASSETTES.SHELVES.map(
-      (s) => `<section class="cas-shelf${s.id === "mine" ? " cas-shelf-mine" : ""}" aria-labelledby="cas-shelf-${s.id}">
-        <h3 id="cas-shelf-${s.id}">${s.name}${s.id === "mine" ? ` <small>${CASSETTES.mine().length} / ${CASSETTES.MINE_MAX}</small>` : ""}</h3>
-        <div class="cas-grid">${s.id === "mine" ? mine() : CASSETTES.LIST.filter((c) => c.shelf === s.id).map(item).join("")}</div>
-      </section>`
-    ).join("");
+    // たなは たためる（v1.62、48 こ ある ので）。いつもの と じぶんの リンク だけ ひらいて いる。いま はいって いる かずを みだしに
+    shelvesEl.innerHTML = CASSETTES.SHELVES.map((s) => {
+      const items = s.id === "mine" ? CASSETTES.mine() : CASSETTES.LIST.filter((c) => c.shelf === s.id);
+      const using = items.filter((c) => cur.includes(c.id)).length;
+      const count = s.id === "mine" ? `${CASSETTES.mine().length} / ${CASSETTES.MINE_MAX}` : using ? `・${using}` : "";
+      return `<details class="cas-shelf${s.id === "mine" ? " cas-shelf-mine" : ""}" data-shelf="${s.id}"${openShelves.has(s.id) ? " open" : ""}>
+        <summary><h3 id="cas-shelf-${s.id}">${s.name}${count ? ` <small>${count}</small>` : ""}</h3></summary>
+        <div class="cas-grid">${s.id === "mine" ? mine() : items.map(item).join("")}</div>
+      </details>`;
+    }).join("");
     if (draft) makeBtn.disabled = draft.some((id) => !id);
     drawIcons(dialog);
   }
@@ -71,12 +76,19 @@ const cassetteUi = (() => {
     slotsEl.querySelector(`[data-slot="${sel}"]`).focus();
   });
 
+  shelvesEl.addEventListener("toggle", (e) => {
+    const d = e.target.closest?.("details[data-shelf]");
+    if (d) d.open ? openShelves.add(d.dataset.shelf) : openShelves.delete(d.dataset.shelf);
+  }, true);
   shelvesEl.addEventListener("click", (e) => {
     if (e.target.closest("#cas-add")) return mylink.open();
     const ed = e.target.closest(".cas-edit");
     if (ed) return mylink.open(ed.dataset.edit);
     const b = e.target.closest(".cas-item");
     if (!b) return;
+    // おした カセットの たなは ひらいた まま
+    const shelf = b.closest("details[data-shelf]")?.dataset.shelf;
+    if (shelf) openShelves.add(shelf);
     const id = b.dataset.id;
     const c = CASSETTES.byId(id);
     if (draft) {
@@ -285,7 +297,8 @@ const cassetteUi = (() => {
       e.preventDefault();
       const label = nameIn.value.trim();
       if (!label) return (msgEl.textContent = "なまえを いれてね。");
-      if (!CASSETTES.cleanUrl(urlIn.value)) return (msgEl.textContent = "https:// で はじまる アドレスを いれてね。");
+      const ng = CASSETTES.checkMine(urlIn.value, editing);
+      if (ng) return (msgEl.textContent = ng);
       const wasEditing = editing;
       const c = editing ? CASSETTES.updateMine(editing, { label, url: urlIn.value, icon }) : CASSETTES.addMine({ label, url: urlIn.value, icon });
       if (!c) return (msgEl.textContent = "つくれなかった……");
