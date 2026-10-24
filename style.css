@@ -890,20 +890,6 @@ body::after {
   gap: 8px;
 }
 
-/* となりの へや（v1.49）：ゲームセンター WARPIX-ARCADE への いりぐち */
-.arcade-door {
-  color: var(--accent-2);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  text-align: center;
-  text-underline-offset: 3px;
-}
-
-.arcade-door:hover,
-.arcade-door:focus-visible {
-  color: var(--fg);
-}
-
 /* いちばん下の 名札（どこの 製品か） */
 .footer-maker {
   margin: 0;

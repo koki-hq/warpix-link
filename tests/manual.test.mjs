@@ -133,14 +133,12 @@ export default {
     await server.close();
   },
 
-  async "となりの へや（WARPIX ARCADE）の いりぐちは リンク集の したと このページについて に のこる"(t) {
+  async "WARPIX ARCADE の いりぐちは もう ない（v1.63.3、ARCADE は いったん 寝かせた）"(t) {
     const server = await t.startServer();
     const p = await fresh(t);
     await p.goto(server.url);
-    await t.sleep(1000);
-    // リンク集の 下にも となりの へや
-    t.eq(await p.ev(`document.querySelector(".arcade-door").href`), "https://arcade.warpix.app/", "となりの へやの いりぐち");
-    t.ok(await p.ev(`document.getElementById("about").textContent.includes("WARPIX ARCADE")`), "このページについて に となりの へや が ない");
+    await t.sleep(800);
+    t.ok(await p.ev(`!document.querySelector(".arcade-door") && !document.querySelector('a[href*="arcade.warpix.app"]') && !document.getElementById("about").textContent.includes("ARCADE")`), "ARCADE の いりぐちが のこって いる");
     t.noErrors(p);
     await server.close();
   },
