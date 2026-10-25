@@ -2,6 +2,7 @@
 // うえに いまの 6 こ（スロット）、したに たな。スロットを えらんで、たなの カセットを おすと いれかわる。
 // たなの カセットが もう ほかの スロットに あれば、その 2 つを いれかえる（いつも 6 こ、おなじ ものは ない）。
 // v1.56：リンクの したの ボタンは「リンクの へんせい」。いれかえる・パーティを ふやす（6 こ ぜんぶ えらんで できる）・なまえ・けす。
+// v1.64：ふやす も いれかえる と おなじ。6 こ そろった ところで もう できて いて、✕ は とじる だけ（本人「××閉じの動きが統一されてない」）
 // パーティが 2 つ いじょう ある とき だけ、リンクの うえに「◀ PARTY 1 ▶」。おすそわけ（v1.32）は やめた（「こじんの せかい だから」）
 const cassetteUi = (() => {
   const dialog = document.getElementById("cassette");
@@ -10,7 +11,6 @@ const cassetteUi = (() => {
   const slotsEl = document.getElementById("cas-slots");
   const shelvesEl = document.getElementById("cas-shelves");
   const msg = document.getElementById("cas-msg");
-  const makeBtn = document.getElementById("cas-make");
   const resetBtn = document.getElementById("cas-reset");
   let sel = 0;
   // さいしょから ぜんぶ ひらく（v1.63.2、本人「むしろ 開くのが 手間」）。たためるのは そのまま
@@ -56,7 +56,6 @@ const cassetteUi = (() => {
         <div class="cas-grid">${s.id === "mine" ? mine() : items.map(item).join("")}</div>
       </details>`;
     }).join("");
-    if (draft) makeBtn.disabled = draft.some((id) => !id);
     drawIcons(dialog);
   }
 
@@ -98,9 +97,10 @@ const cassetteUi = (() => {
       const j = draft.indexOf(id);
       if (j >= 0) draft[j] = draft[sel];
       draft[sel] = id;
-      sound.sfx.coin();
       const left = draft.filter((x) => !x).length;
-      msg.textContent = left ? `${sel + 1}ばんめを ${c.label} に した。あと ${left} こ。` : "6 こ そろった！";
+      if (!left) return made();
+      sound.sfx.coin();
+      msg.textContent = `${sel + 1}ばんめを ${c.label} に した。あと ${left} こ。`;
       const next = draft.findIndex((x) => !x);
       if (next >= 0) sel = next;
       render();
@@ -125,30 +125,36 @@ const cassetteUi = (() => {
     CASSETTES.reset();
     applyToPage();
     sound.sfx.coin();
-    msg.textContent = "いつもの 6 こに もどした。";
+    msg.textContent = "さいしょの 6 こに もどした。";
     emit("cassette", { reset: true });
     render();
   });
 
-  makeBtn.addEventListener("click", () => {
-    if (!draft || draft.some((id) => !id) || !CASSETTES.addParty(draft)) return;
+  // 6 こ そろったら その ばで できる。まどは その まま、あとは いれかえると おなじ
+  function made() {
+    if (!CASSETTES.addParty(draft)) return;
     draft = null;
-    dialog.close();
     applyToPage();
     swapLook();
     sound.sfx.powerup();
     emit("cassette", { party: CASSETTES.at() });
     achievements.unlock("cassette");
-  });
+    heading();
+    msg.textContent = `${CASSETTES.parties()[CASSETTES.at()].label} が できた！ もう リンクに でてるよ。`;
+    render();
+    slotsEl.querySelector(`[data-slot="${sel}"]`).focus();
+  }
 
+  function heading() {
+    const n = CASSETTES.parties().length;
+    title.textContent = draft ? `PARTY ${n + 1} を つくる` : n > 1 ? `${CASSETTES.parties()[CASSETTES.at()].label} の リンク` : "カセット えらび";
+    note.textContent = draft ? "6 こ ぜんぶ えらぶと できるよ。" : "リンクは いつも 6 こ。いれかえる ばしょを えらんで、たなの カセットを おしてね。";
+    resetBtn.hidden = !!draft;
+  }
   function open({ fresh = false } = {}) {
     sel = 0;
     draft = fresh ? Array(6).fill(null) : null;
-    const n = CASSETTES.parties().length;
-    title.textContent = fresh ? `PARTY ${n + 1} を つくる` : n > 1 ? `${CASSETTES.parties()[CASSETTES.at()].label} の リンク` : "カセット えらび";
-    note.textContent = fresh ? "6 こ ぜんぶ えらぶと できるよ。" : "リンクは いつも 6 こ。いれかえる ばしょを えらんで、たなの カセットを おしてね。";
-    makeBtn.hidden = !fresh;
-    resetBtn.hidden = fresh;
+    heading();
     msg.textContent = fresh ? "1ばんめに なにを いれる？" : "";
     render();
     dialog.showModal();
@@ -318,7 +324,7 @@ const cassetteUi = (() => {
         const where = CASSETTES.partiesWith(editing);
         const many = CASSETTES.parties().length > 1;
         msgEl.textContent = where.length
-          ? `${many ? `${where.join("・")} に` : "いまの リンクに"} はいってるよ。けすと、そこは いつもの リンクに もどるよ。もう いちど おすと けす。`
+          ? `${many ? `${where.join("・")} に` : "いまの リンクに"} はいってるよ。けすと、そこは さいしょの リンクに もどるよ。もう いちど おすと けす。`
           : "ほんとうに けす？ もう いちど おしてね。";
         delBtn.textContent = "ほんとうに けす";
         return;

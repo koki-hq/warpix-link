@@ -42,7 +42,7 @@ export default {
     const { server, p } = await open(t);
     t.ok(await p.ev(`CASSETTES.SHELVES.every((s) => CASSETTES.GIFTS[s.id]) && !!CASSETTES.GIFTS.secret`), "あなの いろが ない たな");
     t.ok(await p.ev(`Object.values(CASSETTES.GIFTS).every((g) => g.hole.c && g.hole.p && !g.rows)`), "あなの いろが おかしい");
-    t.eq(await p.ev(`["key", "youtube", "tiktok", "studyplus", "nope"].map(CASSETTES.shelfOf)`), ["secret", "default", "sns", "study", "default"], "shelfOf");
+    t.eq(await p.ev(`["key", "youtube", "tiktok", "studyplus", "nope"].map(CASSETTES.shelfOf)`), ["secret", "video", "sns", "study", "default"], "shelfOf");
     t.noErrors(p);
     await server.close();
   },

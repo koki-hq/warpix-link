@@ -34,20 +34,21 @@ export default {
     await server.close();
   },
 
-  async "ふやすは 6 こ ぜんぶ えらぶまで つくれない。とちゅうで とじたら のこらない。つくると PARTY 2 に なって きりかえが でる"(t) {
+  async "ふやすは 6 こ そろった ところで その ばで できる（つくる ボタンは ない、v1.64）。とちゅうで とじたら のこらない。PARTY 2 に なって きりかえが でる"(t) {
     const { server, p } = await open(t);
     const ids = await p.ev(`CASSETTES.LIST.map((c) => c.id).filter((id) => !CASSETTES.current().includes(id)).slice(0, 6)`);
     await make(p, ids.slice(0, 3));
     t.eq(await p.ev(`document.getElementById("cassette-title").textContent`), "PARTY 2 を つくる", "みだし");
     t.eq(await p.ev(`document.querySelectorAll(".cas-slot.empty").length`), 3, "のこりは まだ えらんでない");
-    t.ok(await p.ev(`document.getElementById("cas-make").disabled`), "6 こ そろう まえに つくれる");
+    t.ok(await p.ev(`!document.getElementById("cas-make") && CASSETTES.parties().length === 1`), "6 こ そろう まえに できた か、つくる ボタンが ある");
     await p.shot("party-make.png");
     await p.ev(`document.getElementById("cassette").close()`);
     t.eq(await p.ev(`CASSETTES.parties().length`), 1, "つくりかけが のこった");
     await make(p, ids);
-    t.ok(!(await p.ev(`document.getElementById("cas-make").disabled`)), "6 こ そろっても つくれない");
-    await p.click("#cas-make");
     await t.sleep(300);
+    t.eq(await p.ev(`CASSETTES.parties().length`), 2, "6 こ そろっても できない");
+    t.ok(await p.ev(`document.getElementById("cassette").open && document.getElementById("cassette-title").textContent === "PARTY 2 の リンク"`), "できた あと いれかえの まどに ならない");
+    await p.ev(`document.getElementById("cassette-close").click()`);
     t.eq(await icons(p), ids, "あたらしい パーティの リンクに ならない");
     t.ok(!(await p.ev(`document.getElementById("party-bar").hidden`)), "2 つ に なっても きりかえが でない");
     t.eq(await p.ev(`document.getElementById("party-name").textContent`), "PARTY 2", "なまえ");

@@ -42,25 +42,32 @@ export default {
     await server.close();
   },
 
-  async "あとから きた ひとには、それより まえの おしらせは とどかない（ようこそ は とどく）"(t) {
+  async "あとから きた ひとにも、きた きせつに でた おしらせは とどく。まえの きせつの ものは とどかない（v1.64）"(t) {
+    // あき（9〜11 がつ）に きた：10/24 の おしらせも 11/1 の 開店も とどく
     const { server, p } = await open(t, { url: "?date=2026-11-05", before: pixe("2026-11-03") });
-    t.eq(await p.ev(`mail.list().map((m) => m.id).filter((id) => !id.startsWith("season-"))`), ["welcome"], "まえの おしらせが とどいた");
+    const ids = await p.ev(`mail.list().map((m) => m.id)`);
+    t.ok(ids.includes("welcome") && ids.includes("2026-10-24-closet") && ids.includes("2026-11-01-open"), `きた きせつの おしらせが とどかない：${ids}`);
+    // ふゆに きた：あきの おしらせは とどかない
+    await p.ev(`localStorage.clear(); ${pixe("2026-12-03")}`);
+    await p.goto(server.url + "?date=2026-12-05");
+    await p.boot();
+    t.eq(await p.ev(`mail.list().map((m) => m.id).filter((id) => !id.startsWith("season-"))`), ["welcome"], "まえの きせつの おしらせが とどいた");
     t.noErrors(p);
     await server.close();
   },
 
-  async "じぶんに かんけい ある もの だけ：きた ひと おなじ ひづけの おしらせと、さいしょから もって いる きせつの 入庫は とどかない（v1.63.2）"(t) {
+  async "ようこそ は ようこそ だけ。いまの きせつの 入庫は べつの 1 つうで とどき、ふゆに なっても きえない（v1.64）"(t) {
     const { server, p } = await open(t, { url: "?date=2026-10-24", before: pixe("2026-10-24") });
-    t.eq(await p.ev(`mail.list().map((m) => m.id)`), ["welcome"], "ようこそ だけ に ならない");
-    t.ok((await p.ev(`mail.list()[0].body.join("")`)).includes("あきの コスチューム"), "ようこそに いまの きせつの ひとこと が ない");
-    // つぎの ひも あきの 入庫は とどかない（さいしょから もって いる）
+    const welcome = await p.ev(`mail.list().find((m) => m.id === "welcome")`);
+    t.ok(!welcome.body.join("").includes("コスチューム") && !welcome.action, `ようこそに ほかの ことが まざった：${welcome.body.join("")}`);
+    // つぎの ひ：あきの 入庫が べつに とどく
     await p.goto(server.url + "?date=2026-10-26");
     await p.boot();
-    t.ok(!(await p.ev(`mail.list().some((m) => m.id.startsWith("season-autumn"))`)), "さいしょから もって いる きせつの 入庫が とどいた");
-    // ふゆに なったら はじめて もらえる ので とどく。らいねんの あきには とどかない
+    t.ok(await p.ev(`mail.list().some((m) => m.id === "season-autumn")`), "いまの きせつの 入庫が とどかない");
+    // ふゆに なったら ふゆの 入庫。あきの ものも きえない
     await p.goto(server.url + "?date=2026-12-02");
     await p.boot();
-    t.ok(await p.ev(`mail.list().some((m) => m.id === "season-winter")`), "ふゆの 入庫が とどかない");
+    t.ok(await p.ev(`mail.list().some((m) => m.id === "season-winter") && mail.list().some((m) => m.id === "season-autumn")`), "ふゆの 入庫が とどかない か、あきの ものが きえた");
     t.noErrors(p);
     await server.close();
   },

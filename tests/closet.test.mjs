@@ -92,4 +92,18 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "じぶんで えらんだ ぼうし（「なし」も）を まもる。きせつの ぼうし・かさは まだ えらんで いない 人 だけ（v1.64）"(t) {
+    const { server, p } = await open(t, { url: "?date=2026-10-28", before: pixe(0, ["2026-10-27", "2026-10-28"]) });
+    t.eq(await p.ev(`wardrobe.currentId()`), "pumpkin", "えらんで いない 人に ハロウィンの ぼうしが でない");
+    await p.ev(`wardrobe.wear(null)`);
+    t.eq(await p.ev(`wardrobe.currentId()`), null, "「なし」に したのに かぼちゃ");
+    await p.goto(server.url + "?date=2026-10-28");
+    await p.boot();
+    t.eq(await p.ev(`wardrobe.currentId()`), null, "ひらきなおすと かぼちゃに もどった");
+    await p.ev(`wardrobe.wearSeasonal("umbrella")`);
+    t.eq(await p.ev(`wardrobe.currentId()`), null, "「なし」に したのに かさを さした");
+    t.noErrors(p);
+    await server.close();
+  },
 };

@@ -50,7 +50,7 @@ export default {
     await server.close();
   },
 
-  async "えんぴつで なおす。けすのは 2 かい おしで、はいって いた パーティは いつもの リンクに もどる"(t) {
+  async "えんぴつで なおす。けすのは 2 かい おしで、はいって いた パーティは さいしょの リンクに もどる"(t) {
     const mine = JSON.stringify([{ id: "my-1", label: "ノート", url: "https://example.com/n", icon: "book" }]);
     const parties = JSON.stringify({ at: 1, name: "", more: [{ name: "よる", ids: ["my-1", "discord", "threads", "bluesky", "pinterest", "twitch"] }] });
     const { server, p } = await open(t, `localStorage.setItem("warpix-mylinks", ${JSON.stringify(mine)}); localStorage.setItem("warpix-cassette", JSON.stringify(["youtube", "my-1", "instagram", "booth", "tumblr", "spotify"])); localStorage.setItem("warpix-parties", ${JSON.stringify(parties)})`);
@@ -63,7 +63,7 @@ export default {
     await p.click('.cas-edit[data-edit="my-1"]');
     await p.click("#mylink-delete");
     const warn = await p.ev(`document.getElementById("mylink-msg").textContent`);
-    t.ok(warn.includes("PARTY 1") && warn.includes("よる") && warn.includes("いつもの リンクに もどる"), `パーティの けいこく：${warn}`);
+    t.ok(warn.includes("PARTY 1") && warn.includes("よる") && warn.includes("さいしょの リンクに もどる"), `パーティの けいこく：${warn}`);
     t.eq(await p.ev(`CASSETTES.mine().length`), 1, "1 かいで けえた");
     await p.click("#mylink-delete");
     t.eq(await p.ev(`CASSETTES.mine().length`), 0, "2 かい おしても けせない");
@@ -105,7 +105,7 @@ export default {
     t.eq(await p.ev(`document.querySelectorAll("details.cas-shelf:not([open])").length`), 0, "さいしょから ぜんぶ ひらいて いない（v1.63.2）");
     await p.ev(`document.querySelector('details[data-shelf="video"] summary').click()`);
     t.ok(await p.ev(`!document.querySelector('details[data-shelf="video"]').open`), "たためない");
-    t.ok((await p.ev(`document.querySelector('details[data-shelf="video"] summary').textContent`)).includes("・1"), "いま はいって いる かず");
+    t.ok((await p.ev(`document.querySelector('details[data-shelf="video"] summary').textContent`)).includes("・2"), "いま はいって いる かず");
     await p.ev(`document.querySelector('details[data-shelf="video"] summary').click()`);
     await t.sleep(200);
     await p.ev(`document.querySelector('.cas-slot[data-slot="5"]').click(); document.querySelector('.cas-item[data-id="hulu"]').click()`);

@@ -4294,11 +4294,6 @@ a,
   margin-top: 0;
 }
 
-.cas-make:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* まだ えらんでない ばしょ */
 .cas-slot.empty {
   min-height: 72px;
@@ -5245,8 +5240,11 @@ a,
   font-size: 16px;
 }
 
-#about-manual {
+/* 2 つの ボタンは くっつけない（v1.64、本人「一つの大きなブロックみたいになっちゃってる」） */
+#about-manual,
+#about-prologue {
   margin-top: 8px;
+  margin-right: 8px;
 }
 
 /* ---------- とりあつかい せつめいしょ（v1.48、manual.js） ---------- */

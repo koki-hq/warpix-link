@@ -65,6 +65,8 @@ const wardrobe = (() => {
 
   // 季節イベント中は、帽子を選んでいなければ季節の帽子をかぶる
   let seasonal = null;
+  // じぶんで えらんだ ことが ある（「なし」も）。えらんだ ものを まもる（v1.64、本人「デフォルトにできるようにしたい　強制ではなく」）
+  let picked = store.get("warpix-hat-picked", false);
   const seen = new Set(store.get("warpix-season-hats", []));
   // もらいかた（unlock）：なし＝さいしょから・"days:N"＝N にち あう・"season:…"＝その きせつに あう・それ いがい＝じっせき（v1.57）
   const days = () => (growState() ?? store.get("warpix-pixe", null))?.days?.length ?? 0;
@@ -83,8 +85,9 @@ const wardrobe = (() => {
   };
   const isOpen = (hat) => unlocked(hat.unlock);
 
-  // きんの アンテナ（もとは ぼうしの したに かさなって いた もの）は、きせつの ぼうしや あめの かさに ゆずる（v1.57）
-  const shown = () => (current === "antenna" ? seasonal : null) ?? current ?? seasonal;
+  // きせつの ぼうし・あめの かさが かぶさるのは、まだ いちども えらんで いない 人 だけ（v1.64）。
+  // その とき、きんの アンテナ（もとは ぼうしの したに かさなって いた もの）は ゆずる（v1.57）
+  const shown = () => (picked ? current : (current === "antenna" ? seasonal : null) ?? current ?? seasonal);
   function apply() {
     const id = shown();
     npc.setHat(id && HATS[id] ? HATS[id] : null);
@@ -113,10 +116,12 @@ const wardrobe = (() => {
     }
   }
 
-  // quiet：きろくを うつす とき（closet の はじめ）は、じっせきも おしらせも なし
-  function wear(id, { quiet = false } = {}) {
+  // quiet：きろくを うつす とき（closet の はじめ）は、じっせきも おしらせも なし。
+  // pick：じぶんで えらんだ（プレゼントで かぶせる とき は false。きせつの ぼうしは そのまま でる）
+  function wear(id, { quiet = false, pick = !quiet } = {}) {
     current = id;
     store.set("warpix-hat", current);
+    if (pick && !picked) store.set("warpix-hat-picked", (picked = true));
     apply();
     if (quiet) return;
     render();
@@ -376,7 +381,7 @@ const closet = (() => {
     // そだって もらった とき（grow.js）：きる・かぶる
     gift(id) {
       if (ITEMS[id]) wear(id);
-      else if (hats()[id]) wardrobe.wear(id);
+      else if (hats()[id]) wardrobe.wear(id, { pick: false });
     },
     wear,
     worn: () => ({ ...worn }),

@@ -42,6 +42,12 @@ const mail = (() => {
       body: ["リンクの したの「リンクの へんせい」から、6 この リンクの くみあわせ（パーティ）を 3 つまで つくれます。", "パーティが 2 つ いじょう あると、リンクの したで きりかえられます。"],
     },
     {
+      id: "2026-10-25-shelves",
+      date: "2026-10-25",
+      title: "リンクの たなを ととのえました",
+      body: ["「いつもの」の たなは なくして、YOUTUBE や SPOTIFY も それぞれの たなに いれました。", "せいかつの たなに TIMETREE が はいりました。", "パーティを ふやす ときは、6 こ そろった ところで もう できあがります。"],
+    },
+    {
       id: "2026-11-01-open",
       date: "2026-11-01",
       title: "WARPIX LINK、開店しました",
@@ -58,7 +64,7 @@ const mail = (() => {
   };
   function seasonal() {
     // きせつの 入庫は、その ひとが はじめて もらえた とき だけ。まいとしは おくらない（v1.63.2）。
-    // はじめて きた ひに もう その きせつ だったら（さいしょから もって いる ので）おくらない
+    // はじめて きた ひに もう その きせつ だったら、ようこそ には まぜずに べつの 1 つうで とどく（v1.64）
     const b = born();
     return Object.entries(SEASON_MAIL)
       .map(([k, [title, line]]) => {
@@ -71,35 +77,38 @@ const mail = (() => {
           save();
         }
         const at = state.got[id];
-        return at && at > b ? { id, date: at, title, body: [line, "へやの ハンガーラックで ためしに きてみてね。"], action: goCloset } : null;
+        return at && at >= b ? { id, date: at, title, body: [line, "へやの ハンガーラックで ためしに きてみてね。"], action: goCloset } : null;
       })
       .filter(Boolean);
   }
-  // その ひの きせつ（ようこその ひとこと）
-  const seasonOf = (s) => {
+  // その ひの きせつの はじまりの ひ（v1.64）：はる 3〜5・つゆ 6・なつ 7〜8・あき 9〜11・ふゆ 12〜2 がつ。
+  // ゲームの シーズンの ように、きた きせつに でた おしらせは あとから きた ひとにも とどく（本人「始めたばかりの人に　情報が行き届かないのもなんか違う」）。
+  // きた ひで きめるので、きせつが かわっても いちど とどいた ものは きえない
+  function seasonStart(s) {
     const m = Number(s.slice(5, 7));
-    return [9, 10, 11].includes(m) ? "あき" : [12, 1, 2].includes(m) ? "ふゆ" : m === 6 ? "つゆ" : [7, 8].includes(m) ? "なつ" : null;
-  };
+    const first = m >= 12 ? 12 : m >= 9 ? 9 : m >= 7 ? 7 : m === 6 ? 6 : m >= 3 ? 3 : 12;
+    const y = Number(s.slice(0, 4)) - (m < 3 ? 1 : 0);
+    return `${y}-${pad2(first)}-01`;
+  }
   const seasonNow = (k) => {
     const m = today().getMonth() + 1;
     const md = m * 100 + today().getDate();
     return { autumn: [9, 10, 11].includes(m), winter: [12, 1, 2].includes(m), tsuyu: m === 6, summer: [7, 8].includes(m), christmas: md >= 1218 && md <= 1225 }[k];
   };
 
-  // ようこその おしらせ（はじめて きた ひ）
+  // ようこその おしらせ（はじめて きた ひ）。ようこそ だけ、ほかの ことは まぜない（v1.64、本人「ごちゃ付く」）
   const born = () => (growState() ?? store.get("warpix-pixe", null))?.born ?? ymd;
   function list() {
     const b = born();
-    const s = seasonOf(b);
     const welcome = {
       id: "welcome",
       date: b,
       title: "ようこそ、WARPIX LINK へ",
-      body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", ...(s ? [`いまは ${s}の コスチュームも、へやの ハンガーラックに はいってるよ。`] : []), "あたらしい ことが あったら、ここで おしらせします。"],
-      action: s ? goCloset : undefined,
+      body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", "あたらしい ことが あったら、ここで おしらせします。"],
     };
-    // じぶんに かんけい ある もの だけ（v1.63.2）：きた ひ より あと に でた おしらせ。きた ひ より まえ・おなじ ひの ことは さいしょから ある ので しらせない
-    return [welcome, ...MAILS.filter((m) => m.date > b && m.date <= ymd), ...seasonal()].sort((a, b2) => (a.date === b2.date ? 0 : a.date < b2.date ? 1 : -1));
+    // きた ひ より あと に でた おしらせ（v1.63.2）と、きた きせつに でた おしらせ（v1.64）。みらいの ものは その ひまで でない
+    const from = seasonStart(b);
+    return [welcome, ...MAILS.filter((m) => (m.date > b || m.date >= from) && m.date <= ymd), ...seasonal()].sort((a, b2) => (a.date === b2.date ? 0 : a.date < b2.date ? 1 : -1));
   }
   const unread = () => list().filter((m) => !state.read.includes(m.id));
 

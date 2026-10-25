@@ -17,7 +17,7 @@ async function open(t, { url = "", before = "", boot = true, width, height } = {
 }
 
 export default {
-  async "さいしょは いつもの 6 こ。TWITTER の いきさきは x.com で (X) つき"(t) {
+  async "さいしょは さいしょの 6 こ。TWITTER の いきさきは x.com で (X) つき"(t) {
     const { server, p } = await open(t);
     const l = await links(p);
     t.eq(l.map((x) => x.icon), ["youtube", "twitter", "instagram", "booth", "tumblr", "spotify"], "いつもの 6 こ");
@@ -25,9 +25,9 @@ export default {
     t.eq([l[1].href, l[1].label, l[1].sub], ["https://x.com/", "TWITTER", "(X)"], "TWITTER");
     t.eq(await p.ev(`localStorage.getItem("warpix-cassette")`), null, "いつものままなのに ほぞんした");
     // カタログ：28 こ、URL は https で かぶらない、アイコンは ぜんぶ ある
-    t.eq(await p.ev(`CASSETTES.LIST.length`), 48, "カセットの かず");
+    t.eq(await p.ev(`CASSETTES.LIST.length`), 49, "カセットの かず");
     t.ok(await p.ev(`CASSETTES.LIST.every((c) => c.url.startsWith("https://") && ICONS[c.id]) && new Set(CASSETTES.LIST.map((c) => c.url)).size === CASSETTES.LIST.length`), "URL か アイコンが おかしい");
-    t.ok(await p.ev(`CASSETTES.LIST.filter((c) => c.shelf !== "default").every((c) => c.hi && c.back)`), "ピクセの しょうかいか おみやげばなしが ない");
+    t.ok(await p.ev(`CASSETTES.LIST.filter((c) => !CASSETTES.DEFAULT.includes(c.id)).every((c) => c.hi && c.back)`), "ピクセの しょうかいか おみやげばなしが ない");
     t.noErrors(p);
     await server.close();
   },
@@ -38,7 +38,7 @@ export default {
     await p.click("#hensei-swap");
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("cassette").open`), "まどが ひらかない");
-    t.eq(await p.ev(`document.querySelectorAll(".cas-slot").length + "," + document.querySelectorAll(".cas-item").length`), "6,48", "スロットと カセットの かず");
+    t.eq(await p.ev(`document.querySelectorAll(".cas-slot").length + "," + document.querySelectorAll(".cas-item").length`), "6,49", "スロットと カセットの かず");
     await put(p, 3, "studyplus");
     await t.sleep(200);
     let l = await links(p);
@@ -137,6 +137,38 @@ export default {
     await t.sleep(300);
     t.ok(await p.ev(`document.documentElement.scrollWidth <= innerWidth && [...document.querySelectorAll(".cas-slot, .cas-item")].every((b) => b.scrollWidth <= b.clientWidth + 1)`), "まどの なかで はみだした");
     await p.shot("cassette-360.png");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "もどった ときの セリフは「？」で おわらない。TIMETREE が せいかつに、「いつもの」の たなは ない（v1.64）"(t) {
+    const { server, p } = await open(t);
+    t.eq(await p.ev(`CASSETTES.LIST.filter((c) => c.back && (/？$/.test(c.back) || !c.back.startsWith("ただいま！"))).map((c) => c.id)`), [], "「？」で おわる か「ただいま！」で ない");
+    t.eq(await p.ev(`CASSETTES.byId("timetree")?.shelf`), "life", "TIMETREE が ない");
+    t.ok(await p.ev(`!CASSETTES.SHELVES.some((s) => s.id === "default") && CASSETTES.LIST.every((c) => CASSETTES.SHELVES.some((s) => s.id === c.shelf))`), "いつもの の たなが のこった か、たなが ない カセットが ある");
+    t.eq(await p.ev(`CASSETTES.DEFAULT`), ["youtube", "twitter", "instagram", "booth", "tumblr", "spotify"], "さいしょの 6 こ");
+    await p.click("#cassette-btn");
+    await p.click("#hensei-swap");
+    t.eq(await p.ev(`document.getElementById("cas-reset").textContent`), "さいしょの 6 こに もどす", "もどす ボタンの なまえ");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "iPhone では GMAIL・TIKTOK を アプリの アドレスで ひらく。ほかの きかいでは ウェブ（v1.64）"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    const set = `localStorage.clear(); localStorage.setItem("warpix-cassette", JSON.stringify(["gmail", "tiktok", "instagram", "booth", "tumblr", "spotify"]))`;
+    await p.goto(server.url);
+    await p.ev(set);
+    await p.goto(server.url);
+    await p.boot();
+    t.eq(await p.ev(`[...document.querySelectorAll(".links .pixel-btn:not(.secret)")].slice(0, 2).map((a) => a.dataset.app ?? null)`), [null, null], "iPhone で ないのに アプリの アドレス");
+    await p.send("Emulation.setUserAgentOverride", { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1", platform: "iPhone" });
+    await p.goto(server.url);
+    await p.boot();
+    const l = await p.ev(`[...document.querySelectorAll(".links .pixel-btn:not(.secret)")].map((a) => [a.dataset.app ?? null, a.href])`);
+    t.eq(l.slice(0, 3), [["googlegmail://", "https://mail.google.com/"], ["snssdk1233://", "https://www.tiktok.com/"], [null, "https://www.instagram.com/"]], "アプリの アドレス");
     t.noErrors(p);
     await server.close();
   },

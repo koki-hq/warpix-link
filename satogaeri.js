@@ -5,7 +5,7 @@
 const satogaeri = (() => {
   const KEY = "warpix-satogaeri"; // { last: 日付, n: かいすう }
   const WAIT = 4 * 60 * 1000; // ひらいてから これだけ たって、ひまなら いく
-  const AWAY = 30 * 1000; // るすに する じかん
+  const AWAY = 5 * 1000; // るすに する じかん（v1.64：30 びょうは ながすぎ、本人「５秒くらいでいいよ」）
   const pad2 = (n) => String(n).padStart(2, "0");
   const ymdOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   const peek = () => /[?&]date=/.test(location.search);

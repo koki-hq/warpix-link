@@ -9,6 +9,9 @@ export default {
     await p.click("#about-btn");
     await t.sleep(300);
     t.ok(await p.ev(`document.getElementById("about").open`), "窓が開かない");
+    // せつめいしょ と オープニング の ボタンは くっつかない（v1.64）
+    const gap = await p.ev(`(() => { const a = document.getElementById("about-manual").getBoundingClientRect(), b = document.getElementById("about-prologue").getBoundingClientRect(); return Math.max(b.left - a.right, b.top - a.bottom); })()`);
+    t.ok(gap >= 6, `ボタンが くっついて いる：${gap}px`);
     const text = await p.ev(`document.getElementById("about").innerText`);
     for (const want of ["この ブラウザの なかだけ", "10km", "Open-Meteo", "Supabase", "Google Fonts", "IP アドレス", "クッキー"]) {
       t.ok(text.includes(want), `「${want}」の説明がない`);
