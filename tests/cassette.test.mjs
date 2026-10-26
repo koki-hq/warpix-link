@@ -87,6 +87,9 @@ export default {
       let hid = false;
       Object.defineProperty(document, "hidden", { get: () => hid, configurable: true });
       window.__hide = (v) => { hid = v; document.dispatchEvent(new Event("visibilitychange")); };
+      // かえりの「ポケットが ひかってる」（card.js、5%）に あたると おみやげばなしが うわがき される（v1.65 で CI が こけた）
+      const r = Math.random;
+      Math.random = () => Math.max(r(), 0.06);
     })()`);
     const a = `document.querySelector('.pixel-btn [data-icon="duolingo"]').closest("a")`;
     await p.ev(`${a}.dispatchEvent(new Event("mouseenter"))`);
