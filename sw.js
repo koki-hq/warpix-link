@@ -8,6 +8,7 @@ const FILES = [
   "style.css",
   "fonts/dotgothic16.woff2",
   "config.js",
+  "count.js",
   "script.js",
   "game.js",
   "extras.js",

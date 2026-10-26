@@ -51,7 +51,8 @@ export async function startServer({ online = false, port = 0 } = {}) {
       // きせつの イベント・オープン きねんも ?date= の ない テストでは ださない（WARPIX_EVENT_DAYS）
       return res.end('window.WARPIX_ONLINE = {}; window.WARPIX_NEWS ??= "tests/fixtures/no-news.json"; window.WARPIX_MANUAL ??= false; window.WARPIX_PROLOGUE ??= false; window.WARPIX_FIRSTDAY ??= false; window.WARPIX_READ_MS ??= 0; window.WARPIX_EVENT_DAYS ??= false;');
     }
-    const file = join(ROOT, path === "/" ? "index.html" : path);
+    // /ig/ の ような 入口（v1.65）も GitHub Pages と おなじく index.html を かえす
+    const file = join(ROOT, path.endsWith("/") ? path + "index.html" : path);
     if (!file.startsWith(ROOT) || !existsSync(file)) {
       res.writeHead(404).end();
       return;

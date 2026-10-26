@@ -13,7 +13,7 @@ export default {
     const gap = await p.ev(`(() => { const a = document.getElementById("about-manual").getBoundingClientRect(), b = document.getElementById("about-prologue").getBoundingClientRect(); return Math.max(b.left - a.right, b.top - a.bottom); })()`);
     t.ok(gap >= 6, `ボタンが くっついて いる：${gap}px`);
     const text = await p.ev(`document.getElementById("about").innerText`);
-    for (const want of ["この ブラウザの なかだけ", "10km", "Open-Meteo", "Supabase", "Google Fonts", "IP アドレス", "クッキー"]) {
+    for (const want of ["この ブラウザの なかだけ", "10km", "Open-Meteo", "Supabase", "Google Fonts", "IP アドレス", "クッキー", "Cloudflare"]) {
       t.ok(text.includes(want), `「${want}」の説明がない`);
     }
     await p.shot("about.png");
