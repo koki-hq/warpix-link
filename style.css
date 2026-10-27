@@ -4432,13 +4432,15 @@ a,
   animation-delay: calc(var(--i, 0) * 0.06s);
 }
 
+/* リンクは アニメで みえる ように なる（.js で さいしょ opacity: 0）ので、とめる ときは みえる まま に（v1.65.1） */
 .simple .links.party-swap .pixel-btn,
 .reduce-motion .links.party-swap .pixel-btn {
+  opacity: 1;
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .links.party-swap .pixel-btn { animation: none; }
+  .links.party-swap .pixel-btn { opacity: 1; animation: none; }
 }
 
 /* =====================================================================

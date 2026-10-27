@@ -99,4 +99,15 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "うごきを へらす・よみやすい もじ でも、きりかえた あと リンクが みえる（v1.65.1：すけて きえて いた）"(t) {
+    const parties = JSON.stringify({ at: 0, name: "", more: [{ name: "", ids: SIX }] });
+    const { server, p } = await open(t, { before: `localStorage.setItem("warpix-settings", ${JSON.stringify(JSON.stringify({ motion: "reduce", font: "plain" }))}); localStorage.setItem("warpix-parties", ${JSON.stringify(parties)})` });
+    await p.click("#party-next");
+    await t.sleep(600);
+    t.eq(await icons(p), SIX, "きりかわらない");
+    t.eq(await p.ev(`[...document.querySelectorAll(".links .pixel-btn:not(.secret)")].map((e) => getComputedStyle(e).opacity)`), ["1", "1", "1", "1", "1", "1"], "リンクが すけて いる");
+    t.noErrors(p);
+    await server.close();
+  },
 };

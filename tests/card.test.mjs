@@ -84,6 +84,13 @@ export default {
     await t.sleep(5500);
     t.eq(await p.ev(`cards.state().list.length`), 1, "おなじ 日に ラッキーが 2 まい");
     await closeReveal(p);
+    // とじた あと、ふきだしが「ひかってる」の ままに ならない（v1.65.1）
+    let after = "";
+    for (let i = 0; i < 20 && !after.includes("カード だったね"); i++) {
+      await t.sleep(200);
+      after = await p.ev(`document.getElementById("dialog-text").textContent`);
+    }
+    t.ok(after.includes("カード だったね"), `とじた あとの ひとこと：${after}`);
     t.noErrors(p);
     await server.close();
   },

@@ -184,6 +184,8 @@ const cards = (() => {
       timers.forEach(clearTimeout);
       el.remove();
       revealing = null;
+      // ふきだしが「ポケットが ひかってる」の ままに ならない ように（v1.65.1）
+      if (card.kind === "lucky") npc.say(["ポケットの ひかり、\nカード だったね。"]);
     };
     // うしろの まくで ピクセが かくれるので、カードの したの ちいさな ピクセが よろこぶ
     const hop = () => {
