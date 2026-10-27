@@ -55,7 +55,7 @@ export default {
   },
 
   async "おなじ 日でも、じかんたいが かわって いたら じかんの あいさつ（v1.65.1）"(t) {
-    const AGAIN = ["あ、おかえり！", "さっきぶり！", "おっ、また きたね。", "おかえりー。"];
+    const AGAIN = ["あ、おかえり！", "さっきぶり！", "おかえりー。"];
     const { server, p } = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify(pixe(20, 1))}); localStorage.setItem("warpix-visits", "56")`);
     const now = await p.ev(`JSON.parse(localStorage.getItem("warpix-greet-time"))`);
     t.ok(["late", "morning", "day", "evening"].includes(now), `じかんたいを おぼえない: ${now}`);
