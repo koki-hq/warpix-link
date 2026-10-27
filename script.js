@@ -791,8 +791,11 @@ const npc = (() => {
   function greeting() {
     const visits = store.get("warpix-visits", 1);
     const days = grow.state.days?.length ?? 1;
+    // おなじ 日でも、まえに きた ときと じかんたいが ちがえば じかんの あいさつ（v1.65.1。あさ きて よる また きた とき など）
+    const lastTime = store.get("warpix-greet-time", null);
+    store.set("warpix-greet-time", TIME);
     if (visits <= 1) return INTRO;
-    if (!grow.firstToday) return [pickFresh(AGAIN, "warpix-greet")];
+    if (!grow.firstToday && lastTime === TIME) return [pickFresh(AGAIN, "warpix-greet")];
     const lines = [pickFresh(HELLO[days >= 7 ? "close" : "warm"][TIME], "warpix-greet")];
     if (days >= 7 && Math.random() < 0.12) lines.push(pickFresh(RARE, "warpix-greet-rare"));
     return lines;

@@ -54,6 +54,22 @@ export default {
     await server.close();
   },
 
+  async "おなじ 日でも、じかんたいが かわって いたら じかんの あいさつ（v1.65.1）"(t) {
+    const AGAIN = ["あ、おかえり！", "さっきぶり！", "おっ、また きたね。", "おかえりー。"];
+    const { server, p } = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify(pixe(20, 1))}); localStorage.setItem("warpix-visits", "56")`);
+    const now = await p.ev(`JSON.parse(localStorage.getItem("warpix-greet-time"))`);
+    t.ok(["late", "morning", "day", "evening"].includes(now), `じかんたいを おぼえない: ${now}`);
+    // おなじ じかんたい なら おかえり
+    t.ok(AGAIN.includes((await again(p, server))[0]), "おなじ じかんたい なのに おかえり じゃない");
+    // まえは べつの じかんたい だった
+    await p.ev(`localStorage.setItem("warpix-greet-time", ${JSON.stringify(JSON.stringify(now === "morning" ? "evening" : "morning"))})`);
+    const lines = await again(p, server);
+    t.ok(!AGAIN.includes(lines[0]), `じかんたいが かわったのに おかえり: ${JSON.stringify(lines)}`);
+    t.eq(await p.ev(`JSON.parse(localStorage.getItem("warpix-greet-time"))`), now, "いまの じかんたいに かきかわらない");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "来た かいすうは ふしめ だけ（100 かいめ）"(t) {
     // だいじな はなし（そだつ・きっぷ・じゅもん）が おおい ひは かるい わだいを いわない（v1.60）ので、それらは すんだ ことに
     const { server, p, intro: lines } = await visit(t, `localStorage.setItem("warpix-pixe", ${JSON.stringify({ ...pixe(20, 1), stage: 3 })}); localStorage.setItem("warpix-visits", "99"); localStorage.setItem("warpix-ticket", JSON.stringify({ got: "2026-10-01" })); localStorage.setItem("warpix-save-told", "true")`);
