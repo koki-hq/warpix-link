@@ -56,6 +56,24 @@ export default {
     await server.close();
   },
 
+  async "あとから きた ひとには、まえからの ひと むけの 話は とどかない。ようこそ が いちばん した で、ひづけは きた ひ（v1.65.3）"(t) {
+    const { server, p } = await open(t, { url: "?date=2026-10-28", before: pixe("2026-10-28") });
+    const list = await p.ev(`mail.list().map((m) => [m.id, m.date])`);
+    const ids = list.map(([id]) => id);
+    t.ok(!ids.includes("2026-10-24-mailbox") && !ids.includes("2026-10-25-shelves"), `まえからの ひと むけが とどいた：${ids}`);
+    t.ok(["2026-10-24-room", "2026-10-24-closet", "2026-10-24-party"].every((id) => ids.includes(id)), `つかいかたの おしらせが ない：${ids}`);
+    t.eq(ids.at(-1), "welcome", "ようこそ が いちばん した に ない");
+    t.ok(list.every(([, d]) => d === "2026-10-28"), `きた ひ より まえの ひづけ：${JSON.stringify(list)}`);
+    // まえから いる ひとには とどく
+    await p.ev(`localStorage.clear(); ${pixe("2026-10-20")}`);
+    await p.goto(server.url + "?date=2026-10-28");
+    await p.boot();
+    const old = await p.ev(`mail.list().map((m) => m.id)`);
+    t.ok(old.includes("2026-10-24-mailbox") && old.includes("2026-10-25-shelves") && old.at(-1) === "welcome", `まえから いる ひと：${old}`);
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ようこそ は ようこそ だけ。いまの きせつの 入庫は べつの 1 つうで とどき、ふゆに なっても きえない（v1.64）"(t) {
     const { server, p } = await open(t, { url: "?date=2026-10-24", before: pixe("2026-10-24") });
     const welcome = await p.ev(`mail.list().find((m) => m.id === "welcome")`);

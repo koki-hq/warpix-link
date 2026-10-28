@@ -311,4 +311,24 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "タッチの スマホで、いちばん したの じめんが そうさ ボタンより うえに くる（ピクセが かくれない、v1.65.3）"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser({ width: 390, height: 844 });
+    const p = await b.firstPage();
+    await p.size(390, 844, true);
+    await p.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+    await p.goto(server.url);
+    await p.boot({ readIntro: false });
+    await p.ev(`adventure.start()`);
+    await t.sleep(800);
+    // いちばん したまで スクロール した ときの じめんの いち（カメラが ピクセを おうので、じっさいには スクロール しないで はかる）
+    const [ground, pad] = await p.ev(`(() => {
+      const g = document.querySelector(".adv-ground").getBoundingClientRect().top + scrollY;
+      return [g - (document.documentElement.scrollHeight - innerHeight), document.querySelector(".adv-pad button").getBoundingClientRect().top];
+    })()`);
+    t.ok(ground + 4 <= pad, `じめん ${ground} が ボタン ${pad} に かさなる`);
+    t.noErrors(p);
+    await server.close();
+  },
 };

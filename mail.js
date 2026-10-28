@@ -13,11 +13,13 @@ const mail = (() => {
   const fmt = (s) => `${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
   const goCloset = { label: "クローゼットを みる", go: () => room.open("hat") };
 
-  // 版ごとに ここへ 1 つう たす。date より まえに であった ひとにも、その ひ から とどく（みらいの ひづけは その ひまで でない）
+  // 版ごとに ここへ 1 つう たす。date より まえに であった ひとにも、その ひ から とどく（みらいの ひづけは その ひまで でない）。
+  // before: true は まえから きて いる ひと むけの 話（かわった こと）。あとから きた ひとには とどけない（v1.65.3）
   const MAILS = [
     {
       id: "2026-10-24-mailbox",
       date: "2026-10-24",
+      before: true,
       title: "おしらせ ボックスが できました",
       body: ["WARPIX製作所からの おしらせは、これからは ここに とどきます。", "あたらしい おしらせが あると、この ふうとうが きんいろに ひかります。"],
     },
@@ -44,6 +46,7 @@ const mail = (() => {
     {
       id: "2026-10-25-shelves",
       date: "2026-10-25",
+      before: true,
       title: "リンクの たなを ととのえました",
       body: ["「いつもの」の たなは なくして、YOUTUBE や SPOTIFY も それぞれの たなに いれました。", "せいかつの たなに TIMETREE が はいりました。", "パーティを ふやす ときは、6 こ そろった ところで もう できあがります。"],
     },
@@ -108,7 +111,9 @@ const mail = (() => {
     };
     // きた ひ より あと に でた おしらせ（v1.63.2）と、きた きせつに でた おしらせ（v1.64）。みらいの ものは その ひまで でない
     const from = seasonStart(b);
-    return [welcome, ...MAILS.filter((m) => (m.date > b || m.date >= from) && m.date <= ymd), ...seasonal()].sort((a, b2) => (a.date === b2.date ? 0 : a.date < b2.date ? 1 : -1));
+    // きた ひ より まえの ものは きた ひ づけに そろえて、ようこそ を いちばん した（さいしょに とどいた もの）に（v1.65.3、本人「ようこそ の前にすでにメールが届いてるの違和感ある」）
+    const later = MAILS.filter((m) => (m.date > b || (m.date >= from && !m.before)) && m.date <= ymd).map((m) => (m.date < b ? { ...m, date: b } : m));
+    return [...later, ...seasonal(), welcome].sort((a, b2) => (a.date === b2.date ? 0 : a.date < b2.date ? 1 : -1));
   }
   const unread = () => list().filter((m) => !state.read.includes(m.id));
 

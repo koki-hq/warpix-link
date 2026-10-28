@@ -89,6 +89,20 @@ export default {
     await server.close();
   },
 
+  async "きりかえの おびは ◀ ▶ の はば だけ（アドベンチャーで よこの すきまに のれない、v1.65.3）"(t) {
+    const more = JSON.stringify({ at: 0, name: "", more: [{ name: "", ids: SIX }] });
+    const { server, p } = await open(t, { before: `localStorage.setItem("warpix-parties", ${JSON.stringify(more)})` });
+    const [bar, links] = await p.ev(`["party-bar", "links"].map((c) => { const r = document.querySelector("." + c).getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right)]; })`);
+    t.ok(bar[1] - bar[0] < (links[1] - links[0]) * 0.8, `おびが ひろい: ${bar} / ${links}`);
+    t.ok(Math.abs(bar[0] - links[0] - (links[1] - bar[1])) <= 2, `まんなかに ない: ${bar} / ${links}`);
+    await p.ev(`adventure.start()`);
+    await t.sleep(300);
+    const r = await p.ev(`(() => { const r = document.getElementById("party-bar").getBoundingClientRect(); return [r.left, r.right]; })()`);
+    t.eq(r.map(Math.round), bar, "アドベンチャーで おびの はばが かわる");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "こわれた パーティは つかわない。1 つに もどると warpix-parties は けす"(t) {
     const bad = JSON.stringify({ at: 5, name: "", more: [{ name: "x", ids: ["youtube"] }, { ids: ["nope", 1, 2, 3, 4, 5] }] });
     const { server, p } = await open(t, { before: `localStorage.setItem("warpix-parties", ${JSON.stringify(bad)})` });

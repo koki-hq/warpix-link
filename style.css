@@ -1482,6 +1482,11 @@ body.party {
   .adv-pad {
     display: flex;
   }
+
+  /* したに よはくを たして、じめんが ボタンより うえに くる ように（ピクセが ボタンに かくれない、v1.65.3） */
+  .adventuring .screen {
+    padding-bottom: 150px;
+  }
 }
 
 /* ---------- スタッフロール ---------- */
@@ -4377,8 +4382,9 @@ a,
   align-items: center;
   justify-content: center;
   gap: 12px;
-  width: 100%;
-  margin-top: 16px;
+  /* はばは ◀ ▶ の ぶん だけ。アドベンチャーで よこの すきまに のれて しまう（v1.65.3） */
+  width: fit-content;
+  margin: 16px auto 0;
 }
 
 /* スタート がめんでは みせない（ほかの ぶひんと おなじく、はじまってから でる） */
