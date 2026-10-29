@@ -15,6 +15,7 @@ const FAKE = (at) => `
     send(m) { window.__sent.push(m); return Promise.resolve(); },
     presenceState() { return {}; },
   };
+  window.__fire = (k, m) => (handlers[k] ?? []).forEach((cb) => cb(m));
   window.supabase = { createClient: () => ({
     channel: (name) => ((window.__channel = name), ch),
     from: () => ({ select: async () => ({ data: [], error: null }) }),
@@ -64,17 +65,20 @@ export default {
     const { server, p } = await open(t, NIGHT - 3000);
     await p.boot();
     let hp = "";
-    for (let i = 0; i < 20 && !hp.startsWith("HP 90"); i++) {
+    for (let i = 0; i < 20 && !hp.startsWith("HP 300"); i++) {
       await t.sleep(500);
       hp = await p.ev(`document.querySelector(".raid-hp")?.textContent ?? ""`);
     }
-    t.eq(hp, "HP 90/90", "HP が 3 ばいに ならない");
+    t.eq(hp, "HP 300/300", "HP が ひとり 300 に ならない");
     t.ok(await p.ev(`document.querySelector(".raid").classList.contains("night")`), "きんいろに ならない");
     t.ok((await p.ev(`document.querySelector(".raid-title").textContent`)).includes("しゅうらいの よる"), "なまえ");
     t.ok((await p.ev(`document.querySelector(".raid-time").textContent`)).match(/のこり 1[67]\dびょう/), `3 ぷんに ならない: ${await p.ev(`document.querySelector(".raid-time").textContent`)}`);
-    for (let i = 0; i < 90; i++) await p.ev(`document.querySelector(".raid:not(.down) .raid-ship")?.click()`);
+    await p.ev(`for (let i = 0; i < 300; i++) document.querySelector(".raid:not(.down) .raid-ship")?.click()`);
     await t.sleep(500);
     t.ok(await p.ev(`achievements.has("raid-night") && achievements.has("raid")`), "実績");
+    // たおした あと、あとから きた ひとに「もう たおした」と こたえる（v1.66.1）
+    await p.ev(`window.__sent = []; __fire("broadcast:raid-ask", { payload: { slot: ${NIGHT / 600000}, from: "late" } })`);
+    t.ok(await p.ev(`window.__sent.some((m) => m.event === "raid-state" && m.payload.down)`), "あとから きた ひとに こたえない");
     t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "raid-night")`), "にっき");
     t.noErrors(p);
     await server.close();
@@ -99,19 +103,56 @@ export default {
     const lines = await p.readIntro();
     t.ok(lines.some((l) => l.includes("リハーサルの そら")), `リハーサルと いわない: ${JSON.stringify(lines)}`);
     let hp = "";
-    for (let i = 0; i < 20 && !hp.startsWith("HP 90"); i++) {
+    for (let i = 0; i < 20 && !hp.startsWith("HP 300"); i++) {
       await t.sleep(500);
       hp = await p.ev(`document.querySelector(".raid-hp")?.textContent ?? ""`);
     }
-    t.eq(hp, "HP 90/90", "マザーシップが こない");
+    t.eq(hp, "HP 300/300", "マザーシップが こない");
     t.eq(await p.ev(`window.__channel`), "warpix-sky-rehearsal", "本番の そらに つないだ");
     t.ok((await p.ev(`document.querySelector(".raid-title").textContent`)).includes("リハーサル"), "なまえ");
     await p.ev(`emit("ufo-down", {})`);
-    for (let i = 0; i < 90; i++) await p.ev(`document.querySelector(".raid:not(.down) .raid-ship")?.click()`);
-    await t.sleep(3500);
+    await p.ev(`for (let i = 0; i < 300; i++) document.querySelector(".raid:not(.down) .raid-ship")?.click()`);
+    // リハーサルも はなびと きねんしゃしんの さそいまで（v1.66.1）
+    let asked = false;
+    for (let i = 0; i < 60 && !asked; i++) {
+      await t.sleep(200);
+      asked = (await p.text()).includes("きねんしゃしん");
+      if (!asked && !(await p.ev(`Boolean(document.querySelector(".dialog-choices"))`))) await p.ev(`document.getElementById("dialog").click()`);
+    }
+    t.ok(asked, `リハーサルで きねんしゃしんに さそわない: ${await p.text()}`);
+    t.eq(await p.ev(`opening.saved().length`), 0, "リハーサルが WORLD RECORD に のこった");
     t.ok(!(await p.ev(`achievements.has("raid-night") || achievements.has("raid")`)), "リハーサルで 実績が ついた");
-    t.ok(!(await p.ev(`grow.state.diary.some((e) => e.type === "raid-night")`)), "リハーサルが にっきに のった");
+    t.ok(!(await p.ev(`grow.state.diary.some((e) => ["raid-night", "hanabi"].includes(e.type))`)), "リハーサルが にっきに のった");
     t.ok(!(await p.ev(`window.__rpc`)), "せかいの きろくを ふやした");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "たおされた あとに きた ひとには あたらしい マザーシップを ださない。はなびだけ（v1.66.1）"(t) {
+    const { server, p } = await open(t, NIGHT + 60000);
+    // boot（2.6 びょう まつ）を つかうと、こたえる まえに じぶんで はじめて しまう。PRESS START だけ おして すぐ みはる
+    await p.ev(`document.getElementById("start-btn").click()`);
+    // くわわった ときの「いま HP いくつ？」に、たおした ひとが「もう たおした」と こたえる
+    let asked = false;
+    for (let i = 0; i < 200 && !asked; i++) {
+      await t.sleep(50);
+      asked = await p.ev(`window.__sent.some((m) => m.event === "raid-ask")`);
+    }
+    t.ok(asked, "くわわらない");
+    await p.ev(`__fire("broadcast:raid-state", { payload: { slot: ${NIGHT / 600000}, down: true, from: "a" } })`);
+    await t.sleep(2500);
+    t.ok(!(await p.ev(`Boolean(document.querySelector(".raid"))`)), "あたらしい マザーシップが でた");
+    // あいさつを よみおえた あとに いう
+    const lines = await p.readIntro();
+    let told = lines.some((l) => l.includes("たおしたよ"));
+    for (let i = 0; i < 20 && !told; i++) {
+      await t.sleep(300);
+      const now = await p.text();
+      told = now.includes("たおしたよ");
+      if (!told) await p.ev(`document.getElementById("dialog").click()`);
+    }
+    t.ok(told, `ピクセが おしえない: ${JSON.stringify(lines)} / ${await p.text()}`);
+    t.ok(!(await p.ev(`achievements.has("raid-night")`)), "うって いないのに 実績");
     t.noErrors(p);
     await server.close();
   },

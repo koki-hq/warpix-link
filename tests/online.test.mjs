@@ -230,7 +230,7 @@ export default {
     }
     t.ok(ready, `ふたりの画面に おなじ HP の マザーシップが出ない: ${hp}`);
     const max = Number(hp.split("/")[1]);
-    t.ok(max === 90 || max === 180, `HP が ひとり 90 で ない: ${max}`);
+    t.ok(max === 300 || max === 600, `HP が ひとり 300 で ない: ${max}`);
     await p.shot("online-raid-pair.png");
     for (let i = 0; i < 5; i++) { await inFrame(0, `document.querySelector(".raid-ship").click()`); await t.sleep(40); }
     await t.sleep(800);

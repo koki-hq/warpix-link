@@ -22,7 +22,7 @@ export default {
     const titles = await p.ev(`[...document.querySelectorAll(".mail-item .mail-title")].map((e) => e.textContent)`);
     t.ok(titles.includes("コスチュームが 入庫しました") && titles.includes("ようこそ、WARPIX LINK へ"), `いちらん：${titles}`);
     t.ok(!titles.includes("WARPIX LINK、開店しました"), "みらいの おしらせが でた");
-    t.eq(titles[0], "ようこそ、WARPIX LINK へ", "ようこそ が いちばん うえに ない");
+    t.eq(titles.at(-1), "ようこそ、WARPIX LINK へ", "まえから いる ひとの ようこそ が いちばん したに ない");
     await p.shot("mail.png");
     await p.ev(`[...document.querySelectorAll(".mail-item")].find((b) => b.textContent.includes("コスチュームが 入庫")).click()`);
     await t.sleep(200);
@@ -42,7 +42,7 @@ export default {
     await server.close();
   },
 
-  async "開店からは 掲示板：プレリリースの おしらせは きえ、ほんとうの ひづけで いつ きた ひとにも みえる。ようこそ は いちばん うえに ピンどめ（v1.66）"(t) {
+  async "開店からは 掲示板：プレリリースの おしらせは きえ、ほんとうの ひづけで いつ きた ひとにも みえる。ようこそ も きた ひの ひづけ（v1.66.1）"(t) {
     // プレリリース中（10/28）：まえからの おしらせも ある
     const { server, p } = await open(t, { url: "?date=2026-10-28", before: pixe("2026-10-28") });
     const pre = await p.ev(`mail.list().map((m) => m.id)`);
@@ -52,10 +52,15 @@ export default {
     await p.ev(`localStorage.clear(); ${pixe("2026-10-20")}`);
     await p.goto(server.url + "?date=2026-11-01");
     await p.boot();
-    t.eq(await p.ev(`mail.list().map((m) => m.id)`), ["welcome", "2026-11-01-open"], "開店の ひの おしらせ");
+    t.eq(await p.ev(`mail.list().map((m) => m.id)`), ["2026-11-01-open", "welcome"], "開店の ひの おしらせ（まえから いる ひとの ようこそ は した）");
+    // 11/1 に はじめて きた ひと：開店が さいしょの 1 つう、ようこそ が その あと（おなじ ひは ようこそ が うえ）
+    await p.ev(`localStorage.clear(); ${pixe("2026-11-01")}`);
+    await p.goto(server.url + "?date=2026-11-01");
+    await p.boot();
+    t.eq(await p.ev(`mail.list().map((m) => m.id)`), ["welcome", "2026-11-01-open"], "11/1 に きた ひとの おしらせ");
     await p.click("#mail-btn");
     await t.sleep(200);
-    t.eq(await p.ev(`document.querySelector(".mail-item .mail-date").textContent`), "PIN", "ようこそ が ピンどめ で ない");
+    t.eq(await p.ev(`document.querySelector(".mail-item .mail-date").textContent`), "11/1", "ようこそ に ひづけが ない");
     await p.ev(`document.getElementById("mail").close()`);
     // 12 がつに はじめて きた ひと：あきの 入荷も 開店も ほんとうの ひづけで みえる。あたらしい じゅん
     await p.ev(`localStorage.clear(); ${pixe("2026-12-20")}`);

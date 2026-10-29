@@ -10,12 +10,13 @@ const raid = (() => {
   const PERIOD = (rehearsal ? 4 : 10) * 60 * 1000; // じかんの わく（21:00 の わくが しゅうらいの よる）
   const DURATION = 3 * 60 * 1000; // 3 ぷん いないに たおす
   const WARN = 10 * 1000; // 10 秒前に予告
-  const HP_PER_PLAYER = 90; // ひとり 90（v1.50 までの いつもの レイドの 3 ばい）
+  // ひとり 300（v1.66.1、まえは 90）。1 びょうに 5 かい おして ひとりで 1 ぷんくらい。だれも おさないと にげられる
+  const HP_PER_PLAYER = 300;
   const slotOf = (t) => Math.floor(t / PERIOD);
   const startOf = (slot) => slot * PERIOD;
 
   // ---------- しゅうらいの よる（v1.40）：まいつき さいしょの にちようびの 21:00（日本時間）は だい マザーシップ ----------
-  // SNS で 予告して、その じかんに みんなで あつまる 日。HP は 3 ばい、3 ぷんかん、きんいろ
+  // SNS で 予告して、その じかんに みんなで あつまる 日。HP は ひとり 300（v1.66.1）、3 ぷんかん、きんいろ
   const JST = 9 * 60 * 60 * 1000;
   const NIGHT_HOUR = 21;
   const jst = (t) => new Date(t + JST); // getUTC… で 日本の 日付・じこくが よめる
@@ -40,6 +41,7 @@ const raid = (() => {
   let cur = null; // { slot, hp, max, hits, players, el, ... }
   let warned = -1;
   let done = -1;
+  let beaten = -1; // たおした わく（あとから きた ひとに「もう たおした」と おしえる、v1.66.1）
   let outbox = 0; // まだ送っていない自分の攻撃
   let missedTimer = 0;
 
@@ -136,25 +138,29 @@ const raid = (() => {
     // うった 人 だけで なく、その とき おなじ そらに いた 人も なかま（HP も その 人数で きまる。v1.46）
     const players = Math.max(cur.players.size, online.count(), 1);
     const mine = cur.hits;
+    beaten = cur.slot;
     const el = finish();
     el.classList.add("down");
-    if (rehearsal) {
-      [0, 180, 360].forEach((d) => setTimeout(sound.sfx.boom, d));
-      npc.say([`リハーサル せいこう！\n${players}にんで たおした。`, `きみは ${mine}かい うった。\nつぎも ${PERIOD / 60000}ふんごとに くるよ。`]);
-      return;
-    }
     el.querySelector(".raid-ship").innerHTML = pixelSvg(BOOM) + pixelSvg(BOOM) + pixelSvg(BOOM);
     [0, 180, 360, 540].forEach((d) => setTimeout(sound.sfx.boom, d));
     stars.warp(2000);
+    // リハーサルも はなびと きねんしゃしんまで（v1.66.1）。ごほうび・きろく・にっきは なし
+    if (rehearsal) {
+      npc.say([`リハーサル せいこう！\n${players}にんで たおした。`, `きみは ${mine}かい うった。\nつぎも ${PERIOD / 60000}ふんごとに くるよ。`]);
+      opening.celebrate({ players, rehearsal: true });
+      return;
+    }
     if (mine > 0) {
       score.add(20000, innerWidth / 2, 160);
       achievements.unlock("raid");
       achievements.unlock("raid-night");
       emit("raid-win", { players, hits: mine, night: true });
       grow.write("raid-night", `しゅうらいの よるに、${players}にんで だい マザーシップを たおした。`, { force: true });
-      npc.say([`しゅうらいの よるを\n${players}にんで のりきった！`, `きみは ${mine}かい うった。\nらいげつも あつまろうね！`]);
+      npc.say([`しゅうらいの よるを\n${players === 1 ? "ひとりで" : `${players}にんで`} のりきった！`, `きみは ${mine}かい うった。\nらいげつも あつまろうね！`]);
     } else {
-      npc.say(["だれかが マザーシップを\nたおした！ すごい！"]);
+      // うつ まえに たおれても、その ばに いた ひとは なかま。はなびと きねんしゃしんは でる（v1.66.1）。じっせきと カードは うった ひと だけ
+      emit("raid-win", { players, hits: 0, night: true });
+      npc.say(["みんなが マザーシップを\nたおした！", "はなびが あがるよ！"]);
     }
   }
 
@@ -193,9 +199,25 @@ const raid = (() => {
   // ---------- 合図を受け取る ----------
   online.listen("raid-ask", (p) => {
     if (cur && cur.slot === p.slot && cur.hp !== null) online.send("raid-state", { slot: cur.slot, hp: cur.hp, max: cur.max });
+    // もう たおした あと：あとから きた ひとに おしえる
+    else if (beaten === p.slot) online.send("raid-state", { slot: p.slot, down: true });
   });
   online.listen("raid-state", (p) => {
     if (!cur || cur.slot !== p.slot) return;
+    if (p.down) {
+      // たたかって いた とちゅうなら たおした ことに。あとから きた ひとは はなびだけ みる（あたらしい 1 たいを はじめない、v1.66.1）
+      if (cur.hp !== null) return win();
+      beaten = cur.slot;
+      finish().remove();
+      // ひらいた ばかりで あいさつの とちゅう なら、おわって から（あいさつに うわがき されない ように）
+      const tell = () => {
+        if (!npc.ready() || playing()) return setTimeout(tell, 500);
+        npc.say(["さっき みんなが\nマザーシップを たおしたよ！", "はなびだけ いっしょに みよう。"]);
+        opening.fireworks();
+      };
+      tell();
+      return;
+    }
     cur.players.add(p.from);
     if (cur.hp === null) adopt(p.hp, p.max, p.from);
     // ふたりが同時に始めてしまったときは、大きい HP と、進んでいるほうの残りにそろえる

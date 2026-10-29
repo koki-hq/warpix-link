@@ -1,4 +1,4 @@
-// 開店の 日の リハーサル（2026-11-01）：朝 7 時の「開店しました」から、21 時の しゅうらいの よる、せいざ、きねんしゃしん まで
+// 開店の 日の リハーサル（2026-11-01）：朝 7 時の「開店しました」から、21 時の しゅうらいの よる、はなび、きねんしゃしん まで
 // ホームページの tools/open-news.json と おなじ おしらせを、本物の かわりに わたす。オンラインは にせもの、時計は ずらす
 import { readFileSync } from "node:fs";
 
@@ -73,7 +73,7 @@ export default {
     await server.close();
   },
 
-  async "開店の 夜（SNS から はじめて 来た 人）：予告 → 21:00 の だい マザーシップ → せいざ → きねんしゃしん"(t) {
+  async "開店の 夜（SNS から はじめて 来た 人）：予告 → 21:00 の だい マザーシップ → はなび → きねんしゃしん"(t) {
     const others = `a: [{ hat: "crown" }], b: [{ hat: "party" }]`;
     const { server, p } = await open(t, { born: "2026-11-01", at: NIGHT - 25000, query: "date=2026-11-01&hour=20", others });
     await p.ev(`document.getElementById("start-btn").click()`);
@@ -83,11 +83,11 @@ export default {
     t.ok(before.includes("こんや 21じ"), `予告が ない: ${before}`);
     // 21:00 まで まつ
     let hp = "";
-    for (let i = 0; i < 80 && !hp.startsWith("HP 270"); i++) {
+    for (let i = 0; i < 80 && !hp.startsWith("HP 900"); i++) {
       await t.sleep(250);
       hp = await p.ev(`document.querySelector(".raid.night .raid-hp")?.textContent ?? ""`);
     }
-    t.eq(hp, "HP 270/270", "3 にんぶんの だい マザーシップが こない");
+    t.eq(hp, "HP 900/900", "3 にんぶんの だい マザーシップが こない");
     // みんなで うつ
     for (let i = 0; i < 300; i++) {
       const left = await p.ev(`(() => { const s = document.querySelector(".raid:not(.down) .raid-ship"); if (!s) return -1; s.click(); return 1; })()`);
@@ -97,8 +97,7 @@ export default {
     t.ok(await p.ev(`achievements.has("raid-night")`), "たおせない");
     const after = (await listen(p, t, 9000)).join(" / ");
     t.ok(after.includes("3にんで のりきった"), `たおした あとの ことば（3 にんで）: ${after}`);
-    t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "seiza" && e.text.includes("3この ほし"))`), "3 この ほしの せいざが できない");
-    t.ok(await p.ev(`Boolean(document.querySelector(".seiza"))`) || after.includes("きねんしゃしん"), "せいざが でない");
+    t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "hanabi" && e.text.includes("3にんで"))`), "3 にんの はなびが にっきに ない");
     t.ok(after.includes("きねんしゃしん"), `きねんしゃしんに さそわない: ${after}`);
     await p.ev(`document.querySelector(".dialog-choices button")?.click()`);
     await t.sleep(1500);

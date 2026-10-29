@@ -4685,51 +4685,17 @@ a,
 }
 
 /* =====================================================================
-   開店の よる（v1.42）：しゅうらいの よるの せいざ・ひらく ひの てがみ
+   開店の よる（v1.42）：しゅうらいの よるの はなび（v1.66.1 まで せいざ）・ひらく ひの てがみ
    ===================================================================== */
-.seiza {
+/* たおした あとの はなび（v1.66.1、まえは せいざ）：がめんいっぱいの キャンバス。おしても したに とおる */
+.hanabi {
   position: fixed;
-  top: 64px;
-  left: 50%;
+  inset: 0;
   z-index: 7;
-  width: min(420px, calc(100vw - 32px));
-  translate: -50% 0;
-  pointer-events: none;
-  text-align: center;
-  animation: seiza-in 1.2s steps(6) both;
-}
-
-.seiza svg {
-  display: block;
   width: 100%;
-  height: auto;
-  max-height: 150px;
-  shape-rendering: crispEdges;
-}
-
-.seiza-lines line {
-  stroke: var(--fg);
-  stroke-width: 0.6;
-  stroke-dasharray: 1 1.5;
-  opacity: 0.7;
-}
-
-.seiza-name {
-  margin: 4px 0 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  color: var(--gold);
-  text-shadow: 2px 2px 0 #000;
-}
-
-.seiza.gone {
-  opacity: 0;
-  transition: opacity 1s steps(4);
-}
-
-@keyframes seiza-in {
-  from { opacity: 0; translate: -50% 12px; }
-  to { opacity: 1; translate: -50% 0; }
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
 }
 
 .seiza-list h4 {
@@ -4762,21 +4728,8 @@ a,
   shape-rendering: crispEdges;
 }
 
-/* せまい 画面では ピクセの セリフに かさなるので、なまえは ださない（ピクセが いう） */
-@media (max-width: 720px) {
-  .seiza-name {
-    display: none;
-  }
-}
-
 .letter-btn.special {
   color: var(--gold);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .seiza {
-    animation: none;
-  }
 }
 
 /* =====================================================================
@@ -5117,7 +5070,7 @@ a,
   }
 }
 
-/* しゅうらいの よるの きねんしゃしん（v1.45）：WORLD RECORD の せいざを おすと しゃしん */
+/* しゅうらいの よるの きねんしゃしん（v1.45）：WORLD RECORD の はなびを おすと しゃしん */
 .seiza-btn {
   display: block;
   width: 100%;
@@ -6048,10 +6001,6 @@ a,
   font-family: "Press Start 2P", monospace;
   font-size: 8px;
   color: var(--accent-2);
-}
-
-.mail-item.pin .mail-date {
-  color: var(--gold);
 }
 
 .mail-title {

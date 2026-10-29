@@ -1,4 +1,4 @@
-// 開店の よる（v1.42）：1きせいへの ひらく ひの てがみ、しゅうらいの よるの せいざ
+// 開店の よる（v1.42）：1きせいへの ひらく ひの てがみ、しゅうらいの よるの はなび（v1.66.1 まで せいざ）と きねんしゃしん
 async function page(t, born, query = "") {
   const server = await t.startServer();
   const b = await t.launchBrowser();
@@ -43,29 +43,30 @@ export default {
     }
   },
 
-  async "しゅうらいの よるに たおすと、人数ぶんの ほしの せいざ。WORLD RECORD に のこる"(t) {
+  async "しゅうらいの よるに たおすと がめんに はなび（v1.66.1、まえは せいざ）。うって いなくても でる。WORLD RECORD に のこる"(t) {
     const { server, p } = await page(t, "2026-10-12");
     await p.boot();
     await p.ev(`emit("raid-win", { players: 4, hits: 10 })`); // ふつうの レイド
-    await t.sleep(3800);
-    t.ok(!(await p.ev(`Boolean(document.querySelector(".seiza"))`)), "ふつうの レイドで せいざ");
-    await p.ev(`emit("raid-win", { players: 4, hits: 10, night: true })`);
-    await t.sleep(3800);
-    t.eq(await p.ev(`document.querySelectorAll(".seiza svg rect").length`), 4, "ほしの かず");
-    t.eq(await p.ev(`document.querySelectorAll(".seiza svg line").length`), 3, "つなぐ せん");
+    await t.sleep(2000);
+    t.ok(!(await p.ev(`Boolean(document.querySelector(".hanabi"))`)), "ふつうの レイドで はなび");
+    await p.ev(`emit("raid-win", { players: 4, hits: 0, night: true })`);
+    let shown = false;
+    for (let i = 0; i < 20 && !shown; i++) {
+      await t.sleep(200);
+      shown = await p.ev(`Boolean(document.querySelector("canvas.hanabi"))`);
+    }
+    t.ok(shown, "はなびが あがらない");
     const saved = await p.ev(`JSON.parse(localStorage.getItem("warpix-constellations"))`);
-    t.eq([saved.length, saved[0].colors.length], [1, 4], "ほぞん");
+    t.eq([saved.length, saved[0].hats.length], [1, 4], "ほぞん");
     await p.ev(`room.open("trophy")`);
     await t.sleep(300);
     t.eq(await p.ev(`document.querySelectorAll("#seiza-list li").length`), 1, "WORLD RECORD に ない");
-    t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "seiza")`), "にっき");
-    // おなじ 日付なら おなじ かたち
-    t.eq(await p.ev(`JSON.stringify(opening.points("warpix-seiza-2026-11-01", 4))`), await p.ev(`JSON.stringify(opening.points("warpix-seiza-2026-11-01", 4))`), "かたちが きまらない");
+    t.ok(await p.ev(`grow.state.diary.some((e) => e.type === "hanabi" && e.text.includes("4にんで"))`), "にっき");
     t.noErrors(p);
     await server.close();
   },
 
-  async "せいざの あと「きねんしゃしん とろう！」→ とる で みんなの ピクセの しゃしん。WORLD RECORD の せいざからも みられる"(t) {
+  async "はなびの あと「きねんしゃしん とろう！」→ とる で みんなの ピクセの しゃしん。WORLD RECORD からも みられる。100 にんでも つくれる"(t) {
     const { server, p } = await page(t, "2026-10-12");
     await p.boot();
     await p.ev(`emit("raid-win", { players: 3, hits: 10, night: true })`);
@@ -90,6 +91,8 @@ export default {
     t.ok(await p.ev(`Boolean(document.querySelector(".postcard"))`), "WORLD RECORD から みられない");
     const size = await p.ev(`opening.photo(opening.saved()[0]).then((cv) => [cv.width, cv.height])`);
     t.eq(size, [1200, 630], "しゃしんの 大きさ");
+    // ぜんいん うつす（12 にんで とまらない、v1.66.1）
+    t.eq(await p.ev(`opening.photo({ date: "2026-11-01", hats: Array(100).fill(null) }).then((cv) => cv.width)`), 1200, "100 にんの しゃしんが できない");
     t.noErrors(p);
     await server.close();
   },

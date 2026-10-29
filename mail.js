@@ -87,18 +87,19 @@ const mail = (() => {
     },
   ];
 
-  // ようこそ（はじめて きた ひ）は いちばん うえに ピンどめ。ひづけの ならびには いれない（だい 11 かい 会議）
+  // ようこそ（はじめて きた ひ）も きた ひの ひづけで ならべる。おなじ ひは ようこそ が うえ（あとから とどいた もの）。
+  // v1.66 は ピンどめ だったが やめた（本人「ピン止めする意味なくね？だって１１/１に開店でしょ？　それがお知らせの第一投目じゃん？」）
   const born = () => (growState() ?? store.get("warpix-pixe", null))?.born ?? ymd;
   function list() {
     const welcome = {
       id: "welcome",
       date: born(),
-      pin: true,
       title: "ようこそ、WARPIX LINK へ",
       body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", "あたらしい ことが あったら、ここで おしらせします。"],
     };
-    const board = MAILS.filter((m) => m.date <= ymd && !(m.pre && ymd >= OPEN)).sort((x, y) => (x.date === y.date ? 0 : x.date < y.date ? 1 : -1));
-    return [welcome, ...board];
+    const board = MAILS.filter((m) => m.date <= ymd && !(m.pre && ymd >= OPEN));
+    // あたらしい じゅん。おなじ ひなら ようこそ が うえ（sort は おなじ ものの じゅんを かえない）
+    return [welcome, ...board].sort((x, y) => (x.date === y.date ? 0 : x.date < y.date ? 1 : -1));
   }
   const unread = () => list().filter((m) => !state.read.includes(m.id));
 
@@ -128,7 +129,7 @@ const mail = (() => {
       ? items
           .map((m) => {
             const isNew = !state.read.includes(m.id);
-            return `<li><button type="button" class="mail-item${isNew ? " unread" : ""}${m.pin ? " pin" : ""}" data-id="${m.id}"><span class="mail-date">${m.pin ? "PIN" : fmt(m.date)}</span><span class="mail-title">${m.title}</span>${isNew ? '<span class="mail-new">NEW</span>' : ""}</button></li>`;
+            return `<li><button type="button" class="mail-item${isNew ? " unread" : ""}" data-id="${m.id}"><span class="mail-date">${fmt(m.date)}</span><span class="mail-title">${m.title}</span>${isNew ? '<span class="mail-new">NEW</span>' : ""}</button></li>`;
           })
           .join("")
       : `<li class="mail-empty">まだ おしらせは ないよ。</li>`;
