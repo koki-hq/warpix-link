@@ -16,22 +16,22 @@ const FAKE = (at) => `
     presenceState() { return {}; },
   };
   window.supabase = { createClient: () => ({
-    channel: () => ch,
+    channel: (name) => ((window.__channel = name), ch),
     from: () => ({ select: async () => ({ data: [], error: null }) }),
-    rpc: async () => ({ data: 1 }),
+    rpc: async () => ((window.__rpc = (window.__rpc ?? 0) + 1), { data: 1 }),
   }) };`;
 const NIGHT = Date.UTC(2026, 10, 1, 12); // 2026-11-01（日）21:00 日本時間
 const MORNING = Date.UTC(2026, 10, 1, 1); // おなじ 日の 10:00 日本時間
 const ORDINARY = Date.UTC(2026, 10, 8, 12); // 2 しゅうめの にちようび 21:00（ふつうの レイド）
 
-async function open(t, at) {
+async function open(t, at, url = "?away=0") {
   const server = await t.startServer();
   const b = await t.launchBrowser();
   const p = await b.firstPage();
   await p.send("Page.addScriptToEvaluateOnNewDocument", { source: FAKE(at) });
   await p.goto(server.url);
   await p.ev(`localStorage.clear()`);
-  await p.goto(server.url + "?away=0");
+  await p.goto(server.url + url);
   return { server, p };
 }
 
@@ -87,6 +87,31 @@ export default {
     t.ok(!(await p.ev(`Boolean(document.querySelector(".raid"))`)), "ふつうの 日に マザーシップが きた");
     t.ok(!(await p.text()).includes("なにか くる"), "ふつうの 日に 予告した");
     t.eq(await p.ev(`document.getElementById("raid-next").textContent`), "12/6 21:00", "つぎの しゅうらいの よる");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "リハーサル（?raid=rehearsal）：べつの そらで すぐ だい マザーシップ。せかいの きろくも ごほうびも ふやさない（v1.66）"(t) {
+    // ふつうの ひの ひる。4 ぷんの わくの はじめ
+    const at = Math.floor(Date.UTC(2026, 10, 4, 3) / 240000) * 240000 + 2000;
+    const { server, p } = await open(t, at, "?away=0&raid=rehearsal");
+    await p.boot({ readIntro: false });
+    const lines = await p.readIntro();
+    t.ok(lines.some((l) => l.includes("リハーサルの そら")), `リハーサルと いわない: ${JSON.stringify(lines)}`);
+    let hp = "";
+    for (let i = 0; i < 20 && !hp.startsWith("HP 90"); i++) {
+      await t.sleep(500);
+      hp = await p.ev(`document.querySelector(".raid-hp")?.textContent ?? ""`);
+    }
+    t.eq(hp, "HP 90/90", "マザーシップが こない");
+    t.eq(await p.ev(`window.__channel`), "warpix-sky-rehearsal", "本番の そらに つないだ");
+    t.ok((await p.ev(`document.querySelector(".raid-title").textContent`)).includes("リハーサル"), "なまえ");
+    await p.ev(`emit("ufo-down", {})`);
+    for (let i = 0; i < 90; i++) await p.ev(`document.querySelector(".raid:not(.down) .raid-ship")?.click()`);
+    await t.sleep(3500);
+    t.ok(!(await p.ev(`achievements.has("raid-night") || achievements.has("raid")`)), "リハーサルで 実績が ついた");
+    t.ok(!(await p.ev(`grow.state.diary.some((e) => e.type === "raid-night")`)), "リハーサルが にっきに のった");
+    t.ok(!(await p.ev(`window.__rpc`)), "せかいの きろくを ふやした");
     t.noErrors(p);
     await server.close();
   },

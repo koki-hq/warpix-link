@@ -12,6 +12,9 @@ const online = (() => {
   const countEl = document.getElementById("online-count");
   const recordEl = document.getElementById("world-record");
   if (!cfg.url || !cfg.key) return { enabled: false };
+  // しゅうらいの よるの リハーサル（v1.66）：?raid=rehearsal で ひらくと、本番と べつの そらに つながる。
+  // 本番の まえに 本物の Supabase と 2 だい いじょうで ためす ため（本人「本当に　できるのかとか　実機で」）。せかいの きろくは ふやさない
+  const rehearsal = new URLSearchParams(location.search).get("raid") === "rehearsal";
 
   const SDK = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
   const MAX_GHOSTS = 8;
@@ -183,7 +186,7 @@ const online = (() => {
 
   // つついた回数などは、まとめて 3 秒ごとに送る（1 回で増やせるのは 20 まで）
   async function flush() {
-    if (!client) return;
+    if (!client || rehearsal) return;
     for (const k of Object.keys(pending)) {
       const n = Math.min(pending[k], 20);
       if (!n) continue;
@@ -215,7 +218,7 @@ const online = (() => {
   }
   function join() {
     if (channel) return;
-    channel = client.channel("warpix-sky", { config: { presence: { key: me }, broadcast: { self: false } } });
+    channel = client.channel(rehearsal ? "warpix-sky-rehearsal" : "warpix-sky", { config: { presence: { key: me }, broadcast: { self: false } } });
     const mine = channel;
     channel
       .on("presence", { event: "sync" }, () => mine === channel && render(mine.presenceState()))
@@ -281,6 +284,7 @@ const online = (() => {
 
   return {
     enabled: true,
+    rehearsal,
     me,
     open,
     isOpen: () => !!channel,

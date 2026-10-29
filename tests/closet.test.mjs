@@ -24,25 +24,50 @@ async function toCloset(t, p) {
 }
 
 export default {
+  async "あきの コスチュームは 11/15 の 入荷から。それまでは ヒントで いつか わかる。プレリリースで もらった 人は そのまま（v1.66）"(t) {
+    const { server, p } = await open(t, { url: "?date=2026-11-05", before: pixe(0, ["2026-11-05"]) });
+    await toCloset(t, p);
+    t.ok(!(await open_(p)).includes("acorn"), "入荷まえに どんぐりが ある");
+    t.eq(await p.ev(`document.querySelector('#closet-list [data-id="acorn"]').title`), "11/15 に 入荷するよ", "入荷の ヒント");
+    // プレリリース（10 がつ）に もらった 人：もった まま。年は おしらせの きろくから
+    await p.ev(`localStorage.clear(); ${pixe(0, ["2026-10-24", "2026-11-05"], "2026-10-24")}; localStorage.setItem("warpix-season-hats", JSON.stringify(["season:autumn"])); localStorage.setItem("warpix-mail", JSON.stringify({ read: [], got: { "season-autumn": "2026-10-24" } }))`);
+    // （1きせいは 開店の あと ひらく ひの てがみが でるので、ROOM は ひらかず に しらべる）
+    await p.goto(server.url + "?date=2026-11-05");
+    await p.boot();
+    t.ok(await p.ev(`wardrobe.opened("acorn")`), "プレリリースで もらった どんぐりが きえた");
+    t.eq(await p.ev(`wardrobe.fromOf("season:autumn")`), "2026年の あきに とどいた", "でどころの 年");
+    // 11/15 から：はじめての 人も もらえる
+    await p.ev(`localStorage.clear(); ${pixe(0, ["2026-11-15"])}`);
+    await p.goto(server.url + "?date=2026-11-15");
+    await p.boot();
+    await toCloset(t, p);
+    t.ok((await open_(p)).includes("acorn"), "11/15 に どんぐりが ない");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ぶんるいは ぼうし と コスチューム。ためしに きて「これに する」、ぼうしと コスチュームは いっしょに きられる"(t) {
-    const { server, p } = await open(t, { url: "?date=2026-10-24", before: pixe(0, ["2026-10-24"]) });
+    // あきの 入荷（11/15、v1.66）の あと
+    const { server, p } = await open(t, { url: "?date=2026-11-16", before: pixe(0, ["2026-11-16"]) });
     await toCloset(t, p);
     t.eq(await p.ev(`document.getElementById("diary-title").textContent`), "クローゼット", "みだし");
     t.eq(await p.ev(`[...document.querySelectorAll(".closet-kind")].map((b) => b.textContent)`), ["ぼうし", "コスチューム"], "ぶんるい");
-    // はじめての ひ（あき）：ベレー（あか）＋ あきの どんぐり ＋ もとからの ぼうし（かぼちゃ は ハロウィン）
+    // はじめての ひ（あき）：ベレー（あか）＋ あきの どんぐり
     const hats = await open_(p);
     t.ok(hats.includes("beret") && hats.includes("acorn") && !hats.includes("catears") && !hats.includes("beret-deep"), `ぼうしの ならび：${hats}`);
     await item(p, "beret");
     t.eq(await p.ev(`document.getElementById("closet-name").textContent`), "ベレーぼう", "なまえ");
+    t.eq(await p.ev(`document.getElementById("closet-from").textContent`), "さいしょから もってる", "でどころ（さいしょから）");
     t.eq(await p.ev(`[...document.querySelectorAll(".closet-color")].map((b) => b.disabled)`), [false, false, false, false], "いろの まる（4 しょく さいしょから）");
     await p.ev(`document.querySelector('.closet-color[data-hat="beret-deep"]').click()`);
-    t.eq(await p.ev(`wardrobe.currentId()`), "pumpkin", "ためした だけで かわった");
+    t.eq(await p.ev(`wardrobe.currentId()`), null, "ためした だけで かわった");
     await p.click("#closet-decide");
     t.eq(await p.ev(`wardrobe.currentId()`), "beret-deep", "いろちがいを かぶれない");
     t.ok((await p.ev(`document.getElementById("closet-name").textContent`)).includes("ふかい みどり"), "かぶった ひとこと");
     await kindTab(p, "cos");
     t.eq(await open_(p), ["none", "glasses", "muffler", "sweater"], "コスチュームの ならび（さいしょ・あき）");
     await item(p, "sweater");
+    t.eq(await p.ev(`document.getElementById("closet-from").textContent`), "2026年の あきに とどいた", "でどころ（きせつ は 年いり）");
     await p.click("#closet-decide");
     t.eq(await p.ev(`[wardrobe.currentId(), closet.worn().cos]`), ["beret-deep", "sweater"], "いっしょに きられない");
     await p.shot("closet.png");
@@ -50,7 +75,7 @@ export default {
     await item(p, "glasses");
     await p.click("#closet-decide");
     t.eq(await p.ev(`closet.worn().cos`), "glasses", "いれかわらない");
-    await p.goto(server.url + "?date=2026-10-24");
+    await p.goto(server.url + "?date=2026-11-16");
     await p.boot();
     t.eq(await p.ev(`[wardrobe.currentId(), closet.worn().cos]`), ["beret-deep", "glasses"], "ひらきなおすと もどる");
     t.noErrors(p);
@@ -86,6 +111,7 @@ export default {
     t.eq(await p.ev(`[...document.querySelectorAll("#closet-list .wardrobe-item")].filter((b) => b.querySelector(".closet-new")).map((b) => b.dataset.id)`), ["ribbon"], "NEW が ついた もの");
     await item(p, "ribbon");
     t.ok(await p.ev(`!document.querySelector("#closet-list .closet-new")`), "ためしても NEW が きえない");
+    t.eq(await p.ev(`document.getElementById("closet-from").textContent`), "5にち あえた プレゼント", "でどころ（あえた ひ）");
     await p.click("#room-back");
     await t.sleep(300);
     t.ok(await p.ev(`!document.querySelector(".rs-closet").classList.contains("glow")`), "みた あとも ひかる");

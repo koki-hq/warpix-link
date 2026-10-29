@@ -68,10 +68,35 @@ const wardrobe = (() => {
   // じぶんで えらんだ ことが ある（「なし」も）。えらんだ ものを まもる（v1.64、本人「デフォルトにできるようにしたい　強制ではなく」）
   let picked = store.get("warpix-hat-picked", false);
   const seen = new Set(store.get("warpix-season-hats", []));
+  // その きせつに はじめて あった ひ（v1.66、でどころの 年の ため）。v1.65.3 までに もって いた ものは おしらせの きろく（season-autumn など）から
+  const seenAt = store.get("warpix-season-at", {});
+  const ymdNow = () => { const d = today(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  function seasonDate(key) {
+    if (seenAt[key]) return seenAt[key];
+    const got = store.get("warpix-mail", null)?.got ?? {};
+    const k = `season-${key.slice(7)}`;
+    return got[k] ?? Object.entries(got).find(([x]) => x.startsWith(`${k}-`))?.[1] ?? null;
+  }
   // もらいかた（unlock）：なし＝さいしょから・"days:N"＝N にち あう・"season:…"＝その きせつに あう・それ いがい＝じっせき（v1.57）
   const days = () => (growState() ?? store.get("warpix-pixe", null))?.days?.length ?? 0;
   const unlocked = (u) => !u || (u.startsWith("days:") ? days() >= Number(u.slice(5)) : u.startsWith("season:") ? seen.has(u) : achievements.has(u));
-  const hintOf = (u) => (!u ? "" : u.startsWith("days:") ? `${u.slice(5)}にち あうと もらえる` : u.startsWith("season:") ? SEASON_HINT[u] ?? "きせつで もらえる" : `じっせき「${achievements.nameOf(u)}」で もらえる`);
+  const hintOf = (u) => (!u ? "" : u.startsWith("days:") ? `${u.slice(5)}にち あうと もらえる` : u.startsWith("season:") ? restockHint(u) ?? SEASON_HINT[u] ?? "きせつで もらえる" : `じっせき「${achievements.nameOf(u)}」で もらえる`);
+  // 入荷の ひ（v1.66、だい 11 かい 会議）：開店の としの あきは 11/15 から。その ひまでは きせつでも もらえない。mail.js の 掲示板と そろえる
+  const RESTOCK = { "season:autumn": "2026-11-15" };
+  const restocked = (key) => !RESTOCK[key] || ymdNow() >= RESTOCK[key];
+  const restockHint = (key) => (restocked(key) ? null : `${Number(RESTOCK[key].slice(5, 7))}/${Number(RESTOCK[key].slice(8))} に 入荷するよ`);
+  // でどころ（v1.66）：てに はいった ものが どこから きたか。きせつ ものは 年いり（本人「この年のあきか　とかもわかるし」）
+  const SEASON_NAME = { "season:autumn": "あき", "season:winter": "ふゆ", "season:spring": "はる", "season:tsuyu": "つゆ", "season:summer": "なつ", "season:halloween": "ハロウィン", "season:christmas": "クリスマス", "season:newyear": "おしょうがつ", "season:tanabata": "たなばた" };
+  function fromOf(u) {
+    if (!u) return "さいしょから もってる";
+    if (u.startsWith("days:")) return `${u.slice(5)}にち あえた プレゼント`;
+    if (u.startsWith("season:")) {
+      const at = seasonDate(u);
+      const name = SEASON_NAME[u] ?? "きせつ";
+      return at ? `${at.slice(0, 4)}年の ${name}に とどいた` : `${name}に とどいた`;
+    }
+    return `じっせき「${achievements.nameOf(u)}」の ごほうび`;
+  }
   const SEASON_HINT = {
     "season:autumn": "あきに あえるかも",
     "season:winter": "ふゆに あえるかも",
@@ -138,6 +163,10 @@ const wardrobe = (() => {
       if (current === id) apply();
     },
     seeSeason(key) {
+      if (!seen.has(key)) {
+        seenAt[key] = ymdNow();
+        store.set("warpix-season-at", seenAt);
+      }
       seen.add(key);
       store.set("warpix-season-hats", [...seen]);
     },
@@ -154,6 +183,8 @@ const wardrobe = (() => {
     seen: (key) => seen.has(key),
     unlocked,
     hintOf,
+    fromOf,
+    restocked,
   };
 })();
 
@@ -206,7 +237,7 @@ const closet = (() => {
   // きせつ（その きせつに 1 かい あえば、ずっと もらえる）。テストは ?date= の とき だけ
   const m = today().getMonth() + 1;
   const SEASONS = { autumn: [9, 10, 11], winter: [12, 1, 2], spring: [3, 4, 5], tsuyu: [6], summer: [7, 8] };
-  if (eventDays()) for (const [k, months] of Object.entries(SEASONS)) if (months.includes(m)) wardrobe.seeSeason(`season:${k}`);
+  if (eventDays()) for (const [k, months] of Object.entries(SEASONS)) if (months.includes(m) && wardrobe.restocked(`season:${k}`)) wardrobe.seeSeason(`season:${k}`);
 
   const KEY = "warpix-wear";
   // まだ きろくが ない 人（v1.56 まで）：そだって もらった ものを きた まま（コスチュームは 1 つ なので あたらしい ほう）。
@@ -255,6 +286,7 @@ const closet = (() => {
   // ---------- まど（ROOM の クローゼット） ----------
   const previewEl = document.getElementById("closet-preview");
   const nameEl = document.getElementById("closet-name");
+  const fromEl = document.getElementById("closet-from");
   const colorsEl = document.getElementById("closet-colors");
   const decideBtn = document.getElementById("closet-decide");
   const kindsEl = document.getElementById("closet-kinds");
@@ -275,17 +307,25 @@ const closet = (() => {
     const cos = t && "cos" in t ? t.cos : worn.cos;
     return dress(NPC.idle, hat ? hats()[hat] ?? null : null, [...layerOf(cos), ...growthLayers]);
   }
+  // ためして いる ものの でどころ（「なし」と じぶんで かいた ぼうしは なし）
+  const fromOfTry = (t) => {
+    const id = "hat" in t ? t.hat : t.cos;
+    if (!id || id === "mine") return "";
+    return wardrobe.fromOf("hat" in t ? hats()[id]?.unlock : ITEMS[id].unlock);
+  };
   const nameOf = (t) => ("hat" in t ? (t.hat ? hats()[t.hat]?.name : "ぼうし なし") : t.cos ? ITEMS[t.cos].name : "コスチューム なし");
 
   function renderTop() {
     previewEl.innerHTML = pixelSvg(lookOf(trying));
     colorsEl.innerHTML = "";
+    fromEl.textContent = "";
     if (!trying) {
       nameEl.textContent = "きせかえる ものを えらんでね";
       decideBtn.hidden = true;
       return;
     }
     nameEl.textContent = nameOf(trying);
+    fromEl.textContent = fromOfTry(trying);
     // いろちがいが ある ぼうしは、したに いろの まる
     const fam = trying.hat && familyOf(trying.hat);
     const variants = fam ? Object.entries(hats()).filter(([id, h]) => id === fam || h.variantOf === fam) : [];

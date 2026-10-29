@@ -5870,6 +5870,15 @@ a,
   font-size: 14px;
 }
 
+/* でどころ（v1.66） */
+.closet-from {
+  min-height: 1.4em;
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 11px;
+}
+
 .closet-decide {
   margin: 0;
 }
@@ -6039,6 +6048,10 @@ a,
   font-family: "Press Start 2P", monospace;
   font-size: 8px;
   color: var(--accent-2);
+}
+
+.mail-item.pin .mail-date {
+  color: var(--gold);
 }
 
 .mail-title {

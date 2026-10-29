@@ -5,7 +5,9 @@
 // HP はみんなで共有。だれかが撃つたびに、全員の画面で減る（Supabase の同じ空で知らせ合う）。
 // データベースは使わない。オンライン機能がないときは来ない。
 const raid = (() => {
-  const PERIOD = 10 * 60 * 1000; // じかんの わく（21:00 の わくが しゅうらいの よる）
+  // リハーサル（v1.66、online.rehearsal）：4 ぷんごとに だい マザーシップ。ごほうび・じっせき・にっきは なし
+  const rehearsal = !!online.rehearsal;
+  const PERIOD = (rehearsal ? 4 : 10) * 60 * 1000; // じかんの わく（21:00 の わくが しゅうらいの よる）
   const DURATION = 3 * 60 * 1000; // 3 ぷん いないに たおす
   const WARN = 10 * 1000; // 10 秒前に予告
   const HP_PER_PLAYER = 90; // ひとり 90（v1.50 までの いつもの レイドの 3 ばい）
@@ -18,9 +20,10 @@ const raid = (() => {
   const NIGHT_HOUR = 21;
   const jst = (t) => new Date(t + JST); // getUTC… で 日本の 日付・じこくが よめる
   const isNightDay = (t) => { const d = jst(t); return d.getUTCDay() === 0 && d.getUTCDate() <= 7; };
-  const isNight = (slot) => { const d = jst(startOf(slot)); return isNightDay(startOf(slot)) && d.getUTCHours() === NIGHT_HOUR && d.getUTCMinutes() === 0; };
+  const isNight = (slot) => { if (rehearsal) return true; const d = jst(startOf(slot)); return isNightDay(startOf(slot)) && d.getUTCHours() === NIGHT_HOUR && d.getUTCMinutes() === 0; };
   // つぎの しゅうらいの よる（その 時刻）
   function nextNight(from = Date.now()) {
+    if (rehearsal) return startOf(slotOf(from) + (from - startOf(slotOf(from)) < DURATION ? 0 : 1));
     const d = jst(from);
     for (let m = 0; m < 3; m++) {
       const first = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + m, 1));
@@ -52,7 +55,7 @@ const raid = (() => {
     const night = isNight(cur.slot);
     el.classList.toggle("night", night);
     el.innerHTML = `
-      <p class="raid-title">${night ? "しゅうらいの よる！ だい マザーシップ" : "RAID! みんなで マザーシップ"}</p>
+      <p class="raid-title">${rehearsal ? "リハーサル！ だい マザーシップ" : night ? "しゅうらいの よる！ だい マザーシップ" : "RAID! みんなで マザーシップ"}</p>
       <div class="raid-bar"><span class="raid-fill"></span></div>
       <p class="raid-info"><span class="raid-hp">HP ---</span><span class="raid-people"></span><span class="raid-time"></span></p>
       <button type="button" class="raid-ship" aria-label="マザーシップを うつ">${pixelSvg(MOTHERSHIP)}</button>`;
@@ -135,6 +138,11 @@ const raid = (() => {
     const mine = cur.hits;
     const el = finish();
     el.classList.add("down");
+    if (rehearsal) {
+      [0, 180, 360].forEach((d) => setTimeout(sound.sfx.boom, d));
+      npc.say([`リハーサル せいこう！\n${players}にんで たおした。`, `きみは ${mine}かい うった。\nつぎも ${PERIOD / 60000}ふんごとに くるよ。`]);
+      return;
+    }
     el.querySelector(".raid-ship").innerHTML = pixelSvg(BOOM) + pixelSvg(BOOM) + pixelSvg(BOOM);
     [0, 180, 360, 540].forEach((d) => setTimeout(sound.sfx.boom, d));
     stars.warp(2000);
@@ -243,6 +251,11 @@ const raid = (() => {
 
   // しゅうらいの よるの 日は、ひらいた ときに ピクセが 予告する（21 じ まえ だけ、1 日 1 かい）
   on("boot", () => {
+    if (rehearsal) {
+      const left = Math.max(0, Math.ceil((nextNight() - Date.now()) / 1000));
+      npc.addIntro(left ? `リハーサルの そらに つないだよ。\nあと ${left}びょうで くる。` : "リハーサルの そらに つないだよ。\nもう きてる！");
+      return;
+    }
     const now = Date.now();
     const at = nextNight(now);
     if (!at || !isNightDay(now) || now >= at || simple.on) return;
