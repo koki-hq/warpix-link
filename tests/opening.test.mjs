@@ -21,16 +21,17 @@ export default {
     await p.ev(`document.querySelector(".letter-btn.special").click()`);
     await t.sleep(300);
     const text = await p.ev(`document.getElementById("letter-body").textContent`);
-    t.ok(text.includes("さいしょの おきゃくさんへ") && text.includes("おみせを ひらく ひ") && text.includes("よる 9じ"), `なかみ: ${text}`);
+    t.ok(text.includes("さいしょの おきゃくさんへ") && text.includes("11/1、WARPIX製作所は おみせを ひらいたよ") && !text.includes("きょう"), `なかみ: ${text}`);
     t.ok(await p.ev(`letter.add({ kind: "opening", title: "x", lines: ["x"] }) === null`), "2 かい わたせて しまう");
     t.noErrors(p);
     await server.close();
   },
 
-  async "開店の あとに ひらいた 1きせいには、あとからの ことばで。開店まえ・あとから きた ひとには なし"(t) {
+  async "ひらく ひの てがみは いつ ひらいても 11/1 づけで おなじ ことば（v1.66.2）。開店まえ・あとから きた ひとには なし"(t) {
     let { server, p } = await page(t, "2026-10-12", "&date=2026-11-04&hour=10");
     await p.boot();
-    t.ok((await p.ev(`letter.read("2026-11-04:opening"), document.getElementById("letter-body").textContent`)).includes("ぶじに おみせを ひらいた"), "あとからの ことばに ならない");
+    const later = await p.ev(`letter.read("2026-11-01:opening"), document.getElementById("letter-body").textContent`);
+    t.ok(later.includes("11/1") && later.includes("おみせを ひらいたよ"), `11/4 に ひらいた ひとの てがみ: ${later}`);
     await server.close();
     await t.closeAll();
     for (const [born, date] of [["2026-10-12", "2026-10-20"], ["2026-11-05", "2026-11-05"]]) {
@@ -41,6 +42,20 @@ export default {
       await server.close();
       await t.closeAll();
     }
+  },
+
+  async "10/31 づけで とどいて しまった てがみも、11/1 づけの ことばに なおる（v1.66.2）"(t) {
+    const { server, p } = await page(t, "2026-10-12");
+    const old = [{ week: "2026-10-31", from: "2026-10-31", kind: "opening", title: "ひらく ひの てがみ", lines: ["さいしょの おきゃくさんへ", "きょうは WARPIX製作所が おみせを ひらく ひ。"], unread: false }];
+    await p.ev(`localStorage.setItem("warpix-letters", ${JSON.stringify(JSON.stringify(old))})`);
+    await p.goto(server.url + "?away=0");
+    await p.boot();
+    const saved = await p.ev(`JSON.parse(localStorage.getItem("warpix-letters")).find((l) => l.kind === "opening")`);
+    t.eq([saved.week, saved.from, saved.unread], ["2026-11-01", "2026-11-01", false], "ひづけが なおらない（よんだ しるしは そのまま）");
+    t.ok(saved.lines.join("").includes("11/1、WARPIX製作所は おみせを ひらいたよ") && !saved.lines.join("").includes("きょう"), `ことば: ${saved.lines.join(" / ")}`);
+    t.eq(await p.ev(`letter.letters().filter((l) => l.kind === "opening").length`), 1, "2 つうに なる");
+    t.noErrors(p);
+    await server.close();
   },
 
   async "しゅうらいの よるに たおすと がめんに はなび（v1.66.1、まえは せいざ）。うって いなくても でる。WORLD RECORD に のこる"(t) {

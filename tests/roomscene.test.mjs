@@ -59,4 +59,27 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "きっぷの ない ひとは かべの ものを よせて すきまを なくす（v1.66.2）"(t) {
+    const server = await t.startServer();
+    const b = await t.launchBrowser();
+    const p = await b.firstPage();
+    const gaps = () => p.ev(`(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); const w = r(".rs-window"), c = r(".rs-calendar"), tr = r(".rs-trophy"); return [Math.round(c.left - w.right), Math.round(tr.left - c.right)]; })()`);
+    for (const [born, has] of [["2026-11-01", false], ["2026-10-12", true]]) {
+      await p.goto(server.url);
+      await p.ev(`localStorage.clear(); localStorage.setItem("warpix-pixe", JSON.stringify({ born: "${born}", days: ["${born}"], last: "${born}", stage: 0, sulk: false, pokeMark: 0, diary: [] }))`);
+      await p.goto(server.url + "?away=0&date=2026-11-02&hour=10");
+      await p.boot();
+      await p.click("#room-btn");
+      await t.sleep(400);
+      t.eq(await p.ev(`[Boolean(document.querySelector(".rs-ticket")), document.querySelector(".rs-room").classList.contains("no-ticket")]`), [has, !has], `${born} に きた ひと`);
+      if (!has) {
+        const [a, c] = await gaps();
+        t.ok(a > 0 && c > 0 && Math.max(a, c) < 2 * Math.min(a, c), `すきまが かたよって いる: ${a} / ${c}`);
+        await p.shot("roomscene-no-ticket.png");
+      }
+    }
+    t.noErrors(p);
+    await server.close();
+  },
 };

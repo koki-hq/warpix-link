@@ -102,13 +102,22 @@ const letter = (() => {
   on("notebook-tab", ({ which }) => which === "home" && deliver());
 
   // とくべつな てがみ（開店の ひ など、v1.42）。おなじ kind は 1 かい だけ
-  function add({ kind, title, lines }) {
+  // date を わたすと、その ひづけの てがみに なる（ひらく ひの てがみ は いつも 11/1、v1.66.2）
+  function add({ kind, title, lines, date = ymd }) {
     if (letters.some((l) => l.kind === kind)) return null;
-    const l = { week: ymd, from: ymd, kind, title, lines, unread: true };
+    const l = { week: date, from: date, kind, title, lines, unread: true };
     letters = [l, ...letters].slice(0, 8);
     if (!preview) store.set(KEY, letters);
     return l;
   }
 
-  return { write, letters: () => letters, read, add, isSundayNight };
+  // もう とどいた てがみの ひづけと ことばを なおす（よんだ かどうかは そのまま）
+  function fix({ kind, title, lines, date }) {
+    const l = letters.find((x) => x.kind === kind);
+    if (!l || (l.week === date && l.title === title && l.lines.join("\n") === lines.join("\n"))) return;
+    Object.assign(l, { week: date, from: date, title, lines });
+    if (!preview) store.set(KEY, letters);
+  }
+
+  return { write, letters: () => letters, read, add, fix, isSundayNight };
 })();

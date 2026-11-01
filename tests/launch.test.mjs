@@ -67,7 +67,7 @@ export default {
     t.ok(all.includes("こんや 21じ"), `しゅうらいの よるの 予告が ない: ${all}`);
     // 開店の おしらせは ピクセが いうのでは なく、みぎうえの ふうとうに とどく（v1.59）
     t.ok(await p.ev(`mail.unread().some((m) => m.id === "2026-11-01-open")`), "開店の おしらせが ふうとうに ない");
-    t.ok(await p.ev(`letter.letters().some((l) => l.kind === "opening" && l.lines.join("").includes("おみせを ひらく ひ"))`), "てがみが 開店の 日の ことばに ならない");
+    t.ok(await p.ev(`letter.letters().some((l) => l.kind === "opening" && l.week === "2026-11-01" && l.lines.join("").includes("11/1、WARPIX製作所は おみせを ひらいたよ"))`), "てがみが 11/1 づけの ことばに ならない");
     t.ok(await p.ev(`document.getElementById("mail-btn").classList.contains("has-new")`), "ふうとうが ひからない");
     t.noErrors(p);
     await server.close();

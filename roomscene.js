@@ -134,7 +134,7 @@ const roomScene = (() => {
     const glow = { window: tweetNew, post: letterNew, closet: closet.hasNew() };
     const ticketOn = typeof ticket !== "undefined" && ticket.has();
     el.innerHTML = `
-      <div class="rs-room">
+      <div class="rs-room${ticketOn ? "" : " no-ticket"}">
         ${THINGS.map((t) => {
           const art = t.id === "trophy" ? pixelSvg(TROPHY) : pixelSvg(ART[t.id], PAL);
           const empty = t.empty?.();

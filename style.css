@@ -5694,6 +5694,11 @@ a,
 .rs-cardbox  { right: 5%; top: 81%; width: 15%; }
 .rs-pixe     { left: 38%; top: 59%; width: 24%; }
 
+/* きっぷの ない ひと（開店から きた ひと）は、かべの ものを よせて すきまを なくす（v1.66.2） */
+.no-ticket .rs-window   { left: 7%; }
+.no-ticket .rs-calendar { left: 45%; }
+.no-ticket .rs-trophy   { right: 8%; }
+
 .rs-pixe svg {
   display: block;
   width: 100%;

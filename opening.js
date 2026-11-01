@@ -7,23 +7,29 @@ const opening = (() => {
   const pad2 = (n) => String(n).padStart(2, "0");
   const ymdOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   const peek = () => /[?&]date=/.test(location.search);
+  const md = (date) => `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
 
   // ---------- 1. ひらく ひの てがみ ----------
-  function letterLines(day) {
-    const first = day === ticket.CUTOFF;
-    return [
+  // ひづけも ことばも ひとつに きめて ある（v1.66.2）。まえは ひらいた ひで かえていたが、10/31 の よるに ひらいて
+  // 0 じを すぎてから はじめると「10/31 づけで きょう おみせを ひらく ひ」に なった。本人「固定でよくね？」。
+  // もう とどいた ひとの てがみも、この ひづけと ことばに なおす
+  const LETTER = {
+    kind: "opening",
+    title: "ひらく ひの てがみ",
+    date: ticket.CUTOFF,
+    lines: [
       "さいしょの おきゃくさんへ",
       "まだ だれも しらない ころから きてくれて、ありがとう。",
-      first ? "きょうは WARPIX製作所が おみせを ひらく ひ。" : "WARPIX製作所は、ぶじに おみせを ひらいたよ。",
-      first ? "よる 9じ、きんいろの だい マザーシップが くるよ。いっしょに そらを まもってね。" : "あたらしい ともだちも、すこしずつ ふえてきた。",
+      `${md(ticket.CUTOFF)}、WARPIX製作所は おみせを ひらいたよ。`,
       "きみが さいしょに きてくれた こと、ずっと おぼえてる。",
       "これからも、いっしょに ワープしようね。",
-    ];
-  }
+    ],
+  };
   on("boot", () => {
     const day = ymdOf(today());
     if (!ticket.has() || day < ticket.CUTOFF || simple.on) return;
-    if (!letter.add({ kind: "opening", title: "ひらく ひの てがみ", lines: letterLines(day) })) return;
+    letter.fix(LETTER);
+    if (!letter.add(LETTER)) return;
     npc.addIntro("ROOM に、とくべつな\nてがみが とどいてるよ。");
     grow.write("opening-letter", "ひらく ひの てがみを わたした。さいしょの おきゃくさんへ。", { force: true });
   });
@@ -33,7 +39,6 @@ const opening = (() => {
   // たおしたら がめんに はなびを うちあげて、きねんしゃしん（はなびの したに その ばに いた ぜんいんの ピクセ）。
   // きろくは KEY のまま { date, colors, hats }。hats[0] が じぶん。ひとの かずは hats（まえの きろくは colors）の ながさ
   const count = (e) => (e.hats ?? e.colors ?? [null]).length;
-  const md = (date) => `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
   const css = () => {
     const s = getComputedStyle(document.body);
     const v = (n) => s.getPropertyValue(n).trim();
