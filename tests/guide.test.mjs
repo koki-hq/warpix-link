@@ -12,7 +12,9 @@ async function visit(t, storage) {
   const p = await b.firstPage();
   await p.goto(server.url);
   // v1.60：だいじな はなし（1きせいの きっぷ・ふっかつの じゅもん）が 2 ぎょう いじょう ある ひは ヒントを いわない ので、もう すんだ ことに する
-  await p.ev(`localStorage.clear(); localStorage.setItem("warpix-ticket", JSON.stringify({ got: "2026-10-01" })); localStorage.setItem("warpix-save-told", "true"); ${storage}`);
+  // 11/1 から 1きせいには ひらく ひの てがみ も とどく ので、それも とどいた ことに する（v1.66.2。ほんとうの 11/1 に こけた）
+  const opened = JSON.stringify([{ week: "2026-11-01", from: "2026-11-01", kind: "opening", title: "ひらく ひの てがみ", lines: ["x"], unread: false }]);
+  await p.ev(`localStorage.clear(); localStorage.setItem("warpix-ticket", JSON.stringify({ got: "2026-10-01" })); localStorage.setItem("warpix-save-told", "true"); localStorage.setItem("warpix-letters", ${JSON.stringify(opened)}); ${storage}`);
   await p.goto(server.url);
   await p.ev(`document.getElementById("start-btn").click()`);
   await t.sleep(2600);
