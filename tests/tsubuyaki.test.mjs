@@ -46,7 +46,7 @@ export default {
     await again.server.close();
   },
 
-  async "きまった 日は きまった つぶやき（ハロウィン）。60 こ ぜんぶ でて くる"(t) {
+  async "きまった 日は きまった つぶやき（ハロウィン）。ぜんぶ（96 こ）でて くる"(t) {
     const { server, p } = await open(t, { date: "2026-10-31", before: born("2026-10-01") });
     await p.ev(`room.open("diary")`);
     await t.sleep(300);
@@ -54,6 +54,11 @@ export default {
     // 60 にち つづけると 60 こ ぜんぶ 1 かいずつ（きまった 日は のぞく）
     const seen = await p.ev(`(() => { const s = new Set(); for (let i = 0; i < tsubuyaki.LIST.length; i++) { const d = new Date(Date.UTC(2027, 1, 1 + i, 12)); s.add(tsubuyaki.LIST.indexOf(tsubuyaki.of(d.toISOString().slice(0, 10)))); } return s.size; })()`);
     t.eq(seen, await p.ev(`tsubuyaki.LIST.length`), "でて こない つぶやきが ある");
+    // ふやしても（v1.66.3）、もう でた 日の つぶやきは かわらない
+    t.ok((await p.ev(`tsubuyaki.of("2026-11-09")`)).startsWith("おなかが すいた"), "11/9 の つぶやきが かわった");
+    t.ok((await p.ev(`tsubuyaki.of("2026-11-02")`)).startsWith("100えんだま"), "11/2 の つぶやきが かわった");
+    // 11/10 から は あたらしい ものが さきに でる
+    t.ok(await p.ev(`tsubuyaki.LIST.indexOf(tsubuyaki.of("2026-11-10")) >= 60`), "11/10 に あたらしい つぶやきが でない");
     t.noErrors(p);
     await server.close();
   },
