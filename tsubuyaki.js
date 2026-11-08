@@ -80,5 +80,7 @@ const tsubuyaki = (() => {
     const day = Math.round(Date.parse(`${ymd}T12:00:00Z`) / 86400000);
     return LIST[(((day * 37) % LIST.length) + LIST.length) % LIST.length];
   }
-  return { of, LIST, DAYS };
+  // つぶやきが はじまった 日（v1.55 を だした 日）。ここから きょうまで ぜんぶ よめる（v1.66.3）
+  const START = "2026-10-24";
+  return { of, LIST, DAYS, START };
 })();

@@ -14,17 +14,18 @@ async function open(t, { date, before = "" }) {
 const shown = (p) => p.ev(`[...document.querySelectorAll("#diary-body .tsubuyaki")].map((s) => [s.querySelector("h3").textContent, s.querySelector("p").innerText])`);
 
 export default {
-  async "ROOM に きょうの つぶやき。こなかった 日の ぶんも さいきん 7 にち、であう まえの 日は ない。ひづけで きまる"(t) {
-    const { server, p } = await open(t, { date: "2026-10-20", before: born("2026-10-01") });
+  async "ROOM に きょうの つぶやき。はじまった 日（10/24）から きょうまで ぜんぶ、であう まえの 日も。ひづけで きまる（v1.66.3）"(t) {
+    const { server, p } = await open(t, { date: "2026-11-09", before: born("2026-11-07") });
     t.ok(await p.ev(`!document.querySelector("#room-btn .diary-new").hidden`), "よむ まえに NEW が ない");
     await p.click("#room-btn");
     await t.sleep(300);
     await p.click(".rs-window");
     await t.sleep(200);
     const list = await shown(p);
-    t.eq(list.length, 7, "7 にち ぶん");
-    t.eq(list.map(([d]) => d), ["10/20", "10/19", "10/18", "10/17", "10/16", "10/15", "10/14"], "あたらしい じゅん");
-    const want = await p.ev(`["2026-10-20", "2026-10-19"].map((d) => tsubuyaki.of(d))`);
+    t.eq(list.length, 17, "10/24 から 11/9 まで 17 にち ぶん");
+    t.eq(list.slice(0, 3).map(([d]) => d), ["2026/11/9", "2026/11/8", "2026/11/7"], "あたらしい じゅん・とし つき");
+    t.eq(list.at(-1)[0], "2026/10/24", "はじまった 日まで ない");
+    const want = await p.ev(`["2026-11-09", "2026-11-08"].map((d) => tsubuyaki.of(d))`);
     t.eq(list.slice(0, 2).map(([, s]) => s), want, "ひづけの つぶやき");
     t.ok(want[0] !== want[1], "となりの 日が おなじ");
     t.ok(await p.ev(`document.getElementById("tab-diary").textContent === "つぶやき"`), "タブの なまえ");
@@ -33,14 +34,14 @@ export default {
     await p.shot("tsubuyaki.png");
     await p.ev(`document.getElementById("diary").close()`);
     t.ok(await p.ev(`document.querySelector("#room-btn .diary-new").hidden`), "よんでも NEW が きえない");
-    // ?date= の あいだは よんだ ことを のこさない ので、ここまで。であって 3 日めなら 3 こ
+    // ?date= の あいだは よんだ ことを のこさない ので、ここまで。10/26 なら であった 日に かかわらず 3 こ
     await server.close();
-    const again = await open(t, { date: "2026-10-03", before: born("2026-10-01") });
+    const again = await open(t, { date: "2026-10-26", before: born("2026-10-26") });
     await again.p.click("#room-btn");
     await t.sleep(300);
     await again.p.click(".rs-window");
     await t.sleep(200);
-    t.eq((await shown(again.p)).map(([d]) => d), ["10/3", "10/2", "10/1"], "であう まえの 日が ある");
+    t.eq((await shown(again.p)).map(([d]) => d), ["2026/10/26", "2026/10/25", "2026/10/24"], "はじまった 日から で ない");
     t.noErrors(again.p);
     await again.server.close();
   },

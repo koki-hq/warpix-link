@@ -201,16 +201,18 @@ const grow = (() => {
   function render() {
     const stage = STAGES[state.stage];
     const age = dayDiff(state.born, ymd);
-    // ピクセの つぶやき（v1.55）：さいきんの 7 にち。こなかった 日の ぶんも ある（ピクセは ピクセで くらして いる）。であう まえの 日は ない
+    // ピクセの つぶやき（v1.55）：こなかった 日の ぶんも ある（ピクセは ピクセで くらして いる）。
+    // v1.66.3 から、つぶやきが はじまった 日（tsubuyaki.START）から きょうまで ぜんぶ。であう まえの 日も みえる
+    // （本人「全部見れていいんじゃない？過去のも」）。まえは さいきん 7 にち・であった 日から だった
     const days = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; ; i++) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const day = ymdOf(d);
-      if (day < state.born) break;
+      if (day < tsubuyaki.START) break;
       days.push(day);
     }
-    const fmtDate = (s) => `${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
+    const fmtDate = (s) => `${s.slice(0, 4)}/${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
     body.innerHTML = `
       <h3 class="tsubuyaki-title">ピクセの つぶやき</h3>
       ${days.map((date) => `

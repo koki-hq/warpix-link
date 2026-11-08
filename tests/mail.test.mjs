@@ -21,7 +21,7 @@ export default {
     await t.sleep(200);
     const titles = await p.ev(`[...document.querySelectorAll(".mail-item .mail-title")].map((e) => e.textContent)`);
     t.ok(titles.includes("コスチュームが 入庫しました") && titles.includes("ようこそ、WARPIX LINK へ"), `いちらん：${titles}`);
-    t.ok(!titles.includes("WARPIX LINK、開店しました"), "みらいの おしらせが でた");
+    t.ok(!titles.includes("WARPIX LINK を リリースしました"), "みらいの おしらせが でた");
     t.eq(titles.at(-1), "ようこそ、WARPIX LINK へ", "まえから いる ひとの ようこそ が いちばん したに ない");
     await p.shot("mail.png");
     await p.ev(`[...document.querySelectorAll(".mail-item")].find((b) => b.textContent.includes("コスチュームが 入庫")).click()`);
@@ -60,7 +60,7 @@ export default {
     t.eq(await p.ev(`mail.list().map((m) => m.id)`), ["welcome", "2026-11-01-open"], "11/1 に きた ひとの おしらせ");
     await p.click("#mail-btn");
     await t.sleep(200);
-    t.eq(await p.ev(`document.querySelector(".mail-item .mail-date").textContent`), "11/1", "ようこそ に ひづけが ない");
+    t.eq(await p.ev(`document.querySelector(".mail-item .mail-date").textContent`), "2026/11/1", "ようこそ に ひづけが ない");
     await p.ev(`document.getElementById("mail").close()`);
     // 12 がつに はじめて きた ひと：あきの 入荷も 開店も ほんとうの ひづけで みえる。あたらしい じゅん
     await p.ev(`localStorage.clear(); ${pixe("2026-12-20")}`);
