@@ -46,19 +46,21 @@ export default {
     await again.server.close();
   },
 
-  async "きまった 日は きまった つぶやき（ハロウィン）。ぜんぶ（96 こ）でて くる"(t) {
+  async "きまった 日は きまった つぶやき（ハロウィン）。1 たい 1 で、ぜんぶ 1 かいずつ でて くる"(t) {
     const { server, p } = await open(t, { date: "2026-10-31", before: born("2026-10-01") });
     await p.ev(`room.open("diary")`);
     await t.sleep(300);
     t.ok((await shown(p))[0][1].startsWith("トリック オア トリート！"), "ハロウィンの つぶやき で ない");
-    // 60 にち つづけると 60 こ ぜんぶ 1 かいずつ（きまった 日は のぞく）
-    const seen = await p.ev(`(() => { const s = new Set(); for (let i = 0; i < tsubuyaki.LIST.length; i++) { const d = new Date(Date.UTC(2027, 1, 1 + i, 12)); s.add(tsubuyaki.LIST.indexOf(tsubuyaki.of(d.toISOString().slice(0, 10)))); } return s.size; })()`);
-    t.eq(seen, await p.ev(`tsubuyaki.LIST.length`), "でて こない つぶやきが ある");
+    // 1 たい 1（v1.66.3）：10/24 から ストックの さいごの 日まで、どの つぶやきも 1 かい きりで、ぜんぶ でる（きまった 日は のぞく）
+    const use = await p.ev(`(() => { const out = []; for (let i = 0; ; i++) { const d = new Date(Date.UTC(2026, 9, 24 + i, 12)).toISOString().slice(0, 10); if (d > tsubuyaki.lastDay()) return out; if (!tsubuyaki.DAYS[d.slice(5)]) out.push(tsubuyaki.of(d)); } })()`);
+    t.eq(new Set(use).size, use.length, "おなじ つぶやきが 2 かい でる");
+    t.eq(use.length, await p.ev(`tsubuyaki.LIST.length`), "でて こない つぶやきが ある");
+    t.ok(await p.ev(`tsubuyaki.lastDay() >= "2027-02-01"`), "ストックが 2/1 まで もたない");
     // ふやしても（v1.66.3）、もう でた 日の つぶやきは かわらない
     t.ok((await p.ev(`tsubuyaki.of("2026-11-09")`)).startsWith("おなかが すいた"), "11/9 の つぶやきが かわった");
     t.ok((await p.ev(`tsubuyaki.of("2026-11-02")`)).startsWith("100えんだま"), "11/2 の つぶやきが かわった");
-    // 11/10 から は あたらしい ものが さきに でる
-    t.ok(await p.ev(`tsubuyaki.LIST.indexOf(tsubuyaki.of("2026-11-10")) >= 60`), "11/10 に あたらしい つぶやきが でない");
+    // きれた あとも からに ならない
+    t.ok(await p.ev(`tsubuyaki.LIST.includes(tsubuyaki.of("2027-06-01"))`), "きれた あとの 日が から");
     t.noErrors(p);
     await server.close();
   },

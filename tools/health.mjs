@@ -140,5 +140,17 @@ async function axe(p, label, setup = "") {
   await closeAll();
 }
 
+// ---------- 5. ピクセの つぶやきの のこり（v1.66.3） ----------
+// つぶやきは 1 日 1 こ、1 かい きり。きれる まえに tsubuyaki.js の LIST の うしろへ たす
+{
+  const { readFileSync } = await import("node:fs");
+  const t = new Function(`${readFileSync(new URL("../tsubuyaki.js", import.meta.url), "utf8")}; return tsubuyaki;`)();
+  const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+  const last = t.lastDay();
+  const left = Math.round((Date.parse(last) - Date.parse(today)) / 86400000);
+  log("\n## ピクセの つぶやき（1 日 1 こ、1 かい きり）");
+  log(`- ${t.LIST.length} こ。${last} まで もつ（あと ${left} にち）${left < 30 ? "  ⚠️ もうすぐ きれる。LIST の うしろに たして" : ""}`);
+}
+
 await server.close();
 process.exit(0);
