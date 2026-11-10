@@ -56,6 +56,10 @@ export default {
     }
     t.ok(lines.every(Boolean), "つついても しゃべらない");
     t.ok(lines.every((l, i) => i === 0 || l !== lines[i - 1]), `おなじ ことを つづけた：${lines.join(" / ")}`);
+    // しゃべって いる とちゅうに つついても、まいかい ジャンプ（v1 の さわりごこち、v2.0.1）
+    await p.ev(`pixe.say("ながい ながい おはなしを して いる ところ")`);
+    await p.ev(`document.getElementById("npc").classList.remove("jump"); document.getElementById("npc").click()`);
+    t.ok(await p.ev(`document.getElementById("npc").classList.contains("jump")`), "しゃべって いる とちゅうだと ジャンプ しない");
     t.noErrors(p);
     await server.close();
   },

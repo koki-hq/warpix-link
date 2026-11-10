@@ -172,15 +172,11 @@ const pixe = (() => {
   }
 
   let lastChatter = -1;
+  // つつくと ジャンプ＋コインの 音（v1 の さわりごこち。本人「ピクセタッチした時に感触変えた？前の方が良かった」）。
+  // +10 の かずは コインゲームと いっしょに なくした
   sprite.addEventListener("click", () => {
     if (away) return;
-    if (typing) {
-      clearInterval(typing);
-      typing = null;
-      bubble.textContent = full;
-      return;
-    }
-    sound.sfx.hover();
+    sound.sfx.coin();
     sprite.classList.remove("jump");
     void sprite.offsetWidth;
     sprite.classList.add("jump");

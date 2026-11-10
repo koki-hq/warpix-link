@@ -35,8 +35,10 @@ const mail = (() => {
       title: "WARPIX LINK が新しくなりました",
       body: [
         "リンクアプリとして、もっと使いやすくするために作り直しました。",
-        "・よく行くリンクを「グループ」にまとめられます。右上の「＋」から作れます<br>・リンクは、棚から選ぶことも、自分で作ることもできます<br>・グループの名前を押すと、名前や並び順を変えられます<br>・左上のメニューから、ワープの記録を見たり、背景の空の色を選んだりできます",
-        "以下の機能はなくなりました。<br>・ピクセの部屋（日記・図鑑・実績・クローゼット・つぶやき・手紙）<br>・ミニゲーム・おみくじ",
+        // v2.0.1：かじょうがきは 1 こずつ あいだを あける（本人「改行とかも入れて読みやすくしていいよ　なんか文字が詰まってる感じがする」）
+        `<ul class="mail-points"><li>よく行くリンクを「グループ」にまとめられます。<br>右上の「＋」から作れます。</li><li>リンクは、棚から選ぶことも、自分で作ることもできます。</li><li>グループの名前を押すと、名前や並び順を変えられます。</li><li>左上のメニューから、ワープの記録を見たり、背景の空の色を選んだりできます。</li></ul>`,
+        "以下の機能はなくなりました。",
+        `<ul class="mail-points"><li>ピクセの部屋（日記・図鑑・実績・クローゼット・つぶやき・手紙）</li><li>ミニゲーム・おみくじ</li></ul>`,
         "今後とも WARPIX LINK をよろしくお願いします。",
       ],
     },
@@ -94,7 +96,8 @@ const mail = (() => {
     listEl.hidden = true;
     readEl.hidden = false;
     backBtn.hidden = false;
-    readEl.innerHTML = `<p class="mail-meta">${fmt(m.date)} ・ WARPIX製作所より</p><h3>${m.title}</h3>${m.body.map((t) => `<p>${t}</p>`).join("")}`;
+    readEl.innerHTML = `<p class="mail-meta">${fmt(m.date)} ・ WARPIX製作所より</p><h3>${m.title}</h3>${m.body.map((t) => (t.startsWith("<") ? t : `<p>${t}</p>`)).join("")}<p class="mail-sign">WARPIX製作所</p>`;
+    // さいごに 署名（v2.0.1、本人「最後に　WARPIX製作所　とか入れてもいいね　丁寧な感じで」）
     if (!state.read.includes(id)) {
       state.read.push(id);
       save();

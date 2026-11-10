@@ -67,7 +67,7 @@ const gear = (() => {
     sound.sfx.hover();
   });
   $("log-clear").addEventListener("click", () => {
-    if (!confirm("ワープの きろくを ぜんぶ けしますか？ もとには もどせません。")) return;
+    if (!ask("ワープの きろくを ぜんぶ けしますか？ もとには もどせません。")) return;
     warpLog.clear();
     renderLog();
   });
@@ -176,7 +176,7 @@ const gear = (() => {
   async function take(text) {
     const data = await decode(text);
     if (!data) return say("コードが ちがうみたいです。さいごまで まるごと はりつけてください。", false);
-    if (!confirm("いまの グループ・リンク・きろくを、コードの ものに いれかえますか？")) return;
+    if (!ask("いまの グループ・リンク・きろくを、コードの ものに いれかえますか？")) return;
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
       for (const [k, v] of Object.entries(data)) localStorage.setItem(k, v);
@@ -215,7 +215,7 @@ const gear = (() => {
     manual.open();
   });
   $("about-reset").addEventListener("click", () => {
-    if (!confirm("グループ・リンク・じぶんの リンク・きろく・せっていを ぜんぶ けして、はじめからに しますか？ もとには もどせません。")) return;
+    if (!ask("グループ・リンク・じぶんの リンク・きろく・せっていを ぜんぶ けして、はじめからに しますか？ もとには もどせません。")) return;
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
     } catch {}

@@ -402,6 +402,15 @@ const sound = (() => {
     onWaiting(v);
   }
 
+  // たしかめる まど（confirm）の あと。iPhone では まどが 出て いる あいだ 音が とめられ、
+  // とじても もどらない ことが ある（v2.0.1、本人「けす ボタンを押して キャンセルしたらBGMが消えちゃう」）。
+  // その ばで おこし、だめなら つくりなおして つぎの タップで おこす
+  function revive() {
+    if (!ctx || ctx.state === "running") return;
+    ctx.resume().catch(() => {});
+    setTimeout(() => ctx && ctx.state !== "running" && !document.hidden && resume(), 300);
+  }
+
   // 曲を えらぶ（せっていの BGM タブ）
   function setSong(id) {
     song = SONGS[id] ?? SONGS.usual;
@@ -410,7 +419,7 @@ const sound = (() => {
   }
 
   return {
-    sfx, bgmPlay, bgmStop, pause, resume, setSong, setVolumes,
+    sfx, bgmPlay, bgmStop, pause, resume, revive, setSong, setVolumes,
     waiting: () => waiting,
     onWaiting: (fn) => (onWaiting = fn),
     volumes: () => ({ bgm: bgmVol, se: seVol }),
@@ -420,6 +429,13 @@ const sound = (() => {
     position: () => (timer ? lastPlayed : -1),
   };
 })();
+
+// けす まえに たしかめる。とじたら 音を おこしなおす（上の revive）
+function ask(msg) {
+  const ok = confirm(msg);
+  sound.revive();
+  return ok;
+}
 
 // ---------- せってい（背景の そら・BGM・おおきさ） ----------
 // 背景は じぶんで えらぶ（本人「自動はだめ　やっぱユーザに何かさせないとだめ」）。さいしょは よる（v1 の そら）

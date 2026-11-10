@@ -595,8 +595,12 @@ a,
   display: none;
 }
 
-.js .mail-btn {
-  opacity: 0;
+@keyframes rs-glow {
+  50% { filter: drop-shadow(0 0 1px var(--gold)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mail-btn.has-new { animation: none; }
 }
 
 .save-status {
@@ -1361,6 +1365,143 @@ body {
   font-size: 5px;
   color: var(--muted);
 }
+/* おしらせの まど（v1.59 の まま。v2.0 で もれて いたのを もどした、v2.0.1） */
+.room-back {
+  padding: 2px 8px;
+  border: 0;
+  background: #fffaf0;
+  color: var(--accent);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.room-back[hidden] {
+  display: none;
+}
+
+
+/* =====================================================================
+   おしらせ（v1.59）：けんめいの いちらん → しょうさい
+   ===================================================================== */
+.mail-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mail-list[hidden],
+.mail-read[hidden],
+.mail .room-back[hidden] {
+  display: none;
+}
+
+.mail-item {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--btn);
+  background: none;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mail-item.unread {
+  color: var(--fg);
+}
+
+.mail-item:hover,
+.mail-item:focus-visible {
+  background: var(--btn);
+  outline: none;
+}
+
+.mail-date {
+  flex: none;
+  min-width: 3.2em;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: var(--accent-2);
+}
+
+.mail-title {
+  flex: 1;
+}
+
+.mail-new {
+  flex: none;
+  padding: 1px 3px;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+}
+
+.mail-empty {
+  padding: 12px 0;
+  color: var(--muted);
+}
+
+.mail-meta {
+  margin: 0;
+  color: var(--accent-2);
+  font-size: 12px;
+}
+
+.mail-read h3 {
+  margin: 6px 0 10px;
+  font-size: 17px;
+  font-weight: normal;
+}
+
+.mail-read p {
+  line-height: 1.7;
+}
+
+.mail-action {
+  margin-top: 8px;
+}
+
+/* v2.0.1：かじょうがきは 1 こずつ あける・さいごに 署名 */
+.mail-read p,
+.mail-read .mail-points {
+  margin: 0 0 1em;
+}
+.mail-read .mail-meta {
+  margin: 0;
+}
+.about-body .mail-points {
+  padding: 0;
+  list-style: none;
+  line-height: 1.7;
+}
+.mail-points li {
+  position: relative;
+  padding-left: 1em;
+}
+.mail-points li + li {
+  margin-top: 6px;
+}
+.mail-points li::before {
+  content: "・";
+  position: absolute;
+  left: 0;
+}
+.mail-read .mail-sign {
+  margin: 1.4em 0 0;
+  text-align: right;
+  color: var(--muted);
+}
+
+
 /* おしらせは v1 の まま（ばしょ だけ この だんに） */
 .topbar .mail-btn {
   position: relative;

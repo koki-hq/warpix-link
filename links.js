@@ -218,7 +218,7 @@ const groups = (() => {
     const b = e.target.closest("[data-del]");
     if (!b) return;
     const c = C.byId(b.dataset.del);
-    if (!c || !confirm(`「${c.label}」を けしますか？ はいって いる グループからも はずれます。`)) return;
+    if (!c || !ask(`「${c.label}」を けしますか？ はいって いる グループからも はずれます。`)) return;
     C.removeMine(c.id);
     renderMake();
     render();
@@ -331,7 +331,7 @@ const groups = (() => {
   });
   $("edit-delete").addEventListener("click", () => {
     const g = C.current();
-    if (!confirm(`グループ「${g.title}」を けしますか？`)) return;
+    if (!ask(`グループ「${g.title}」を けしますか？`)) return;
     C.removeGroup(g.id);
     editDialog.close();
     render();
