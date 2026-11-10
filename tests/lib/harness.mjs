@@ -44,12 +44,9 @@ export async function startServer({ online = false, port = 0 } = {}) {
     const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
     if (path === "/config.js" && !online) {
       res.writeHead(200, { "content-type": TYPES[".js"] });
-      // おしらせも 本物は よまない（テストで つかう ときは、さきに window.WARPIX_NEWS を いれておく）
-      // はじめての 人への せつめいしょ（manual.js）も ふだんは 出さない（つかう テストは さきに window.WARPIX_MANUAL = true）
-      // オープニング（prologue.js）も おなじ（つかう テストは さきに window.WARPIX_PROLOGUE = true）
-      // はじめての 日（firstDay、v1.54）と よむ じかんの まち（WARPIX_READ_MS）も ふだんは なし
-      // きせつの イベント・オープン きねんも ?date= の ない テストでは ださない（WARPIX_EVENT_DAYS）
-      return res.end('window.WARPIX_ONLINE = {}; window.WARPIX_NEWS ??= "tests/fixtures/no-news.json"; window.WARPIX_MANUAL ??= false; window.WARPIX_PROLOGUE ??= false; window.WARPIX_FIRSTDAY ??= false; window.WARPIX_READ_MS ??= 0; window.WARPIX_EVENT_DAYS ??= false;');
+      // v2.0：はじめての 人への せつめいしょ（manual.js）と UFO は ふだん 出さない
+      // （つかう テストは さきに window.WARPIX_MANUAL = true / window.WARPIX_UFO = true）
+      return res.end('window.WARPIX_MANUAL ??= false; window.WARPIX_UFO ??= false;');
     }
     // /ig/ の ような 入口（v1.65）も GitHub Pages と おなじく index.html を かえす
     const file = join(ROOT, path.endsWith("/") ? path + "index.html" : path);
@@ -208,25 +205,17 @@ async function connectPage(browser, wsUrl) {
     const r = await page.send("Page.captureScreenshot", { format: "png" });
     writeFileSync(join(OUT, name), Buffer.from(r.result.data, "base64"));
   };
-  // PRESS START を押して、あいさつを最後まで読む
-  page.boot = async ({ readIntro = true } = {}) => {
-    await page.ev(`document.getElementById("start-btn").click()`);
-    await sleep(2600);
-    if (readIntro) await page.readIntro();
-  };
-  page.readIntro = async () => {
-    const lines = [];
-    for (let i = 0; i < 20; i++) {
+  // ピクセの ふきだしの もじ（もじ送りが おわるのを まつ）
+  page.text = async () => {
+    let last = null;
+    for (let i = 0; i < 40; i++) {
       const t = await page.ev(`document.getElementById("dialog-text").textContent`);
-      if (t && !lines.includes(t)) lines.push(t);
-      if (await page.ev(`npc.ready()`)) break;
-      await page.ev(`document.getElementById("dialog").click()`);
-      await sleep(250);
+      if (t === last) return t;
+      last = t;
+      await sleep(150);
     }
-    // 文字送りの途中の行は捨てる
-    return lines.filter((l) => !lines.some((o) => o !== l && o.startsWith(l)));
+    return last;
   };
-  page.text = () => page.ev(`document.getElementById("dialog-text").textContent`);
   await page.send("Runtime.enable");
   await page.send("Page.enable");
   browser.pages.push(page);

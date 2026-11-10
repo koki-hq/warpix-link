@@ -2,65 +2,24 @@
 // だい 5 かいの はなしあい：「いちいち リンクを 踏ませたくない、WARPIX LINK に 集中して もらいたい」。
 // ホームページの 製作所だよりは そのまま、こちらは WARPIX LINK の なか だけで おわる しくみ（どこにも よみに いかない）。
 // けんめいの いちらん → ひらくと しょうさい。よんで いない ものが あると ふうとうが きんいろに。
-// ピクセからの てがみ（にちようの よる）は ピクセからの DM なので、へやの ポストの まま。
+// v2.0：へや・クローゼット・パーティの おしらせ（プレリリース中の もの と あき・ふゆ・クリスマスの 入荷）は はずした。
+// v2.0 から おしらせは ふつうの 日本語（本人「お知らせはピクセ口調やめるよ　分かりにくいからね」）
 const mail = (() => {
-  const KEY = "warpix-mail";
-  const state = { read: [], got: {}, ...store.get(KEY, null) };
-  const save = () => store.set(KEY, state);
-  const pad2 = (n) => String(n).padStart(2, "0");
-  const ymdOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const state = { read: [], ...store.get(KEY.mail, null) };
+  const save = () => store.set(KEY.mail, state);
   const ymd = ymdOf(today());
   // ひづけは とし から（v1.66.3、本人「お知らせの日付は年も入れてほしい」）
   const fmt = (s) => `${s.slice(0, 4)}/${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
-  const goCloset = { label: "クローゼットを みる", go: () => room.open("hat") };
 
   // 版ごとに ここへ 1 つう たす。みらいの ひづけは その ひまで でない。
   // 開店（2026-11-01）からは 掲示板（だい 11 かい 会議、本人「掲示板みたいにしたほうがいいのかもね」）：
   // ほんとうの ひづけの まま、いつ きた ひとにも ぜんぶ みえる。あとから きた ひとが よんでも へんに ならない ように かく
   // （「〜に なりました」で なく「〜が 入荷しました」）。pre: true は プレリリース中の もの。開店の ひから でない
-  const OPEN = "2026-11-01";
   const MAILS = [
     {
-      id: "2026-10-24-mailbox",
-      date: "2026-10-24",
-      pre: true,
-      title: "おしらせ ボックスが できました",
-      body: ["WARPIX製作所からの おしらせは、これからは ここに とどきます。", "あたらしい おしらせが あると、この ふうとうが きんいろに ひかります。"],
-    },
-    {
-      id: "2026-10-24-room",
-      date: "2026-10-24",
-      pre: true,
-      title: "ROOM が ピクセの へやに なりました",
-      body: ["ROOM を ひらくと、ピクセが くらす へやが あります。", "まど・カレンダー・ほんだな・ポスト……へやの ものを おすと、それぞれの ページが ひらきます。", "あたらしい ものが ある ものは、ひかって おしえて くれます。"],
-      action: { label: "へやを みる", go: () => room.open("home") },
-    },
-    {
-      id: "2026-10-24-closet",
-      date: "2026-10-24",
-      pre: true,
-      title: "コスチュームが 入庫しました",
-      body: ["へやの ハンガーラックで、ピクセの ぼうしと コスチュームを きせかえ できます。", "アイテムを おすと ためしに きられます。きに いったら「これに する」。", "あう ひが ふえたり、きせつが かわったりすると、あたらしい ものが とどきます。"],
-      action: goCloset,
-    },
-    {
-      id: "2026-10-24-party",
-      date: "2026-10-24",
-      pre: true,
-      title: "リンクの パーティが つくれます",
-      body: ["リンクの したの「リンクの へんせい」から、6 この リンクの くみあわせ（パーティ）を 3 つまで つくれます。", "パーティが 2 つ いじょう あると、リンクの したで きりかえられます。"],
-    },
-    {
-      id: "2026-10-25-shelves",
-      date: "2026-10-25",
-      pre: true,
-      title: "リンクの たなを ととのえました",
-      body: ["「いつもの」の たなは なくして、YOUTUBE や SPOTIFY も それぞれの たなに いれました。", "せいかつの たなに TIMETREE が はいりました。", "パーティを ふやす ときは、6 こ そろった ところで もう できあがります。"],
-    },
-    {
       id: "2026-11-01-open",
-      date: OPEN,
-      // v1.66.3：本人の ことばで かきなおした（ようこその くりかえしに なって いた。本人「開店メッセージは〜みたいなのも入れてもいい」）
+      date: "2026-11-01",
+      // v1.66.3：本人の ことばで かきなおした もの（v2.0 でも そのまま のこす）
       title: "WARPIX LINK を リリースしました",
       body: [
         "WARPIX製作所の 製品 だい 1 だんです。",
@@ -69,34 +28,23 @@ const mail = (() => {
         "べんりで つかいやすい アプリでは ありません。「きょうは ここを とおってみようかな」。そんな よりみちの きもちで つかってくれたら うれしいです。",
       ],
     },
-    // きせつの コスチュームの 入荷は、ひとごとに とどけず 掲示板に 1 かい はる（だい 11 かい 会議）。
-    // あきは 開店の あと（本人「最初からアイテム多すぎるのさめる」）。ひにちは closet の RESTOCK と そろえる
     {
-      id: "2026-11-15-autumn",
-      date: "2026-11-15",
-      title: "あきの コスチュームが 入荷しました",
-      body: ["どんぐりの ぼうし・あきの マフラー・あきの セーターが はいりました。", "11 がつ の うちに あうと もらえます。", "へやの ハンガーラックで ためしに きてみてね。"],
-      action: goCloset,
-    },
-    {
-      id: "2026-12-01-winter",
-      date: "2026-12-01",
-      title: "ふゆの コスチュームが 入荷しました",
-      body: ["ニットぼうが はいりました。2 がつ まで に あうと もらえます。", "あったかく してね。"],
-      action: goCloset,
-    },
-    {
-      id: "2026-12-18-christmas",
-      date: "2026-12-18",
-      title: "クリスマスの コスチュームが 入荷しました",
-      body: ["サンタぼうと サンタの ふくが はいりました。12/25 まで に あうと もらえます。"],
-      action: goCloset,
+      // v2.0（本人と きめた 文面、2026-11-10）
+      id: "2026-11-10-v2",
+      date: "2026-11-10",
+      title: "WARPIX LINK が新しくなりました",
+      body: [
+        "リンクアプリとして、もっと使いやすくするために作り直しました。",
+        "・よく行くリンクを「グループ」にまとめられます。右上の「＋」から作れます<br>・リンクは、棚から選ぶことも、自分で作ることもできます<br>・グループの名前を押すと、名前や並び順を変えられます<br>・左上のメニューから、ワープの記録を見たり、背景の空の色を選んだりできます",
+        "以下の機能はなくなりました。<br>・ピクセの部屋（日記・図鑑・実績・クローゼット・つぶやき・手紙）<br>・ミニゲーム・おみくじ",
+        "今後とも WARPIX LINK をよろしくお願いします。",
+      ],
     },
   ];
 
   // ようこそ（はじめて きた ひ）も きた ひの ひづけで ならべる。おなじ ひは ようこそ が うえ（あとから とどいた もの）。
   // v1.66 は ピンどめ だったが やめた（本人「ピン止めする意味なくね？だって１１/１に開店でしょ？　それがお知らせの第一投目じゃん？」）
-  const born = () => (growState() ?? store.get("warpix-pixe", null))?.born ?? ymd;
+  const born = () => pixe.met().born ?? ymd;
   function list() {
     const welcome = {
       id: "welcome",
@@ -104,7 +52,7 @@ const mail = (() => {
       title: "ようこそ、WARPIX LINK へ",
       body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", "あたらしい ことが あったら、ここで おしらせします。"],
     };
-    const board = MAILS.filter((m) => m.date <= ymd && !(m.pre && ymd >= OPEN));
+    const board = MAILS.filter((m) => m.date <= ymd);
     // あたらしい じゅん。おなじ ひなら ようこそ が うえ（sort は おなじ ものの じゅんを かえない）
     return [welcome, ...board].sort((x, y) => (x.date === y.date ? 0 : x.date < y.date ? 1 : -1));
   }
@@ -115,8 +63,7 @@ const mail = (() => {
   const btn = document.getElementById("mail-btn");
   btn.innerHTML = `${pixelSvg(ENVELOPE)}<span class="mail-dot" hidden></span><span class="sr-only">おしらせ</span>`;
   function mark() {
-    // はじめての 日は ピクセと であう だけ。ひからせない（v1.54）
-    const n = firstDay() ? 0 : unread().length;
+    const n = unread().length;
     btn.classList.toggle("has-new", n > 0);
     btn.querySelector(".mail-dot").hidden = n === 0;
     btn.setAttribute("aria-label", n ? `おしらせ（よんで いない ものが ${n}つう）` : "おしらせ");
@@ -147,17 +94,12 @@ const mail = (() => {
     listEl.hidden = true;
     readEl.hidden = false;
     backBtn.hidden = false;
-    readEl.innerHTML = `<p class="mail-meta">${fmt(m.date)} ・ WARPIX製作所より</p><h3>${m.title}</h3>${m.body.map((t) => `<p>${t}</p>`).join("")}${m.action ? `<button type="button" class="save-btn mail-action">${m.action.label}</button>` : ""}`;
-    readEl.querySelector(".mail-action")?.addEventListener("click", () => {
-      dialog.close();
-      m.action.go();
-    });
+    readEl.innerHTML = `<p class="mail-meta">${fmt(m.date)} ・ WARPIX製作所より</p><h3>${m.title}</h3>${m.body.map((t) => `<p>${t}</p>`).join("")}`;
     if (!state.read.includes(id)) {
       state.read.push(id);
       save();
       mark();
     }
-    achievements.unlock("factory");
     backBtn.focus();
   }
   function open() {
@@ -177,8 +119,6 @@ const mail = (() => {
   document.getElementById("mail-close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (e) => e.target === dialog && dialog.close());
 
-  on("boot", mark);
   mark();
-  cheats.add("mail", open);
   return { open, list, unread, state, MAILS, mark };
 })();

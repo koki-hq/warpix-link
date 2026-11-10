@@ -12,7 +12,6 @@ export default {
     const b = await t.launchBrowser();
     const p = await b.firstPage();
     await p.goto(server.url, 2500);
-    await p.boot({ readIntro: false });
     await p.ev(`document.fonts.ready`);
     const urls = await p.ev(`performance.getEntriesByType("resource").map((e) => e.name)`);
     t.ok(urls.some((u) => u.endsWith("/fonts/dotgothic16.woff2")), "じぶんの フォントを よんで いない");

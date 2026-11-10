@@ -1,3 +1,7 @@
+/* ===== WARPIX LINK v2.0 =====
+   v1.66.3 の 見た目（ドット方眼の そら・CRT の 走査線・ドットの わくの ボタン・シアンの わくの まど・カセットの たな）を そのまま つかい、
+   いちばん したの「v2.0」の ところで 1 画面に おさめる ならびに した。 */
+
 /* 日本語の ドット文字：この サイトで つかう 文字 だけに した DotGothic16（tools/fonts.mjs で つくる、OFL：fonts/OFL-DotGothic16.txt）。
    名前は もとの まま なので、ほかの ところの font-family は かえなくて いい */
 @font-face {
@@ -25,6 +29,8 @@
   --cos-brown: #8a5a2e;
   --cos-navy: #2f3f8f;
   --px: 4px;
+  --line: #5a5088;
+  --sub: #b9b2dc;
 }
 
 /* 隠しコマンド gameboy：初代ゲームボーイの4色に差しかえ */
@@ -157,6 +163,7 @@ body::after {
   gap: 16px;
 }
 
+
 /* ピクセル枠のボタン（box-shadowで角を欠かせる） */
 .pixel-btn {
   position: relative;
@@ -225,243 +232,6 @@ body::after {
   color: var(--muted);
 }
 
-/* ---------- PRESS START 画面 ---------- */
-.start-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.8);
-  cursor: pointer;
-}
-
-.start-screen[hidden] {
-  display: none;
-}
-
-.start-btn {
-  padding: 8px 4px;
-  border: 0;
-  background: none;
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: clamp(16px, 5vw, 24px);
-  text-shadow: var(--px) var(--px) 0 var(--accent);
-  cursor: pointer;
-  animation: blink 1s steps(1) infinite;
-}
-
-.start-btn:focus-visible {
-  outline: var(--px) solid var(--accent-2);
-  outline-offset: 8px;
-}
-
-.start-hint {
-  margin: 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--muted);
-}
-
-/* スタート後に3回点滅して消える */
-.start-screen.leaving {
-  animation: blink-out 0.45s steps(1) forwards;
-}
-
-@keyframes blink-out {
-  0% { opacity: 1; }
-  20% { opacity: 0; }
-  40% { opacity: 1; }
-  60% { opacity: 0; }
-  80% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* ---------- 起動演出 ---------- */
-/* JSが動くときだけ、スタートまで中身を隠す */
-.js .title,
-.js .subtitle,
-.js .pixel-btn,
-.js .footer,
-.js .cassette-btn,
-.js .bgm-toggle,
-.js .hud,
-.js .npc {
-  opacity: 0;
-}
-
-.booted .title {
-  animation: drop-in 0.5s steps(4) both;
-}
-
-.booted .subtitle,
-.booted .footer,
-.booted .cassette-btn,
-.booted .bgm-toggle,
-.booted .hud,
-.booted .npc {
-  animation: fade-in 0.3s steps(3) 0.5s both;
-}
-
-.booted .pixel-btn {
-  animation: pop-in 0.3s steps(3) both;
-  animation-delay: calc(0.6s + var(--i, 0) * 0.12s);
-}
-
-/* ---------- オープニング（v1.54）：ほんものの がめんの うえで ながす ---------- */
-.prologue-film {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  width: 100%;
-  height: 100%;
-  /* したの みえない リンクや ボタンを おさせない（SKIP だけ うえに ある） */
-  cursor: default;
-}
-
-.prologue-skip {
-  position: fixed;
-  right: 16px;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  z-index: 41;
-  padding: 8px 10px;
-  border: 2px solid var(--muted);
-  background: rgba(15, 11, 30, 0.7);
-  color: var(--muted);
-  font: 10px "Press Start 2P", monospace;
-  cursor: pointer;
-}
-
-.prologue-skip:hover,
-.prologue-skip:focus-visible {
-  border-color: var(--fg);
-  color: var(--fg);
-}
-
-/* おちて きた ピクセの はこ だけ みせる（ふきだしは まだ） */
-.prologue-npc .npc {
-  opacity: 1;
-}
-
-.prologue-npc .dialog {
-  visibility: hidden;
-}
-
-/* オープニングの あとは、ピクセは もう そこに いる ので きえて でなおさない */
-.prologue-done.booted .npc {
-  animation: none;
-  opacity: 1;
-}
-
-/* transform は :active の沈み込みに使うので、演出は translate で動かす */
-@keyframes drop-in {
-  from { opacity: 0; translate: 0 -32px; }
-  to { opacity: 1; translate: 0 0; }
-}
-
-@keyframes pop-in {
-  from { opacity: 0; translate: -16px 0; }
-  to { opacity: 1; translate: 0 0; }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ---------- BGM 切り替えボタン ---------- */
-.bgm-toggle {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 5;
-  padding: 8px 10px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  cursor: pointer;
-  box-shadow:
-    0 calc(var(--px) * -0.5) 0 0 var(--fg),
-    0 calc(var(--px) * 0.5) 0 0 var(--fg),
-    calc(var(--px) * -0.5) 0 0 0 var(--fg),
-    calc(var(--px) * 0.5) 0 0 0 var(--fg);
-}
-
-.bgm-toggle[aria-pressed="false"] {
-  color: var(--muted);
-}
-
-/* もどった あと、タップで 音を おこす のを まって いる（v1.50.2） */
-.bgm-toggle.waiting {
-  color: var(--accent, #ff4fa3);
-  animation: bgm-wait 1s steps(2) infinite;
-}
-@keyframes bgm-wait {
-  50% { opacity: 0.45; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bgm-toggle.waiting { animation: none; }
-}
-
-.bgm-toggle:hover,
-.bgm-toggle:focus-visible {
-  background: var(--btn-hover);
-  outline: none;
-}
-
-/* ---------- スコア表示 ---------- */
-.hud {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--muted);
-}
-
-.hud b {
-  font-weight: normal;
-  color: var(--fg);
-}
-
-.start-hi {
-  margin: 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--accent-2);
-}
-
-/* 取ったポイントがふわっと…ではなく、カクカク浮かぶ */
-.score-pop {
-  position: fixed;
-  z-index: 15;
-  pointer-events: none;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  color: var(--fg);
-  text-shadow: 2px 2px 0 var(--accent);
-  translate: -50% 0;
-  animation: score-up 0.8s steps(4) forwards;
-}
-
-@keyframes score-up {
-  from { translate: -50% 0; opacity: 1; }
-  80% { opacity: 1; }
-  to { translate: -50% -40px; opacity: 0; }
-}
-
-/* ---------- ナビゲーター（マスコット＋会話ウィンドウ） ---------- */
 .npc {
   width: 100%;
   display: flex;
@@ -551,48 +321,6 @@ body::after {
   display: none;
 }
 
-.pixel-btn.secret {
-  color: var(--accent);
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--accent),
-    0 var(--px) 0 0 var(--accent),
-    calc(var(--px) * -1) 0 0 0 var(--accent),
-    var(--px) 0 0 0 var(--accent),
-    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-}
-
-.pixel-btn.secret .icon {
-  color: var(--accent);
-}
-
-/* 隠しコマンド後はタイトルの影がチカチカ色変わり */
-.booted.secret-mode .title {
-  /* drop-in を残さないと、上書きされて opacity: 0 に戻ってしまう */
-  animation:
-    drop-in 0.5s steps(4) both,
-    rainbow 0.6s steps(1) infinite;
-}
-
-@keyframes rainbow {
-  0% { text-shadow: var(--px) 0 0 var(--accent), calc(var(--px) * 2) var(--px) 0 var(--shadow); }
-  33% { text-shadow: var(--px) 0 0 var(--accent-2), calc(var(--px) * 2) var(--px) 0 var(--shadow); }
-  66% { text-shadow: var(--px) 0 0 var(--btn-hover), calc(var(--px) * 2) var(--px) 0 var(--shadow); }
-}
-
-/* ---------- ワープしたときの画面ゆれ ---------- */
-.shake .screen {
-  animation: shake 0.3s steps(6);
-}
-
-@keyframes shake {
-  0% { translate: var(--px) 0; }
-  25% { translate: calc(var(--px) * -1) var(--px); }
-  50% { translate: 0 calc(var(--px) * -1); }
-  75% { translate: var(--px) var(--px); }
-  100% { translate: 0 0; }
-}
-
-/* ---------- UFO ---------- */
 .ufo {
   position: fixed;
   left: 0;
@@ -661,1784 +389,6 @@ body::after {
     2px 0 0 0 var(--accent);
 }
 
-.room-btn:hover,
-.room-btn:focus-visible {
-  background: var(--btn-hover);
-  outline: none;
-}
-
-.room-icon {
-  display: block;
-  width: 12px;
-  height: 12px;
-}
-
-.room-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* おへやの なかの じっせきの かず（きんいろ） */
-.room-trophy {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding-left: 6px;
-  border-left: 2px solid var(--muted);
-  color: var(--gold);
-}
-
-.room-btn.ping {
-  animation: ping 0.6s steps(2) 3;
-}
-
-@keyframes ping {
-  50% { background: var(--gold); color: var(--bg); }
-}
-
-.trophy-mini {
-  display: block;
-  width: 12px;
-  height: 12px;
-}
-
-.trophy-mini svg,
-.toast-icon svg,
-.trophy-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* 実績解除のお知らせ（下からカクッと上がってくる） */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  z-index: 19;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: max-content;
-  max-width: calc(100vw - 32px);
-  padding: 10px 14px;
-  background: var(--bg);
-  translate: -50% 0;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--gold),
-    0 var(--px) 0 0 var(--gold),
-    calc(var(--px) * -1) 0 0 0 var(--gold),
-    var(--px) 0 0 0 var(--gold),
-    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-}
-
-.toast[hidden] {
-  display: none;
-}
-
-.toast.show {
-  animation: toast-in 0.3s steps(3) both;
-}
-
-@keyframes toast-in {
-  from { translate: -50% 120px; }
-  to { translate: -50% 0; }
-}
-
-.toast-icon {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-}
-
-.toast-body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.toast-body small {
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--gold);
-}
-
-.toast-body b {
-  font-family: "DotGothic16", monospace;
-  font-size: 16px;
-  font-weight: normal;
-}
-
-/* 実績一覧のウィンドウ */
-.trophy-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.trophy-list li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  background: var(--btn);
-}
-
-.trophy-list li.locked {
-  color: var(--muted);
-  background: none;
-  outline: 2px dashed var(--btn);
-}
-
-.trophy-icon {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 12px;
-}
-
-.trophy-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-family: "DotGothic16", monospace;
-}
-
-.trophy-text b {
-  font-weight: normal;
-  font-size: 14px;
-}
-
-.trophy-text small {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.cheat-form {
-  margin-top: 16px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--accent-2);
-}
-
-.cheat-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.cheat-row input {
-  flex: 1;
-  min-width: 0;
-  padding: 8px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 12px;
-  outline: 2px solid var(--muted);
-}
-
-.cheat-row input:focus {
-  outline-color: var(--accent-2);
-}
-
-.cheat-row button {
-  padding: 8px 10px;
-  border: 0;
-  background: var(--accent);
-  color: var(--bg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.cheat-msg {
-  min-height: 1em;
-  margin: 8px 0 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  color: var(--fg);
-}
-
-/* ---------- ミニゲーム ---------- */
-/* フッターは画面の幅にかかわらず 2 段：上に遊ぶもの、下にお知らせ。
-   どの画面でも同じ形なので、冒険では「このページについて → INSERT COIN／おみくじ → リンク」の階段になる */
-.footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.footer-play,
-.footer-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.footer-info {
-  gap: 8px;
-}
-
-/* いちばん下の 名札（どこの 製品か） */
-.footer-maker {
-  margin: 0;
-  color: var(--muted);
-  font-family: "DotGothic16", monospace;
-  font-size: 11px;
-  letter-spacing: 1px;
-}
-
-/* シンプルモードでは遊ぶものの段ごと出さない */
-.simple .footer-play {
-  display: none;
-}
-
-.coin-slot {
-  padding: 6px 8px;
-  border: 0;
-  background: none;
-  color: var(--gold);
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  cursor: pointer;
-  outline: 2px solid var(--gold);
-  animation: blink 1.2s steps(1) infinite;
-}
-
-.coin-slot:hover,
-.coin-slot:focus-visible {
-  background: var(--gold);
-  color: var(--bg);
-  animation: none;
-}
-
-.game {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.92);
-}
-
-.game[hidden] {
-  display: none;
-}
-
-.game-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  color: var(--accent);
-}
-
-.game-close {
-  padding: 6px 8px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  cursor: pointer;
-}
-
-.game-canvas {
-  display: block;
-  image-rendering: pixelated;
-  touch-action: none;
-  outline: none;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--fg),
-    0 var(--px) 0 0 var(--fg),
-    calc(var(--px) * -1) 0 0 0 var(--fg),
-    var(--px) 0 0 0 var(--fg);
-}
-
-.game-help {
-  margin: 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  color: var(--muted);
-  text-align: center;
-}
-
-/* ---------- ピクセの雨 ---------- */
-.rain-pixe {
-  position: fixed;
-  top: -40px;
-  z-index: 4;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  animation: rain-fall 3s steps(30) both;
-}
-
-.rain-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-@keyframes rain-fall {
-  to { translate: 0 calc(100vh + 80px); }
-}
-
-/* ---------- 流れ星 ---------- */
-.shooting-star {
-  position: fixed;
-  z-index: 3;
-  width: 12px;
-  height: 12px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  animation: star-fly 1.6s steps(32) forwards;
-}
-
-/* 本体と、右上に伸びるドットのしっぽ */
-.shooting-star::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 4px;
-  height: 4px;
-  background: var(--fg);
-  box-shadow:
-    4px -4px 0 var(--fg),
-    8px -8px 0 var(--accent-2),
-    12px -12px 0 var(--accent-2),
-    16px -16px 0 var(--accent),
-    20px -20px 0 var(--btn-hover);
-}
-
-@keyframes star-fly {
-  from { translate: 0 0; opacity: 1; }
-  85% { opacity: 1; }
-  to { translate: -50vw 40vh; opacity: 0; }
-}
-
-/* ---------- マザーシップ ---------- */
-.mothership {
-  position: fixed;
-  left: 0;
-  z-index: 2;
-  width: 120px;
-  height: 64px;
-  padding: 14px 0 0;
-  border: 0;
-  background: none;
-  cursor: crosshair;
-}
-
-.mothership svg {
-  display: block;
-  width: 120px;
-  height: 50px;
-}
-
-.mothership .hp {
-  position: absolute;
-  top: 0;
-  left: 20px;
-  width: 80px;
-  height: 6px;
-  background: var(--btn);
-  outline: 2px solid var(--fg);
-}
-
-.mothership .hp-fill {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--accent);
-}
-
-.mothership.ltr {
-  animation: mother-ltr 16s steps(160) forwards;
-}
-
-.mothership.rtl {
-  animation: mother-rtl 16s steps(160) forwards;
-}
-
-@keyframes mother-ltr {
-  from { translate: -140px 0; }
-  to { translate: calc(100vw + 140px) 0; }
-}
-
-@keyframes mother-rtl {
-  from { translate: calc(100vw + 140px) 0; }
-  to { translate: -140px 0; }
-}
-
-.mothership.hurt svg {
-  animation: hurt 0.2s steps(2);
-}
-
-@keyframes hurt {
-  50% { opacity: 0.2; }
-}
-
-.mothership.boom {
-  display: flex;
-  translate: none;
-  pointer-events: none;
-  animation: boom 0.9s steps(6) forwards;
-}
-
-.mothership.boom svg {
-  width: 48px;
-  height: 48px;
-}
-
-/* ---------- マウスのキラキラ ---------- */
-.sparkle {
-  position: fixed;
-  z-index: 4;
-  width: 4px;
-  height: 4px;
-  pointer-events: none;
-  animation: sparkle 0.5s steps(4) forwards;
-}
-
-@keyframes sparkle {
-  to { translate: 0 12px; opacity: 0; }
-}
-
-/* ---------- ねむるピクセ ---------- */
-.npc-sprite {
-  position: relative;
-}
-
-.npc-sprite.asleep .npc-body {
-  animation: none;
-}
-
-.npc-sprite.asleep::after {
-  content: "Z z z";
-  position: absolute;
-  top: -16px;
-  right: -20px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--accent-2);
-  animation: zzz 1.5s steps(3) infinite;
-}
-
-@keyframes zzz {
-  from { translate: 0 4px; opacity: 0.4; }
-  to { translate: 4px -8px; opacity: 1; }
-}
-
-/* ---------- 隠しコマンド party ---------- */
-/* 点滅させすぎないよう、暗い色どうしを0.5秒ごとに切りかえる */
-body.party {
-  animation: party-bg 2s steps(1) infinite;
-}
-
-@keyframes party-bg {
-  0% { background-color: #0f0b1e; }
-  25% { background-color: #1e0b2a; }
-  50% { background-color: #0b1a2a; }
-  75% { background-color: #1a0b1e; }
-}
-
-.party .title {
-  animation:
-    drop-in 0.5s steps(4) both,
-    rainbow 0.6s steps(1) infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body.party,
-  .coin-slot,
-  .room-btn.ping,
-  .npc-sprite.asleep::after,
-  .party .title {
-    animation: none !important;
-  }
-
-  .party .title {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cursor,
-  .pixel-btn .arrow,
-  .start-btn,
-  .npc-body,
-  .npc-sprite.jump,
-  .shake .screen {
-    animation: none !important;
-  }
-
-  .booted.secret-mode .title {
-    animation: drop-in 1ms both !important;
-  }
-
-  .booted .title,
-  .booted .subtitle,
-  .booted .footer,
-  .booted .cassette-btn,
-  .booted .bgm-toggle,
-  .booted .hud,
-  .booted .npc,
-  .booted .pixel-btn,
-  .score-pop,
-  .start-screen.leaving {
-    animation-duration: 1ms !important;
-    animation-delay: 0s !important;
-  }
-}
-
-/* =====================================================================
-   v1.3「ページの外まで遊び場」
-   ===================================================================== */
-
-/* ---------- 会話の選択肢 ---------- */
-.dialog-choices {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.dialog-choices button {
-  padding: 4px 10px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.dialog-choices button::before {
-  content: "▶";
-  margin-right: 6px;
-  color: var(--accent);
-  visibility: hidden;
-}
-
-.dialog-choices button:hover,
-.dialog-choices button:focus-visible {
-  background: var(--btn-hover);
-  outline: none;
-}
-
-.dialog-choices button:hover::before,
-.dialog-choices button:focus-visible::before {
-  visibility: visible;
-}
-
-/* ---------- 留守のピクセ・となりのタブから来たピクセ ---------- */
-.npc-sprite.away {
-  outline: 2px dashed var(--muted);
-  outline-offset: -2px;
-  cursor: default;
-}
-
-.npc-sprite.away::after {
-  content: "るす";
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.npc-guest {
-  flex-shrink: 0;
-  width: 64px;
-  height: 64px;
-  margin-left: -12px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  animation: bob 0.8s steps(1) infinite;
-}
-
-.npc-guest svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* ---------- 今日の月 ---------- */
-.moon {
-  position: absolute;
-  top: 64px;
-  right: 24px;
-  z-index: 3; /* .screen（z-index: 1）より手前にしないとクリックが届かない */
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.moon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.moon:focus-visible {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 4px;
-}
-
-.js .moon {
-  opacity: 0;
-}
-
-.booted .moon {
-  animation: fade-in 0.3s steps(3) 0.5s both;
-}
-
-/* ---------- PIXE ADVENTURE ---------- */
-.adv-hero,
-.adv-coin,
-.adv-enemy,
-.adv-goal {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-}
-
-.adv-hero svg,
-.adv-coin svg,
-.adv-enemy svg,
-.adv-goal svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.adv-hero {
-  z-index: 6;
-  width: 32px;
-  height: 32px;
-}
-
-.adv-coin {
-  z-index: 5;
-  width: 16px;
-  height: 16px;
-}
-
-/* 2コマを交互に出して、くるくる回って見せる */
-.adv-coin span {
-  position: absolute;
-  inset: 0;
-}
-
-/* 2枚を半周期ずらして、どちらか片方だけが見えるようにする */
-.adv-coin span {
-  animation: coin-flip 0.6s steps(1) infinite;
-}
-
-.adv-coin span:last-child {
-  animation-delay: -0.3s;
-}
-
-@keyframes coin-flip {
-  0% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.adv-enemy {
-  z-index: 5;
-  width: 24px;
-  height: 12px;
-}
-
-.adv-enemy.boom {
-  height: 24px;
-}
-
-.adv-goal {
-  z-index: 5;
-  width: 24px;
-  height: 24px;
-  animation: bob 0.5s steps(1) infinite;
-}
-
-/* 勢いよく着地されたボタンはへこむ（アニメーションと取り合わないよう transform で） */
-.pixel-btn.bumped,
-.coin-slot.bumped,
-.omikuji-btn.bumped,
-.about-btn.bumped,
-.settings-btn.bumped,
-.cassette-btn.bumped {
-  transform: translateY(var(--px));
-}
-
-.adv-hud {
-  position: fixed;
-  top: 12px;
-  left: 50%;
-  z-index: 18;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
-  background: var(--bg);
-  translate: -50% 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--gold);
-  white-space: nowrap;
-  box-shadow:
-    0 -2px 0 0 var(--fg),
-    0 2px 0 0 var(--fg),
-    -2px 0 0 0 var(--fg),
-    2px 0 0 0 var(--fg);
-}
-
-.adv-time {
-  color: var(--fg);
-}
-
-.adv-exit {
-  padding: 4px 6px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font: inherit;
-  cursor: pointer;
-}
-
-/* タッチ端末だけに出す操作ボタン。iPhone の したの ホームバーの ぶん うえに（v1.58、本人「こんな下の位置だったっけ」） */
-.adv-pad {
-  position: fixed;
-  right: calc(16px + env(safe-area-inset-right));
-  bottom: calc(32px + env(safe-area-inset-bottom));
-  left: calc(16px + env(safe-area-inset-left));
-  z-index: 18;
-  display: none;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.adv-pad div {
-  display: flex;
-  gap: 12px;
-}
-
-.adv-pad button {
-  width: 62px;
-  height: 62px;
-  border: 0;
-  background: rgba(42, 33, 80, 0.85);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 16px;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: auto;
-  box-shadow:
-    0 -2px 0 0 var(--fg),
-    0 2px 0 0 var(--fg),
-    -2px 0 0 0 var(--fg),
-    2px 0 0 0 var(--fg);
-}
-
-.adv-pad .adv-a {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-@media (pointer: coarse) {
-  .adv-pad {
-    display: flex;
-  }
-
-  /* したに よはくを たして、じめんが ボタンより うえに くる ように（ピクセが ボタンに かくれない、v1.65.3） */
-  .adventuring .screen {
-    padding-bottom: 150px;
-  }
-}
-
-/* ---------- スタッフロール ---------- */
-.credits {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  overflow: hidden;
-  background: #000;
-  cursor: pointer;
-}
-
-.credits-roll {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  width: min(420px, calc(100vw - 32px));
-  margin: 0 auto;
-  translate: 0 var(--from, 100vh);
-  animation-name: credits-roll;
-  animation-fill-mode: forwards;
-  text-align: center;
-}
-
-@keyframes credits-roll {
-  from { translate: 0 var(--from); }
-  to { translate: 0 var(--to); }
-}
-
-.cr-title {
-  margin: 0 0 80px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 24px;
-  text-shadow: var(--px) 0 0 var(--accent), calc(var(--px) * 2) var(--px) 0 var(--shadow);
-}
-
-.cr-head {
-  margin: 80px 0 32px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 12px;
-  line-height: 2;
-  color: var(--accent-2);
-}
-
-.cr-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 0 0 20px;
-  font-family: "Press Start 2P", "DotGothic16", monospace;
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.cr-row span:first-child {
-  color: var(--muted);
-  text-align: left;
-}
-
-.cr-row span:last-child {
-  text-align: right;
-}
-
-.cr-pixe {
-  width: 64px;
-  height: 64px;
-  margin: 48px auto 24px;
-  animation: jump 0.6s steps(3) infinite;
-}
-
-.cr-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.cr-end {
-  margin: 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 14px;
-  color: var(--gold);
-}
-
-.credits-skip {
-  position: fixed;
-  right: 16px;
-  bottom: 12px;
-  z-index: 41;
-  margin: 0;
-  padding: 8px 10px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 9px;
-  cursor: pointer;
-}
-
-.credits-skip:hover,
-.credits-skip:focus-visible {
-  background: var(--btn-hover);
-  outline: 2px solid var(--accent-2);
-}
-
-/* ロールの いちばん さいご：フッターと おなじ 製作所の なふだ */
-.cr-maker {
-  margin: 24px 0 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
-}
-
-/* ---------- きせかえ ---------- */
-.wardrobe {
-  margin-top: 16px;
-}
-
-.wardrobe h3 {
-  margin: 0 0 8px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  font-weight: normal;
-  color: var(--accent-2);
-}
-
-.wardrobe-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.wardrobe-item {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  padding: 4px;
-  border: 0;
-  background: var(--btn);
-  color: var(--muted);
-  font-family: "Press Start 2P", monospace;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.wardrobe-item svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.wardrobe-item:disabled {
-  background: none;
-  outline: 2px dashed var(--btn);
-  cursor: help;
-}
-
-.wardrobe-item[aria-pressed="true"] {
-  outline: 2px solid var(--gold);
-}
-
-/* わくは「ためして いる もの」の きいろ 1 つ だけ（v1.58、本人「同時に３つの枠がある感じ」）。
-   ゆびを のせた ひょうじは マウスの ある たんまつ だけ（スマホでは おした あとも のこって しまう） */
-@media (hover: hover) {
-  .wardrobe-item:not(:disabled):not([aria-pressed="true"]):hover {
-    background: var(--btn-hover);
-  }
-}
-
-.wardrobe-item:focus-visible:not([aria-pressed="true"]) {
-  outline: 2px dashed var(--muted);
-}
-
-/* ---------- 印刷すると認定証 ---------- */
-.certificate {
-  display: none;
-}
-
-@media print {
-  @page {
-    margin: 12mm;
-  }
-
-  body > *:not(.certificate) {
-    display: none !important;
-  }
-
-  body {
-    background: #fff;
-    color: #000;
-  }
-
-  body::after {
-    display: none;
-  }
-
-  .certificate {
-    display: block;
-  }
-
-  .cert-frame {
-    padding: 32px;
-    border: 8px double #000;
-    font-family: "DotGothic16", monospace;
-    text-align: center;
-  }
-
-  .cert-kicker {
-    margin: 0;
-    font-family: "Press Start 2P", monospace;
-    font-size: 12px;
-  }
-
-  .cert-title {
-    margin: 12px 0 16px;
-    font-size: 40px;
-    letter-spacing: 8px;
-  }
-
-  .cert-pixe {
-    width: 96px;
-    height: 96px;
-    margin: 0 auto 16px;
-  }
-
-  .cert-pixe svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .cert-lead {
-    font-size: 16px;
-    line-height: 1.8;
-  }
-
-  .cert-table {
-    margin: 16px auto;
-    border-collapse: collapse;
-    font-size: 15px;
-  }
-
-  .cert-table th,
-  .cert-table td {
-    padding: 6px 16px;
-    border-bottom: 1px dashed #000;
-    text-align: left;
-  }
-
-  .cert-table td {
-    font-family: "Press Start 2P", "DotGothic16", monospace;
-    font-size: 12px;
-    text-align: right;
-  }
-
-  .cert-sub {
-    margin: 24px 0 4px;
-    font-weight: bold;
-  }
-
-  .cert-trophies {
-    max-width: 560px;
-    margin: 0 auto;
-    font-size: 13px;
-    line-height: 1.8;
-  }
-
-  .cert-date {
-    margin: 24px 0 4px;
-  }
-
-  .cert-sign {
-    margin: 0;
-    font-size: 15px;
-  }
-
-  .cert-stamp {
-    display: inline-grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    margin-left: 8px;
-    border: 3px solid #d0103a;
-    color: #d0103a;
-    font-size: 20px;
-    vertical-align: middle;
-    rotate: -8deg;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .npc-guest,
-  .adv-goal,
-  .cr-pixe,
-  .credits-skip,
-  .adv-coin span {
-    animation: none !important;
-  }
-
-  .adv-coin span:last-child {
-    opacity: 0;
-  }
-
-  .booted .moon {
-    animation-duration: 1ms !important;
-    animation-delay: 0s !important;
-  }
-}
-
-/* =====================================================================
-   v1.4「最高の踊り」：季節・天気・アプリ・コントローラー・オンライン
-   ===================================================================== */
-
-/* ---------- 雪・雨・雲・天の川を描く canvas（星の上、中身の下） ---------- */
-.season-fx {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-/* ---------- かみなりの稲妻（画面は光らせない） ---------- */
-.bolt {
-  position: fixed;
-  top: 40px;
-  z-index: 2;
-  width: 32px;
-  height: 48px;
-  pointer-events: none;
-  animation: bolt 0.6s steps(3) forwards;
-}
-
-.bolt svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-@keyframes bolt {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-/* ---------- 年賀状 ---------- */
-.nenga {
-  position: fixed;
-  inset: 0;
-  z-index: 35;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.8);
-}
-
-.nenga-card {
-  width: min(360px, 100%);
-  padding: 24px 20px;
-  background: #fffaf0;
-  color: #1a1433;
-  text-align: center;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 #d0103a,
-    0 var(--px) 0 0 #d0103a,
-    calc(var(--px) * -1) 0 0 0 #d0103a,
-    var(--px) 0 0 0 #d0103a,
-    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-  animation: drop-in 0.4s steps(4) both;
-}
-
-.nenga-kicker {
-  margin: 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: #d0103a;
-}
-
-.nenga-title {
-  margin: 12px 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 28px;
-  line-height: 1.3;
-}
-
-.nenga-pixe {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 8px;
-}
-
-.nenga-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.nenga-body {
-  margin: 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-.nenga-from {
-  margin: 12px 0 16px;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  text-align: right;
-}
-
-.nenga-close {
-  padding: 6px 16px;
-  border: 0;
-  background: #d0103a;
-  color: #fffaf0;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-/* ---------- ほかの訪問者のピクセ ---------- */
-.online-count {
-  color: var(--accent-2);
-}
-
-.online-count[hidden] {
-  display: none;
-}
-
-.ghost {
-  position: fixed;
-  z-index: 3;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: none;
-  opacity: 0.65;
-  cursor: pointer;
-  animation: float 3s steps(6) infinite alternate;
-}
-
-.ghost svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.ghost:hover,
-.ghost:focus-visible {
-  opacity: 1;
-  outline: 2px solid var(--accent-2);
-  outline-offset: 2px;
-}
-
-@keyframes float {
-  from { translate: 0 0; }
-  to { translate: 0 -12px; }
-}
-
-.ghost.hop svg {
-  animation: jump 0.3s steps(3);
-}
-
-/* てを ふりすぎ：てが つかれて ぐったり（v1.48.2） */
-.ghost.tired svg {
-  animation: ghost-tired 0.9s steps(3);
-}
-
-@keyframes ghost-tired {
-  0%, 100% { translate: 0 0; rotate: 0deg; }
-  30%, 80% { translate: 0 3px; rotate: -12deg; }
-}
-
-.ghost.leaving {
-  animation: fade-in 0.4s steps(4) reverse forwards;
-}
-
-/* ---------- 世界の記録 ---------- */
-.world-record {
-  margin-top: 16px;
-}
-
-.world-record[hidden] {
-  display: none;
-}
-
-.world-record h3 {
-  margin: 0 0 8px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  font-weight: normal;
-  color: var(--accent-2);
-}
-
-.world-record dl {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px 12px;
-  margin: 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-}
-
-.world-record dt {
-  color: var(--muted);
-}
-
-.world-record dd {
-  margin: 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  text-align: right;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ghost,
-  .ghost.hop svg,
-  .ghost.tired svg,
-  .nenga-card {
-    animation: none !important;
-  }
-}
-
-/* 冒険中だけ出る地面（いちばん下の足場のすぐ下） */
-.adv-ground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 4;
-  height: 4px;
-  pointer-events: none;
-  background: repeating-linear-gradient(90deg, var(--accent-2) 0 8px, transparent 8px 12px);
-}
-
-/* =====================================================================
-   ピクセが育つ：日記・でんせつの輝き
-   ===================================================================== */
-
-.diary-new {
-  padding: 1px 3px;
-  background: var(--accent);
-  color: var(--bg);
-  animation: blink 1s steps(1) infinite;
-}
-
-.diary-new[hidden] {
-  display: none;
-}
-
-/* 罫線ノートの日記 */
-.diary {
-  width: min(440px, calc(100vw - 32px));
-  max-height: calc(100vh - 64px);
-  padding: 0;
-  border: 0;
-  background: #fffaf0;
-  color: #1a1433;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--accent),
-    0 var(--px) 0 0 var(--accent),
-    calc(var(--px) * -1) 0 0 0 var(--accent),
-    var(--px) 0 0 0 var(--accent),
-    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-}
-
-.diary::backdrop {
-  background: rgba(15, 11, 30, 0.75);
-}
-
-.diary-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--accent);
-  color: #fffaf0;
-}
-
-.diary-top h2 {
-  margin: 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 18px;
-  font-weight: normal;
-}
-
-.diary-close {
-  padding: 2px 8px;
-  border: 0;
-  background: #fffaf0;
-  color: var(--accent);
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.diary-body {
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
-  padding: 16px 20px 24px;
-  font-family: "DotGothic16", monospace;
-  scrollbar-color: var(--muted) #fffaf0;
-}
-
-.diary-head {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding-bottom: 12px;
-  margin-bottom: 8px;
-  border-bottom: 2px dashed #c9bfa8;
-}
-
-.diary-pixe {
-  flex-shrink: 0;
-  width: 64px;
-  height: 64px;
-  padding: 4px;
-  background: #1a1433;
-}
-
-.diary-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.diary-head dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px 10px;
-  margin: 0;
-  font-size: 13px;
-}
-
-.diary-head dt {
-  color: #8a7f68;
-}
-
-.diary-head dd {
-  margin: 0;
-}
-
-.diary-day {
-  margin-top: 12px;
-}
-
-.diary-day h3 {
-  margin: 0 0 4px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  font-weight: normal;
-  color: var(--accent);
-}
-
-/* 1行ずつ罫線の上に書く */
-.diary-day p {
-  margin: 0;
-  padding: 4px 0 3px;
-  border-bottom: 1px solid #e6dcc6;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-/* ピクセの つぶやき（v1.55）の みだし */
-.tsubuyaki-title {
-  margin: 18px 0 0;
-  color: #8a7f68;
-  font-size: 13px;
-  font-weight: normal;
-}
-
-/* 30日会った「でんせつの ピクセ」はキラキラ光る（点滅ではなく、ドットが入れかわる） */
-.npc-sprite.legend::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 4px;
-  height: 4px;
-  pointer-events: none;
-  animation: legend 1.6s steps(1) infinite;
-}
-
-@keyframes legend {
-  0% { box-shadow: 0 0 0 var(--gold), 52px 8px 0 var(--accent-2), 8px 48px 0 var(--gold), 56px 52px 0 var(--fg); }
-  50% { box-shadow: 4px 12px 0 var(--accent-2), 48px 0 0 var(--gold), 0 56px 0 var(--fg), 52px 40px 0 var(--gold); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .diary-new,
-  .npc-sprite.legend::before {
-    animation: none !important;
-  }
-}
-
-/* =====================================================================
-   シンプルモード：リンクだけの静かなページ（v1.6）
-   ===================================================================== */
-
-/* シンプルモードの ときだけ、みぎうえに「▶ あそぶ」（v1.58） */
-.simple-toggle {
-  display: none;
-  position: fixed;
-  top: 16px;
-  right: 104px;
-  z-index: 5;
-  padding: 8px 10px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  cursor: pointer;
-  outline: 2px solid var(--btn);
-}
-
-.simple-toggle:hover,
-.simple-toggle:focus-visible {
-  color: var(--fg);
-  outline-color: var(--muted);
-}
-
-.js .simple-toggle {
-  opacity: 0;
-}
-
-.booted .simple-toggle {
-  animation: fade-in 0.3s steps(3) 0.5s both;
-}
-
-/* シンプルモード中：遊びの部品をぜんぶ隠して、リンクをすぐ見せる */
-.simple .start-screen,
-.simple .stars,
-.simple .season-fx,
-.simple .hud,
-.simple .npc,
-.simple #moon,
-.simple .bgm-toggle,
-.simple .coin-slot,
-.simple .ghost,
-.simple .ufo,
-.simple .toast,
-.simple .cursor {
-  display: none !important;
-}
-
-.simple .title,
-.simple .subtitle,
-.simple .pixel-btn,
-.simple .footer,
-.simple .cassette-btn,
-.simple .simple-toggle {
-  opacity: 1;
-  animation: none;
-}
-
-/* シンプルモードは おとも うごきも ないので、せっていする ものが ない */
-.simple .settings-btn,
-.simple .sep-settings {
-  display: none;
-}
-
-.simple .simple-toggle {
-  display: block;
-  right: 16px;
-  color: var(--accent-2);
-  outline-color: var(--accent-2);
-}
-
-.simple .screen {
-  padding-top: 72px;
-}
-
-/* =====================================================================
-   みんなでマザーシップ（レイド）（v1.6）
-   ===================================================================== */
-.raid {
-  position: fixed;
-  top: 72px;
-  left: 50%;
-  z-index: 8;
-  width: min(320px, calc(100vw - 32px));
-  padding: 8px 10px 4px;
-  background: rgba(15, 11, 30, 0.85);
-  translate: -50% 0;
-  text-align: center;
-  box-shadow:
-    0 -2px 0 0 var(--accent),
-    0 2px 0 0 var(--accent),
-    -2px 0 0 0 var(--accent),
-    2px 0 0 0 var(--accent);
-  /* drop-in を使うと translate が上書きされて、まんなか寄せがずれる */
-  animation: raid-in 0.4s steps(4) both;
-}
-
-/* せまい画面では、左上の HUD（DIARY ボタンの下端 〜100px）にかぶらないよう下げる */
-@media (max-width: 720px) {
-  .raid {
-    top: 112px;
-  }
-
-  /* 会話ウィンドウにもかからないよう、マザーシップを小さめに */
-  .raid .raid-ship {
-    width: 120px;
-    height: 50px;
-    margin-top: 6px;
-  }
-}
-
-@keyframes raid-in {
-  from { translate: -50% -32px; opacity: 0; }
-  to { translate: -50% 0; opacity: 1; }
-}
-
-.raid-title {
-  margin: 0 0 6px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--accent);
-  animation: blink 0.8s steps(1) infinite;
-}
-
-.raid-bar {
-  height: 8px;
-  background: var(--btn);
-  outline: 2px solid var(--fg);
-}
-
-.raid-fill {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--accent);
-}
-
-.raid-info {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 6px 0 0;
-  font-family: "Press Start 2P", "DotGothic16", monospace;
-  font-size: 8px;
-  color: var(--fg);
-}
-
-.raid-people {
-  color: var(--accent-2);
-}
-
-.raid-ship {
-  position: relative;
-  display: block;
-  width: 192px;
-  height: 80px;
-  margin: 8px auto 4px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: crosshair;
-  animation: bob 0.6s steps(1) infinite;
-}
-
-.raid-ship svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.raid-ship.hurt > svg {
-  animation: hurt 0.15s steps(2);
-}
-
-.raid-spark {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-}
-
-.raid.down .raid-ship {
-  display: flex;
-  justify-content: center;
-  animation: boom 0.9s steps(6) forwards;
-}
-
-.raid.down .raid-ship svg {
-  width: 64px;
-  height: 64px;
-}
-
-.raid.escape {
-  animation: raid-escape 1s steps(8) forwards;
-}
-
-@keyframes raid-escape {
-  to { translate: -50% -240px; opacity: 0; }
-}
-
-/* 広い画面では、まんなかの中身にかからないよう右の余白に出す */
-@media (min-width: 1100px) {
-  .raid {
-    top: 120px;
-    right: 32px;
-    left: auto;
-    translate: none;
-    animation-name: raid-in-side;
-  }
-
-  .raid.escape {
-    animation-name: raid-escape-side;
-  }
-}
-
-@keyframes raid-in-side {
-  from { translate: 0 -32px; opacity: 0; }
-  to { translate: 0 0; opacity: 1; }
-}
-
-@keyframes raid-escape-side {
-  to { translate: 0 -240px; opacity: 0; }
-}
-
-.simple .raid {
-  display: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .raid,
-  .raid-title,
-  .raid-ship,
-  .raid.escape {
-    animation: none !important;
-  }
-}
-
-/* 放っておかれてページごと眠っているとき：動きを全部止めて、少し暗くする（何か触れば起きる） */
-.dozing *,
-.dozing *::before,
-.dozing *::after {
-  animation-play-state: paused !important;
-}
-
-.dozing .screen,
-.dozing .stars {
-  opacity: 0.55;
-}
-
-/* 画面には出さず、スクリーンリーダーにだけ読ませる文字 */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2596,23 +546,6 @@ a,
   touch-action: manipulation;
 }
 
-/* 連打する的は、長押しで文字が選ばれたり、タップのたびに色の四角が出たりしないように */
-.raid-ship,
-.npc-sprite,
-.mothership,
-.ufo,
-.ghost,
-.rain-pixe,
-.shooting-star {
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* =====================================================================
-   ピクセと さっきょく（v1.8）
-   ===================================================================== */
-/* おしらせ（v1.59）：みぎうえ、BGM の となり（まえは SIMPLE と ♪ が あった ところ）。あたらしい おしらせが あると きんいろ */
 .mail-btn {
   position: fixed;
   top: 16px;
@@ -2666,1332 +599,6 @@ a,
   opacity: 0;
 }
 
-.booted .mail-btn {
-  animation: fade-in 0.3s steps(3) 0.5s both;
-}
-
-.booted .mail-btn.has-new {
-  animation: fade-in 0.3s steps(3) 0.5s both, rs-glow 1.6s steps(2) 1s infinite;
-}
-
-.simple .mail-btn {
-  display: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mail-btn.has-new,
-  .booted .mail-btn.has-new { animation: none; opacity: 1; }
-}
-
-.composer {
-  width: min(580px, calc(100vw - 16px));
-  max-height: calc(100vh - 32px);
-  padding: 0;
-  border: 0;
-  background: var(--bg);
-  color: var(--fg);
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--accent),
-    0 var(--px) 0 0 var(--accent),
-    calc(var(--px) * -1) 0 0 0 var(--accent),
-    var(--px) 0 0 0 var(--accent);
-}
-
-.composer::backdrop {
-  background: rgba(15, 11, 30, 0.75);
-}
-
-.composer-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--btn);
-}
-
-.composer-top h2 {
-  margin: 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 17px;
-  font-weight: normal;
-  color: var(--accent);
-}
-
-.composer-close {
-  padding: 2px 8px;
-  border: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.composer-body {
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  padding: 12px 14px 16px;
-  font-family: "DotGothic16", monospace;
-}
-
-.roll {
-  display: block;
-  margin: 0 auto;
-  touch-action: none;
-  cursor: crosshair;
-  image-rendering: pixelated;
-}
-
-.roll:focus-visible {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 2px;
-}
-
-.roll-status {
-  min-height: 1.4em;
-  margin: 4px 0 8px;
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
-}
-
-.composer-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 12px;
-  margin-top: 8px;
-}
-
-.c-btn {
-  padding: 6px 10px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.c-btn:hover,
-.c-btn:focus-visible {
-  background: var(--btn-hover);
-  outline: 2px solid var(--accent-2);
-}
-
-.c-main {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-.c-save {
-  background: var(--gold);
-  color: var(--bg);
-}
-
-.c-small {
-  padding: 2px 8px;
-}
-
-.c-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.c-label select {
-  padding: 4px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-}
-
-.c-label b {
-  min-width: 2.2em;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  font-weight: normal;
-  color: var(--fg);
-  text-align: center;
-}
-
-.composer-msg {
-  min-height: 1.6em;
-  margin: 10px 0 0;
-  font-size: 13px;
-  text-align: center;
-  word-break: break-all;
-}
-
-/* レコードだな（v1.15） */
-.shelf {
-  margin-top: 16px;
-  padding-top: 10px;
-  border-top: 2px dashed var(--btn);
-}
-
-.shelf-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.shelf-top h3 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: normal;
-  color: var(--accent-2);
-}
-
-.shelf-list {
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.shelf-list li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 0;
-}
-
-.shelf-name {
-  flex: 1 1 10em;
-  font-size: 13px;
-}
-
-.shelf-name::before {
-  content: "◉ ";
-  color: var(--accent);
-}
-
-.shelf-name small {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.shelf-now {
-  color: var(--gold);
-  font-weight: normal;
-  font-size: 11px;
-}
-
-.shelf-empty {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* =====================================================================
-   ピクセの おみくじ（v1.8）
-   ===================================================================== */
-.omikuji-btn {
-  padding: 6px 8px;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  cursor: pointer;
-  outline: 2px solid var(--accent);
-}
-
-.omikuji-btn:hover,
-.omikuji-btn:focus-visible {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-.simple .omikuji-btn {
-  display: none !important;
-}
-
-.omikuji {
-  position: fixed;
-  inset: 0;
-  z-index: 35;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.8);
-}
-
-.omikuji-card {
-  width: min(320px, 100%);
-  padding: 20px 18px;
-  background: #fffaf0;
-  color: #1a1433;
-  text-align: center;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 #d0103a,
-    0 var(--px) 0 0 #d0103a,
-    calc(var(--px) * -1) 0 0 0 #d0103a,
-    var(--px) 0 0 0 #d0103a,
-    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-  font-family: "DotGothic16", monospace;
-}
-
-.omikuji-box {
-  width: 64px;
-  height: 48px;
-  margin: 0 auto 8px;
-}
-
-.omikuji-box svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.omikuji-box.shake {
-  animation: omikuji-shake 0.3s steps(3) 4;
-}
-
-@keyframes omikuji-shake {
-  0% { rotate: -12deg; }
-  50% { rotate: 12deg; }
-  100% { rotate: 0deg; }
-}
-
-.omikuji-kicker {
-  margin: 0;
-  font-size: 13px;
-  color: #8a7f68;
-}
-
-.omikuji-fortune {
-  margin: 4px 0 6px;
-  font-size: 36px;
-  color: #d0103a;
-  letter-spacing: 4px;
-}
-
-.omikuji-line {
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.omikuji-card dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 10px;
-  margin: 0 auto;
-  width: max-content;
-  max-width: 100%;
-  font-size: 14px;
-  text-align: left;
-}
-
-.omikuji-card dt {
-  color: #8a7f68;
-}
-
-.omikuji-card dd {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-}
-
-.omikuji-color {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  outline: 2px solid #1a1433;
-}
-
-.omikuji-from {
-  margin: 12px 0 14px;
-  font-size: 13px;
-  text-align: right;
-}
-
-.omikuji-close {
-  padding: 6px 16px;
-  border: 0;
-  background: #d0103a;
-  color: #fffaf0;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .omikuji-box.shake {
-    animation: none !important;
-  }
-}
-
-/* =====================================================================
-   冒険のゴースト（v1.8）
-   ===================================================================== */
-.adv-ghost {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 5;
-  width: 32px;
-  height: 32px;
-  pointer-events: none;
-  opacity: 0.45;
-}
-
-.adv-ghost .ghost-body,
-.adv-ghost .ghost-body svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.adv-ghost .ghost-tag {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  translate: -50% -2px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-  color: var(--accent-2);
-}
-
-.adv-ghost.done {
-  opacity: 0.25;
-}
-
-.adv-ghost-time {
-  color: var(--accent-2);
-}
-
-/* せまい画面の冒険中は、冒険の HUD（COIN・タイム・GHOST）と重ならないよう、ふだんの HUD と右上のボタンを隠す */
-@media (max-width: 720px) {
-  .adventuring .hud,
-  .adventuring .bgm-toggle,
-  .adventuring .simple-toggle,
-  .adventuring .mail-btn {
-    visibility: hidden;
-  }
-}
-
-/* =====================================================================
-   ピクセの ずかん（v1.9）：日記のノートのタブ
-   ===================================================================== */
-.diary-bar {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 16px 0;
-  background: #fffaf0;
-  border-bottom: 2px solid #e6dcc6;
-}
-
-.diary-tabs {
-  display: flex;
-  gap: 4px;
-}
-
-.postcard-btn {
-  margin-bottom: 4px;
-  padding: 4px 10px;
-  border: 0;
-  background: #1a1433;
-  color: #fffaf0;
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.postcard-btn:hover,
-.postcard-btn:focus-visible {
-  background: var(--accent);
-  outline: 2px solid #1a1433;
-}
-
-.diary-tab {
-  padding: 6px 14px;
-  border: 0;
-  background: #efe6d2;
-  color: #8a7f68;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.diary-tab[aria-selected="true"] {
-  background: var(--accent);
-  color: #fffaf0;
-}
-
-.diary-tab:focus-visible {
-  outline: 2px solid #1a1433;
-  outline-offset: 2px;
-}
-
-.diary-body[hidden] {
-  display: none;
-}
-
-.diary-body:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -4px;
-}
-
-.zukan-head p {
-  margin: 0 0 6px;
-  font-size: 14px;
-}
-
-.zukan-head b {
-  font-family: "Press Start 2P", monospace;
-  font-size: 12px;
-  font-weight: normal;
-  color: var(--accent);
-}
-
-.zukan-bar {
-  height: 8px;
-  background: #efe6d2;
-  outline: 2px solid #1a1433;
-}
-
-.zukan-bar span {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-}
-
-.zukan-section h3 {
-  margin: 16px 0 6px;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  font-weight: normal;
-  color: var(--accent);
-}
-
-.zukan-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.zukan-grid li {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-}
-
-.zukan-pic {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 8px;
-  background: #1a1433;
-}
-
-.zukan-pic svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.zukan-text {
-  font-family: "DotGothic16", monospace;
-  font-size: 18px;
-  color: #ff6b6b;
-}
-
-.unknown .zukan-text {
-  color: #3d3460;
-}
-
-.zukan-name {
-  font-size: 11px;
-  line-height: 1.3;
-  color: #1a1433;
-}
-
-.unknown .zukan-name {
-  color: #b3a88f;
-}
-
-/* =====================================================================
-   せってい（v1.10）
-   ===================================================================== */
-.set-row {
-  display: grid;
-  grid-template-columns: 1fr 130px 2.5em;
-  align-items: center;
-  gap: 10px;
-  margin: 6px 0;
-}
-
-.set-row input[type="range"] {
-  width: 100%;
-  accent-color: var(--accent);
-}
-
-.set-row output {
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  text-align: right;
-}
-
-.set-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 6px 0;
-  cursor: pointer;
-}
-
-.set-check input {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin-top: 3px;
-  accent-color: var(--accent);
-}
-
-.keys {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 12px;
-  margin: 0;
-  font-size: 13px;
-}
-
-.keys dt {
-  color: var(--accent-2);
-  white-space: nowrap;
-}
-
-.keys dd {
-  margin: 0;
-}
-
-/* うごきを へらす（このサイトの せってい）：アニメーションを すぐ終わらせる。
-   OS の「動きを減らす」は @media で別に止めているので、ここは html.reduce-motion のときだけ */
-.reduce-motion *,
-.reduce-motion *::before,
-.reduce-motion *::after {
-  animation-duration: 1ms !important;
-  animation-delay: 0s !important;
-  animation-iteration-count: 1 !important;
-  transition: none !important;
-}
-
-/* よみやすい もじ：ドットの もじを、端末の ふつうの もじに */
-.plain-font,
-.plain-font * {
-  font-family: system-ui, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif !important;
-  letter-spacing: normal !important;
-  -webkit-font-smoothing: auto;
-}
-
-.plain-font .title {
-  font-weight: 800;
-}
-
-/* =====================================================================
-   ピクセの ポストカード（v1.11）
-   ===================================================================== */
-.postcard {
-  position: fixed;
-  inset: 0;
-  z-index: 35;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.85);
-}
-
-.postcard-box {
-  width: min(720px, 100%);
-}
-
-.postcard-img {
-  display: block;
-  width: 100%;
-  height: auto;
-  image-rendering: pixelated;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--fg),
-    0 var(--px) 0 0 var(--fg),
-    calc(var(--px) * -1) 0 0 0 var(--fg),
-    var(--px) 0 0 0 var(--fg);
-}
-
-.postcard-row {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.postcard-row > * {
-  padding: 8px 16px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 15px;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.postcard-row .postcard-save {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-.postcard-row > *:hover,
-.postcard-row > *:focus-visible {
-  outline: 2px solid var(--accent-2);
-}
-
-.postcard-row [hidden] {
-  display: none;
-}
-
-/* =====================================================================
-   じかんの そら（v1.12）：時刻で変わる、夜空のうすいベール
-   ===================================================================== */
-.sky-tint {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* シンプルモードと ゲームボーイの色の ときは出さない */
-.simple .sky-tint,
-.gb .sky-tint {
-  display: none;
-}
-
-/* =====================================================================
-   おへやの どうぐ（ポストカード など）
-   ===================================================================== */
-.diary-tools {
-  display: flex;
-  gap: 6px;
-}
-
-.diary-tools [hidden] {
-  display: none;
-}
-
-/* =====================================================================
-   ピクセの スタンプカード（v1.18）：ノートの「スタンプ」タブ
-   ===================================================================== */
-.stamp-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.stamp-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: normal;
-  color: #1a1433;
-}
-
-.stamp-nav {
-  min-width: 40px;
-  min-height: 32px;
-  border: 0;
-  background: #1a1433;
-  color: #fffaf0;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.stamp-nav:hover,
-.stamp-nav:focus-visible {
-  background: var(--accent);
-  outline: 2px solid #1a1433;
-}
-
-.stamp-nav:disabled {
-  background: #e6dcc6;
-  color: #8a8070;
-  cursor: default;
-  outline: 0;
-}
-
-.stamp-cal {
-  width: 100%;
-  margin-top: 10px;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.stamp-cal th {
-  padding: 2px 0 6px;
-  font-size: 12px;
-  font-weight: normal;
-  color: #5c5470;
-}
-
-.stamp-cal th.sun {
-  color: #c2185b;
-}
-
-.stamp-cal th.sat {
-  color: #11707f;
-}
-
-.stamp-cal td {
-  position: relative;
-  height: 46px;
-  padding: 0;
-  border: 2px solid #efe6d2;
-  vertical-align: top;
-}
-
-.stamp-cal td.blank {
-  border-color: transparent;
-}
-
-.stamp-day {
-  position: absolute;
-  top: 2px;
-  left: 3px;
-  font-size: 11px;
-  color: #8a8070;
-}
-
-.stamp-cal td.today {
-  border-color: var(--accent);
-}
-
-.stamp-cal td.today .stamp-day {
-  color: #1a1433;
-}
-
-.stamp-cal .stamp-mark {
-  position: absolute;
-  right: 3px;
-  bottom: 3px;
-  width: 26px;
-  height: 26px;
-  opacity: 0.88;
-}
-
-.stamp-mark svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.stamp-sum {
-  margin: 12px 0 0;
-  font-size: 13px;
-  text-align: center;
-}
-
-.stamp-sum b {
-  font-family: "Press Start 2P", monospace;
-  font-size: 11px;
-  font-weight: normal;
-  color: var(--accent);
-}
-
-.stamp-legend {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 6px 12px;
-  margin: 14px 0 0;
-  padding: 10px 0 0;
-  border-top: 2px dashed #e6dcc6;
-  list-style: none;
-  font-size: 12px;
-  color: #5c5470;
-}
-
-.stamp-legend li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.stamp-legend .stamp-mark {
-  flex: none;
-  width: 16px;
-  height: 16px;
-}
-
-.stamp-sum span {
-  white-space: nowrap;
-}
-
-/* =====================================================================
-   ピクセの ゆめ（v1.19）：ねむっている あいだの ふきだし
-   ===================================================================== */
-.dream {
-  position: absolute;
-  bottom: calc(100% + 30px);
-  left: 34px;
-  z-index: 2;
-  width: 72px;
-  height: 42px;
-  padding: 0;
-  background: var(--btn);
-  pointer-events: none;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--fg),
-    0 var(--px) 0 0 var(--fg),
-    calc(var(--px) * -1) 0 0 0 var(--fg),
-    var(--px) 0 0 0 var(--fg);
-  animation: dream-in 0.8s steps(4) both;
-}
-
-.dream[hidden] {
-  display: none;
-}
-
-.dream svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* ふきだしの しっぽ（ちいさな まる 2 つ） */
-.dream::before,
-.dream::after {
-  content: "";
-  position: absolute;
-  background: var(--fg);
-}
-
-.dream::before {
-  left: 4px;
-  bottom: -12px;
-  width: 6px;
-  height: 6px;
-}
-
-.dream::after {
-  left: -2px;
-  bottom: -20px;
-  width: 4px;
-  height: 4px;
-}
-
-@keyframes dream-in {
-  from {
-    opacity: 0;
-    translate: 0 6px;
-  }
-}
-
-.reduce-motion .dream {
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dream {
-    animation: none;
-  }
-}
-
-/* =====================================================================
-   きゅうけい（v1.20）：20 びょう、とおくを みる
-   ===================================================================== */
-.rest {
-  position: fixed;
-  inset: 0;
-  z-index: 36;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.92);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  text-align: center;
-}
-
-.rest p {
-  margin: 0;
-}
-
-.rest-title {
-  font-size: 20px;
-  color: var(--accent-2);
-}
-
-.rest-count {
-  font-family: "Press Start 2P", monospace;
-  font-size: 56px;
-  line-height: 1.4;
-  color: var(--gold);
-}
-
-.rest-hint {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.rest-stop {
-  margin-top: 8px;
-}
-
-/* =====================================================================
-   ぼうし アトリエ（v1.21）：じぶんで ぼうしを かく
-   ===================================================================== */
-.wardrobe-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.wardrobe-head h3 {
-  margin: 0;
-}
-
-.atelier-btn {
-  padding: 4px 8px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.atelier-btn:hover,
-.atelier-btn:focus-visible {
-  background: var(--btn-hover);
-  outline: 2px solid var(--accent-2);
-}
-
-.atelier {
-  width: min(520px, calc(100vw - 16px));
-  max-height: calc(100vh - 32px);
-  padding: 0;
-  border: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--accent-2),
-    0 var(--px) 0 0 var(--accent-2),
-    calc(var(--px) * -1) 0 0 0 var(--accent-2),
-    var(--px) 0 0 0 var(--accent-2);
-}
-
-.atelier::backdrop {
-  background: rgba(15, 11, 30, 0.75);
-}
-
-.atelier-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--btn);
-}
-
-.atelier-top h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: normal;
-  color: var(--accent-2);
-}
-
-.atelier-close {
-  padding: 2px 8px;
-  border: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.atelier-body {
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  padding: 14px;
-}
-
-.atelier-main {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-}
-
-.atelier-grid {
-  display: grid;
-  gap: 1px;
-  padding: 1px;
-  background: var(--btn);
-  touch-action: none;
-}
-
-.atelier-grid [role="row"] {
-  display: grid;
-  grid-template-columns: repeat(16, 1fr);
-  gap: 1px;
-}
-
-.atelier-cell {
-  width: clamp(14px, 4.6vw, 20px);
-  height: clamp(14px, 4.6vw, 20px);
-  padding: 0;
-  border: 0;
-  background: var(--bg);
-  cursor: crosshair;
-}
-
-/* ピクセの あたまの ばしょは、からっぽの ときだけ うすく みせる */
-.atelier-cell.under[data-c="."] { background: #3d3460; }
-.atelier-cell[data-c="w"] { background: var(--fg); }
-.atelier-cell[data-c="p"] { background: var(--accent); }
-.atelier-cell[data-c="c"] { background: var(--accent-2); }
-.atelier-cell[data-c="y"] { background: var(--gold); }
-.atelier-cell[data-c="o"] { background: #000; }
-
-.atelier-cell:focus-visible {
-  position: relative;
-  z-index: 1;
-  outline: 2px solid var(--gold);
-}
-
-.atelier-preview {
-  width: 96px;
-  height: 96px;
-}
-
-.atelier-preview svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.atelier-colors {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 14px;
-}
-
-.atelier-color {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.atelier-color::before {
-  content: "";
-  width: 12px;
-  height: 12px;
-  outline: 1px solid var(--muted);
-}
-
-.atelier-color[data-c="w"]::before { background: var(--fg); }
-.atelier-color[data-c="p"]::before { background: var(--accent); }
-.atelier-color[data-c="c"]::before { background: var(--accent-2); }
-.atelier-color[data-c="y"]::before { background: var(--gold); }
-.atelier-color[data-c="o"]::before { background: #000; }
-.atelier-color[data-c="."]::before { background: linear-gradient(135deg, transparent 45%, var(--accent) 45% 55%, transparent 55%); }
-
-.atelier-color[aria-checked="true"] {
-  background: var(--accent-2);
-  color: var(--bg);
-}
-
-.atelier-color:focus-visible {
-  outline: 2px solid var(--gold);
-}
-
-.atelier-name {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.atelier-name input {
-  width: 11em;
-  padding: 4px 6px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-}
-
-.atelier-name input:focus-visible {
-  outline: 2px solid var(--accent-2);
-}
-
-.atelier-row {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.atelier-msg {
-  min-height: 1.4em;
-  margin: 10px 0 0;
-  font-size: 13px;
-  text-align: center;
-}
-
-/* =====================================================================
-   かくれピクセ（v1.23）：ページの すみから のぞく ちびピクセ
-   ===================================================================== */
-/* がめんの ふちに かくれる ときは、はみでた ぶんを きる（テレビの ふちに かくれている みたいに）。
-   はみでたまま だと ページが よこに ひろがって、スマホの ブラウザで ぐらぐら ゆれた（v1.47.4）。
-   たかさ 0 で「よこだけ きる」は iPhone で たても きれて みえなく なったので、
-   ページ ぜんたいの たかさに して（hide.js が はかる）、ふつうに きる。さわるのは ちびピクセ だけ（v1.47.5） */
-.hide-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 6;
-  width: 100%;
-  height: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hide-layer .hide-pixe {
-  pointer-events: auto;
-}
-
-.hide-pixe {
-  position: absolute;
-  width: 24px;
-  height: 18px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  opacity: 0.85;
-  transition: translate 0.15s steps(2);
-}
-
-/* ときどき ひっこむ（JS が 6 びょうに 1 かい、1 ぴきだけ つける。ずっと うごかす アニメは つかわない） */
-.hide-pixe.duck {
-  translate: 0 6px;
-}
-
-.hide-pixe[hidden] {
-  display: none;
-}
-
-.hide-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.hide-pixe.flip svg {
-  transform: scaleY(-1);
-}
-
-.hide-pixe.side-left svg {
-  transform: rotate(-90deg);
-}
-
-.hide-pixe.side-right svg {
-  transform: rotate(90deg);
-}
-
-.hide-pixe:hover,
-.hide-pixe:focus-visible {
-  opacity: 1;
-  outline: 2px solid var(--accent-2);
-  outline-offset: 2px;
-}
-
-.hide-pixe.found {
-  animation: hide-found 0.5s steps(5) forwards;
-}
-
-@keyframes hide-found {
-  to { translate: 0 -20px; opacity: 0; }
-}
-
-.gaming .hide-layer,
-.adventuring .hide-layer {
-  display: none;
-}
-
-.reduce-motion .hide-pixe {
-  transition: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hide-pixe {
-    transition: none;
-  }
-}
-
-@media print {
-  .hide-layer {
-    display: none;
-  }
-}
-
-/* ---------- 製作所だより（フッターの リンク） ---------- */
-/* よこの はばは まえの「© 2026 WARPIX」と おなじ（ぼうけんで おみくじへの 足場に なっている） */
-.news-link {
-  padding: 6px 16px;
-  color: var(--muted);
-  font-family: "DotGothic16", monospace;
-  font-size: 12px;
-}
-.news-link.has-new {
-  color: var(--accent-2);
-}
-.news-new {
-  margin-left: 4px;
-  padding: 0 3px;
-  background: var(--accent);
-  color: var(--shadow);
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  vertical-align: 2px;
-}
-
-/* ---------- きろくを まもる・ひっこす（このページについて の なか） ---------- */
 .save-status {
   color: var(--accent-2);
 }
@@ -4046,55 +653,6 @@ a,
   padding: 8px 12px 0;
 }
 
-.diary-tabs {
-  flex: 1;
-}
-
-.diary-tab {
-  flex: 1;
-  padding: 6px 2px;
-  white-space: nowrap;
-}
-
-/* ポストカード・おみやげは ピンクの みだしの なか、✕ の となり */
-.diary-top {
-  gap: 8px;
-}
-
-.diary-top h2 {
-  margin-right: auto;
-}
-
-.diary-top .postcard-btn {
-  margin: 0;
-}
-
-/* じっせきと ぼうしは、ゲームの がめんみたいな こい いろの ページ */
-.room-dark {
-  background: var(--bg);
-  color: var(--fg);
-  scrollbar-color: var(--muted) var(--bg);
-}
-
-.room-dark:focus-visible {
-  outline-color: var(--accent-2);
-}
-
-.room-sub {
-  margin: 0 0 10px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  font-weight: normal;
-  color: var(--gold);
-}
-
-.room-dark .wardrobe {
-  margin-top: 0;
-}
-
-/* =====================================================================
-   ワープ ダイブ（v1.27）：リンクを おすと ピクセが ワープあなに とびこむ
-   ===================================================================== */
 .warp-hole,
 .warp-pixe {
   position: fixed;
@@ -4127,27 +685,6 @@ a,
   margin-left: -4px;
   font-size: 9px;
   color: var(--accent-2);
-}
-
-/* リンクの した：めだたない いれかえ ボタン */
-.cassette-btn {
-  align-self: center;
-  margin-top: 16px;
-  padding: 4px 10px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  text-decoration: underline dotted;
-  text-underline-offset: 4px;
-  cursor: pointer;
-}
-
-.cassette-btn:hover,
-.cassette-btn:focus-visible {
-  color: var(--accent-2);
-  outline: 2px solid var(--accent-2);
 }
 
 .cas-slots {
@@ -4327,871 +864,6 @@ a,
   margin-top: 8px;
 }
 
-.hensei-menu .save-btn,
-.hensei-name .save-btn {
-  margin-top: 0;
-}
-
-.hensei-now {
-  margin: 0 0 8px;
-  color: var(--accent-2);
-}
-
-.hensei-remove {
-  background: var(--btn);
-  color: var(--fg);
-}
-
-.hensei-name {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  margin-top: 14px;
-}
-
-.hensei-name[hidden] {
-  display: none;
-}
-
-.hensei-name label {
-  width: 100%;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.hensei-name input {
-  flex: 1;
-  min-width: 0;
-  padding: 8px;
-  border: 2px solid var(--muted);
-  background: var(--bg);
-  color: var(--fg);
-  font: 16px "DotGothic16", monospace;
-}
-
-.hensei-msg {
-  min-height: 1.5em;
-  margin: 10px 0 0;
-  color: var(--accent-2);
-}
-
-/* リンクの うえの きりかえ：◀ PARTY 1 ▶ */
-.party-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  /* はばは ◀ ▶ の ぶん だけ。アドベンチャーで よこの すきまに のれて しまう（v1.65.3） */
-  width: fit-content;
-  margin: 16px auto 0;
-}
-
-/* スタート がめんでは みせない（ほかの ぶひんと おなじく、はじまってから でる） */
-.js .party-bar {
-  opacity: 0;
-}
-
-.booted .party-bar {
-  animation: fade-in 0.3s steps(3) 0.5s both;
-}
-
-.simple .party-bar {
-  opacity: 1;
-  animation: none;
-}
-
-.party-bar:not([hidden]) + .cassette-btn {
-  margin-top: 8px;
-}
-
-.party-bar[hidden] {
-  display: none;
-}
-
-.party-name {
-  min-width: 9em;
-  font-family: "Press Start 2P", "DotGothic16", monospace;
-  font-size: 10px;
-  color: var(--gold);
-  text-align: center;
-}
-
-.party-arrow {
-  padding: 6px 10px;
-  border: 0;
-  background: none;
-  color: var(--accent-2);
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.party-arrow:hover,
-.party-arrow:focus-visible {
-  color: var(--fg);
-  outline: 2px solid var(--accent-2);
-}
-
-/* きりかえた とき、リンクが ぱっと ならびなおす */
-.links.party-swap .pixel-btn:not(.secret) {
-  animation: pop-in 0.3s steps(3) both;
-  animation-delay: calc(var(--i, 0) * 0.06s);
-}
-
-/* リンクは アニメで みえる ように なる（.js で さいしょ opacity: 0）ので、とめる ときは みえる まま に（v1.65.1） */
-.simple .links.party-swap .pixel-btn,
-.reduce-motion .links.party-swap .pixel-btn {
-  opacity: 1;
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .links.party-swap .pixel-btn { opacity: 1; animation: none; }
-}
-
-/* =====================================================================
-   ピクセの てがみ（v1.33）：にちようの よるに とどく
-   ===================================================================== */
-.letters {
-  margin: 4px 0 12px;
-}
-
-.letters h3 {
-  margin: 0 0 6px;
-  font-size: 13px;
-  font-weight: normal;
-  color: var(--accent);
-}
-
-.letter-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.letter-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 2px solid #c9bfa8;
-  background: #fffaf0;
-  color: #1a1433;
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.letter-btn:hover,
-.letter-btn:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.letter-btn.unread {
-  border-color: var(--accent);
-}
-
-.letter-env {
-  display: block;
-  width: 20px;
-  height: 14px;
-  --fg: #fffaf0;
-}
-
-.letter-env svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  outline: 1px solid #8a7f68;
-}
-
-.letter-new {
-  padding: 0 3px;
-  background: var(--accent);
-  color: #fffaf0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 7px;
-}
-
-/* びんせん：クリーム いろに あわい けいせん */
-.letter {
-  width: min(400px, calc(100vw - 32px));
-  max-height: calc(100vh - 64px);
-  padding: 28px 24px 20px;
-  border: 0;
-  background: repeating-linear-gradient(#fffaf0 0 31px, #e6dcc6 31px 32px);
-  color: #1a1433;
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--gold),
-    0 var(--px) 0 0 var(--gold),
-    calc(var(--px) * -1) 0 0 0 var(--gold),
-    var(--px) 0 0 0 var(--gold),
-    calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--shadow);
-}
-
-.letter::backdrop {
-  background: rgba(15, 11, 30, 0.75);
-}
-
-.letter-close {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  padding: 2px 8px;
-  border: 0;
-  background: #1a1433;
-  color: #fffaf0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.letter-body {
-  font-family: "DotGothic16", monospace;
-  font-size: 15px;
-  line-height: 32px;
-}
-
-.letter-body p {
-  margin: 0;
-}
-
-.letter-date {
-  font-family: "Press Start 2P", monospace;
-  font-size: 9px;
-  color: #8a7f68;
-}
-
-.letter-to {
-  color: var(--accent);
-}
-
-.letter-from {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px !important;
-}
-
-.letter-pixe {
-  display: block;
-  width: 32px;
-  height: 32px;
-  padding: 2px;
-  background: #1a1433;
-}
-
-.letter-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-@media (min-height: 600px) {
-  .cas-head {
-    position: sticky;
-  }
-}
-
-/* =====================================================================
-   すうじキーで ワープ（v1.35）：パソコンでは リンクの みぎはしに ばんごう
-   ===================================================================== */
-.link-key {
-  display: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .link-key {
-    display: block;
-    margin-left: auto;
-    padding: 2px 5px;
-    font-size: 9px;
-    color: var(--accent-2);
-    outline: 2px solid var(--accent-2);
-    outline-offset: -2px;
-  }
-}
-
-/* =====================================================================
-   ピクセの ひっこし（v1.36）：ふるい じゅうしょから あたらしい おうちへ
-   ===================================================================== */
-.move-text {
-  white-space: pre-line;
-}
-
-.move-addr {
-  color: var(--accent-2);
-  overflow-wrap: anywhere;
-}
-
-/* =====================================================================
-   ホームがめんに いれる（v1.37）：いまの きかいの やりかたに しるし
-   ===================================================================== */
-.home-steps {
-  grid-template-columns: 1fr;
-  gap: 2px;
-  margin: 4px 0;
-}
-
-.home-steps dt {
-  color: var(--muted);
-  white-space: normal;
-}
-
-.home-steps dd {
-  margin: 0 0 6px 1em;
-}
-
-.home-steps .here {
-  color: var(--accent-2);
-}
-
-.home-here {
-  color: var(--gold);
-}
-
-#home-install {
-  margin: 8px 0;
-}
-
-/* =====================================================================
-   しゅうらいの よる（v1.40）：まいつき さいしょの にちようびの 21:00 は きんいろの だい マザーシップ
-   ===================================================================== */
-.raid.night {
-  box-shadow:
-    0 -2px 0 0 var(--gold),
-    0 2px 0 0 var(--gold),
-    -2px 0 0 0 var(--gold),
-    2px 0 0 0 var(--gold);
-}
-
-.raid.night .raid-title {
-  color: var(--gold);
-}
-
-.raid.night .raid-fill {
-  background: var(--gold);
-}
-
-.raid.night .raid-ship svg {
-  filter: sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.1);
-}
-
-/* 1きせいの きっぷ（v1.41） */
-.diary-ticket {
-  color: var(--gold);
-}
-
-/* =====================================================================
-   開店の よる（v1.42）：しゅうらいの よるの はなび（v1.66.1 まで せいざ）・ひらく ひの てがみ
-   ===================================================================== */
-/* たおした あとの はなび（v1.66.1、まえは せいざ）：がめんいっぱいの キャンバス。おしても したに とおる */
-.hanabi {
-  position: fixed;
-  inset: 0;
-  z-index: 7;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  image-rendering: pixelated;
-}
-
-.seiza-list h4 {
-  margin: 12px 0 6px;
-  font-size: 12px;
-  font-weight: normal;
-  color: var(--gold);
-}
-
-.seiza-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.seiza-items li {
-  display: grid;
-  gap: 2px;
-  font-size: 11px;
-  text-align: center;
-}
-
-.seiza-items svg {
-  width: 100%;
-  height: auto;
-  background: #000;
-  shape-rendering: crispEdges;
-}
-
-.letter-btn.special {
-  color: var(--gold);
-}
-
-/* =====================================================================
-   ひみつの こうじょう（v1.43）：ワープゾーンの いきさき。あおい せっけいずの かみ
-   ===================================================================== */
-.kojo-blueprint {
-  position: relative;
-  display: grid;
-  place-items: center;
-  padding: 16px 0 10px;
-  background-color: #1d3b8a;
-  background-image:
-    linear-gradient(rgba(191, 233, 255, 0.25) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(191, 233, 255, 0.25) 1px, transparent 1px);
-  background-size: 12px 12px;
-  outline: 2px solid #bfe9ff;
-}
-
-.kojo-pixe {
-  width: 96px;
-  height: 96px;
-}
-
-.kojo-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  shape-rendering: crispEdges;
-}
-
-.kojo-stamp {
-  margin: 6px 0 0;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: #bfe9ff;
-}
-
-.kojo-facts {
-  margin: 4px 0;
-}
-
-/* a でも ボタンと おなじ 見た目に（リンクの いろに ならない ように） */
-.kojo .kojo-code,
-.kojo .kojo-code:visited {
-  color: var(--bg);
-  text-decoration: none;
-  text-align: center;
-}
-
-.kojo .about-body > p + p {
-  margin-top: 6px;
-}
-
-/* =====================================================================
-   WARPIX カード（v1.52、v1.53 で コレクションの たな）：ROOM の にっきの なか。ホロは きらっと ひかる
-   ===================================================================== */
-.cards-count {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.cards-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 8px;
-  margin: 6px 0 12px;
-}
-
-.cards-btn {
-  position: relative;
-  overflow: hidden;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.cards-btn img {
-  display: block;
-  width: 100%;
-  height: auto;
-  image-rendering: pixelated;
-  outline: 2px solid var(--fg);
-}
-
-.cards-btn:hover img,
-.cards-btn:focus-visible img {
-  outline-color: var(--accent-2);
-}
-
-.cards-btn.holo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
-  transform: translateX(-100%);
-  animation: card-shine 3.2s steps(16) infinite;
-  pointer-events: none;
-}
-
-.cards-btn.tier-rainbow::after {
-  animation-duration: 2s;
-}
-
-@keyframes card-shine {
-  60%, 100% { transform: translateX(100%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cards-btn::after { animation: none; display: none; }
-}
-
-/* まだ ない ばんごう：うらむきで うすく（v1.53） */
-.cards-none {
-  cursor: default;
-}
-
-.cards-none img {
-  opacity: 0.35;
-  outline-color: var(--muted);
-}
-
-.cards-no,
-.cards-n {
-  position: absolute;
-  font-family: "Press Start 2P", monospace;
-  font-size: 9px;
-  color: var(--fg);
-  text-shadow: 1px 1px 0 #000;
-}
-
-.cards-no {
-  inset: auto 0 8px;
-  text-align: center;
-}
-
-.cards-n {
-  top: 4px;
-  right: 4px;
-  padding: 2px 3px;
-  background: rgba(15, 11, 30, 0.8);
-}
-
-/* =====================================================================
-   WARPIX カードが でる しゅんかん（v1.53）：うらむきで おちて きて、タップで めくる
-   ===================================================================== */
-.card-reveal {
-  position: fixed;
-  inset: 0;
-  z-index: 36;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 14px;
-  padding: 16px;
-  background: rgba(15, 11, 30, 0.88);
-}
-
-.card-flip {
-  position: relative;
-  width: min(280px, 70vw);
-  aspect-ratio: 420 / 588;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  perspective: 900px;
-  animation: card-drop 0.7s steps(10) both;
-}
-
-.card-face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  transition: transform 0.6s steps(8);
-}
-
-.card-face img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-}
-
-.card-back {
-  box-shadow: 0 0 18px 6px var(--glow);
-  animation: card-glow 1s steps(4) infinite alternate;
-}
-
-.card-reveal.rainbow .card-back {
-  animation: card-glow-rainbow 0.8s steps(5) infinite;
-}
-
-.card-front {
-  transform: rotateY(180deg);
-}
-
-.card-reveal.flipped .card-back {
-  transform: rotateY(-180deg);
-}
-
-.card-reveal.flipped .card-front {
-  transform: rotateY(0deg);
-  box-shadow: 0 0 24px 4px var(--glow);
-}
-
-.card-reveal-talk {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-}
-
-.card-reveal-pixe {
-  width: 40px;
-  height: 40px;
-  flex: none;
-}
-
-.card-reveal-pixe svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.card-reveal-pixe.jump {
-  animation: card-hop 0.4s steps(4);
-}
-
-@keyframes card-hop {
-  50% { transform: translateY(-16px); }
-}
-
-.card-reveal-msg {
-  min-height: 1.4em;
-  margin: 0;
-  font-size: 14px;
-  color: var(--fg);
-}
-
-.card-reveal-note {
-  margin: 0;
-  font-size: 13px;
-  color: var(--gold);
-}
-
-.card-reveal-note[hidden] {
-  display: none;
-}
-
-.card-reveal-row {
-  display: flex;
-  gap: 10px;
-}
-
-.card-reveal-row[hidden] {
-  display: none;
-}
-
-@keyframes card-drop {
-  from { transform: translateY(-60vh) rotate(-12deg); }
-  70% { transform: translateY(12px) rotate(2deg); }
-  to { transform: none; }
-}
-
-@keyframes card-glow {
-  from { box-shadow: 0 0 8px 2px var(--glow); }
-  to { box-shadow: 0 0 28px 10px var(--glow); }
-}
-
-@keyframes card-glow-rainbow {
-  0% { box-shadow: 0 0 26px 10px #ff4fa3; }
-  25% { box-shadow: 0 0 26px 10px #ffd84a; }
-  50% { box-shadow: 0 0 26px 10px #3ee8ff; }
-  75% { box-shadow: 0 0 26px 10px #8bf06a; }
-  100% { box-shadow: 0 0 26px 10px #b07cff; }
-}
-
-/* ホロ：ひかりの おびが ながれる。ゆびや マウスの ところへ よる（--hx） */
-.card-front.holo,
-.postcard-art.holo {
-  overflow: hidden;
-}
-
-.postcard-art {
-  position: relative;
-  display: block;
-}
-
-.card-front.holo::after,
-.postcard-art.holo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 42%, rgba(62, 232, 255, 0.25) 48%, rgba(255, 79, 163, 0.25) 54%, transparent 66%);
-  background-size: 300% 100%;
-  background-position: var(--hx, 50%) 0;
-  mix-blend-mode: screen;
-  animation: holo-flow 3s linear infinite;
-  pointer-events: none;
-}
-
-/* ゆびで なぞって いる あいだは、ひかりが ゆびに ついて くる */
-.card-front.holo.follow::after,
-.postcard-art.holo.follow::after {
-  animation: none;
-}
-
-@keyframes holo-flow {
-  from { background-position: 0% 0; }
-  to { background-position: 100% 0; }
-}
-
-.postcard-note {
-  margin: 10px 0 0;
-  font-size: 14px;
-  text-align: center;
-  color: var(--fg);
-}
-
-/* ポケットが ひかってる（ラッキーの まえぶれ） */
-#npc.card-omen {
-  filter: drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 12px var(--gold));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-flip,
-  .card-back,
-  .card-reveal.rainbow .card-back,
-  .card-front.holo::after,
-  .postcard-art.holo::after,
-  .card-reveal-pixe.jump {
-    animation: none;
-  }
-
-  .card-face {
-    transition: none;
-  }
-}
-
-/* しゅうらいの よるの きねんしゃしん（v1.45）：WORLD RECORD の はなびを おすと しゃしん */
-.seiza-btn {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.seiza-btn:hover svg,
-.seiza-btn:focus-visible svg {
-  outline: 2px solid var(--accent-2);
-}
-
-
-/* ピクセの さとがえり（v1.46）：るすの かわりに「おでかけ」 */
-.npc-sprite.away.satogaeri::after {
-  content: "おでかけ";
-  font-size: 11px;
-  color: var(--gold);
-}
-
-/* ピクセに おてがみ（v1.47） */
-.about .otegami-btn,
-.about .otegami-btn:visited {
-  display: inline-block;
-  margin: 6px 0 2px;
-  color: var(--bg);
-  text-decoration: none;
-}
-
-/* ---------- ひらいた ときの「テレビの スイッチ」（v1.47.3） ----------
-   まっくらな がめんの まんなかに しろい よこせんが ピッと はしって、うえと したに ひらく。
-   ページを よみこんだ ときだけ（うらから もどった ときは でない）。待ち時間は ふやさない 0.45 びょう */
-.tv-on {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483646;
-  pointer-events: none;
-  animation: tv-on-done 0.45s steps(1) forwards;
-}
-
-.tv-on::before,
-.tv-on::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: var(--bg);
-}
-
-.tv-on::before {
-  top: 0;
-  animation: tv-on-top 0.45s steps(6) forwards;
-}
-
-.tv-on::after {
-  bottom: 0;
-  animation: tv-on-bottom 0.45s steps(6) forwards;
-}
-
-.tv-on i {
-  position: absolute;
-  z-index: 1;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 4px;
-  margin-top: -2px;
-  background: var(--fg);
-  box-shadow: 0 0 16px var(--accent-2);
-  transform: scaleX(0);
-  animation: tv-on-line 0.45s steps(8) forwards;
-}
-
-@keyframes tv-on-line {
-  0% { transform: scaleX(0); opacity: 1; }
-  35% { transform: scaleX(1); opacity: 1; }
-  60% { transform: scaleX(1); opacity: 0; }
-  100% { transform: scaleX(1); opacity: 0; }
-}
-
-@keyframes tv-on-top {
-  0%, 35% { transform: translateY(0); }
-  100% { transform: translateY(-100%); }
-}
-
-@keyframes tv-on-bottom {
-  0%, 35% { transform: translateY(0); }
-  100% { transform: translateY(100%); }
-}
-
-@keyframes tv-on-done {
-  to { visibility: hidden; }
-}
-
-/* うごきを へらす・リンクだけの しずかな ページ では だまって ひらく */
-.reduce-motion .tv-on,
-.simple .tv-on {
-  display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tv-on {
-    display: none;
-  }
-}
-
-/* ---------- ひとことで なにの アプリか（v1.48、おたより #4） ---------- */
-.start-tagline {
-  margin: 0;
-  padding: 0 8px;
-  font-family: "DotGothic16", monospace;
-  font-size: 16px;
-  text-align: center;
-  color: var(--fg);
-}
-
-/* せまい 画面では「、」の ところで 2 行に（「入」と「口。」が わかれない、v1.48.2） */
-.start-tagline span,
 .manual-lead span {
   display: inline-block;
 }
@@ -5555,677 +1227,1086 @@ a,
 }
 
 /* =====================================================================
-   ピクセの へや（v1.57）：ROOM を ひらくと まず へやの え。もの が 入口
+   v2.0：1 画面に おさめる（iPhone で スクロール なし）
    ===================================================================== */
-/* タブは もう みせない（もの から いく）。ページに いる ときは「◀ へや」で もどる */
-.diary .diary-bar,
-.diary .diary-tools {
-  display: none;
-}
-
-.room-back {
-  padding: 2px 8px;
-  border: 0;
-  background: #fffaf0;
-  color: var(--accent);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.room-back[hidden] {
-  display: none;
-}
-
-.room-scene {
-  padding: 0;
-  background: var(--bg);
-  color: var(--fg);
-}
-
-/* かべ（うえ 6 わり）と ゆか */
-.rs-room {
-  position: relative;
-  aspect-ratio: 1 / 1.05;
+html,
+body {
+  height: 100%;
   overflow: hidden;
-  background:
-    radial-gradient(circle, var(--btn-hover) 1px, transparent 1.5px) 0 0 / 16px 16px,
-    linear-gradient(var(--btn) 0 60%, var(--btn-hover) 60% calc(60% + 4px), var(--bg-grid) calc(60% + 4px) 100%);
 }
 
-/* ゆかの いた め */
-.rs-room::before {
-  content: "";
-  position: absolute;
-  inset: calc(60% + 4px) 0 0;
-  background: repeating-linear-gradient(90deg, transparent 0 46px, var(--bg) 46px 48px);
-  opacity: 0.6;
+/* そら：よるは v1 の ドット方眼（body）。ひる・ゆうがたは こまかい グラデーション＋うすい 方眼 */
+.sky-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
-
-/* ピクセの したの まるい ラグ */
-.rs-room::after {
-  content: "";
-  position: absolute;
-  left: 30%;
-  right: 30%;
-  top: 76%;
-  height: 9%;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.35;
+[data-sky="day"] .sky-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    var(--sky-day);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
 }
-
-.rs-thing,
-.rs-pixe {
-  position: absolute;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--fg);
-  cursor: pointer;
+[data-sky="evening"] .sky-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 2px, transparent 2px),
+    var(--sky-evening);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
 }
-
-.rs-art {
-  display: block;
-  width: 100%;
+:root {
+  /* こまかい おび（ドットの そららしく、うすい おびを たくさん かさねる） */
+  --sky-day: linear-gradient(180deg, #1f5fc4 0% 3.1%, #2361c7 3.1% 6.3%, #2765ca 6.3% 9.4%, #2b69cd 9.4% 12.5%, #2f6dd0 12.5% 15.6%, #2f73d4 15.6% 18.8%, #2f79d8 18.8% 21.9%, #2f7fdc 21.9% 25%, #3384e0 25% 28.1%, #3a89e3 28.1% 31.3%, #418ee6 31.3% 34.4%, #4893e9 34.4% 37.5%, #4c98ec 37.5% 40.6%, #529cee 40.6% 43.8%, #5ba1ef 43.8% 46.9%, #64a6f1 46.9% 50%, #6dabf2 50% 53.1%, #76b0f3 53.1% 56.3%, #7fb5f4 56.3% 59.4%, #84b8f5 59.4% 62.5%, #89bbf5 62.5% 65.6%, #8ebef6 65.6% 68.8%, #93c1f6 68.8% 71.9%, #98c4f7 71.9% 75%, #9dc7f7 75% 78.1%, #a2caf8 78.1% 81.3%, #a6cdf8 81.3% 84.4%, #aed2f9 84.4% 87.5%, #b4d6f9 87.5% 90.6%, #badafa 90.6% 93.8%, #bfdefa 93.8% 96.9%, #c4e1fb 96.9% 100%);
+  --sky-evening: linear-gradient(180deg, #1d1b4f 0% 2.8%, #221e56 2.8% 5.6%, #28215d 5.6% 8.3%, #2d2465 8.3% 11.1%, #33286d 11.1% 13.9%, #392b75 13.9% 16.7%, #422f7d 16.7% 19.4%, #4d3484 19.4% 22.2%, #58388b 22.2% 25%, #623b91 25% 27.8%, #6c3f94 27.8% 30.6%, #7a4193 30.6% 33.3%, #884392 33.3% 36.1%, #964590 36.1% 38.9%, #a3468f 38.9% 41.7%, #ae498b 41.7% 44.4%, #b94c88 44.4% 47.2%, #c44f85 47.2% 50%, #cf5282 50% 52.8%, #da5880 52.8% 55.6%, #e2607a 55.6% 58.3%, #e96874 58.3% 61.1%, #f0706f 61.1% 63.9%, #f47a6b 63.9% 66.7%, #f78367 66.7% 69.4%, #f98c63 69.4% 72.2%, #fb955e 72.2% 75%, #fd9e5a 75% 77.8%, #ffa65c 77.8% 80.6%, #ffad5e 80.6% 83.3%, #ffb461 83.3% 86.1%, #ffbb63 86.1% 88.9%, #ffc266 88.9% 91.7%, #ffc568 91.7% 94.4%, #ffc66a 94.4% 97.2%, #ffc76b 97.2% 100%);
 }
-
-.rs-art svg {
-  display: block;
-  width: 100%;
-  height: auto;
+[data-sky="day"] .stars {
+  display: none;
 }
-
-.rs-label {
-  padding: 1px 5px;
-  background: rgba(15, 11, 30, 0.75);
-  font-family: "DotGothic16", monospace;
-  font-size: 11px;
-  white-space: nowrap;
+[data-sky="evening"] .stars {
+  opacity: 0.5;
 }
-
-.rs-thing:hover .rs-art,
-.rs-thing:focus-visible .rs-art {
-  translate: 0 -2px;
-}
-
-.rs-thing:focus-visible,
-.rs-pixe:focus-visible {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 2px;
-}
-
-/* あたらしい ものが ある もの だけ ひかる（ことばの NEW では なく） */
-.rs-thing.glow .rs-art {
-  filter: drop-shadow(0 0 3px var(--gold)) drop-shadow(0 0 6px var(--gold));
-  animation: rs-glow 1.6s steps(2) infinite;
-}
-
-.rs-thing.glow .rs-label {
-  color: var(--gold);
-}
-
-@keyframes rs-glow {
-  50% { filter: drop-shadow(0 0 1px var(--gold)); }
-}
-
-.rs-count {
-  position: absolute;
-  top: 30%;
-  font-family: "Press Start 2P", monospace;
-  font-size: 7px;
-  color: var(--bg);
-}
-
-.rs-window   { left: 6%;  top: 7%;  width: 26%; }
-.rs-ticket   { left: 38%; top: 12%; width: 12%; }
-.rs-calendar { left: 56%; top: 8%;  width: 14%; }
-.rs-trophy   { right: 6%; top: 10%; width: 16%; }
-.rs-closet   { left: 4%;  top: 38%; width: 20%; }
-.rs-shelf    { right: 5%; top: 36%; width: 20%; }
-.rs-post     { left: 7%;  top: 70%; width: 12%; }
-.rs-camera   { left: 27%; top: 86%; width: 12%; }
-.rs-record   { left: 64%; top: 63%; width: 14%; }
-.rs-cardbox  { right: 5%; top: 81%; width: 15%; }
-.rs-pixe     { left: 38%; top: 59%; width: 24%; }
-
-/* きっぷの ない ひと（開店から きた ひと）は、かべの ものを よせて すきまを なくす（v1.66.2） */
-.no-ticket .rs-window   { left: 7%; }
-.no-ticket .rs-calendar { left: 45%; }
-.no-ticket .rs-trophy   { right: 8%; }
-
-.rs-pixe svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.rs-pixe.jump {
-  animation: rs-jump 0.4s steps(4);
-}
-
-@keyframes rs-jump {
-  50% { translate: 0 -18%; }
-}
-
-.rs-say {
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 34%;
-  z-index: 2;
-  margin: 0;
-  padding: 6px 10px;
-  background: var(--bg);
-  outline: 2px solid var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  visibility: hidden;
-}
-
-.rs-say.show {
-  visibility: visible;
-  animation: rs-say 4s steps(1) forwards;
-}
-
-@keyframes rs-say {
-  100% { visibility: hidden; }
-}
-
-/* からっぽの もの（てがみ・カードが まだ ない）は すこし くらく */
-.rs-thing.empty .rs-art {
-  opacity: 0.45;
-}
-
-.rs-thing.empty .rs-label {
-  color: var(--muted);
-}
-
-/* そだちの ステータス（ゲームの がめんの した） */
-.rs-room,
-.rs-status,
-.diary-top {
-  user-select: none;
-  -webkit-user-select: none;
-  /* ながおしで でる メニュー（コピー など）も ださない（v1.58） */
-  -webkit-touch-callout: none;
-}
-
-/* スマホで おした ところに でる くろい わく（タップハイライト）を ださない。ジャンプで おした ことは わかる（v1.58） */
-.rs-thing,
-.rs-pixe,
-.closet-kind,
-.closet-color,
-.wardrobe-item,
-.room-back,
-.diary-close {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.rs-status {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 8px 14px;
-  margin: 0;
-  padding: 10px 12px 12px;
-  border-top: 4px solid var(--accent);
-  font-family: "DotGothic16", monospace;
-  text-align: center;
-}
-
-.rs-status dt {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.rs-status dd {
-  margin: 2px 0 0;
-  font-size: 14px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rs-thing.glow .rs-art,
-  .rs-pixe.jump { animation: none; }
-}
-
-.reduce-motion .rs-thing.glow .rs-art,
-.reduce-motion .rs-pixe.jump {
-  animation: none;
-}
-
-/* クローゼット：うえに ためしに きた おおきな ピクセ、したに アイテムが ずらっと */
-.closet-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 0 12px;
-}
-
-.closet-preview {
-  width: 112px;
-  height: 112px;
-  padding: 8px;
-  background: var(--btn);
-}
-
-.closet-preview svg {
-  display: block;
+.clouds {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
-.closet-name {
-  min-height: 1.5em;
-  margin: 0;
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-}
-
-/* でどころ（v1.66） */
-.closet-from {
-  min-height: 1.4em;
-  margin: -4px 0 0;
-  color: var(--muted);
-  font-family: "DotGothic16", monospace;
-  font-size: 11px;
-}
-
-.closet-decide {
-  margin: 0;
-}
-
-/* いろちがい（ベレー など）の まる */
-.closet-colors {
-  display: flex;
-  gap: 8px;
-}
-
-.closet-colors:empty {
-  display: none;
-}
-
-.closet-color {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  padding: 3px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--btn);
-  color: var(--muted);
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.closet-color span {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-.closet-color[aria-pressed="true"] {
-  outline: 2px solid var(--fg);
-}
-
-.closet-color:disabled {
-  cursor: default;
-}
-
-.closet-decide[hidden] {
-  display: none;
-}
-
-.closet-kinds {
-  display: flex;
-  gap: 6px;
-  margin: 0 0 10px;
-}
-
-.closet-kind {
-  flex: 1;
-  padding: 6px 4px;
-  border: 0;
-  background: var(--btn);
-  color: var(--fg);
-  font-family: "DotGothic16", monospace;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.closet-kind[aria-pressed="true"] {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-/* あたらしく もらった もの */
-.wardrobe-item {
-  position: relative;
-}
-
-.closet-new {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  padding: 1px 3px;
-  background: var(--gold);
-  color: var(--bg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-  line-height: 1.2;
-}
-
-/* いま きて いる もの */
-/* きて いる ものは わくでは なく「きてる」の ふだ */
-.closet-worn {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  padding: 1px 3px;
-  background: var(--accent-2);
-  color: var(--bg);
-  font-family: "DotGothic16", monospace;
-  font-size: 9px;
-  line-height: 1.2;
-}
-
-.closet .atelier-btn {
-  margin-top: 12px;
-}
-
-.atelier-btn[hidden] {
-  display: none;
-}
-
-/* ひみつの こうじょうの かくしコマンド集（v1.58） */
-.kojo-list code {
-  font-family: "Press Start 2P", monospace;
-  font-size: 9px;
-  color: var(--gold);
-  overflow-wrap: anywhere;
-}
-
-.kojo-cheats[hidden],
-.kojo-main[hidden] {
-  display: none;
-}
-
-/* =====================================================================
-   おしらせ（v1.59）：けんめいの いちらん → しょうさい
-   ===================================================================== */
-.mail-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.mail-list[hidden],
-.mail-read[hidden],
-.mail .room-back[hidden] {
-  display: none;
-}
-
-.mail-item {
-  position: relative;
-  display: flex;
-  align-items: baseline;
+.screen,
+.screen {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: calc(10px + env(safe-area-inset-top)) 16px calc(10px + env(safe-area-inset-bottom));
+  justify-content: flex-start;
+  align-items: stretch;
   gap: 10px;
-  width: 100%;
-  padding: 10px 8px;
-  border: 0;
-  border-bottom: 1px solid var(--btn);
-  background: none;
-  color: var(--muted);
-  font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  text-align: left;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 720px) {
+  .screen {
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
 }
 
-.mail-item.unread {
-  color: var(--fg);
+/* ---------- うえの だん：メニュー・おしらせ・＋（メニューと ＋ は おなじ かたち・おおきさ） ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  height: 44px;
+  padding-right: 4px;
 }
-
-.mail-item:hover,
-.mail-item:focus-visible {
-  background: var(--btn);
-  outline: none;
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
-
-.mail-date {
-  flex: none;
-  min-width: 3.2em;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  color: var(--accent-2);
-}
-
-.mail-title {
-  flex: 1;
-}
-
-.mail-new {
-  flex: none;
-  padding: 1px 3px;
-  background: var(--gold);
-  color: var(--bg);
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-}
-
-.mail-empty {
-  padding: 12px 0;
-  color: var(--muted);
-}
-
-.mail-meta {
-  margin: 0;
-  color: var(--accent-2);
-  font-size: 12px;
-}
-
-.mail-read h3 {
-  margin: 6px 0 10px;
-  font-size: 17px;
-  font-weight: normal;
-}
-
-.mail-read p {
-  line-height: 1.7;
-}
-
-.mail-action {
-  margin-top: 8px;
-}
-
-/* =====================================================================
-   じぶんの リンク（v1.61）
-   ===================================================================== */
-.cas-shelf h3 small {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.cas-mine {
+.bar-btn {
   position: relative;
-}
-
-.cas-edit {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  z-index: 1;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--accent-2);
-  color: var(--bg);
-  font-size: 13px;
-  line-height: 24px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.cas-add {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-height: 68px;
+  gap: 3px;
+  width: 44px;
+  height: 44px;
+  padding: 8px 0 0;
   border: 0;
-  background: none;
-  outline: 2px dashed var(--accent-2);
-  outline-offset: -2px;
-  color: var(--accent-2);
-  font-size: 18px;
+  background: var(--btn);
   cursor: pointer;
+  box-shadow: 0 -2px 0 0 var(--fg), 0 2px 0 0 var(--fg), -2px 0 0 0 var(--fg), 2px 0 0 0 var(--fg), 4px 4px 0 0 var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+}
+/* カセットの みぞ */
+.bar-btn::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: var(--shadow);
+}
+.bar-btn:hover,
+.bar-btn:focus-visible {
+  background: var(--btn-hover);
+  outline: none;
+}
+.bar-btn:active {
+  translate: 2px 2px;
+  box-shadow: 0 -2px 0 0 var(--fg), 0 2px 0 0 var(--fg), -2px 0 0 0 var(--fg), 2px 0 0 0 var(--fg);
+}
+.bar-btn .glyph {
+  display: block;
+  width: 18px;
+  height: 14px;
+  color: var(--accent-2);
+}
+.bar-btn .glyph.plus {
+  height: 18px;
+  color: var(--accent);
+}
+.glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.bar-label {
+  font-family: "Press Start 2P", monospace;
+  font-size: 5px;
+  color: var(--muted);
+}
+/* おしらせは v1 の まま（ばしょ だけ この だんに） */
+.topbar .mail-btn {
+  position: relative;
+  top: auto;
+  right: auto;
 }
 
-.mylink-form {
+/* ---------- ロゴ：v1 の タイトルを その まま ちいさく。だんの まんなか ---------- */
+.logo-row {
+  position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+  margin-top: -2px;
+}
+.logo-row .title {
+  font-size: 18px;
+  letter-spacing: 1px;
+  text-shadow: 3px 0 0 var(--accent), 5px 3px 0 var(--shadow);
+}
+.logo-row .subtitle {
+  margin: 0;
+  font-size: 8px;
+}
+/* ほんとうの 月：ロゴの だんの みぎ はし */
+.moon {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+.moon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+[data-sky="day"] .moon {
+  opacity: 0.8;
 }
 
-.mylink-form label,
-.mylink-label {
-  margin: 6px 0 0;
+/* ---------- ピクセ と ふきだし（v1 の まま） ---------- */
+.screen .npc {
+  flex: 1 1 84px;
+  min-height: 80px;
+  max-height: 200px;
+  align-items: center;
+  padding: 4px 4px 0;
+}
+.npc-sprite.away {
+  visibility: hidden;
+}
+
+/* ---------- グループが ない とき ---------- */
+.empty {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  translate: 0 -25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 0 24px;
+}
+.empty[hidden] {
+  display: none;
+}
+.empty-add {
+  width: 270px;
+  max-width: 100%;
+  height: 92px;
+  border: 0;
+  background: var(--accent-2);
+  color: var(--bg);
+  font-family: "DotGothic16", monospace;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 -4px 0 0 var(--fg), 0 4px 0 0 var(--fg), -4px 0 0 0 var(--fg), 4px 0 0 0 var(--fg), 8px 8px 0 0 var(--shadow);
+}
+.empty-add:hover,
+.empty-add:focus-visible {
+  background: #7ff1ff;
+  outline: none;
+}
+.empty-add:active {
+  translate: 4px 4px;
+  box-shadow: 0 -4px 0 0 var(--fg), 0 4px 0 0 var(--fg), -4px 0 0 0 var(--fg), 4px 0 0 0 var(--fg);
+}
+.empty-note {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: center;
+  text-shadow: 2px 2px 0 var(--shadow);
+}
+.no-groups .screen .npc {
+  flex: 0 0 auto;
+}
+
+/* ---------- グループの だん：◀ かんばん ▶ ---------- */
+.group-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+.group-bar[hidden] {
+  display: none;
+}
+.group-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(3px 3px 0 var(--shadow));
+  -webkit-tap-highlight-color: transparent;
+}
+.group-arrow .glyph {
+  width: 24px;
+  height: 36px;
+  color: var(--accent-2);
+}
+.group-arrow:hover .glyph,
+.group-arrow:focus-visible .glyph {
+  color: var(--fg);
+}
+.group-arrow:focus-visible {
+  outline: 2px solid var(--accent-2);
+}
+.group-arrow:active {
+  translate: 2px 2px;
+  filter: none;
+}
+.group-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.group-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+/* かんばん：紺の 札・きんいろの ほそい わく・うえに つるす 金具・したに かげ */
+.group-sign {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 196px;
+  max-width: calc(100vw - 180px);
+  height: 40px;
+  margin-top: 6px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--bg-grid);
+  color: var(--gold);
+  font-family: "DotGothic16", monospace;
+  font-size: 17px;
+  cursor: pointer;
+  box-shadow: 0 -2px 0 0 var(--gold), 0 2px 0 0 var(--gold), -2px 0 0 0 var(--gold), 2px 0 0 0 var(--gold), 0 6px 0 0 var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+}
+.group-sign:hover,
+.group-sign:focus-visible {
+  background: var(--btn);
+  outline: none;
+}
+.group-sign:active {
+  translate: 0 3px;
+  box-shadow: 0 -2px 0 0 var(--gold), 0 2px 0 0 var(--gold), -2px 0 0 0 var(--gold), 2px 0 0 0 var(--gold), 0 3px 0 0 var(--shadow);
+}
+.sign-hook {
+  position: absolute;
+  top: -10px;
+  left: 26px;
+  width: 4px;
+  height: 8px;
+  background: var(--muted);
+}
+.sign-hook.right {
+  left: auto;
+  right: 26px;
+}
+.group-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.group-dots {
+  display: flex;
+  gap: 6px;
+}
+.group-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--line, #5a5088);
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+.group-dots span.on {
+  background: var(--accent);
+}
+
+/* ---------- リンク：v1 の ボタンを 2 列 × 6 段 ---------- */
+.screen .links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  column-gap: 18px;
+  row-gap: 14px;
+  flex: 1 1 auto;
+  height: 420px;
+  min-height: 276px;
+  max-height: 420px;
+  padding: 4px 10px 10px 4px;
+}
+.screen .links[hidden] {
+  display: none;
+}
+.links .pixel-btn {
+  min-width: 0;
+  min-height: 0;
+  gap: 10px;
+  padding: 0 10px;
+  font-size: 10px;
+  line-height: 1.5;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--fg),
+    0 var(--px) 0 0 var(--fg),
+    calc(var(--px) * -1) 0 0 0 var(--fg),
+    var(--px) 0 0 0 var(--fg),
+    6px 6px 0 0 var(--shadow);
+}
+.links .pixel-btn.jp-label {
+  font-size: 15px;
+}
+.links .pixel-btn .icon {
+  width: 24px;
+  height: 24px;
+}
+.link-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.link-add {
+  min-width: 0;
+  border: 0;
+  outline: 2px dashed var(--accent-2);
+  outline-offset: -2px;
+  background: rgba(15, 11, 30, 0.6);
+  color: var(--accent-2);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  cursor: pointer;
+}
+.link-add:hover,
+.link-add:focus-visible {
+  background: rgba(62, 232, 255, 0.15);
+  outline-style: solid;
+}
+
+/* フッター（v1 と おなじ） */
+.screen .footer-maker {
+  margin: auto 0 0;
+  flex-shrink: 0;
+  text-align: center;
+}
+.footer-maker {
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* =====================================================================
+   v2.0 の まど（v1 の .about の かたちに たす）
+   ===================================================================== */
+.win {
+  display: none;
+  flex-direction: column;
+}
+.win[open] {
+  display: flex;
+}
+.win.tall {
+  height: min(760px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 48px);
+}
+.win .about-body {
+  max-height: none;
+}
+.win-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.win-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.win-form label,
+.win-label {
+  margin: 4px 0 0;
+}
+.win-input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 16px;
+  box-shadow: 0 0 0 2px var(--line, #5a5088);
+}
+.win-input:focus {
+  box-shadow: 0 0 0 2px var(--accent-2);
+}
+.win-input.gold {
+  color: var(--gold);
+}
+.win-input.code {
+  padding: 10px 12px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+  word-break: break-all;
+  resize: vertical;
+}
+.win-steps {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 0;
   color: var(--muted);
   font-size: 13px;
 }
-
-.mylink-form input {
-  padding: 8px;
-  border: 2px solid var(--muted);
-  background: var(--bg);
-  color: var(--fg);
-  font: 16px "DotGothic16", monospace;
+.win-steps .on {
+  color: var(--accent);
 }
-
-.mylink-icons {
+.win-error {
+  margin: 0;
+  color: var(--accent);
+}
+.win-error[hidden] {
+  display: none;
+}
+.win-note {
+  margin: 8px 0 0;
+  color: var(--sub, #b9b2dc);
+  font-size: 13px;
+}
+.win-btns {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 1fr 1.6fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+.panel .win-btns,
+.edit-dialog .win-btns {
+  grid-template-columns: 1fr 1fr;
+}
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.win-btn:hover,
+.win-btn:focus-visible {
+  background: var(--btn-hover);
+  outline: 2px solid var(--accent-2);
+}
+.win-btn.cyan {
+  background: var(--accent-2);
+  color: var(--bg);
+}
+.win-btn.pink {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 4px 4px 0 0 var(--shadow);
+}
+.win-btn.danger {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+  margin-top: 6px;
+}
+.win-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.win-btn[hidden] {
+  display: none;
+}
+.win-head {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 16px 12px;
+  border-bottom: 2px solid var(--btn);
+  font-family: "DotGothic16", monospace;
+}
+.win-where {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  font-size: 13px;
+}
+.gold {
+  color: var(--gold);
+}
+.muted {
+  color: var(--muted);
+}
+.win-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.win-tabs.five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
 }
+.win-tabs [role="tab"] {
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+.win-tabs.five [role="tab"] {
+  font-size: 13px;
+}
+.win-tabs [aria-selected="true"] {
+  background: var(--accent);
+  color: var(--bg);
+}
+.win-tabs [role="tab"]:focus-visible {
+  outline: 2px solid var(--accent-2);
+}
+.win-foot {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 2px solid var(--btn);
+  font-family: "DotGothic16", monospace;
+}
+.win-msg {
+  flex: 1;
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--accent-2);
+  font-size: 13px;
+}
+.win-msg.bad {
+  color: var(--accent);
+}
 
+/* よみやすい もじ（メニューの 中・せつめいしょ。本人「わかりやすいフォントにしようか」） */
+.readable,
+.readable p,
+.readable li,
+.readable label {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+}
+.readable h3 {
+  font-family: "DotGothic16", monospace;
+}
+
+/* たな：えらんだ ものは ✓、つくる は てんせん */
+.cas-shelves {
+  padding-bottom: 8px;
+}
+.cas-shelf h3 small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.cas-item {
+  min-height: 62px;
+}
+.cas-item.picked {
+  background: var(--btn-hover);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.cas-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  color: var(--accent);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+}
+.cas-make {
+  min-height: 62px;
+  border: 0;
+  outline: 2px dashed var(--accent-2);
+  outline-offset: -2px;
+  background: transparent;
+  color: var(--accent-2);
+  font-family: "DotGothic16", monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+.cas-make span {
+  display: block;
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* じぶんの リンク：アイコンを えらぶ */
+.mylink-label {
+  margin: 4px 0 0;
+}
+.mylink-icons {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
 .mylink-icon {
-  padding: 6px;
+  height: 40px;
+  padding: 8px;
   border: 0;
   background: var(--btn);
   color: var(--accent-2);
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
-
 .mylink-icon svg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
-
-.mylink-icon[aria-pressed="true"] {
-  outline: 2px solid var(--gold);
+.mylink-icon[aria-checked="true"] {
+  outline: 2px solid var(--accent);
 }
-
-.mylink-msg {
-  min-height: 1.4em;
-  margin: 4px 0 0;
-  color: var(--gold);
+.mylink-list h3 {
+  margin: 12px 0 6px;
 }
-
-#mylink-delete[hidden] {
-  display: none;
-}
-
-/* たたむ たな（v1.62） */
-.cas-shelf > summary {
-  list-style: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.cas-shelf > summary::-webkit-details-marker {
-  display: none;
-}
-
-.cas-shelf > summary h3 {
+.mylink-row,
+.edit-rows li {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  min-height: 42px;
+  border-bottom: 1px solid var(--btn);
 }
-
-.cas-shelf > summary h3::before {
-  content: "▶";
-  font-size: 9px;
-  color: var(--muted);
+.mylink-row .icon,
+.edit-rows .icon,
+.rank .icon {
+  display: block;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  box-sizing: border-box;
+  background: var(--btn);
+  color: var(--accent-2);
 }
-
-.cas-shelf[open] > summary h3::before {
-  content: "▼";
+.mylink-row .icon svg,
+.edit-rows .icon svg,
+.rank .icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-
-.cas-shelf:not([open]) {
-  padding-bottom: 2px;
-}
-
-/* まどを ひらいて いる あいだは、うしろの がめんを スクロール させない（v1.63） */
-html:has(dialog[open]),
-html:has(dialog[open]) body {
+.mylink-row-name,
+.edit-row-name {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
-}
-
-dialog .diary-body,
-dialog .about-body {
-  overscroll-behavior: contain;
-}
-
-/* おとが ねて いる とき：ピクセの あたまに「♪z」（v1.63） */
-.npc-sprite::after {
-  content: "♪z";
-  position: absolute;
-  top: -14px;
-  right: -10px;
   font-family: "Press Start 2P", monospace;
   font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mylink-row-name,
+.edit-row-name.jp {
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+}
+.edit-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.edit-empty {
+  color: var(--muted);
+}
+.mini {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  background: var(--btn);
   color: var(--accent-2);
-  opacity: 0;
-  pointer-events: none;
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+.mini:disabled {
+  color: var(--line, #5a5088);
+  cursor: default;
+}
+.mini.danger {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.mini:focus-visible {
+  outline: 2px solid var(--accent-2);
 }
 
-.sound-asleep .npc-sprite::after {
-  opacity: 1;
-  animation: zz-float 1.6s steps(4) infinite;
+/* メニュー */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-
-@keyframes zz-float {
-  50% { translate: 0 -4px; }
+.panel[hidden] {
+  display: none;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .sound-asleep .npc-sprite::after { animation: none; }
+.panel p {
+  margin: 0;
 }
-
-/* ひらいた WARPIX カード（たてなが）も がめんの たかさに おさまる（v1.63.2。パソコンでは したが みえなかった） */
-.postcard-art {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
+.panel h3 {
+  margin: 6px 0 0;
 }
-
-.postcard-img {
+.seg {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.seg button {
+  min-height: 38px;
+  border: 0;
+  background: var(--bg-grid);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+.seg [aria-pressed="true"] {
+  background: var(--accent-2);
+  color: var(--bg);
+}
+.log-sum {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-grid);
+  box-shadow: 0 0 0 2px var(--btn);
+}
+.log-sum p {
+  margin: 0;
+}
+.log-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+.log-total {
+  color: var(--accent);
+  font-family: "DotGothic16", monospace !important;
+  font-size: 40px;
+  line-height: 1.1;
+}
+.log-total small {
+  color: var(--fg);
+  font-size: 18px;
+}
+.log-top {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+.log-top b {
+  color: var(--fg);
+  font-family: "Press Start 2P", "DotGothic16", monospace;
+  font-size: 10px;
+}
+.log-week[hidden] {
+  display: none;
+}
+.bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  height: 104px;
+  margin-top: 6px;
+}
+.bars .day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.bar-n {
+  color: var(--muted);
+}
+.wbar {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  background: var(--accent-2);
+}
+.bars .today .wbar {
+  background: var(--accent);
+}
+.rank {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rank li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 40px;
+  gap: 10px;
+  align-items: center;
+}
+.rank-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 8px;
+  align-items: baseline;
+  min-width: 0;
+}
+.rank-name {
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.rank-name.jp {
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+}
+.rank-group {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rank-bar {
+  grid-column: 1 / 3;
+  display: block;
+  height: 8px;
+  background: var(--accent-2);
+}
+.rank-n {
+  font-family: "DotGothic16", monospace;
+  font-size: 16px;
+  text-align: right;
+}
+.rank li.log-empty {
+  display: block;
+  color: var(--muted);
+}
+.text-btn {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.text-btn.danger {
+  color: var(--accent);
+}
+.sky-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 6px;
+}
+.sky-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  cursor: pointer;
+}
+.sky-thumb {
+  display: block;
+  height: 140px;
+  box-shadow: 0 0 0 2px var(--line, #5a5088);
+}
+.sky-thumb[data-thumb="night"] {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--bg-grid) 2px, transparent 2px), linear-gradient(90deg, var(--bg-grid) 2px, transparent 2px);
+  background-size: 16px 16px;
+}
+.sky-thumb[data-thumb="day"] {
+  background: var(--sky-day);
+}
+.sky-thumb[data-thumb="evening"] {
+  background: var(--sky-evening);
+}
+.sky-card[aria-pressed="true"] .sky-thumb {
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent);
+}
+.sky-card[aria-pressed="true"] b::after {
+  content: "えらんでる";
+  display: block;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: normal;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  font-weight: 700;
+}
+.bgm-switch {
+  padding: 8px 12px;
+  border: 0;
+  background: var(--btn);
+  color: var(--fg);
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  cursor: pointer;
+  box-shadow: 0 -2px 0 0 var(--fg), 0 2px 0 0 var(--fg), -2px 0 0 0 var(--fg), 2px 0 0 0 var(--fg);
+}
+.bgm-switch[aria-checked="false"] {
+  color: var(--muted);
+}
+.vol-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+}
+.vol-row input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.vol-row b {
+  width: 2.5em;
+  text-align: right;
+}
+.panel .win-btn {
+  width: 100%;
+}
+.panel .win-btns .win-btn {
   width: auto;
-  max-width: 100%;
-  max-height: calc(100dvh - 150px);
-  margin: 0 auto;
+}
+
+/* せまい・ひくい 画面（iPhone SE の Safari など） */
+@media (max-height: 600px) {
+  .screen {
+    gap: 7px;
+  }
+  .screen .npc {
+    flex: 0 0 72px;
+    min-height: 72px;
+  }
+  .screen .dialog {
+    min-height: 56px;
+    padding: 8px 12px 10px;
+  }
+  .screen .dialog-text {
+    font-size: 13px;
+  }
+  .screen .links {
+    row-gap: 10px;
+    min-height: 260px;
+  }
+  .logo-row .subtitle {
+    display: none;
+  }
+}
+@media (max-width: 360px) {
+  .logo-row .title {
+    font-size: 15px;
+  }
+  .group-bar {
+    gap: 10px;
+  }
+  .links .pixel-btn {
+    gap: 6px;
+    padding: 0 6px;
+    font-size: 9px;
+  }
+}
+
+/* hidden を かならず まもる（.win-form などの display に まけない） */
+.about [hidden],
+.screen [hidden] {
+  display: none !important;
+}
+
+/* ひるの そらでも よめる ように かげを つける */
+.logo-row .subtitle {
+  text-shadow: 2px 2px 0 var(--shadow);
+}
+.seg button {
+  font-size: 12px;
+  white-space: nowrap;
+}
+[data-sky="day"] .footer-maker,
+[data-sky="evening"] .footer-maker {
+  color: var(--fg);
+  text-shadow: 1px 1px 0 var(--shadow);
 }

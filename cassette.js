@@ -1,7 +1,7 @@
-// ---------- カセット えらび（v1.28）：6 この リンクを、たなの 公式リンクから えらんで いれかえる ----------
-// リンクは いつも 6 こ。たなは こちらで よういした 公式の トップページと、じぶんで つくった リンク（v1.61）。
-// script.js より さきに よみこんで、ページを かく まえに えらんだ リンクへ さしかえる。
-// アイコンは 12×12 の オリジナルの ドット絵（"#" が ぬり）。公式ロゴは つかわない。
+// ---------- たなの リンク（v1.28 カセット）と グループ（v1.56 パーティ → v2.0 グループ） ----------
+// たなは こちらで よういした 公式の トップページと、じぶんで つくった リンク（v1.61）。
+// v2.0：リンクは いつも 6 こ → 0〜12 こ（さいしょは から、たなから えらぶか じぶんで つくる）。グループの かずの せいげん なし。
+// アイコンは 12×12 の オリジナルの ドット絵（"#" が ぬり）。公式ロゴは つかわない（X だけ 公式の マークを ドットで、v2.0 本人）。
 const CASSETTES = (() => {
   const SHELVES = [
     // 「いつもの」の たなは なくした（v1.64、本人「誰のいつものだよってなる」）。さいしょの 6 こも それぞれの たなに
@@ -18,14 +18,20 @@ const CASSETTES = (() => {
     { id: "study", name: "べんきょう" },
   ];
   // hi：ゆびさした ときの ピクセの しょうかい。back：ワープから もどった ときの おみやげばなし
-  // （さいしょの 6 こは extras.js と warp.js に もとから ある）
+  // （さいしょの 6 こは v1 の extras.js と warp.js に あった もの を ここへ）
   const LIST = [
-    { id: "youtube", label: "YOUTUBE", url: "https://www.youtube.com/", shelf: "video" },
-    { id: "twitter", label: "TWITTER", sub: "(X)", url: "https://x.com/", shelf: "sns" },
-    { id: "instagram", label: "INSTAGRAM", url: "https://www.instagram.com/", shelf: "sns" },
-    { id: "booth", label: "BOOTH", url: "https://booth.pm/", shelf: "shop" },
-    { id: "tumblr", label: "TUMBLR", url: "https://www.tumblr.com/", shelf: "sns" },
-    { id: "spotify", label: "SPOTIFY", url: "https://open.spotify.com/", shelf: "music" },
+    { id: "youtube", label: "YOUTUBE", url: "https://www.youtube.com/", shelf: "video",
+      hi: "YOUTUBEは うごく えの せかい。\nポップコーンの よういは いい？", back: ["ただいま！ YOUTUBE の せかいは\nがめんが いっぱい ならんでた。", "ただいま！ どうがの せかいで\nおすすめに ながされそうに なった……"] },
+    { id: "twitter", label: "X", url: "https://x.com/", shelf: "sns",
+      hi: "Xは みんなが いっせいに\nしゃべってる せかい。", back: ["ただいま！ X の せかいは\nみんな いっせいに しゃべってた。", "ただいま！ タイムラインが はやくて\nめが まわった〜"] },
+    { id: "instagram", label: "INSTAGRAM", url: "https://www.instagram.com/", shelf: "sns",
+      hi: "INSTAGRAMは しゃしんの せかい。\nはい、チーズ！", back: ["ただいま！ しゃしんの せかいは\nきらきら していたよ。", "ただいま！ ぼくも しゃしん\nとって もらえば よかったな。"] },
+    { id: "booth", label: "BOOTH", url: "https://booth.pm/", shelf: "shop",
+      hi: "BOOTHは おみせの せかい。\nなにか かっていく？", back: ["ただいま！ おみせの せかいで\nほしい ものが いっぱい あった。", "ただいま！ ドットの グッズ、\nつい ながめちゃった。"] },
+    { id: "tumblr", label: "TUMBLR", url: "https://www.tumblr.com/", shelf: "sns",
+      hi: "TUMBLRは ふしぎな\nブログの せかい。", back: ["ただいま！ TUMBLR の せかいは\nふしぎな え が いっぱい。", "ただいま！ むこうは しずかで\nちょっと ねむく なった。"] },
+    { id: "spotify", label: "SPOTIFY", url: "https://open.spotify.com/", shelf: "music",
+      hi: "SPOTIFYは おんがくの せかい。\nこの BGMより いい きょく ある？", back: ["ただいま！ おんがくの せかいで\nずっと ゆれてた♪", "ただいま！ むこうの きょくも いいけど、\nぼくの BGM も わすれないでね。"] },
 
     { id: "tiktok", label: "TIKTOK", url: "https://www.tiktok.com/", app: "snssdk1233://", shelf: "sns",
       hi: "TIKTOKは みじかい どうがの せかい。\nつい ずっと みちゃう。", back: "ただいま！ おどってる ひとが いっぱい。\nぼくも ちょっと おどった。",
@@ -180,10 +186,10 @@ const CASSETTES = (() => {
   };
 
 
-  // ---------- じぶんの リンク（v1.61）：すきな https の アドレスを 18 こまで（パーティ 3 つ × 6 こ を ぜんぶ じぶんの リンクに できる） ----------
+  // ---------- じぶんの リンク（v1.61）：すきな https の アドレスを 18 こまで ----------
   // ユーザー登録 なし、この ブラウザの なか だけ（ふっかつの じゅもんで もちはこべる）。おすそわけ なし。
   // アイコンは よういした ドット絵から えらぶ（あいての サイトから とって こない。とると あいてに「だれかが ひらいた」と つたわる）
-  const MINE_KEY = "warpix-mylinks";
+  const MINE_KEY = KEY.mylinks; // v2.0 から あたらしい キー（v1 の warpix-mylinks は よまない）
   const MINE_MAX = 18;
   const MINE_ICONS = {
     home: { name: "おうち", rows: ["............", ".....##.....", "....####....", "...######...", "..########..", ".##########.", "..########..", "..##.##.##..", "..##.##.##..", "..##....##..", "..########..", "............"] },
@@ -244,68 +250,42 @@ const CASSETTES = (() => {
     } catch {}
   };
 
-  // さいしょの 6 こ（v1.63 までの「いつもの」の たな）
-  const DEFAULT = ["youtube", "twitter", "instagram", "booth", "tumblr", "spotify"];
-  const KEY = "warpix-cassette";
   const byId = (id) => LIST.find((c) => c.id === id) ?? mine.find((c) => c.id === id);
-
-  // 6 こ、ぜんぶ しっている カセットで、おなじ ものが ない ときだけ つかう
-  const valid = (ids) => Array.isArray(ids) && ids.length === 6 && new Set(ids).size === 6 && ids.every(byId);
-  // たなから なくした カセット（v1.58 スタディサプリ）は、さいしょの 6 この まだ ない ものに おきかえる
-  const REMOVED = new Set(["studysapuri"]);
-  const mend = (ids) => {
-    if (!Array.isArray(ids) || !ids.some((id) => REMOVED.has(id))) return ids;
-    const out = ids.filter((id) => !REMOVED.has(id));
-    const spare = [...DEFAULT, ...LIST.map((c) => c.id)].filter((d) => !out.includes(d));
-    return ids.map((id) => (REMOVED.has(id) ? spare.shift() : id));
-  };
-  function load() {
-    try {
-      const ids = mend(JSON.parse(localStorage.getItem(KEY)));
-      if (valid(ids)) return ids;
-    } catch {}
-    return [...DEFAULT];
-  }
-
-  // ---------- パーティ（v1.56）：6 この くみあわせを 3 つまで。じぶんで きりかえる（じかんで かわったり しない） ----------
-  // 1 つめは いままでの warpix-cassette。2 つめ いこうと なまえ・いま つかって いる ばんごうは warpix-parties に。
-  // なまえは さいしょ なし（PARTY 1・2・3 と でる）。「あさ・よる」の ような なまえを かってに つけない（「へんな プレッシャーに なる」）
-  const PARTIES = "warpix-parties";
-  const MAX = 3;
-  const party = (() => {
-    const first = { name: "", ids: load() };
-    try {
-      const p = JSON.parse(localStorage.getItem(PARTIES));
-      const more = (p?.more ?? []).map((x) => ({ ...x, ids: mend(x?.ids) })).filter((x) => valid(x?.ids)).slice(0, MAX - 1).map((x) => ({ name: String(x.name ?? "").slice(0, 10), ids: x.ids }));
-      const list = [{ ...first, name: String(p?.name ?? "").slice(0, 10) }, ...more];
-      const at = Number.isInteger(p?.at) && p.at >= 0 && p.at < list.length ? p.at : 0;
-      return { list, at };
-    } catch {
-      return { list: [first], at: 0 };
-    }
-  })();
-  let current = party.list[party.at].ids;
-
   // にほんごの なまえ（ニコニコ動画 など）は ドットの ゴシックで すこし おおきく
   const jp = (c) => /[^\x00-\x7f]/.test(c.label);
+  // たなの アイコンも ICONS に のせる（さいしょの 6 こ は core.js）
+  for (const c of LIST) if (c.icon && !ICONS[c.id]) ICONS[c.id] = c.icon;
+  const iconOf = (c) => ICONS[c.id] ?? c.icon ?? ICONS.youtube;
 
-  // リンクの なかみを かきかえる（▶・アイコン・なまえ・(X)・よみあげ用の「あたらしい タブ」）
-  // i は 0〜5。パソコンでは みぎはしに すうじキーの ばんごう（v1.35）
-  const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-  function fill(a, c, i) {
-    a.href = c.url;
-    if (IOS && c.app) a.dataset.app = c.app;
-    else delete a.dataset.app;
-    a.classList.toggle("jp-label", jp(c));
-    a.innerHTML = `<span class="arrow">▶</span><span class="icon" data-icon="${c.id}"></span>${c.label}${c.sub ? `<small class="link-sub">${c.sub}</small>` : ""}<span class="link-key" aria-hidden="true">${i + 1}</span><span class="sr-only">（あたらしい タブで ひらく）</span>`;
-  }
-  const slots = () => [...document.querySelectorAll(".links .pixel-btn:not(.secret)")];
-  slots().forEach((a, i) => fill(a, byId(current[i]), i));
+  // ---------- グループ（v1.56 パーティ → v2.0）：なまえ（ひっす・12 もじ）と リンク 0〜12 こ ----------
+  // さいしょは グループも リンクも ない（本人「選べるし　自分でも追加できる」）。おなじ グループに おなじ リンクは 1 つ だけ
+  const MAX_LINKS = 12;
+  const MAX_TITLE = 12;
+  const cut = (s, n) => Array.from(String(s ?? "").trim()).slice(0, n).join("");
+  const newId = () => `g-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+  let groups = [];
+  let at = 0;
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY.groups) ?? "null");
+    if (Array.isArray(saved?.list))
+      groups = saved.list
+        .filter((g) => g && typeof g.id === "string" && cut(g.title, MAX_TITLE))
+        .map((g) => ({ id: g.id, title: cut(g.title, MAX_TITLE), ids: [...new Set((Array.isArray(g.ids) ? g.ids : []).filter((id) => byId(id)))].slice(0, MAX_LINKS) }));
+    at = Number.isInteger(saved?.at) && saved.at >= 0 && saved.at < groups.length ? saved.at : 0;
+  } catch {}
+  const save = () => {
+    try {
+      localStorage.setItem(KEY.groups, JSON.stringify({ at, list: groups }));
+    } catch {}
+  };
+  const find = (gid) => groups.find((g) => g.id === gid);
+
   // アプリで ひらく（v1.64）：ウェブの アドレスだと Gmail は アプリに いかず、TikTok は ログイン して いない まどが ひらいた（本人）。
   // iPhone では アプリの アドレスへ。2.5 びょう たっても この ページが みえた まま なら、アプリが ない ので ウェブへ
+  const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
   document.addEventListener("click", (e) => {
     const a = e.target.closest?.(".links .pixel-btn[data-app]");
-    if (!a || e.defaultPrevented) return; // コントローラーの とき（device.js）は そちらが ひらく
+    if (!a || e.defaultPrevented) return;
     e.preventDefault();
     const web = a.href;
     location.href = a.dataset.app;
@@ -316,58 +296,82 @@ const CASSETTES = (() => {
     SHELVES,
     LIST,
     GIFTS,
-    // その リンクの たな（あなの いろを きめる）
-    shelfOf: (icon) => (icon === "key" ? "secret" : byId(icon)?.shelf ?? "default"),
-    DEFAULT,
+    // その リンクの たな（ワープあなの いろを きめる）
+    shelfOf: (id) => byId(id)?.shelf ?? "default",
     byId,
     jp,
-    current: () => [...current],
-    // i ばんめの スロットに id を いれる。ほかの スロットに あれば いれかえる（いつも 6 こ、おなじ ものは ない）
-    put(i, id) {
-      if (!byId(id) || i < 0 || i > 5 || current[i] === id) return false;
-      const j = current.indexOf(id);
-      if (j >= 0) current[j] = current[i];
-      current[i] = id;
-      this.save();
-      return true;
-    },
-    reset() {
-      current.splice(0, 6, ...DEFAULT);
-      this.save();
-    },
-    // ---------- パーティ ----------
-    MAX,
-    parties: () => party.list.map((p, i) => ({ name: p.name, label: p.name || `PARTY ${i + 1}`, ids: [...p.ids] })),
-    at: () => party.at,
-    valid,
-    // i ばんめの パーティに きりかえる
+    iconOf,
+    appOf: (c) => (IOS && c.app ? c.app : null),
+    MAX_LINKS,
+    MAX_TITLE,
+    // ---------- グループ ----------
+    groups: () => groups.map((g) => ({ ...g, ids: [...g.ids] })),
+    at: () => at,
+    current: () => groups[at] ?? null,
     switchTo(i) {
-      if (i < 0 || i >= party.list.length || i === party.at) return false;
-      party.at = i;
-      current = party.list[i].ids;
-      this.save();
+      if (!groups.length) return false;
+      at = ((i % groups.length) + groups.length) % groups.length;
+      save();
       return true;
     },
-    // 6 こ ぜんぶ えらんで、はじめて できる（からっぽの パーティは つくらない）
-    addParty(ids) {
-      if (party.list.length >= MAX || !valid(ids)) return false;
-      party.list.push({ name: "", ids: [...ids] });
-      this.switchTo(party.list.length - 1);
+    addGroup(title) {
+      const t = cut(title, MAX_TITLE);
+      if (!t) return null;
+      const g = { id: newId(), title: t, ids: [] };
+      groups.push(g);
+      at = groups.length - 1;
+      save();
+      return g;
+    },
+    rename(gid, title) {
+      const g = find(gid);
+      const t = cut(title, MAX_TITLE);
+      if (!g || !t) return false;
+      g.title = t;
+      save();
       return true;
     },
-    rename(i, name) {
-      if (!party.list[i]) return false;
-      party.list[i].name = String(name ?? "").trim().slice(0, 10);
-      this.save();
+    removeGroup(gid) {
+      const i = groups.findIndex((g) => g.id === gid);
+      if (i < 0) return false;
+      groups.splice(i, 1);
+      if (at >= groups.length) at = Math.max(0, groups.length - 1);
+      else if (at > i) at--;
+      save();
       return true;
     },
-    // けすと、のこりの さいしょの パーティに。1 つ しか ない ときは けせない
-    removeParty(i) {
-      if (party.list.length <= 1 || !party.list[i]) return false;
-      party.list.splice(i, 1);
-      party.at = 0;
-      current = party.list[0].ids;
-      this.save();
+    // グループの じゅんばん（-1 まえへ・+1 うしろへ）
+    moveGroup(gid, dir) {
+      const i = groups.findIndex((g) => g.id === gid);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= groups.length) return false;
+      [groups[i], groups[j]] = [groups[j], groups[i]];
+      at = j;
+      save();
+      return true;
+    },
+    // リンクを 追加（さいごに）・はずす・ならべかえ
+    addLink(gid, id) {
+      const g = find(gid);
+      if (!g || !byId(id) || g.ids.includes(id) || g.ids.length >= MAX_LINKS) return false;
+      g.ids.push(id);
+      save();
+      return true;
+    },
+    removeLink(gid, id) {
+      const g = find(gid);
+      if (!g || !g.ids.includes(id)) return false;
+      g.ids = g.ids.filter((x) => x !== id);
+      save();
+      return true;
+    },
+    moveLink(gid, id, dir) {
+      const g = find(gid);
+      const i = g?.ids.indexOf(id) ?? -1;
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= g.ids.length) return false;
+      [g.ids[i], g.ids[j]] = [g.ids[j], g.ids[i]];
+      save();
       return true;
     },
     // ---------- じぶんの リンク ----------
@@ -397,47 +401,21 @@ const CASSETTES = (() => {
       while (mine.some((c) => c.id === `my-${n}`)) n++;
       const c = asCassette({ id: `my-${n}`, label: name, url: href, icon: MINE_ICONS[icon] ? icon : "star" });
       mine.push(c);
+      ICONS[c.id] = c.icon;
       saveMine();
       return c;
     },
-    updateMine(id, { label, url, icon }) {
-      if (this.checkMine(url, id)) return null;
-      const i = mine.findIndex((c) => c.id === id);
-      const href = cleanUrl(url);
-      const name = String(label ?? "").trim().slice(0, 10);
-      if (i < 0 || !href || !name) return null;
-      mine[i] = asCassette({ id, label: name, url: href, icon: MINE_ICONS[icon] ? icon : "star" });
-      saveMine();
-      return mine[i];
-    },
-    // その リンクが はいって いる パーティの なまえ
-    partiesWith: (id) => party.list.map((p, i) => (p.ids.includes(id) ? p.name || `PARTY ${i + 1}` : null)).filter(Boolean),
-    // けすと、はいって いた パーティでは さいしょの リンクの まだ ない ものを その じゅんで 1 つ いれる
+    // けすと、はいって いた グループからも はずす
     removeMine(id) {
       const i = mine.findIndex((c) => c.id === id);
       if (i < 0) return false;
-      for (const p of party.list) {
-        const at = p.ids.indexOf(id);
-        if (at < 0) continue;
-        p.ids[at] = [...DEFAULT, ...LIST.map((c) => c.id)].find((d) => !p.ids.includes(d));
-      }
+      for (const g of groups) g.ids = g.ids.filter((x) => x !== id);
       mine.splice(i, 1);
+      delete ICONS[id];
       saveMine();
-      this.save();
+      save();
       return true;
-    },
-    save() {
-      try {
-        const first = party.list[0];
-        if (first.ids.join() === DEFAULT.join()) localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY, JSON.stringify(first.ids));
-        if (party.list.length === 1 && !first.name) localStorage.removeItem(PARTIES);
-        else localStorage.setItem(PARTIES, JSON.stringify({ at: party.at, name: first.name, more: party.list.slice(1) }));
-      } catch {}
-    },
-    // ページの リンクを いまの カセットに そろえる（アイコンを かくのは よびだした がわ）
-    apply() {
-      slots().forEach((a, i) => fill(a, byId(current[i]), i));
     },
   };
 })();
+for (const c of CASSETTES.mine()) ICONS[c.id] = c.icon;
