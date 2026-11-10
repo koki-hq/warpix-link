@@ -17,7 +17,7 @@ export default {
     for (const id of await p.ev(`[...document.querySelectorAll(".mail-item")].map((b) => b.dataset.id)`)) {
       await p.ev(`document.querySelector('.mail-item[data-id="${id}"]').click()`);
       t.ok(await p.ev(`!document.getElementById("mail-read").hidden && document.getElementById("mail-read").textContent.includes("WARPIX製作所")`), `${id} が よめない`);
-      t.ok(await p.ev(`document.querySelector("#mail-read .mail-sign")?.textContent === "WARPIX製作所" && !document.getElementById("mail-back").hidden && !!document.getElementById("mail-back").closest(".about-top")`), `${id}：署名か うえの「◀ いちらん」が ない`);
+      t.ok(await p.ev(`document.querySelector("#mail-read .mail-sign")?.textContent === "WARPIX製作所" && !document.getElementById("mail-back").hidden && !document.getElementById("mail-back").closest(".about-top")`), `${id}：署名か したの「◀ いちらんへ」が ない`);
       if (id === "2026-11-10-v2") {
         await p.shot("v2-mail-read.png");
         t.eq(await p.ev(`document.querySelectorAll("#mail-read .mail-points li").length`), 6, "かじょうがきが 1 こずつ に なって いない");

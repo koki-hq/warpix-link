@@ -118,6 +118,7 @@ const groups = (() => {
   let addTab = "shelf";
   let backToEdit = false;
   let pickedIcon = "star";
+  let editingId = null; // つくった リンクを かえて いる ときの id（したの「かえる」）
 
   function renderCount() {
     const g = C.current();
@@ -155,6 +156,9 @@ const groups = (() => {
   function openAdd({ fromEdit = false, tab = "shelf" } = {}) {
     if (!C.current()) return;
     backToEdit = fromEdit;
+    editingId = null;
+    $("mylink-name").value = "";
+    $("mylink-url").value = "";
     if (editDialog.open) editDialog.close();
     selectTab(tab);
     addDialog.showModal();
@@ -202,9 +206,12 @@ const groups = (() => {
       .map(([k, v]) => `<button type="button" role="radio" class="mylink-icon" data-icon="${k}" aria-checked="${k === pickedIcon}" aria-label="${esc(v.name)}">${pixelSvg(v.rows)}</button>`)
       .join("");
     $("mylink-error").hidden = true;
+    const editing = editingId && C.byId(editingId);
+    $("mylink-editing").hidden = !editing;
+    if (editing) $("mylink-editing-name").textContent = editing.label;
     const mine = C.mine();
     $("mylink-list").innerHTML = mine.length
-      ? `<h3>つくった リンク</h3>${mine.map((c) => `<div class="mylink-row"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を けす">けす</button></div>`).join("")}`
+      ? `<h3>つくった リンク</h3>${mine.map((c) => `<div class="mylink-row"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を かえる"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を けす">けす</button></div>`).join("")}`
       : "";
     renderCount();
   }
@@ -214,16 +221,44 @@ const groups = (() => {
     pickedIcon = b.dataset.icon;
     for (const x of iconsEl.querySelectorAll("[data-icon]")) x.setAttribute("aria-checked", String(x === b));
   });
-  $("mylink-list").addEventListener("click", (e) => {
+  // つくった リンクを かえる（v2.0.2、本人「名前とかアイコンとかリンクとか」「かえる　とかの方がいいかな　けす　に合わせて」）。
+  // かえる を おすと うえの 欄に いまの なまえ・アドレス・アイコンが はいり、けってい で ほぞん。はいって いる グループ ぜんぶに かわる
+  function startEdit(c) {
+    editingId = c.id;
+    $("mylink-name").value = c.label;
+    $("mylink-url").value = c.url;
+    pickedIcon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
+    renderMake();
+    $("mylink-name").focus();
+    $("add-make").scrollTop = 0;
+  }
+  function stopEdit() {
+    editingId = null;
+    $("mylink-name").value = "";
+    $("mylink-url").value = "";
+    renderMake();
+  }
+  $("mylink-stop").addEventListener("click", () => {
+    stopEdit();
+    $("mylink-name").focus();
+  });
+  $("mylink-list").addEventListener("click", async (e) => {
+    const ed = e.target.closest("[data-edit]");
+    if (ed) {
+      const c = C.byId(ed.dataset.edit);
+      if (c) startEdit(c);
+      return;
+    }
     const b = e.target.closest("[data-del]");
     if (!b) return;
     const c = C.byId(b.dataset.del);
-    if (!c || !ask(`「${c.label}」を けしますか？ はいって いる グループからも はずれます。`)) return;
+    if (!c || !(await ask(`「${c.label}」を けしますか？ はいって いる グループからも はずれます。`))) return;
+    if (editingId === c.id) editingId = null;
     C.removeMine(c.id);
     renderMake();
     render();
   });
-  // じぶんの リンクを つくって、いまの グループに 追加する。できたら true
+  // じぶんの リンクを つくって、いまの グループに 追加する（かえて いる ときは ほぞん）。できたら true
   function makeLink() {
     const err = $("mylink-error");
     const name = $("mylink-name").value.trim();
@@ -231,13 +266,23 @@ const groups = (() => {
     const g = C.current();
     let msg = null;
     if (!name) msg = "なまえを いれてね。";
-    else msg = C.checkMine(url);
-    if (!msg && C.mine().length >= C.MINE_MAX) msg = `じぶんの リンクは ${C.MINE_MAX} こ まで だよ。`;
-    if (!msg && g.ids.length >= C.MAX_LINKS) msg = `この グループは もう ${C.MAX_LINKS} こ いっぱい だよ。`;
+    else msg = C.checkMine(url, editingId);
+    if (!editingId) {
+      if (!msg && C.mine().length >= C.MINE_MAX) msg = `じぶんの リンクは ${C.MINE_MAX} こ まで だよ。`;
+      if (!msg && g.ids.length >= C.MAX_LINKS) msg = `この グループは もう ${C.MAX_LINKS} こ いっぱい だよ。`;
+    }
     if (msg) {
       err.textContent = msg;
       err.hidden = false;
       return false;
+    }
+    if (editingId) {
+      const c = C.updateMine(editingId, { label: name, url, icon: pickedIcon });
+      if (!c) return false;
+      stopEdit();
+      sound.sfx.coin();
+      pixe.say(`「${c.label}」、かえたよ！`);
+      return true;
     }
     const c = C.addMine({ label: name, url, icon: pickedIcon });
     if (!c) return false;
@@ -329,9 +374,9 @@ const groups = (() => {
     renderEdit();
     render();
   });
-  $("edit-delete").addEventListener("click", () => {
+  $("edit-delete").addEventListener("click", async () => {
     const g = C.current();
-    if (!ask(`グループ「${g.title}」を けしますか？`)) return;
+    if (!(await ask(`グループ「${g.title}」を けしますか？`))) return;
     C.removeGroup(g.id);
     editDialog.close();
     render();

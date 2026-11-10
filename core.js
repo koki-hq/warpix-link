@@ -402,15 +402,6 @@ const sound = (() => {
     onWaiting(v);
   }
 
-  // たしかめる まど（confirm）の あと。iPhone では まどが 出て いる あいだ 音が とめられ、
-  // とじても もどらない ことが ある（v2.0.1、本人「けす ボタンを押して キャンセルしたらBGMが消えちゃう」）。
-  // その ばで おこし、だめなら つくりなおして つぎの タップで おこす
-  function revive() {
-    if (!ctx || ctx.state === "running") return;
-    ctx.resume().catch(() => {});
-    setTimeout(() => ctx && ctx.state !== "running" && !document.hidden && resume(), 300);
-  }
-
   // 曲を えらぶ（せっていの BGM タブ）
   function setSong(id) {
     song = SONGS[id] ?? SONGS.usual;
@@ -419,7 +410,7 @@ const sound = (() => {
   }
 
   return {
-    sfx, bgmPlay, bgmStop, pause, resume, revive, setSong, setVolumes,
+    sfx, bgmPlay, bgmStop, pause, resume, setSong, setVolumes,
     waiting: () => waiting,
     onWaiting: (fn) => (onWaiting = fn),
     volumes: () => ({ bgm: bgmVol, se: seVol }),
@@ -430,11 +421,32 @@ const sound = (() => {
   };
 })();
 
-// けす まえに たしかめる。とじたら 音を おこしなおす（上の revive）
-function ask(msg) {
-  const ok = confirm(msg);
-  sound.revive();
-  return ok;
+// けす まえに たしかめる まど（v2.0.2）。ブラウザの confirm() は iPhone で 出て いる あいだ 音を とめ、
+// とじても BGM が もどらない（本人「けす　ボタンを押して　キャンセルしたらBGMが消えちゃう」「BGM止まったままだよ」）。
+// アプリの なかの まどに したので 音は とまらない。はい なら true の Promise。
+// テストは window.WARPIX_ASK = true / false で まどを 出さずに こたえる
+function ask(msg, yes = "けす") {
+  if (typeof window.WARPIX_ASK === "boolean") return Promise.resolve(window.WARPIX_ASK);
+  const d = document.getElementById("ask-dialog");
+  const y = document.getElementById("ask-yes");
+  const n = document.getElementById("ask-no");
+  document.getElementById("ask-text").textContent = msg;
+  y.textContent = yes;
+  return new Promise((resolve) => {
+    const done = (v) => {
+      d.close();
+      sound.sfx.select();
+      resolve(v);
+    };
+    y.onclick = () => done(true);
+    n.onclick = () => done(false);
+    d.oncancel = (e) => {
+      e.preventDefault();
+      done(false);
+    };
+    d.showModal();
+    n.focus();
+  });
 }
 
 // ---------- せってい（背景の そら・BGM・おおきさ） ----------

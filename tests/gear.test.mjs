@@ -45,7 +45,7 @@ export default {
 
   async "ワープの きろく：きょう・こんしゅう（げつようから、ようびごと）・こんげつ・ぜんぶ、けす"(t) {
     const { server, p } = await openApp(t, { query: "?date=2026-11-10", storage: { "warpix-v2-log": LOG } });
-    await p.ev(`window.confirm = () => true; gear.open("log")`);
+    await p.ev(`window.WARPIX_ASK = true; gear.open("log")`);
     await sleep(200);
     let v = await logView(p);
     t.eq([v.label, v.total, v.top, v.week], ["こんしゅうの ワープ", "6", "YOUTUBE", true], "こんしゅう が ちがう");
@@ -128,7 +128,7 @@ export default {
     // べつの ブラウザ（まっさら）で うけとる
     const other = await openApp(t);
     const q = other.p;
-    await q.ev(`window.confirm = () => true; gear.open("move")`);
+    await q.ev(`window.WARPIX_ASK = true; gear.open("move")`);
     await q.ev(`document.getElementById("move-input").value = "へんな コード"`);
     await q.click("#move-take");
     await sleep(200);

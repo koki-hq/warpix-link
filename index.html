@@ -136,6 +136,7 @@
     </div>
     <div class="about-body win-scroll" id="add-make" role="tabpanel" aria-labelledby="add-tab-make" hidden>
       <form class="win-form" id="mylink-form" novalidate>
+      <p class="mylink-editing" id="mylink-editing" hidden><span>「<b id="mylink-editing-name"></b>」を かえて います</span><button class="mini" id="mylink-stop" type="button">やめる</button></p>
       <label for="mylink-name">なまえ（10 もじ まで）</label>
       <input class="win-input" id="mylink-name" type="text" maxlength="10" autocomplete="off">
       <label for="mylink-url">アドレス（https:// で はじまる もの）</label>
@@ -150,6 +151,17 @@
     <div class="win-foot">
       <p class="win-msg" id="add-msg" aria-live="polite"></p>
       <button class="win-btn pink" id="add-done" type="button">けってい</button>
+    </div>
+  </dialog>
+
+  <!-- たしかめる まど（v2.0.2）：ブラウザの confirm は iPhone で BGM を とめて しまうので アプリの まどに -->
+  <dialog class="about win ask" id="ask-dialog" aria-labelledby="ask-text">
+    <div class="about-body">
+      <p class="ask-text" id="ask-text"></p>
+    </div>
+    <div class="win-foot">
+      <button class="win-btn" id="ask-no" type="button">やめる</button>
+      <button class="win-btn danger" id="ask-yes" type="button">けす</button>
     </div>
   </dialog>
 
@@ -182,13 +194,14 @@
   <!-- おしらせ（v1.59）：けんめいの いちらん → しょうさい -->
   <dialog class="about mail" id="mail" aria-labelledby="mail-title">
     <div class="about-top">
-      <button class="room-back" id="mail-back" type="button" hidden>◀ いちらん</button>
       <h2 id="mail-title">おしらせ</h2>
       <button class="about-close" id="mail-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <div class="about-body">
       <ul class="mail-list" id="mail-list"></ul>
-      <div class="mail-read" id="mail-read" hidden></div>
+      <article class="mail-read" id="mail-read" hidden></article>
+      <!-- いちらんへ もどる ボタンは よんだ ものの した（v2.0 の かたち。本人「位置とかも含めてv2.0の方が良かった」） -->
+      <button class="save-btn mail-back" id="mail-back" type="button" hidden>◀ いちらんへ</button>
     </div>
   </dialog>
 

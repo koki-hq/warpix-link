@@ -58,7 +58,7 @@ export default {
 
   async "かんばんを おすと へんしゅう：なまえ・ならべかえ・はずす・グループの じゅんばん・けす"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube", "spotify", "twitter"]], ["B", ["line"]]]) } });
-    await p.ev(`window.confirm = () => true`);
+    await p.ev(`window.WARPIX_ASK = true`);
     await p.click("#group-sign");
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("edit-dialog").open`), "かんばんを おしても へんしゅうが ひらかない");
@@ -95,13 +95,24 @@ export default {
     await server.close();
   },
 
-  async "けす まえに たしかめる（いいえ なら けさない）"(t) {
+  async "けす まえに アプリの まどで たしかめる（やめる なら けさない・けす なら けす）"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
-    await p.ev(`window.confirm = () => false`);
+    // ブラウザの confirm は つかわない（iPhone で BGM が とまる、v2.0.2）
+    await p.ev(`window.confirm = () => { throw new Error("confirm を つかった"); }`);
     await p.click("#group-sign");
     await sleep(100);
     await p.ev(`document.getElementById("edit-delete").click()`);
-    t.eq((await view(p)).saved, ["A"], "たしかめずに けした");
+    await sleep(100);
+    t.ok(await p.ev(`document.getElementById("ask-dialog").open && document.getElementById("ask-text").textContent.includes("A")`), "たしかめる まどが でない");
+    await p.click("#ask-no");
+    await sleep(100);
+    t.eq((await view(p)).saved, ["A"], "やめる なのに けした");
+    t.ok(await p.ev(`!document.getElementById("ask-dialog").open && document.getElementById("edit-dialog").open`), "やめる で へんしゅうに もどらない");
+    await p.ev(`document.getElementById("edit-delete").click()`);
+    await sleep(100);
+    await p.click("#ask-yes");
+    await sleep(100);
+    t.eq((await view(p)).saved, [], "けす で けせない");
     t.noErrors(p);
     await server.close();
   },

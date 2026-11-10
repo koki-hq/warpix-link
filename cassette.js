@@ -405,6 +405,19 @@ const CASSETTES = (() => {
       saveMine();
       return c;
     },
+    // かえる（v2.0.2）：なまえ・アドレス・アイコン。id は そのまま なので はいって いる グループ ぜんぶで かわる
+    updateMine(id, { label, url, icon }) {
+      const i = mine.findIndex((c) => c.id === id);
+      if (i < 0 || this.checkMine(url, id)) return null;
+      const href = cleanUrl(url);
+      const name = String(label ?? "").trim().slice(0, 10);
+      if (!href || !name) return null;
+      const c = asCassette({ id, label: name, url: href, icon: MINE_ICONS[icon] ? icon : "star" });
+      mine[i] = c;
+      ICONS[id] = c.icon;
+      saveMine();
+      return c;
+    },
     // けすと、はいって いた グループからも はずす
     removeMine(id) {
       const i = mine.findIndex((c) => c.id === id);

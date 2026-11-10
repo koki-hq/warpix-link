@@ -41,7 +41,7 @@ export default {
 
   async "じぶんで つくる：なまえ・https・アイコン → けってい で つくって 追加。へんな アドレスは だめ。けすと グループからも はずれる"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", []]]) } });
-    await p.ev(`window.confirm = () => true`);
+    await p.ev(`window.WARPIX_ASK = true`);
     await p.click("#link-add");
     await sleep(100);
     await p.click("#add-tab-make");
@@ -62,7 +62,21 @@ export default {
     await sleep(100);
     t.ok(await p.ev(`!!document.querySelector('.cas-item[data-id="my-1"]')`), "じぶんの リンクの たなに でない");
     await p.click("#add-tab-make");
+    // かえる（v2.0.2）：いまの なまえ・アドレス・アイコンが はいり、けってい で かわる。グループの なかも かわる
+    await p.ev(`document.querySelector('#mylink-list [data-edit="my-1"]').click()`);
+    t.eq(await p.ev(`[document.getElementById("mylink-name").value, document.getElementById("mylink-url").value, document.querySelector('#mylink-icons [aria-checked="true"]').dataset.icon, !document.getElementById("mylink-editing").hidden]`), ["<b>こう</b>", "https://band.example.jp/", "music", true], "かえる で いまの ものが はいらない");
+    await p.ev(`document.getElementById("mylink-url").value = "https://www.youtube.com/"; document.getElementById("add-done").click()`);
+    t.ok(await p.ev(`!document.getElementById("mylink-error").hidden && document.getElementById("add-dialog").open`), "かえる でも へんな アドレスが とおる");
+    await p.ev(`document.querySelector('#mylink-icons [data-icon="star"]').click(); document.getElementById("mylink-name").value = "かえた"; document.getElementById("mylink-url").value = "https://band.example.jp/"; document.getElementById("add-done").click()`);
+    await sleep(200);
+    t.eq(await p.ev(`CASSETTES.mine().map((c) => [c.id, c.label, c.url, c.iconKey])`), [["my-1", "かえた", "https://band.example.jp/", "star"]], "かえられない（おなじ アドレスの まま でも かえられる）");
+    t.eq([await ids(p), await p.ev(`document.querySelector(".links .pixel-btn .link-label").textContent`)], [["my-1"], "かえた"], "グループの なかが かわらない");
+    await p.click("#link-add");
+    await sleep(100);
+    await p.click("#add-tab-make");
+    t.ok(await p.ev(`document.getElementById("mylink-editing").hidden && document.getElementById("mylink-name").value === ""`), "ひらきなおしても かえる の まま");
     await p.ev(`document.querySelector('#mylink-list [data-del="my-1"]').click()`);
+    await sleep(100);
     t.eq([await p.ev(`CASSETTES.mine().length`), await ids(p)], [0, []], "けしても のこる・グループから はずれない");
     t.noErrors(p);
     await server.close();
