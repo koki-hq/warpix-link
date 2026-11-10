@@ -83,7 +83,8 @@ export default {
     await p.ev(`warpDive.trip().left = true`);
     await p.ev(`warpDive.back()`);
     await sleep(1600);
-    t.ok(await p.ev(`CASSETTES.byId("spotify").back.includes(document.getElementById("dialog-text").textContent)`), `おみやげばなしで ない：${await p.text()}`);
+    const line = await p.text(); // もじ送りが おわるのを まつ
+    t.ok(await p.ev(`CASSETTES.byId("spotify").back.includes(${JSON.stringify(line)})`), `おみやげばなしで ない：${line}`);
     t.ok(await p.ev(`!document.getElementById("npc").classList.contains("away")`), "ピクセが もどらない");
     t.noErrors(p);
     await server.close();
