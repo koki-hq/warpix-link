@@ -21,9 +21,8 @@ export default {
     for (const e of ENTRIES) {
       await p.goto(`${server.url}${e}/`, 1500);
       t.ok(await p.ev(`location.pathname === "/"`), `/${e}/ から 本体へ うつらない：${await p.ev("location.pathname")}`);
-      t.ok(await p.ev(`!!document.getElementById("about-btn")`), `/${e}/ の あと 本体が ひらかない`);
+      t.ok(await p.ev(`!!document.getElementById("gear-btn")`), `/${e}/ の あと 本体が ひらかない`);
     }
-    await p.boot();
     t.ok(seen.length === 0, `トークンが ないのに かぞえようと した：${seen.join(", ")}`);
     t.noErrors(p);
     await server.close();

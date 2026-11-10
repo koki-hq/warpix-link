@@ -1,6 +1,6 @@
 // 健康診断：重さ（ファイルのサイズ）、スマホでの速さ、待機中の CPU、アクセシビリティ（axe-core）。
 //   node tools/health.mjs
-// 結果はターミナルに出す。オンライン機能は切って測る（本物の Supabase には触らない）。
+// 結果はターミナルに出す。
 import { startServer, launchBrowser, closeAll, sleep } from "../tests/lib/harness.mjs";
 
 const AXE = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js";
@@ -63,7 +63,7 @@ const log = (s = "") => { report.push(s); console.log(s); };
 
   // ---------- 3. 待機中の CPU ----------
   await p.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
-  await p.boot({ readIntro: true });
+  await sleep(3000); // ピクセの あいさつが おわるまで
   await p.send("Performance.enable");
   const metric = async () => Object.fromEntries((await p.send("Performance.getMetrics")).result.metrics.map((m) => [m.name, m.value]));
   const a = await metric();
@@ -75,14 +75,6 @@ const log = (s = "") => { report.push(s); console.log(s); };
   log(`- そのうちスクリプト: ${(((z.ScriptDuration - a.ScriptDuration) / (z.Timestamp - a.Timestamp)) * 100).toFixed(1)} %`);
   log(`- JS のメモリ: ${kb(z.JSHeapUsedSize)}`);
 
-  // 放っておかれて「ページごと眠った」あと（寝る 40 秒 → デモ 20 秒後に開始 → 30 秒で眠る）
-  await p.ev(`(() => { const real = performance.now.bind(performance); let extra = 0; performance.now = () => real() + extra; window.__skip = (ms) => (extra += ms); })()`);
-  for (const ms of [41000, 21000, 31000]) { await p.ev(`__skip(${ms})`); await sleep(1500); }
-  const dozing = await p.ev(`document.body.classList.contains("dozing")`);
-  const c = await metric();
-  await sleep(10000);
-  const d = await metric();
-  log(`- ページごと眠ったあと（${dozing ? "眠っている" : "※眠っていない"}）: ${(((d.TaskDuration - c.TaskDuration) / (d.Timestamp - c.Timestamp)) * 100).toFixed(1)} %`);
   log("  ※ GPU を使わないヘッドレス Chrome で測っているので、実機より重く出る");
   await closeAll();
 }
@@ -98,58 +90,31 @@ async function axe(p, label, setup = "") {
 }
 {
   log("\n## アクセシビリティ（axe-core 4.10.2）");
-  const b = await launchBrowser();
+  const b = await launchBrowser({ width: 390, height: 844 });
   const p = await b.firstPage();
+  await p.size(390, 844, true);
   await p.goto(server.url);
-  await axe(p, "PRESS START 画面");
-  await p.boot();
-  await axe(p, "いつもの画面（起動後）");
-  await axe(p, "ピクセの おへや（にっき）", `document.getElementById("room-btn").click()`);
-  await axe(p, "おへや：ずかん", `document.querySelector('.diary-tab[data-tab="zukan"]').click()`);
-  await axe(p, "おへや：じっせき", `document.getElementById("tab-trophy").click()`);
-  await axe(p, "おへや：ぼうし", `document.getElementById("tab-hat").click()`);
-  await p.ev(`document.getElementById("diary").close()`);
-  await axe(p, "このページについて", `document.getElementById("about-btn").click()`);
-  await axe(p, "とりあつかい せつめいしょ（1 まいめ）", `document.getElementById("about-manual").click()`);
-  await axe(p, "とりあつかい せつめいしょ（2 まいめ：つかいかた）", `document.getElementById("manual-next").click()`);
-  await axe(p, "とりあつかい せつめいしょ（3 まいめ：リンクは じぶん好みに）", `document.getElementById("manual-next").click()`);
+  await p.ev(`localStorage.clear()`);
+  await p.goto(server.url);
+  await axe(p, "はじめて（グループが ない）");
+  await axe(p, "せつめいしょ", `manual.open()`);
   await p.ev(`document.getElementById("manual").close()`);
-  await axe(p, "せってい", `document.getElementById("settings-btn").click()`);
-  await p.ev(`document.getElementById("settings").close()`);
-  await axe(p, "さっきょく（レコードだな）", `localStorage.setItem("warpix-shelf", JSON.stringify(["10430000000000000000000000000000000", "10450000000000000000000000000000000"])); composer.open()`);
-  await p.ev(`document.getElementById("composer").close()`);
-  await axe(p, "スタンプカード", `document.getElementById("room-btn").click(); document.getElementById("tab-stamp").click()`);
-  await p.ev(`document.getElementById("diary").close()`);
-  await axe(p, "ぼうし アトリエ", `atelier.open()`);
-  await p.ev(`document.querySelector("dialog.atelier").close()`);
-  await axe(p, "カセット えらび", `document.getElementById("cassette-btn").click()`);
-  await p.ev(`document.getElementById("cassette").close()`);
-  await axe(p, "ピクセの てがみ", `room.open("diary"); letter.letters().unshift({ week: "2026-10-18", from: "2026-10-12", lines: letter.write().lines, unread: false }); letter.read("2026-10-18")`);
-  await p.ev(`document.getElementById("letter").close(); document.getElementById("diary").close()`);
-  await axe(p, "WARPIX カード（でる しゅんかん）", `cards.show({ kind: "lucky", tier: "gold", date: "2026-11-01", line: "きんいろの ひかり" }).then(() => document.querySelector(".card-flip").click())`);
-  await p.ev(`document.querySelector(".card-reveal-close")?.click()`);
-  await axe(p, "きゅうけい（とおくを みる）", `rest.lookFar()`);
-  await p.ev(`document.querySelector(".rest-stop").click()`);
+  await axe(p, "グループを つくる", `groups.openGroupDialog()`);
+  await p.ev(`document.getElementById("group-dialog").close()`);
+  await p.ev(`(() => { const g = groups.addGroup("すきなバンド"); ["公式サイト", "YouTube", "Spotify", "ライブ情報", "X"].forEach((n, i) => groups.addLink(g.id, { url: "example" + i + ".com", name: n })); groups.addGroup("しごと"); groups.render(); warpLog.record({ url: "https://example0.com/", name: "公式サイト", group: "すきなバンド" }); })()`);
+  await axe(p, "リンクの 画面（よる）");
+  for (const sky of ["day", "evening"]) await axe(p, `リンクの 画面（${sky === "day" ? "ひる" : "ゆうがた"}）`, `settings.set({ sky: "${sky}" })`);
+  await axe(p, "リンクを ついか", `groups.openLinkDialog()`);
+  await p.ev(`document.getElementById("link-dialog").close()`);
+  await axe(p, "グループを へんしゅう", `groups.openEditDialog()`);
+  await p.ev(`document.getElementById("edit-dialog").close()`);
   await axe(p, "おしらせ", `mail.open()`);
   await p.ev(`document.getElementById("mail").close()`);
-  await axe(p, "ピクセの へや", `room.open("home")`);
-  await axe(p, "クローゼット", `room.open("hat")`);
-  await p.ev(`document.getElementById("diary").close()`);
-  await p.goto(`${server.url}?simple=1`);
-  await axe(p, "シンプルモード");
+  for (const [tab, label] of [["log", "きろく"], ["sky", "背景"], ["bgm", "BGM"], ["move", "ひっこし"], ["about", "アプリ"]]) {
+    await axe(p, `せってい：${label}`, `gear.open("${tab}")`);
+    await p.ev(`document.getElementById("gear").close()`);
+  }
   await closeAll();
-}
-
-// ---------- 5. ピクセの つぶやきの のこり（v1.66.3） ----------
-// つぶやきは 1 日 1 こ、1 かい きり。きれる まえに tsubuyaki.js の LIST の うしろへ たす
-{
-  const { readFileSync } = await import("node:fs");
-  const t = new Function(`${readFileSync(new URL("../tsubuyaki.js", import.meta.url), "utf8")}; return tsubuyaki;`)();
-  const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
-  const last = t.lastDay();
-  const left = Math.round((Date.parse(last) - Date.parse(today)) / 86400000);
-  log("\n## ピクセの つぶやき（1 日 1 こ、1 かい きり）");
-  log(`- ${t.LIST.length} こ。${last} まで もつ（あと ${left} にち）${left < 30 ? "  ⚠️ もうすぐ きれる。LIST の うしろに たして" : ""}`);
 }
 
 await server.close();

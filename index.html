@@ -2,15 +2,15 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>WARPIX LINK</title>
-  <meta name="description" content="いつものアプリを、ちょっと楽しくひらく入口。ピクセが まってる、ドットの リンク集。ピクセルアート・レトロゲーム・チップチューンの せかいで、リンクを えらぶと その せかいへ ワープ。">
+  <meta name="description" content="よく行くサイトをグループにまとめて、ワンタップでワープ。ドット絵のピクセが まってる リンクアプリ。">
 
   <!-- リンクを共有したときのカード（X・Discord・LINE など）。画像の元は tools/og-card.html -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="WARPIX LINK">
   <meta property="og:title" content="WARPIX LINK">
-  <meta property="og:description" content="いつものアプリを、ちょっと楽しくひらく入口。ピクセが まってる、ドットの リンク集。リンクを えらぶと その せかいへ ワープ。">
+  <meta property="og:description" content="よく行くサイトをグループにまとめて、ワンタップでワープ。ドット絵のピクセが まってる リンクアプリ。">
   <meta property="og:url" content="https://link.warpix.app/">
   <meta property="og:image" content="https://link.warpix.app/og.png">
   <meta property="og:image:width" content="1200">
@@ -43,604 +43,245 @@
   <link rel="apple-touch-startup-image" href="icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
   <meta name="theme-color" content="#0f0b1e">
   <link rel="stylesheet" href="style.css">
-  <script>
-    document.documentElement.classList.add("js");
-    // シンプルモード（リンクだけの静かなページ）。?simple=1 か、前回えらんだ設定で、描く前に切りかえる
-    try {
-      if (new URLSearchParams(location.search).has("simple") || localStorage.getItem("warpix-simple") === "on") {
-        document.documentElement.classList.add("simple");
-      }
-      // せってい：動きを減らす・よみやすい もじ（描く前に切りかえる）
-      const settings = JSON.parse(localStorage.getItem("warpix-settings") || "{}");
-      if (settings.motion === "reduce") document.documentElement.classList.add("reduce-motion");
-      if (settings.font === "plain") document.documentElement.classList.add("plain-font");
-      // はじめての 人か（せつめいしょ manual.js、v1.48）。warpix- の きろくが ひとつも なく、ひっこしで きた のでも ない
-      window.WARPIX_FIRST = !location.hash.startsWith("#move=") && !Object.keys(localStorage).some((k) => k.startsWith("warpix-"));
-      // ひっこしで とどいた きろく（#move=…、move.js）。ほかの スクリプトが かきこむ まえに、もう きろくが あったかを みておく
-      if (location.hash.startsWith("#move=")) {
-        window.WARPIX_MOVE_IN = { code: location.hash.slice(6), had: Object.keys(localStorage).some((k) => k.startsWith("warpix-")) };
-        history.replaceState(null, "", location.pathname + location.search);
-      }
-    } catch {}
-  </script>
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
-  <!-- ひらいた ときの「テレビの スイッチ」（style.css の .tv-on、v1.47.3） -->
-  <div class="tv-on" aria-hidden="true"><i></i></div>
-  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+  <!-- 空（ひる・ゆうがた・よる は ⚙️ の 背景で えらぶ。html の data-sky） -->
+  <div class="sky" id="sky" aria-hidden="true"></div>
 
-  <section class="start-screen" id="start-screen" aria-label="スタート" hidden>
-    <!-- ひとことで なにの アプリか（v1.48、おたより #4）。宣伝文・せつめいしょ・このページについて と おなじ ことば -->
-    <p class="start-tagline"><span>いつものアプリを、</span><span>ちょっと楽しくひらく入口。</span></p>
-    <button class="start-btn" id="start-btn" type="button">PRESS START</button>
-    <p class="start-hint">CLICK OR PRESS ENTER</p>
-    <p class="start-hi">HI-SCORE <span data-hiscore>000000</span></p>
-  </section>
-
-  <aside class="hud" aria-label="スコアと きろく">
-    <span>SCORE <b data-score>000000</b></span>
-    <span>HI <b data-hiscore>000000</b></span>
-    <span class="online-count" id="online-count" hidden>ONLINE <b>1</b></span>
-    <!-- ピクセの おへや：つぶやき・ずかん・スタンプ・じっせき・ぼうしが ぜんぶ ここに -->
-    <button class="room-btn" id="room-btn" type="button">
-      <span class="room-icon" aria-hidden="true"></span><span class="sr-only">ピクセの おへや</span><span aria-hidden="true">ROOM</span>
-      <span class="room-trophy"><span class="trophy-mini" data-trophy></span><span class="sr-only">じっせき</span><span id="trophy-count">0/0</span></span><span class="diary-new" hidden>NEW</span>
-    </button>
-  </aside>
-
-  <div class="toast" id="toast" role="status" hidden>
-    <span class="toast-icon" data-trophy></span>
-    <span class="toast-body">
-      <small>ACHIEVEMENT UNLOCKED</small>
-      <b class="toast-name"></b>
-    </span>
-  </div>
-
-  <dialog class="diary" id="diary" aria-labelledby="diary-title">
-    <div class="diary-top">
-      <button class="room-back" id="room-back" type="button" hidden>◀ へや</button>
-      <h2 id="diary-title">ピクセの おへや</h2>
-      <span class="diary-tools">
-        <button type="button" class="postcard-btn" id="postcard-btn">ポストカード</button>
-      </span>
-      <button class="diary-close" id="diary-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="diary-bar">
-      <div class="diary-tabs" role="tablist" aria-label="おへやの ページ">
-        <button type="button" class="diary-tab" role="tab" id="tab-home" data-tab="home" aria-selected="false" aria-controls="room-scene">へや</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-diary" data-tab="diary" aria-selected="true" aria-controls="diary-body">つぶやき</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-letters" data-tab="letters" aria-selected="false" aria-controls="letters-body">てがみ</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-cards" data-tab="cards" aria-selected="false" aria-controls="cards-body">WARPIX カード</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-zukan" data-tab="zukan" aria-selected="false" aria-controls="zukan-body">ずかん</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-stamp" data-tab="stamp" aria-selected="false" aria-controls="stamp-body">スタンプ</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-trophy" data-tab="trophy" aria-selected="false" aria-controls="trophy-body">じっせき</button>
-        <button type="button" class="diary-tab" role="tab" id="tab-hat" data-tab="hat" aria-selected="false" aria-controls="hat-body">クローゼット</button>
+  <main class="app">
+    <header class="bar">
+      <button class="px-btn icon-btn" id="gear-btn" type="button" aria-label="せってい" aria-haspopup="dialog"><span class="glyph" data-glyph="gear"></span></button>
+      <h1 class="logo"><span class="sr-only">WARPIX LINK</span><span aria-hidden="true">WARPIX<span class="logo-dash">-</span>LINK</span></h1>
+      <div class="bar-right">
+        <button class="px-btn icon-btn mail-btn" id="mail-btn" type="button" aria-label="おしらせ" aria-haspopup="dialog"><span class="glyph" data-glyph="mail"></span><span class="mail-dot" hidden></span></button>
+        <button class="px-btn icon-btn" id="add-group" type="button" aria-label="グループを ついか" aria-haspopup="dialog"><span class="glyph plus" data-glyph="plus"></span></button>
       </div>
-    </div>
-    <!-- ページは長くてスクロールするので、キーボードでも選んでスクロールできるよう tabindex をつける -->
-    <!-- ピクセの へや（v1.57）：ROOM を ひらくと まず ここ。もの を おすと それぞれの ページへ -->
-    <div class="diary-body room-scene" id="room-scene" role="tabpanel" aria-labelledby="tab-home" hidden></div>
-    <div class="diary-body" id="diary-body" role="tabpanel" aria-labelledby="tab-diary" tabindex="0"></div>
-    <div class="diary-body" id="letters-body" role="tabpanel" aria-labelledby="tab-letters" tabindex="0" hidden></div>
-    <div class="diary-body" id="cards-body" role="tabpanel" aria-labelledby="tab-cards" tabindex="0" hidden></div>
-    <div class="diary-body zukan-body" id="zukan-body" role="tabpanel" aria-labelledby="tab-zukan" tabindex="0" hidden></div>
-    <div class="diary-body stamp-body" id="stamp-body" role="tabpanel" aria-labelledby="tab-stamp" tabindex="0" hidden></div>
-    <!-- じっせきと ぼうしは、ゲームの がめんみたいな こい いろの ページ -->
-    <div class="diary-body room-dark trophy-body" id="trophy-body" role="tabpanel" aria-labelledby="tab-trophy" tabindex="0" hidden>
-      <h3 class="room-sub">ACHIEVEMENTS <span id="trophies-count"></span></h3>
-      <ul class="trophy-list" id="trophy-list"></ul>
-      <section class="world-record" id="world-record" aria-labelledby="world-record-title" hidden>
-        <h3 id="world-record-title">WORLD RECORD</h3>
-        <dl>
-          <dt>せかいで ピクセが つつかれた かいすう</dt><dd data-counter="pokes">-</dd>
-          <dt>せかいで ワープした かいすう</dt><dd data-counter="warps">-</dd>
-          <dt>せかいで おとされた UFO</dt><dd data-counter="ufos">-</dd>
-          <dt>つぎの しゅうらいの よる</dt><dd id="raid-next">--</dd>
-        </dl>
-        <!-- しゅうらいの よるの きねんしゃしん（v1.42 は せいざ、v1.66.1 から はなび。id は まえの まま） -->
-        <div class="seiza-list" id="seiza-list" hidden>
-          <h4>しゅうらいの よるの きねんしゃしん</h4>
-          <ul class="seiza-items"></ul>
-        </div>
-      </section>
-      <form class="cheat-form" id="cheat-form" autocomplete="off">
-        <label for="cheat-input">CHEAT CODE</label>
-        <div class="cheat-row">
-          <input id="cheat-input" type="text" inputmode="latin" autocapitalize="off" spellcheck="false" maxlength="12" placeholder="????">
-          <button type="submit">ENTER</button>
-        </div>
-        <p class="cheat-msg" id="cheat-msg" aria-live="polite"></p>
-      </form>
-    </div>
-    <div class="diary-body room-dark hat-body" id="hat-body" role="tabpanel" aria-labelledby="tab-hat" tabindex="0" hidden>
-      <!-- クローゼット（v1.57）：おすと おおきな ピクセが ためしに きる。「これに する」で きまり -->
-      <section class="wardrobe closet" aria-labelledby="wardrobe-title">
-        <h3 id="wardrobe-title" class="sr-only">クローゼット</h3>
-        <div class="closet-stage">
-          <div class="closet-preview" id="closet-preview"></div>
-          <p class="closet-name" id="closet-name" aria-live="polite"></p>
-          <!-- でどころ（v1.66）：てに はいった ものが どこから きたか。プレゼントの はこ が できるまでの つなぎ -->
-          <p class="closet-from" id="closet-from"></p>
-          <div class="closet-colors" id="closet-colors" role="group" aria-label="いろ"></div>
-          <button type="button" class="save-btn closet-decide" id="closet-decide" hidden>これに する</button>
-        </div>
-        <div class="closet-kinds" id="closet-kinds" role="group" aria-label="ぶんるい"></div>
-        <div class="wardrobe-list" id="closet-list"></div>
-        <button type="button" class="atelier-btn" id="atelier-btn">＋ ぼうしを つくる</button>
-      </section>
-    </div>
-  </dialog>
+    </header>
 
-  <div class="game" id="game" role="dialog" aria-label="ミニゲーム PIXE INVADERS" hidden>
-    <div class="game-head">
-      <span>PIXE INVADERS</span>
-      <button class="game-close" id="game-close" type="button">✕ ESC</button>
-    </div>
-    <canvas class="game-canvas" id="game-canvas" tabindex="0"></canvas>
-    <p class="game-help">← → か ドラッグで いどう ・ ショットは じどう</p>
-  </div>
-
-  <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">BGM ON</button>
-  <button class="simple-toggle" id="simple-toggle" type="button"></button>
-  <!-- おしらせ（v1.59）：WARPIX製作所からの メールボックス -->
-  <button class="mail-btn" id="mail-btn" type="button" aria-haspopup="dialog" aria-label="おしらせ"></button>
-
-  <button class="moon" id="moon" type="button" aria-label="きょうの つき"></button>
-
-  <main class="screen">
-    <h1 class="title"><span class="sr-only">WARPIX LINK</span><span aria-hidden="true">WARPIX<span class="title-dash">-</span>LINK</span></h1>
-    <p class="subtitle">PRESS A LINK TO WARP<span class="cursor">_</span></p>
-
-    <section class="npc" aria-label="ナビゲーター">
-      <button class="npc-sprite" id="npc" type="button" aria-label="ナビゲーターのピクセルをつつく">
-        <span class="npc-body" id="npc-body"></span>
-      </button>
-      <div class="dialog" id="dialog" role="status">
-        <p class="dialog-text" id="dialog-text"></p>
-        <span class="dialog-next" aria-hidden="true">▼</span>
-      </div>
+    <section class="pixe-area" aria-label="ナビゲーター">
+      <button class="pixe" id="pixe" type="button" aria-label="ピクセを つつく"><span class="pixe-body" id="pixe-body"></span></button>
+      <p class="bubble" id="bubble" role="status"></p>
     </section>
 
-    <nav class="links">
-      <a class="pixel-btn" href="https://www.youtube.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="youtube"></span>YOUTUBE<span class="sr-only">（あたらしい タブで ひらく）</span>
-      </a>
-      <a class="pixel-btn" href="https://x.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="twitter"></span>TWITTER<small class="link-sub">(X)</small><span class="sr-only">（あたらしい タブで ひらく）</span>
-      </a>
-      <a class="pixel-btn" href="https://www.instagram.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="instagram"></span>INSTAGRAM<span class="sr-only">（あたらしい タブで ひらく）</span>
-      </a>
-      <a class="pixel-btn" href="https://booth.pm/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="booth"></span>BOOTH<span class="sr-only">（あたらしい タブで ひらく）</span>
-      </a>
-      <a class="pixel-btn" href="https://www.tumblr.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="tumblr"></span>TUMBLR<span class="sr-only">（あたらしい タブで ひらく）</span>
-      </a>
-      <a class="pixel-btn" href="https://open.spotify.com/" target="_blank" rel="noopener">
-        <span class="arrow">▶</span><span class="icon" data-icon="spotify"></span>SPOTIFY<span class="sr-only">（あたらしい タブで ひらく）</span>
-      </a>
-      <!-- ひみつの ワープゾーン：おすと アプリの なかの「ひみつの こうじょう」へ（kojo.js、v1.43）。href は スクリプトが ない とき だけ -->
-      <a class="pixel-btn secret" id="secret-link" href="#" hidden>
-        <span class="arrow">▶</span><span class="icon" data-icon="key"></span>WARP ZONE<span class="sr-only">（ひみつの こうじょうへ）</span>
-      </a>
-    </nav>
-    <!-- パーティ きりかえ（v1.56）：パーティが 2 つ いじょう ある とき だけ でる。じぶんで きりかえる。v1.58 で リンクの したへ（リンクの いちを もとに もどす） -->
-    <div class="party-bar" id="party-bar" hidden>
-      <button class="party-arrow" id="party-prev" type="button" aria-label="まえの パーティ">◀</button>
-      <span class="party-name" id="party-name" aria-live="polite"></span>
-      <button class="party-arrow" id="party-next" type="button" aria-label="つぎの パーティ">▶</button>
-    </div>
-    <!-- リンクの へんせい（v1.56）：いれかえる・パーティを ふやす・なまえ・けす -->
-    <button class="cassette-btn" id="cassette-btn" type="button" aria-haspopup="dialog">⇄ リンクの へんせい</button>
+    <!-- グループが ない とき：まんなかに おおきく -->
+    <section class="empty" id="empty" hidden>
+      <button class="px-btn empty-add" id="empty-add" type="button" aria-haspopup="dialog">＋ グループを つくる</button>
+      <p class="empty-note">よく行くサイトを、グループにまとめて<br>ワンタップでワープできます</p>
+    </section>
 
-    <footer class="footer">
-      <!-- 上の段：遊ぶもの（2 つで 1 組をまんなかに） -->
-      <div class="footer-play">
-        <button class="coin-slot" id="coin-slot" type="button">INSERT COIN</button>
-        <button class="omikuji-btn" id="omikuji-btn" type="button">おみくじ</button>
+    <div class="group-bar" id="group-bar" hidden>
+      <button class="px-btn arrow-btn" id="group-prev" type="button" aria-label="まえの グループ"><span class="glyph arrow" data-glyph="left"></span></button>
+      <div class="group-box">
+        <div class="group-head">
+          <h2 class="group-title" id="group-title"></h2>
+          <div class="group-dots" id="group-dots" role="img"></div>
+        </div>
+        <button class="group-edit" id="group-edit" type="button" aria-label="グループを へんしゅう" aria-haspopup="dialog"><span class="glyph pencil" data-glyph="pencil"></span></button>
       </div>
-      <!-- 下の段：お知らせ -->
-      <div class="footer-info">
-        <button class="about-btn" id="about-btn" type="button">このページについて</button>
-        <span class="sep-settings" aria-hidden="true">・</span>
-        <button class="settings-btn" id="settings-btn" type="button">せってい</button>
-      </div>
-      <!-- いちばん下：どこの 製品か -->
-      <p class="footer-maker">© 2026 WARPIX製作所</p>
-    </footer>
+      <button class="px-btn arrow-btn" id="group-next" type="button" aria-label="つぎの グループ"><span class="glyph arrow" data-glyph="right"></span></button>
+    </div>
+
+    <nav class="links" id="links" hidden></nav>
   </main>
 
-  <dialog class="composer" id="composer" aria-labelledby="composer-title">
-    <div class="composer-top">
-      <h2 id="composer-title">ピクセと さっきょく</h2>
-      <button class="composer-close" id="composer-close" type="button" aria-label="閉じる">✕</button>
+  <!-- ===== まど ===== -->
+
+  <!-- せつめいしょ（はじめての 人だけ。⚙️ の アプリ から もう いちど） -->
+  <dialog class="win" id="manual" aria-labelledby="manual-title">
+    <h2 class="win-title" id="manual-title">WARPIX LINK へ ようこそ</h2>
+    <ol class="steps">
+      <li><span class="step-n">1</span><div><b>右上の ＋ でグループをつくる</b><p>「すきなバンド」「しごと」など、まとめたい名前をつけます（12 文字まで）。</p></div></li>
+      <li><span class="step-n">2</span><div><b>「＋ リンクを ついか」でリンクを入れる</b><p>URL をはるだけ。1 つのグループに 12 こまで入ります。</p></div></li>
+      <li><span class="step-n">3</span><div><b>おすと、ピクセといっしょにワープ</b><p>◀ ▶ でグループを切りかえ。左上の 歯車で、ワープのきろくや背景をえらべます。</p></div></li>
+    </ol>
+    <button class="px-btn wide pink" id="manual-start" type="button">はじめる</button>
+  </dialog>
+
+  <!-- グループを つくる -->
+  <dialog class="win" id="group-dialog" aria-labelledby="group-dialog-title">
+    <form id="group-form" novalidate>
+      <h2 class="win-title" id="group-dialog-title">あたらしい グループ</h2>
+      <label class="field-label" for="group-name">グループの名前 <span class="req">（ひっす）</span></label>
+      <input class="field" id="group-name" type="text" maxlength="12" placeholder="れい：すきなバンド" autocomplete="off" enterkeyhint="done">
+      <p class="field-note" id="group-count">0 / 12 文字</p>
+      <p class="field-error" id="group-error" role="alert" hidden>グループの名前を いれてください</p>
+      <div class="win-btns">
+        <button class="px-btn" id="group-cancel" type="button">やめる</button>
+        <button class="px-btn pink" type="submit">つくる</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- リンクを ついか・なおす -->
+  <dialog class="win" id="link-dialog" aria-labelledby="link-title">
+    <form id="link-form" novalidate>
+      <div class="win-head">
+        <h2 class="win-title" id="link-title">リンクを ついか</h2>
+        <span class="win-sub" id="link-group"></span>
+      </div>
+      <label class="field-label" for="link-url">URL <span class="req">（ひっす）</span></label>
+      <input class="field" id="link-url" type="url" inputmode="url" placeholder="https://" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <p class="field-error" id="link-error" role="alert" hidden>URL を いれてください（れい：https://example.com）</p>
+      <label class="field-label" for="link-name">名前</label>
+      <input class="field" id="link-name" type="text" maxlength="16" placeholder="なしなら サイトの名前になります" autocomplete="off" enterkeyhint="done">
+      <div class="preview" id="link-preview" hidden>
+        <span>こう見えます</span>
+        <span class="preview-tile"><span class="tile-icon" aria-hidden="true"></span><span class="tile-name"></span></span>
+      </div>
+      <div class="win-btns">
+        <button class="px-btn" id="link-cancel" type="button">やめる</button>
+        <button class="px-btn pink" id="link-save" type="submit">ついか</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- グループを へんしゅう（✏️） -->
+  <dialog class="win" id="edit-dialog" aria-labelledby="edit-title">
+    <form id="edit-form" novalidate>
+      <h2 class="win-title" id="edit-title">グループを へんしゅう</h2>
+      <label class="field-label" for="edit-name">グループの名前 <span class="req">（ひっす）</span></label>
+      <div class="field-row">
+        <input class="field" id="edit-name" type="text" maxlength="12" autocomplete="off" enterkeyhint="done">
+        <button class="px-btn pink" type="submit">ほぞん</button>
+      </div>
+      <p class="field-error" id="edit-error" role="alert" hidden>グループの名前を いれてください</p>
+    </form>
+    <h3 class="win-h3" id="edit-count">リンク</h3>
+    <ul class="edit-links" id="edit-links"></ul>
+    <h3 class="win-h3">グループの じゅんばん</h3>
+    <div class="win-btns">
+      <button class="px-btn" id="edit-prev" type="button">◀ まえへ</button>
+      <button class="px-btn" id="edit-next" type="button">うしろへ ▶</button>
     </div>
-    <div class="composer-body">
-      <canvas class="roll" id="roll" tabindex="0" role="application" aria-label="ピアノロール。やじるしキーで うごかして、スペースで おとを おく・けす" aria-describedby="roll-status"></canvas>
-      <p class="roll-status" id="roll-status" aria-live="polite"></p>
-      <div class="composer-row">
-        <button type="button" class="c-btn c-main" id="compose-play">▶ きく</button>
-        <button type="button" class="c-btn" id="compose-pixe">ピクセに まかせる</button>
-        <button type="button" class="c-btn" id="compose-clear">けす</button>
-      </div>
-      <div class="composer-row">
-        <label class="c-label">コード <select id="compose-chord"></select></label>
-        <span class="c-label">テンポ
-          <button type="button" class="c-btn c-small" id="compose-slower" aria-label="おそく">−</button>
-          <b id="compose-bpm">140</b>
-          <button type="button" class="c-btn c-small" id="compose-faster" aria-label="はやく">＋</button>
-        </span>
-      </div>
-      <p class="composer-msg" id="composer-msg" aria-live="polite"></p>
-      <div class="composer-row">
-        <button type="button" class="c-btn c-save" id="compose-save">これを BGM に する</button>
-        <button type="button" class="c-btn" id="compose-share">シェア</button>
-        <button type="button" class="c-btn" id="compose-reset">もとの BGM に もどす</button>
-      </div>
-      <section class="shelf" aria-labelledby="shelf-title">
-        <div class="shelf-top">
-          <h3 id="shelf-title">レコードだな</h3>
-          <button type="button" class="c-btn" id="shelf-add">たなに しまう</button>
+    <button class="px-btn wide" id="edit-close" type="button">とじる</button>
+    <button class="text-btn danger" id="edit-delete" type="button">この グループを けす</button>
+  </dialog>
+
+  <!-- おしらせ -->
+  <dialog class="win mail" id="mail" aria-labelledby="mail-title">
+    <div class="win-head">
+      <h2 class="win-title" id="mail-title">おしらせ</h2>
+      <button class="px-btn close-btn" id="mail-close" type="button" aria-label="とじる">✕</button>
+    </div>
+    <ul class="mail-list" id="mail-list"></ul>
+    <div class="mail-read" id="mail-read" hidden></div>
+    <button class="px-btn" id="mail-back" type="button" hidden>◀ いちらんへ</button>
+  </dialog>
+
+  <!-- ⚙️ せってい -->
+  <dialog class="gear" id="gear" aria-labelledby="gear-title">
+    <div class="gear-head">
+      <h2 class="gear-title" id="gear-title">せってい</h2>
+      <button class="px-btn close-btn" id="gear-close" type="button" aria-label="とじる">✕</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="せってい">
+      <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="panel-log" aria-selected="true">きろく</button>
+      <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="false" tabindex="-1">背景</button>
+      <button type="button" role="tab" id="tab-bgm" data-tab="bgm" aria-controls="panel-bgm" aria-selected="false" tabindex="-1">BGM</button>
+      <button type="button" role="tab" id="tab-move" data-tab="move" aria-controls="panel-move" aria-selected="false" tabindex="-1">ひっこし</button>
+      <button type="button" role="tab" id="tab-about" data-tab="about" aria-controls="panel-about" aria-selected="false" tabindex="-1">アプリ</button>
+    </div>
+    <div class="panels">
+
+      <section class="panel" id="panel-log" role="tabpanel" aria-labelledby="tab-log">
+        <div class="seg">
+          <button type="button" data-range="today" aria-pressed="false">きょう</button>
+          <button type="button" data-range="week" aria-pressed="true">こんしゅう</button>
+          <button type="button" data-range="month" aria-pressed="false">こんげつ</button>
+          <button type="button" data-range="all" aria-pressed="false">ぜんぶ</button>
         </div>
-        <ol class="shelf-list" id="shelf-list"></ol>
-        <p class="shelf-empty" id="shelf-empty">まだ からっぽ。つくった きょくを「たなに しまう」と、ここに ならぶよ。</p>
+        <div class="log-sum">
+          <div><p class="log-label" id="log-label">こんしゅうの ワープ</p><p class="log-total"><span id="log-total">0</span><small> かい</small></p></div>
+          <p class="log-top-wrap">いちばん<br><b id="log-top">—</b></p>
+        </div>
+        <div class="log-week" id="log-week">
+          <h3 class="panel-h3">ようびごと</h3>
+          <div class="bars" id="log-week-bars" role="img"></div>
+        </div>
+        <h3 class="panel-h3">よく行ったサイト</h3>
+        <ol class="rank" id="log-rank"></ol>
+        <p class="panel-note">きろくは このスマホの中だけにあって、どこにも送りません。</p>
+        <button class="text-btn danger" id="log-clear" type="button">きろくを けす</button>
       </section>
-    </div>
-  </dialog>
 
-  <!-- ピクセの てがみ（v1.33）。なかみは letter.js が かく -->
-  <dialog class="letter" id="letter" aria-label="ピクセからの てがみ">
-    <button class="letter-close" id="letter-close" type="button" aria-label="閉じる">✕</button>
-    <div class="letter-body" id="letter-body"></div>
-  </dialog>
-
-  <dialog class="about cassette" id="cassette" aria-labelledby="cassette-title">
-    <div class="about-top">
-      <h2 id="cassette-title">カセット えらび</h2>
-      <button class="about-close" id="cassette-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <p class="about-note">リンクは いつも 6 こ。いれかえる ばしょを えらんで、たなの カセットを おしてね。</p>
-      <!-- いまの 6 こは、たなを スクロールしても うえに みえている -->
-      <div class="cas-head">
-        <ol class="cas-slots" id="cas-slots" aria-label="いまの リンク"></ol>
-        <p class="cas-msg" id="cas-msg" aria-live="polite"></p>
-      </div>
-      <div class="cas-shelves" id="cas-shelves"></div>
-      <div class="save-row cas-tools">
-        <button class="save-btn cas-reset" id="cas-reset" type="button">さいしょの 6 こに もどす</button>
-      </div>
-    </div>
-  </dialog>
-
-  <!-- じぶんの リンク（v1.61）：なまえ・アドレス・アイコン -->
-  <dialog class="about mylink" id="mylink" aria-labelledby="mylink-title">
-    <div class="about-top">
-      <h2 id="mylink-title">じぶんの リンクを つくる</h2>
-      <button class="about-close" id="mylink-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <form class="mylink-form" id="mylink-form" novalidate>
-        <label for="mylink-name">なまえ（10 もじ まで）</label>
-        <input id="mylink-name" type="text" maxlength="10" autocomplete="off">
-        <label for="mylink-url">アドレス（https:// で はじまる もの）</label>
-        <input id="mylink-url" type="url" inputmode="url" autocomplete="off" spellcheck="false">
-        <p class="mylink-label" id="mylink-icon-label">アイコン</p>
-        <div class="mylink-icons" id="mylink-icons" role="group" aria-labelledby="mylink-icon-label"></div>
-        <p class="mylink-msg" id="mylink-msg" aria-live="polite"></p>
-        <div class="save-row">
-          <button class="save-btn" type="submit">きめる</button>
-          <button class="save-btn hensei-remove" id="mylink-delete" type="button" hidden>この リンクを けす</button>
+      <section class="panel" id="panel-sky" role="tabpanel" aria-labelledby="tab-sky" hidden>
+        <p>すきな空を えらんでください。</p>
+        <div class="sky-cards">
+          <button type="button" class="sky-card" data-sky="day" aria-pressed="false"><span class="sky-thumb day"></span><b>ひる</b></button>
+          <button type="button" class="sky-card" data-sky="evening" aria-pressed="false"><span class="sky-thumb evening"></span><b>ゆうがた</b></button>
+          <button type="button" class="sky-card" data-sky="night" aria-pressed="false"><span class="sky-thumb night"></span><b>よる</b></button>
         </div>
-        <p class="about-note">この ブラウザの なか だけに のこります。どこにも おくりません。</p>
-      </form>
-    </div>
-  </dialog>
+        <p class="panel-note">ピクセの服は、季節やイベントの日に 自動で着がえます。</p>
+      </section>
 
-  <!-- リンクの へんせい（v1.56）：パーティの メニュー -->
-  <dialog class="about hensei" id="hensei" aria-labelledby="hensei-title">
-    <div class="about-top">
-      <h2 id="hensei-title">リンクの へんせい</h2>
-      <button class="about-close" id="hensei-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <p class="hensei-now" id="hensei-now"></p>
-      <div class="hensei-menu">
-        <button class="save-btn" id="hensei-swap" type="button">リンクを いれかえる</button>
-        <button class="save-btn" id="hensei-add" type="button">パーティを ふやす</button>
-        <button class="save-btn" id="hensei-rename" type="button" hidden>なまえを かえる</button>
-        <button class="save-btn hensei-remove" id="hensei-remove" type="button" hidden>この パーティを けす</button>
-      </div>
-      <form class="hensei-name" id="hensei-name" hidden>
-        <label for="hensei-input">あたらしい なまえ（10 もじ まで。からっぽなら PARTY と ばんごう）</label>
-        <input id="hensei-input" type="text" maxlength="10" autocomplete="off">
-        <button class="save-btn" type="submit">きめる</button>
-      </form>
-      <p class="hensei-msg" id="hensei-msg" aria-live="polite"></p>
-    </div>
-  </dialog>
+      <section class="panel" id="panel-bgm" role="tabpanel" aria-labelledby="tab-bgm" hidden>
+        <div class="switch-row"><span id="bgm-label">BGM</span><button type="button" class="switch" id="bgm-switch" role="switch" aria-checked="true" aria-labelledby="bgm-label">ON</button></div>
+        <div class="switch-row"><span id="se-label">効果音</span><button type="button" class="switch" id="se-switch" role="switch" aria-checked="true" aria-labelledby="se-label">ON</button></div>
+        <label class="volume-row">おおきさ<input type="range" id="volume" min="0" max="100" step="5" value="60"></label>
+        <h3 class="panel-h3" id="song-label">曲を えらぶ</h3>
+        <div class="songs" role="radiogroup" aria-labelledby="song-label">
+          <button type="button" class="song" role="radio" data-song="usual" aria-checked="true"><b>いつもの</b><span>ずっと ながれていた 8 ビットの 曲</span></button>
+          <button type="button" class="song" role="radio" data-song="slow" aria-checked="false"><b>ゆっくり さんぽ</b><span>テンポ おそめ。ぼんやりしたい日に</span></button>
+          <button type="button" class="song" role="radio" data-song="bouncy" aria-checked="false"><b>はずむ ワープ</b><span>テンポ はやめ。気分を あげたい日に</span></button>
+        </div>
+      </section>
 
-  <!-- おしらせ（v1.59）：けんめいの いちらん → しょうさい -->
-  <dialog class="about mail" id="mail" aria-labelledby="mail-title">
-    <div class="about-top">
-      <button class="room-back" id="mail-back" type="button" hidden>◀ いちらん</button>
-      <h2 id="mail-title">おしらせ</h2>
-      <button class="about-close" id="mail-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <ul class="mail-list" id="mail-list"></ul>
-      <div class="mail-read" id="mail-read" hidden></div>
-    </div>
-  </dialog>
+      <section class="panel" id="panel-move" role="tabpanel" aria-labelledby="tab-move" hidden>
+        <h3 class="panel-h3">データの ひっこし</h3>
+        <p>スマホを買いかえたときや、べつのブラウザで使いたいときに。グループ・リンク・ワープのきろく・せっていを、まとめて持っていけます。</p>
+        <button class="px-btn wide cyan" id="move-make" type="button">ひっこし用の コードを つくる</button>
+        <p class="panel-note">いまのスマホで押して、コードをコピーします。</p>
+        <textarea class="field code" id="move-code" rows="3" readonly hidden aria-label="ひっこし用の コード"></textarea>
+        <label class="field-label" for="move-input">あたらしいスマホで、コードを はりつける</label>
+        <textarea class="field code" id="move-input" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+        <button class="px-btn wide" id="move-take" type="button">コードを うけとる</button>
+        <p class="move-msg" id="move-msg" role="status" hidden></p>
+        <p class="panel-note">コードは どこにも送りません。メモアプリやメールで、じぶんに渡してください。iPhone では、ホーム画面のアプリと Safari で データが べつべつです。</p>
+      </section>
 
-  <!-- ピクセの ひっこし（v1.36）：ふるい じゅうしょで ひらいた とき、あたらしい おうちへ さそう -->
-  <dialog class="about move" id="move" aria-labelledby="move-title">
-    <div class="about-top">
-      <h2 id="move-title">ピクセの ひっこし</h2>
-      <button class="about-close" id="move-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <p class="move-text" id="move-text"></p>
-      <p class="move-addr" id="move-addr" hidden></p>
-      <div class="save-row">
-        <button class="save-btn" id="move-yes" type="button"></button>
-        <button class="save-btn move-no" id="move-no" type="button"></button>
-      </div>
-    </div>
-  </dialog>
-
-  <!-- ひみつの こうじょう（v1.43）：ワープゾーンの いきさき -->
-  <dialog class="about kojo" id="kojo" aria-labelledby="kojo-title">
-    <div class="about-top">
-      <h2 id="kojo-title">ひみつの こうじょう</h2>
-      <button class="about-close" id="kojo-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <div class="kojo-blueprint"><div class="kojo-pixe" id="kojo-pixe" aria-hidden="true"></div><p class="kojo-stamp">PIXE / DESIGN No.1</p></div>
-      <div class="kojo-main" id="kojo-main">
-        <p>ピクセ「ようこそ、ワーピックスの ひみつの こうじょうへ！」</p>
-        <p>ここには、WARPIX LINK の <b>かくしコマンド</b> の せっけいずが しまって あるんだ。じぶんで みつけたい ひとは、みないで おいてね。</p>
-        <dl class="keys kojo-facts">
-          <dt>いまの はん</dt><dd id="kojo-version">…</dd>
-          <dt>きみと であって</dt><dd id="kojo-days">-</dd>
-          <dt>きみが ワープした かいすう</dt><dd id="kojo-warps">-</dd>
+      <section class="panel about" id="panel-about" role="tabpanel" aria-labelledby="tab-about" hidden>
+        <h3 class="panel-h3">WARPIX LINK について</h3>
+        <p>よく行くサイトをグループにまとめて、ワンタップでワープできるリンクアプリです。ナビゲーターのピクセが、いつも画面の上で待っています。</p>
+        <dl class="about-list">
+          <dt>グループ</dt><dd>右上の ＋ でつくる。名前や並びは ✏️ でいつでも変えられます</dd>
+          <dt>リンク</dt><dd>1 つのグループに 12 こまで</dd>
+          <dt>きろく</dt><dd>どこに何回ワープしたか、日ごと・週ごとに見られます</dd>
         </dl>
-        <div class="save-row">
-          <button class="save-btn kojo-code" id="kojo-cheats-btn" type="button">かくしコマンドを みる</button>
-          <button class="save-btn move-no" id="kojo-back" type="button">もどる</button>
-        </div>
-      </div>
-      <!-- かくしコマンド集（v1.58）：みたい ひと だけ。まえは ソースコード（GitHub）を みせて いた -->
-      <div class="kojo-cheats" id="kojo-cheats" hidden>
-        <p class="about-note">パソコンは キーボードで そのまま うつ。スマホは ROOM の トロフィー（じっせき）の したの CHEAT CODE に うつ。</p>
-        <dl class="keys kojo-list" id="kojo-list"></dl>
-        <div class="save-row">
-          <button class="save-btn move-no" id="kojo-cheats-back" type="button">こうじょうに もどる</button>
-        </div>
-      </div>
+        <button class="px-btn wide" id="about-manual" type="button">つかいかたを もういちど見る</button>
+
+        <h3 class="panel-h3">ホーム画面に 入れる</h3>
+        <dl class="about-list">
+          <dt>iPhone</dt><dd>Safari の 共有ボタン（□に↑）→「ホーム画面に追加」</dd>
+          <dt>Android</dt><dd>Chrome の メニュー（︙）→「ホーム画面に追加」</dd>
+        </dl>
+
+        <h3 class="panel-h3">ピクセに おてがみ</h3>
+        <p>感想や「ここ わかりにくい」、バグの報告など、なんでも うれしいです。</p>
+        <a class="px-btn wide" id="otegami" href="mailto:pixe@warpix.app">ピクセに おてがみを書く<span class="sr-only">（メールの アプリが ひらきます）</span></a>
+
+        <h3 class="panel-h3">データに ついて</h3>
+        <p>グループ・リンク・ワープのきろく・せっていは、<b>このブラウザの中だけ</b>に保存して、どこにも送りません。</p>
+        <ul class="about-ul">
+          <li><b>来た人の数</b>：何人・何回来たかだけ、Cloudflare で数えています。だれかは わかりません。</li>
+          <li><b>文字</b>：英字の ドットの文字は Google Fonts から読みこみます。</li>
+        </ul>
+        <p class="panel-note">広告・クッキー・ひとりずつを追いかけるしくみは 使っていません。このページを置いている GitHub Pages も含め、どのサービスも、つなぐときに ふつうは IP アドレスを受けとります。</p>
+
+        <p class="about-credit"><span id="about-version">v2.0</span>　© 2026 <a href="https://warpix.app/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（あたらしい タブで ひらく）</span></a> ／ いっしょに つくった：Claude<br>プログラム・ピクセ・WARPIX の 名前と 絵は WARPIX製作所の ものです（All rights reserved）。</p>
+      </section>
     </div>
   </dialog>
 
-  <dialog class="about settings" id="settings" aria-labelledby="settings-title">
-    <div class="about-top">
-      <h2 id="settings-title">せってい</h2>
-      <button class="about-close" id="settings-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <h3>おと</h3>
-      <label class="set-row" for="set-bgm"><span>BGM の おおきさ</span>
-        <input type="range" id="set-bgm" min="0" max="100" step="10"><output id="set-bgm-out" for="set-bgm">100</output></label>
-      <label class="set-row" for="set-se"><span>こうかおんの おおきさ</span>
-        <input type="range" id="set-se" min="0" max="100" step="10"><output id="set-se-out" for="set-se">100</output></label>
-      <label class="set-check"><input type="checkbox" id="set-voice"> ピクセの こえ（ピクセの セリフを よみあげる）</label>
-      <p class="about-note" id="set-voice-note"></p>
-      <p class="about-note">BGM を けすだけなら、みぎうえの「BGM ON」でも できます。</p>
-
-      <h3>みやすさ</h3>
-      <label class="set-check"><input type="checkbox" id="set-motion"> うごきを へらす（ほしや UFO を とめて、てんめつも しない）</label>
-      <label class="set-check"><input type="checkbox" id="set-font"> よみやすい もじに する（ドットの もじを ふつうの もじに）</label>
-      <p class="about-note" id="settings-note"></p>
-      <p class="about-note">きりかえると、ページを よみなおします。</p>
-
-      <h3>キーそうさ</h3>
-      <dl class="keys">
-        <dt>1 〜 6</dt><dd>その ばんごうの リンクへ ワープ</dd>
-        <dt>Tab ／ Shift+Tab</dt><dd>ボタンや リンクを えらぶ</dd>
-        <dt>Enter ／ スペース</dt><dd>えらんだ ものを おす（さいしょの PRESS START も）</dd>
-        <dt>Esc</dt><dd>まどを とじる・ミニゲームや ぼうけんを やめる</dd>
-        <dt>← → ／ A D</dt><dd>ミニゲームと ぼうけんで いどう</dd>
-        <dt>スペース ／ ↑ ／ W ／ Z</dt><dd>ぼうけんで ジャンプ</dd>
-        <dt>↓ ／ S</dt><dd>ぼうけんで あしばから おりる</dd>
-        <dt>やじるし ＋ スペース</dt><dd>さっきょくの ピアノロールで おとを おく</dd>
-        <dt>コントローラー</dt><dd>じゅうじキーで えらぶ・A で おす・B で とじる・START で じっせき</dd>
-      </dl>
-      <p class="about-note">ひみつの コマンドは……じぶんで さがしてね。</p>
-    </div>
-  </dialog>
-
-  <!-- はじめての 人への とりあつかい せつめいしょ（v1.48、おたより #4・#6）。なかみの うごきと ホーム画面の やりかたは manual.js -->
-  <dialog class="about manual" id="manual" aria-labelledby="manual-title">
-    <div class="about-top">
-      <h2 id="manual-title">とりあつかい せつめいしょ</h2>
-      <span class="manual-page" id="manual-page"></span>
-    </div>
-    <div class="manual-body">
-      <section class="manual-sheet" data-sheet="what">
-        <div class="manual-stage stage-what" aria-hidden="true">
-          <span class="ms-pixe"></span>
-          <span class="ms-links"><span class="ms-btn">YouTube</span><span class="ms-btn">Instagram</span><span class="ms-btn">X</span></span>
-        </div>
-        <h3>これは なに？</h3>
-        <p class="manual-lead"><span>いつものアプリを、</span><span>ちょっと楽しくひらく入口。</span></p>
-        <p>YouTube や Instagram など、いつも使うアプリやサイトを、ここからひらけます。ひらくまでの間に、ピクセとちょっと寄り道できます。</p>
-        <p class="manual-pixe">ピクセ「ゆっくり していってね。」</p>
-      </section>
-      <section class="manual-sheet" data-sheet="how" hidden>
-        <div class="manual-stage stage-how" aria-hidden="true">
-          <span class="ms-pixe"></span>
-          <span class="ms-hole"></span>
-          <span class="ms-btn ms-target">▶ YouTube</span>
-          <span class="ms-cursor"></span>
-          <span class="ms-warp">YouTube へ ワープ！</span>
-        </div>
-        <h3>つかいかた</h3>
-        <ol class="manual-steps">
-          <li>リンクのボタンを押すと、そのアプリやサイトがひらきます。ピクセもワープでついていきます。</li>
-          <li>戻ってくると、ピクセも帰ってきます。</li>
-          <li>ミニゲームやおみくじは寄り道。しなくても大丈夫。</li>
-          <li>ROOMはピクセのへや。光っているものを押すと、着せかえやカレンダーがひらきます。</li>
-        </ol>
-      </section>
-      <!-- リンクは じぶん このみに（v1.63）。まえの「きみが いつも いく せかいは？」は やめた（リンクは つかう ぜんてい、だい 6 かい 会議） -->
-      <section class="manual-sheet" data-sheet="links" hidden>
-        <h3>リンクは じぶん好みに</h3>
-        <ol class="manual-steps">
-          <li>リンクの下の「リンクの へんせい」から、49 この 公式リンクの たなで 好きな 6 こに いれかえられます。</li>
-          <li>「じぶんの リンク」で、好きな ページを 自分で つくれます（なまえ・アドレス・アイコン）。</li>
-          <li>6 この くみあわせ（パーティ）を 3 つまで つくって、きりかえられます。</li>
-        </ol>
-        <p class="manual-pixe">ピクセ「きみの いつもの せかいに、いっしょに いこう。」</p>
-      </section>
-      <section class="manual-sheet" data-sheet="home" hidden>
-        <h3>ホーム画面に入れよう</h3>
-        <p>ホーム画面に入れると、アプリみたいにすぐひらけます。</p>
-        <p class="manual-how" id="manual-how"></p>
-        <button class="save-btn" id="manual-install" type="button" hidden>ホーム画面に入れる</button>
-        <div class="manual-point" id="manual-point" aria-hidden="true" hidden><span class="ms-pixe"></span><span class="manual-arrow">ここ！<br>▼</span></div>
-      </section>
-    </div>
-    <div class="manual-nav">
-      <button class="manual-skip" id="manual-skip" type="button">とばす</button>
-      <button class="manual-back" id="manual-back" type="button" hidden>◀ もどる</button>
-      <button class="manual-next" id="manual-next" type="button">つぎへ ▶</button>
-    </div>
-  </dialog>
-
-  <dialog class="about" id="about" aria-labelledby="about-title">
-    <div class="about-top">
-      <h2 id="about-title">このページについて</h2>
-      <button class="about-close" id="about-close" type="button" aria-label="閉じる">✕</button>
-    </div>
-    <div class="about-body">
-      <p class="manual-lead"><span>いつものアプリを、</span><span>ちょっと楽しくひらく入口。</span></p>
-      <p>いつもの 公式サイトへ、ピクセの いる 空間を とおって ワープする 踏み台リンク集です。ピクセルアートと チップチューンで できています。</p>
-      <button class="save-btn" id="about-manual" type="button">とりあつかい せつめいしょを よむ</button>
-      <button class="save-btn" id="about-prologue" type="button">オープニングを もういちど みる</button>
-
-      <!-- ホームがめんに いれる（v1.37）：いまの きかいの やりかたに しるし -->
-      <h3>ホームがめんに いれる</h3>
-      <p id="home-status"></p>
-      <button class="save-btn" id="home-install" type="button" hidden>ホームがめんに いれる</button>
-      <dl class="keys home-steps" id="home-steps">
-        <dt data-os="ios">iPhone・iPad（Safari）</dt><dd data-os="ios">したの きょうゆうボタン（□に↑）→「ホーム画面に追加」→「追加」</dd>
-        <dt data-os="android">Android（Chrome）</dt><dd data-os="android">みぎうえの メニュー（︙）→「ホーム画面に追加」か「アプリを インストール」</dd>
-        <dt data-os="pc">パソコン（Chrome・Edge）</dt><dd data-os="pc">アドレスバーの みぎはしの インストールの マーク</dd>
-      </dl>
-      <p class="about-note" id="home-ios-note" hidden>iPhone では、ホームがめんの アプリと Safari で きろくが べつべつ です。いまの きろくを アプリに もっていくには、したの「ふっかつの じゅもん」を コピーして、アプリの ほうで はってね。</p>
-
-      <!-- ピクセに おてがみ（v1.47）：メールの アプリで pixe@warpix.app へ。アプリからは なにも おくらない -->
-      <h3>ピクセに おてがみ</h3>
-      <p>かんそう、「ここ わかりにくい」、「こんな せかいにも ワープしたい」、バグの ほうこく。なんでも うれしいよ。</p>
-      <a class="save-btn otegami-btn" id="otegami" href="mailto:pixe@warpix.app">ピクセに おてがみを かく<span class="sr-only">（メールの アプリが ひらきます）</span></a>
-      <p class="about-note">メールの アプリが ひらきます。したがきに いまの 版と きかいの しゅるいが はいって いるので、バグの ときに たすかります（けしても だいじょうぶ）。</p>
-
-      <h3>このブラウザに のこすもの</h3>
-      <p>スコア、じっせき、ピクセの せいちょうと にっき（ゆめや スタンプの ため）、きょうの つぶやきを よんだか、きょうと さいきん 2 しゅうかんの ワープや つついた かず（てがみの ため）、ピクセからの てがみ、えらんだ リンクの カセットと パーティ、じぶんで つくった リンク（なまえ・アドレス・アイコン）、リンクごとの ワープした かず、ぼうしと コスチューム（じぶんで かいた ぼうしも）と クローゼットで みた もの、つくった きょくと レコードだな、ミニゲームの ランキング、きょう みつけた かくれピクセ、よんだ おしらせ、BGM や シンプルモードの せってい、せつめいしょを よんだか、ピクセが さいごに いった あいさつと その じかんたい（あさ・ひる・よる）と きょうの てんきの ひとこと（おなじ ことを くりかえさない ため）、てんきと やく 10km に まるめた ばしょ（ばしょは 1 にち つかいまわして、なんども きかない ため）、ピクセの おさそいへの へんじ（ことわったら しばらく きかない ため）、WARPIX カードと ワープした かず。<br>
-        <strong>この ブラウザの なかだけ</strong>に ほぞんして、どこにも おくりません。</p>
-
-      <h3>そとに おくるもの</h3>
-      <ul>
-        <li><b>てんき</b>：ピクセが きいて「いいよ」と こたえたときだけ。ばしょを <strong>やく 10km に まるめて</strong>、てんきの サービス（Open-Meteo）に おくります。</li>
-        <li><b>おなじ そら・レイド・せかいの きろく</b>：おなじ そらに つながるのは しゅうらいの よる（まいつき さいしょの にちようびの 21:00 まえあと）だけ。<strong>ランダムな ばんごうと ぼうしの しゅるい</strong>、つついた かいすうや ぼうけんの タイム（ピクセ RTA）などを Supabase に おくります。なまえや ばしょ、スコアは おくりません。</li>
-        <li><b>WARPIX カードの かず</b>：はじめて ひらいた とき「1 にん ふえた」、カードを はじめて もらった とき「その ばんごうの カードが 1 まい ふえた」とだけ Supabase に おくります。「この カードを もっている ひと：ぜんたいの なん%」を だす ためです。だれが どの カードを もって いるかは おくりません。</li>
-        <li><b>きた ひとの かず</b>：なんにん・なんかい きたか だけ、Cloudflare で かぞえて います。だれかは わかりません。ここに のこす きろくは おくりません。</li>
-        <li><b>もじ</b>：英字の ドットの もじは Google Fonts から よみこみます（日本語の もじは この サイトに おいています）。</li>
-        <li><b>ピクセの こえ</b>：せっていで オンに した ときだけ、ブラウザの よみあげを つかいます。その きかいの なかの こえを さきに えらびますが、ない ときは ブラウザの 会社の サーバーで よみあげる こえに なり、セリフの もじが そこへ おくられる ことが あります。</li>
-      </ul>
-      <p class="about-note">※ この ページを おいている GitHub Pages も ふくめ、どの サービスも、つなぐ ときに ふつうは あなたの IP アドレスを うけとります。</p>
-
-      <h3>つかっていないもの</h3>
-      <p>こうこく、クッキー、ひとりずつを おいかける しくみは つかっていません。</p>
-
-      <h3>きろくを まもる・ひっこす</h3>
-      <p>きろくは この ブラウザの なかだけに あります。キャッシュを けしたり、iPhone の Safari で ホームがめんに いれずに しばらく ひらかなかったり すると、きえる ことが あります。<br>
-        <b>ふっかつの じゅもん</b>を とっておくと、きえても もどせるし、べつの ブラウザや スマホにも ひっこせます。じゅもんは この ブラウザの なかで つくり、どこにも おくりません。</p>
-      <p class="save-status" id="save-status"></p>
-      <div class="save-row">
-        <button class="save-btn" id="save-copy" type="button">じゅもんを コピー</button>
-        <button class="save-btn" id="save-file" type="button">ファイルに ほぞん</button>
-      </div>
-      <label class="save-label" for="save-input">ふっかつの じゅもん</label>
-      <textarea class="save-input" id="save-input" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
-      <div class="save-row">
-        <button class="save-btn" id="save-load" type="button">ふっかつ する</button>
-        <button class="save-btn" id="save-open" type="button">ファイルから よむ</button>
-        <input type="file" id="save-file-input" accept=".txt,text/plain" hidden>
-      </div>
-      <p class="save-msg" id="save-msg" aria-live="polite"></p>
-
-      <h3>きろくを けす</h3>
-      <p>この ブラウザに のこした きろくを ぜんぶ けして、はじめからに します。</p>
-      <button class="about-reset" id="about-reset" type="button">きろくを ぜんぶ けす</button>
-      <p class="about-reset-msg" id="about-reset-msg" aria-live="polite"></p>
-
-      <p class="about-credit">© 2026 <a href="https://warpix.app/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（あたらしい タブで ひらく）</span></a> ／ いっしょに つくった：Claude<br>
-        プログラム・ピクセ・WARPIX の 名前と 絵は WARPIX製作所の ものです（All rights reserved）。</p>
-    </div>
-  </dialog>
-
-  <!-- 印刷したときだけ出る認定証（中身は world.js が印刷直前に書く） -->
-  <section class="certificate" id="certificate" aria-hidden="true"></section>
-
-  <!-- config.js と cassette.js だけは すぐ よむ（えらんだ リンクを、かく まえに さしかえる ため）。
-       ほかは defer：HTML を さいごまで よんでから じゅんばんに うごく。そのぶん はやく PRESS START や リンクが みえる（v1.31） -->
   <script src="config.js"></script>
-  <script src="cassette.js"></script>
-  <script src="script.js" defer></script>
-  <script src="game.js" defer></script>
-  <script src="extras.js" defer></script>
-  <script src="adventure.js" defer></script>
-  <script src="world.js" defer></script>
-  <script src="season.js" defer></script>
-  <script src="device.js" defer></script>
-  <script src="weather.js" defer></script>
-  <script src="online.js" defer></script>
-  <script src="raid.js" defer></script>
-  <script src="tsubuyaki.js" defer></script>
-  <script src="grow.js" defer></script>
-  <script src="favorite.js" defer></script>
-  <script src="compose.js" defer></script>
-  <script src="omikuji.js" defer></script>
-  <script src="zukan.js" defer></script>
-  <script src="stamp.js" defer></script>
-  <script src="atelier.js" defer></script>
-  <script src="dream.js" defer></script>
-  <script src="sky.js" defer></script>
-  <script src="settings.js" defer></script>
-  <script src="postcard.js" defer></script>
-  <script src="hide.js" defer></script>
-  <script src="voice.js" defer></script>
-  <script src="rest.js" defer></script>
-  <script src="mail.js" defer></script>
-  <script src="guide.js" defer></script>
-  <script src="save.js" defer></script>
-  <script src="move.js" defer></script>
-  <script src="rta.js" defer></script>
-  <script src="ticket.js" defer></script>
-  <script src="opening.js" defer></script>
-  <script src="kojo.js" defer></script>
-  <script src="card.js" defer></script>
-  <script src="satogaeri.js" defer></script>
-  <script src="otegami.js" defer></script>
-  <script src="warp.js" defer></script>
-  <script src="cassette-ui.js" defer></script>
-  <script src="tonight.js" defer></script>
-  <script src="letter.js" defer></script>
-  <script src="roomscene.js" defer></script>
-  <script src="about.js" defer></script>
-  <script src="manual.js" defer></script>
-  <script src="prologue.js" defer></script>
-  <script src="count.js" defer></script>
+  <script src="count.js"></script>
+  <script src="core.js"></script>
+  <script src="pixe.js"></script>
+  <script src="log.js"></script>
+  <script src="warp.js"></script>
+  <script src="links.js"></script>
+  <script src="mail.js"></script>
+  <script src="gear.js"></script>
+  <script src="manual.js"></script>
 </body>
 </html>

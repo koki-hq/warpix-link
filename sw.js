@@ -1,6 +1,6 @@
 // ---------- サービスワーカー：オフラインでもピクセに会えるように ----------
 // 公開するたびに VERSION を上げると、新しいファイルを取り直す
-const VERSION = "warpix-v1.66.3";
+const VERSION = "warpix-v2.0.0";
 const FONT_CACHE = "warpix-fonts";
 const FILES = [
   "./",
@@ -9,51 +9,14 @@ const FILES = [
   "fonts/dotgothic16.woff2",
   "config.js",
   "count.js",
-  "script.js",
-  "game.js",
-  "extras.js",
-  "adventure.js",
-  "world.js",
-  "season.js",
-  "device.js",
-  "weather.js",
-  "online.js",
-  "raid.js",
-  "tsubuyaki.js",
-  "grow.js",
-  "favorite.js",
-  "compose.js",
-  "omikuji.js",
-  "zukan.js",
-  "stamp.js",
-  "atelier.js",
-  "dream.js",
-  "sky.js",
-  "settings.js",
-  "postcard.js",
-  "hide.js",
-  "voice.js",
-  "rest.js",
-  "mail.js",
-  "save.js",
-  "move.js",
-  "rta.js",
-  "ticket.js",
-  "opening.js",
-  "kojo.js",
-  "card.js",
-  "satogaeri.js",
-  "otegami.js",
+  "core.js",
+  "pixe.js",
+  "log.js",
   "warp.js",
-  "cassette.js",
-  "cassette-ui.js",
-  "tonight.js",
-  "letter.js",
-  "roomscene.js",
-  "guide.js",
-  "about.js",
+  "links.js",
+  "mail.js",
+  "gear.js",
   "manual.js",
-  "prologue.js",
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -113,5 +76,5 @@ self.addEventListener("fetch", (e) => {
       })
     );
   }
-  // それ以外（天気、オンライン機能）はふつうにネットへ
+  // それ以外はふつうにネットへ
 });
