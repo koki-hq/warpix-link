@@ -14,11 +14,11 @@ export default {
     t.eq(await p.ev(`getComputedStyle(document.getElementById("manual"), "::backdrop").backgroundColor`), "rgb(15, 11, 30)", "うしろが すけて 見える");
     t.eq(await p.ev(`document.getElementById("dialog-text").textContent`), "", "説明書の うしろで ピクセが しゃべって いる");
     const text = await p.ev(`document.getElementById("manual").textContent`);
-    for (const w of ["＋", "グループ", "リンクを 追加", "リストから えらぶ", "スワイプ", "空間"]) t.ok(text.includes(w), `「${w}」の せつめいが ない`);
-    t.ok(!/12 ?文字|もじ まで|いっしょに ワープしよう|たな/.test(text), "説明書に いらない ことが のこる");
+    for (const w of ["＋", "グループ", "リンクを 追加", "こんな人におすすめ", "自分のタイミング", "使い方はあなた次第", "空間", "きろく"]) t.ok(text.includes(w), `「${w}」の せつめいが ない`);
+    t.ok(!/12 ?文字|もじ まで|いっしょに ワープしよう|たな|ワンタップ/.test(text), "説明書に いらない ことが のこる");
     t.ok(!/ROOM|ミニゲーム|おみくじ|パーティ/.test(text), "なくした ものの せつめいが のこる");
     await p.shot("v2-manual.png");
-    for (let i = 0; i < 4 && (await p.ev(`document.getElementById("manual").open`)); i++) await p.click("#manual-next");
+    for (let i = 0; i < 6 && (await p.ev(`document.getElementById("manual").open`)); i++) await p.click("#manual-next");
     await sleep(200);
     t.ok(await p.ev(`!document.getElementById("manual").open`), "はじめる で とじない");
     t.ok((await p.text()).includes("「グループを つくる」を"), "とじた あと ピクセが 案内しない");

@@ -2526,3 +2526,38 @@ body {
   font-size: 15px;
   color: var(--gold);
 }
+
+/* 説明書（v2.1.4）：こんな人に・しめの 3 行・使いかたは 1 こずつ あける */
+.manual-sheet p + p {
+  margin-top: 4px;
+}
+.manual-who {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.manual-who li {
+  position: relative;
+  padding-left: 1.2em;
+}
+.manual-who li + li {
+  margin-top: 10px;
+}
+.manual-who li::before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  font-size: 0.7em;
+  color: var(--accent-2);
+}
+.manual-close {
+  color: var(--gold);
+  line-height: 1.9;
+}
+.manual-steps li + li {
+  margin-top: 10px;
+}
+.nowrap {
+  white-space: nowrap;
+}
