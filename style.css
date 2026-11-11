@@ -1621,114 +1621,87 @@ body {
   flex: 0 0 auto;
 }
 
-/* ---------- グループの だん：◀ かんばん ▶ ---------- */
+/* ---------- グループの だん（v2.1 タブ）：ぜんぶの グループ。えらんで いる タブは 金で ぬる ---------- */
 .group-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+  position: relative;
   flex-shrink: 0;
+  width: 100%;
 }
 .group-bar[hidden] {
   display: none;
 }
-.group-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 52px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  filter: drop-shadow(3px 3px 0 var(--shadow));
-  -webkit-tap-highlight-color: transparent;
-}
-.group-arrow .glyph {
-  width: 24px;
-  height: 36px;
-  color: var(--accent-2);
-}
-.group-arrow:hover .glyph,
-.group-arrow:focus-visible .glyph {
-  color: var(--fg);
-}
-.group-arrow:focus-visible {
-  outline: 2px solid var(--accent-2);
-}
-.group-arrow:active {
-  translate: 2px 2px;
-  filter: none;
-}
-.group-arrow:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-.group-mid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-}
-/* かんばん：紺の 札・きんいろの ほそい わく・うえに つるす 金具・したに かげ */
-.group-sign {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 196px;
-  max-width: calc(100vw - 180px);
-  height: 40px;
-  margin-top: 6px;
-  padding: 0 14px;
-  border: 0;
-  background: var(--bg-grid);
-  color: var(--gold);
-  font-family: "DotGothic16", monospace;
-  font-size: 17px;
-  cursor: pointer;
-  box-shadow: 0 -2px 0 0 var(--gold), 0 2px 0 0 var(--gold), -2px 0 0 0 var(--gold), 2px 0 0 0 var(--gold), 0 6px 0 0 var(--shadow);
-  -webkit-tap-highlight-color: transparent;
-}
-.group-sign:hover,
-.group-sign:focus-visible {
-  background: var(--btn);
-  outline: none;
-}
-.group-sign:active {
-  translate: 0 3px;
-  box-shadow: 0 -2px 0 0 var(--gold), 0 2px 0 0 var(--gold), -2px 0 0 0 var(--gold), 2px 0 0 0 var(--gold), 0 3px 0 0 var(--shadow);
-}
-.sign-hook {
+/* まだ つづく ときは 右はしを ぼかす */
+.group-bar.more::after {
+  content: "";
   position: absolute;
-  top: -10px;
-  left: 26px;
-  width: 4px;
-  height: 8px;
-  background: var(--muted);
+  top: 0;
+  right: 0;
+  bottom: 3px;
+  width: 28px;
+  background: linear-gradient(90deg, transparent, var(--bg));
+  pointer-events: none;
 }
-.sign-hook.right {
-  left: auto;
-  right: 26px;
-}
-.group-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.group-dots {
+.group-tabs {
   display: flex;
   gap: 6px;
+  overflow-x: auto;
+  padding: 6px 28px 0 4px;
+  border-bottom: 3px solid var(--gold);
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
-.group-dots span {
-  width: 6px;
-  height: 6px;
-  background: var(--line, #5a5088);
-  box-shadow: 2px 2px 0 var(--shadow);
+.group-tabs::-webkit-scrollbar {
+  display: none;
 }
-.group-dots span.on {
-  background: var(--accent);
+.group-tab {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  background: var(--btn);
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.group-tab:hover,
+.group-tab:focus-visible {
+  color: var(--fg);
+  outline: none;
+}
+.group-tab:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent-2);
+}
+.group-tab.on {
+  background: var(--gold);
+  color: var(--bg);
+}
+.group-tab.on:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--bg);
+}
+.group-tab .pen {
+  display: flex;
+  width: 13px;
+  height: 13px;
+  color: var(--bg);
+}
+.group-tab .pen svg {
+  width: 100%;
+  height: 100%;
+}
+.group-tab.plus {
+  background: transparent;
+  color: var(--accent-2);
+  outline: 2px dashed var(--accent-2);
+  outline-offset: -2px;
+}
+.group-tab:active {
+  translate: 0 2px;
 }
 
 /* ---------- リンク：v1 の ボタンを 2 列 × 6 段 ---------- */
@@ -2457,9 +2430,6 @@ body {
 @media (max-width: 360px) {
   .logo-row .title {
     font-size: 15px;
-  }
-  .group-bar {
-    gap: 10px;
   }
   .links .pixel-btn {
     gap: 6px;

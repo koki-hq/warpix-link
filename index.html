@@ -84,14 +84,9 @@
       <p class="empty-note">YouTube・X・推しの公式サイトなどを<br>まとめて、ワンタップで開けます</p>
     </section>
 
-    <!-- グループの だん：◀ かんばん（おすと へんしゅう） ▶ -->
+    <!-- グループの だん（v2.1 タブ）：ぜんぶの グループが ならぶ。えらんで いる タブを もう いちど おすと 編集。さいごの ＋ で 作る -->
     <div class="group-bar" id="group-bar" hidden>
-      <button class="group-arrow" id="group-prev" type="button" aria-label="前のグループ"><span class="glyph" data-glyph="left"></span></button>
-      <div class="group-mid">
-        <button class="group-sign" id="group-sign" type="button" aria-haspopup="dialog"><span class="sign-hook" aria-hidden="true"></span><span class="sign-hook right" aria-hidden="true"></span><span class="group-title" id="group-title"></span><span class="sr-only">（押すと編集）</span></button>
-        <span class="group-dots" id="group-dots" aria-hidden="true"></span>
-      </div>
-      <button class="group-arrow" id="group-next" type="button" aria-label="次のグループ"><span class="glyph" data-glyph="right"></span></button>
+      <div class="group-tabs" id="group-tabs" role="tablist" aria-label="グループ"></div>
     </div>
 
     <nav class="links" id="links" hidden></nav>
@@ -328,8 +323,8 @@
         <ol class="manual-steps">
           <li>右上の ＋ でグループを作ります。</li>
           <li>「＋ リンクを追加」で、リストから選ぶか、アドレスを貼って自分で作ります。</li>
-          <li>グループの名前を押すと、名前や並び順を変えられます。</li>
-          <li>横にスワイプ（または ◀ ▶）でグループを切り替えます。</li>
+          <li>選んでいるタブ（✎）をもう一度押すと、名前や並び順を変えられます。</li>
+          <li>上のタブか、横にスワイプしてグループを切り替えます。</li>
         </ol>
       </section>
       <section class="manual-sheet" data-sheet="home" hidden>

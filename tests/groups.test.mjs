@@ -5,8 +5,8 @@ const view = (p) => p.ev(`({
   empty: !document.getElementById("empty").hidden,
   bar: !document.getElementById("group-bar").hidden,
   title: document.getElementById("group-title").textContent,
-  on: [...document.querySelectorAll("#group-dots span")].findIndex((d) => d.classList.contains("on")),
-  dots: document.querySelectorAll("#group-dots span").length,
+  on: [...document.querySelectorAll("#group-tabs .group-tab:not(.plus)")].findIndex((d) => d.classList.contains("on")),
+  dots: document.querySelectorAll("#group-tabs .group-tab:not(.plus)").length,
   links: [...document.querySelectorAll(".links .pixel-btn")].map((a) => a.dataset.id),
   saved: (JSON.parse(localStorage.getItem("warpix-v2-groups") || "null")?.list ?? []).map((g) => g.title),
 })`);
@@ -34,20 +34,24 @@ export default {
     await server.close();
   },
 
-  async "右上の ＋ でも つくれる。◀ ▶ で きりかえ（ぐるっと まわる）、ひらきなおしても そのまま"(t) {
+  async "右上の ＋ でも タブの ＋ でも つくれる。タブで きりかえ、← → キーは ぐるっと まわる、ひらきなおしても そのまま"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]], ["B", ["spotify", "twitter"]], ["C", []]]) } });
-    t.eq((await view(p)).title, "A", "さいしょの グループで ない");
-    await p.click("#group-next");
     let v = await view(p);
-    t.eq([v.title, v.on, v.links], ["B", 1, ["spotify", "twitter"]], "▶ で つぎへ いかない");
-    await p.click("#group-prev");
-    await p.click("#group-prev");
-    t.eq((await view(p)).title, "C", "◀ で さいごへ まわらない");
+    t.eq([v.title, v.on, v.dots], ["A", 0, 3], "さいしょの グループで ない／タブの かずが ちがう");
+    await p.click('#group-tabs [data-i="1"]');
+    v = await view(p);
+    t.eq([v.title, v.on, v.links], ["B", 1, ["spotify", "twitter"]], "タブで きりかわらない");
+    await p.key("ArrowLeft");
+    await p.key("ArrowLeft");
+    t.eq((await view(p)).title, "C", "← で さいごへ まわらない");
     await p.goto(await p.ev("location.href"), 500);
     t.eq((await view(p)).title, "C", "ひらきなおすと えらんだ グループが もどる");
-    // ◀ ▶ は わく なしで おおきい・メニューと ＋ は おなじ おおきさ
-    const r = await p.ev(`(() => { const s = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height)]; }; return { prev: s("group-prev"), menu: s("menu-btn"), add: s("add-group"), sign: s("group-sign") }; })()`);
-    t.ok(r.prev[0] >= 44 && r.prev[1] >= 44, `◀ ▶ が ちいさい（${r.prev}）`);
+    t.ok(await p.ev(`!!document.querySelector("#group-sign .pen svg")`), "えらんで いる タブに ✎ が ない");
+    await p.click("#group-new");
+    await sleep(200);
+    t.ok(await p.ev(`document.getElementById("group-dialog").open`), "タブの ＋ で グループの まどが ひらかない");
+    await p.ev(`document.getElementById("group-dialog").close()`);
+    const r = await p.ev(`(() => { const s = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height)]; }; return { menu: s("menu-btn"), add: s("add-group") }; })()`);
     t.eq(r.menu, r.add, "メニューと ＋ の おおきさが ちがう");
     await p.click("#add-group");
     await sleep(200);

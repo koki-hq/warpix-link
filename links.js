@@ -31,11 +31,7 @@ const groups = (() => {
       linksEl.innerHTML = "";
       return;
     }
-    $("group-title").textContent = g.title;
-    $("group-sign").setAttribute("aria-label", `グループ「${g.title}」を編集`);
-    $("group-dots").innerHTML = list.map((_, i) => `<span class="${i === C.at() ? "on" : ""}"></span>`).join("");
-    $("group-prev").disabled = list.length < 2;
-    $("group-next").disabled = list.length < 2;
+    renderTabs(list);
     const tiles = g.ids.map((id) => {
       const c = C.byId(id);
       const app = C.appOf(c);
@@ -46,14 +42,41 @@ const groups = (() => {
     linksEl.setAttribute("aria-label", `${g.title} のリンク`);
   }
 
+  // ---------- タブ（v2.1）：ぜんぶの グループを ならべる。◀ ▶ と てんてん の かわり ----------
+  // 本人「塗りつぶしの方がわかりやすい」。えらんで いる タブには ✎（ペン先は 左下）。おおい ときは よこに スクロール、えらんだ タブを まんなかへ
+  const PEN = ["......##.", ".....####", "....####.", "...####..", "..####...", ".####....", ".###.....", "##.......", "#........"];
+  const tabsEl = $("group-tabs");
+  function renderTabs(list) {
+    const at = C.at();
+    tabsEl.innerHTML =
+      list
+        .map((g, i) =>
+          i === at
+            ? `<button type="button" role="tab" class="group-tab on" id="group-sign" aria-selected="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></button>`
+            : `<button type="button" role="tab" class="group-tab" data-i="${i}" aria-selected="false" tabindex="-1">${esc(g.title)}</button>`
+        )
+        .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを作る" aria-haspopup="dialog">＋</button>`;
+    const on = $("group-sign");
+    const left = on.offsetLeft - (tabsEl.clientWidth - on.offsetWidth) / 2;
+    tabsEl.scrollTo({ left: Math.max(0, left), behavior: "instant" });
+    barEl.classList.toggle("more", tabsEl.scrollWidth > tabsEl.clientWidth + 1);
+  }
+  tabsEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".group-tab");
+    if (!b) return;
+    if (b.id === "group-sign") return openEdit();
+    if (b.id === "group-new") return openGroup();
+    C.switchTo(Number(b.dataset.i));
+    render();
+    sound.sfx.hover();
+  });
+
   function go(dir) {
     if (C.groups().length < 2) return;
     C.switchTo(C.at() + dir);
     render();
     sound.sfx.hover();
   }
-  $("group-prev").addEventListener("click", () => go(-1));
-  $("group-next").addEventListener("click", () => go(1));
   // よこに スワイプでも きりかえ
   let touch = null;
   linksEl.addEventListener("touchstart", (e) => (touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null), { passive: true });
@@ -308,7 +331,7 @@ const groups = (() => {
     if (backToEdit) return openEdit();
     // はじめての ときだけ、つぎに できる ことを ピクセが ひとこと（v2.1）
     const g = C.current();
-    if (g?.ids.length && !pixe.tip("warp", "リンクを おすと ワープ！\nなまえを おすと へんしゅう できるよ。") && C.groups().length >= 2)
+    if (g?.ids.length && !pixe.tip("warp", "リンクを おすと ワープ！\n✎の タブを おすと へんしゅう できるよ。") && C.groups().length >= 2)
       pixe.tip("swipe", "よこに スワイプしても\nグループを きりかえられるよ。");
   }
   // けってい：つくる タブで なにか かいて あれば つくってから とじる
@@ -356,7 +379,6 @@ const groups = (() => {
     if (!editDialog.open) editDialog.showModal();
     sound.sfx.select();
   }
-  $("group-sign").addEventListener("click", openEdit);
   rowsEl.addEventListener("click", (e) => {
     const b = e.target.closest("button[data-act]");
     if (!b) return;

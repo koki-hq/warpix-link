@@ -21,7 +21,7 @@ export default {
     for (let i = 0; i < 4 && (await p.ev(`document.getElementById("manual").open`)); i++) await p.click("#manual-next");
     await sleep(200);
     t.ok(await p.ev(`!document.getElementById("manual").open`), "はじめる で とじない");
-    t.ok((await p.text()).includes("まとめる ばしょを つくろう"), "とじた あと ピクセが 案内しない");
+    t.ok((await p.text()).includes("「グループを作る」を"), "とじた あと ピクセが 案内しない");
     await p.goto(await p.ev("location.href"), 500);
     t.ok(await p.ev(`!document.getElementById("manual").open`), "2 かいめも でる");
     t.noErrors(p);

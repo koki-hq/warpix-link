@@ -98,7 +98,7 @@ export default {
 
   async "ピクセの 案内：グループを つくって リンクを 入れたら 1 かいだけ「おすと ワープ」、2 つめの グループで スワイプ"(t) {
     const { server, p } = await openApp(t);
-    t.ok((await p.text()).includes("つくろう"), "グループが ない ときに 案内しない");
+    t.ok((await p.text()).includes("「グループを作る」"), "グループが ない ときに 案内しない");
     const make = async (name) => {
       await p.click("#add-group");
       await sleep(150);
@@ -113,6 +113,18 @@ export default {
     await make("C");
     const last = await p.text();
     t.ok(!last.includes("スワイプ") && !last.includes("おすと ワープ"), "おなじ 案内を 2 かい いう");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "タブ：グループが 8 つ・ながい 名前でも はみださず、よこに スクロール。えらんだ タブが 見える ところに"(t) {
+    const names = ["すきなバンド", "いつもの", "推し", "YouTuber", "まんがアプリまとめ", "しごと", "ゲーム", "ニュース"];
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData(names.map((n) => [n, ["line"]]), 6) } });
+    const r = await p.ev(`(() => { const t = document.getElementById("group-tabs"); const on = document.getElementById("group-sign").getBoundingClientRect(); const box = t.getBoundingClientRect(); return { more: document.getElementById("group-bar").classList.contains("more"), scroll: t.scrollWidth > t.clientWidth, seen: on.left >= box.left && on.right <= box.right, page: document.documentElement.scrollWidth <= innerWidth, title: document.getElementById("group-title").textContent }; })()`);
+    t.eq(r, { more: true, scroll: true, seen: true, page: true, title: "ゲーム" }, "タブが おかしい");
+    await p.click("#group-sign");
+    await sleep(200);
+    t.ok(await p.ev(`document.getElementById("edit-dialog").open`), "えらんで いる タブを おしても 編集が ひらかない");
     t.noErrors(p);
     await server.close();
   },
