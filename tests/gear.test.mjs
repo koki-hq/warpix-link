@@ -19,7 +19,7 @@ const logView = (p) => p.ev(`({
   top: document.getElementById("log-top").textContent,
   week: !document.getElementById("log-week").hidden,
   bars: [...document.querySelectorAll("#log-week-bars .day .bar-n")].map((x) => x.textContent),
-  rank: [...document.querySelectorAll("#log-rank li")].map((li) => li.querySelector(".rank-name")?.textContent + ":" + li.querySelector(".rank-n")?.textContent.replace("かい", "")),
+  rank: [...document.querySelectorAll("#log-rank li")].map((li) => li.querySelector(".rank-name")?.textContent + ":" + li.querySelector(".rank-n")?.textContent.replace("回", "")),
 })`);
 
 export default {
@@ -28,7 +28,7 @@ export default {
     await p.click("#menu-btn");
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("gear").open`), "メニューで ひらかない");
-    t.eq(await p.ev(`[...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent)`), ["きろく", "はいけい", "BGM", "ひっこし", "アプリ"], "タブが ちがう");
+    t.eq(await p.ev(`[...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent)`), ["記録", "背景", "音", "引っ越し", "アプリ"], "タブが ちがう");
     const shown = () => p.ev(`[...document.querySelectorAll("#gear .panel")].filter((x) => !x.hidden).map((x) => x.id)`);
     t.eq(await shown(), ["panel-log"], "さいしょは きろく で ない");
     await p.click("#tab-bgm");
@@ -48,7 +48,7 @@ export default {
     await p.ev(`window.WARPIX_ASK = true; gear.open("log")`);
     await sleep(200);
     let v = await logView(p);
-    t.eq([v.label, v.total, v.top, v.week], ["こんしゅうの ワープ", "6", "YOUTUBE", true], "こんしゅう が ちがう");
+    t.eq([v.label, v.total, v.top, v.week], ["今週のワープ", "6", "YOUTUBE", true], "こんしゅう が ちがう");
     t.eq(v.bars, ["2", "4", "0", "0", "0", "0", "0"], "ようびごと が ちがう");
     t.eq(v.rank, ["YOUTUBE:5", "SPOTIFY:1"], "よく行った サイト が ちがう");
     await p.ev(`document.querySelector('[data-range="today"]').click()`);
@@ -103,7 +103,7 @@ export default {
     await p.ev(`gear.open("bgm")`);
     await sleep(100);
     await p.click("#bgm-switch");
-    t.eq(await p.ev(`[settings.state.bgm, document.getElementById("bgm-switch").getAttribute("aria-checked"), document.getElementById("bgm-switch").textContent]`), [false, "false", "BGM OFF"], "BGM が OFF に ならない");
+    t.eq(await p.ev(`[settings.state.bgm, document.getElementById("bgm-switch").getAttribute("aria-checked"), document.getElementById("bgm-switch").textContent]`), [false, "false", "OFF"], "BGM が OFF に ならない");
     await p.ev(`(() => { for (const [id, v] of [["bgm-vol", 30], ["se-vol", 0]]) { const x = document.getElementById(id); x.value = v; x.dispatchEvent(new Event("input")); } })()`);
     t.eq(await p.ev(`sound.volumes()`), { bgm: 0.3, se: 0 }, "おおきさが きかない");
     t.eq(await p.ev(`document.getElementById("bgm-vol-n").textContent`), "30", "かずが でない");
@@ -150,7 +150,7 @@ export default {
     t.ok(href.startsWith("mailto:pixe@warpix.app") && /WARPIX LINK v2\.\d/.test(href), `おてがみの したがきが ちがう：${href}`);
     t.ok(/^v2\.\d/.test(await p.ev(`document.getElementById("about-version").textContent`)), "版が でない");
     const text = await p.ev(`document.getElementById("panel-about").textContent`);
-    for (const w of ["グループ", "この ブラウザの なか だけ", "Cloudflare", "Google Fonts"]) t.ok(text.includes(w), `「${w}」の はなしが ない`);
+    for (const w of ["グループ", "このブラウザの中だけ", "Cloudflare", "Google Fonts"]) t.ok(text.includes(w), `「${w}」の はなしが ない`);
     for (const w of ["じゅもん", "Supabase", "てんき", "カード", "ROOM", "パーティ"]) t.ok(!text.includes(w), `ひきざんした「${w}」が のこって いる`);
     await p.click("#about-manual");
     await sleep(200);

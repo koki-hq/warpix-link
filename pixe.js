@@ -125,6 +125,20 @@ const pixe = (() => {
     store.set(key, line);
     return line;
   };
+  // グループが まだ ない とき（v2.1 ナビゲーター、本人「一応ナビゲーターとして　仕事してもらおうかな」）
+  function guide() {
+    if (firstVisit) return "はじめまして！ ぼくは ピクセ。\nまずは よく行く リンクを\nまとめる ばしょを つくろう！";
+    return "まだ グループが ないね。\nした の ボタンから つくろう！";
+  }
+  // いちどだけの 案内（おなじ ことは 2 かい いわない。なれた 人ほど みじかく）
+  const tips = store.get(KEY.tips, []);
+  function tip(id, line) {
+    if (tips.includes(id)) return false;
+    tips.push(id);
+    store.set(KEY.tips, tips);
+    say(line);
+    return true;
+  }
   function greeting() {
     if (firstVisit) return "はじめまして！ ぼくは ピクセ。\nいっしょに ワープしよう！";
     if (firstToday && costume) return EVENT[costume.id];
@@ -240,6 +254,8 @@ const pixe = (() => {
   return {
     say,
     greeting,
+    guide,
+    tip,
     look,
     setAway,
     isAway: () => away,

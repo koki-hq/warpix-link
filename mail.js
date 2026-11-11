@@ -52,7 +52,13 @@ const mail = (() => {
       id: "welcome",
       date: born(),
       title: "ようこそ、WARPIX LINK へ",
-      body: ["WARPIX製作所です。きてくれて ありがとう。", "いつもの せかいへ、ピクセと いっしょに たのしく ワープしてね。", "あたらしい ことが あったら、ここで おしらせします。"],
+      // v2.1：アプリの 要約に（本人「アプリの要約であるべき」「せつめいしょの要約であるべき」）。説明書・メニュー・OGP と おなじ 芯の ことば
+      body: [
+        "WARPIX製作所です。来てくれてありがとうございます。",
+        "WARPIX LINK は、よく行くリンクをグループにまとめて、ワンタップで開けるアプリです。推しのアカウントだけ、いつものサイトだけ。見たいところだけを集めた、自分だけの空間を作れます。",
+        `<ul class="mail-points"><li>右上の「＋」でグループを作ります。</li><li>「＋ リンクを追加」で、リストから選ぶか、アドレスを貼って自分で作ります。</li><li>ホーム画面に入れると、アプリのようにすぐ開けます。</li></ul>`,
+        "新しいことがあったら、ここでお知らせします。",
+      ],
     };
     const board = MAILS.filter((m) => m.date <= ymd);
     // あたらしい じゅん。おなじ ひなら ようこそ が うえ（sort は おなじ ものの じゅんを かえない）
@@ -68,7 +74,7 @@ const mail = (() => {
     const n = unread().length;
     btn.classList.toggle("has-new", n > 0);
     btn.querySelector(".mail-dot").hidden = n === 0;
-    btn.setAttribute("aria-label", n ? `おしらせ（よんで いない ものが ${n}つう）` : "おしらせ");
+    btn.setAttribute("aria-label", n ? `おしらせ（未読 ${n}通）` : "おしらせ");
   }
 
   // ---------- まど ----------
@@ -88,7 +94,7 @@ const mail = (() => {
             return `<li><button type="button" class="mail-item${isNew ? " unread" : ""}" data-id="${m.id}"><span class="mail-date">${fmt(m.date)}</span><span class="mail-title">${m.title}</span>${isNew ? '<span class="mail-new">NEW</span>' : ""}</button></li>`;
           })
           .join("")
-      : `<li class="mail-empty">まだ おしらせは ないよ。</li>`;
+      : `<li class="mail-empty">まだおしらせはありません。</li>`;
   }
   function read(id) {
     const m = list().find((x) => x.id === id);

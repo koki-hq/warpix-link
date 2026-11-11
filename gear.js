@@ -35,11 +35,26 @@ const gear = (() => {
   });
 
   // ---------- きろく ----------
-  const RANGES = { today: "きょう", week: "こんしゅう", month: "こんげつ", all: "ぜんぶ" };
+  // 日・週・月・全部。◀ ▶ で 前の 日・週・月へ（v2.1、本人「過去の記録は参照できない作りか？」）
+  const WEEK = ["日", "月", "火", "水", "木", "金", "土"];
+  let back = 0;
+  const md = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  function when(q) {
+    const s = new Date(`${q.from}T12:00:00`);
+    if (q.range === "today") return back === 0 ? "今日" : back === 1 ? "昨日" : `${md(s)}（${WEEK[s.getDay()]}）`;
+    if (q.range === "week") return back === 0 ? "今週" : back === 1 ? "先週" : `${md(s)}〜${md(new Date(`${q.to}T12:00:00`))}`;
+    if (q.range === "month") return back === 0 ? "今月" : back === 1 ? "先月" : `${s.getFullYear()}年${s.getMonth() + 1}月`;
+    return "全部";
+  }
   function renderLog() {
     for (const b of panels.log.querySelectorAll("[data-range]")) b.setAttribute("aria-pressed", String(b.dataset.range === range));
-    const q = warpLog.query(range);
-    $("log-label").textContent = `${RANGES[range]}の ワープ`;
+    const q = warpLog.query(range, back);
+    const label = when(q);
+    $("log-nav").hidden = range === "all";
+    $("log-when").textContent = label;
+    $("log-older").disabled = !q.older;
+    $("log-newer").disabled = back === 0;
+    $("log-label").textContent = `${label}のワープ`;
     $("log-total").textContent = q.total;
     $("log-top").textContent = q.rank[0]?.name ?? "—";
     const week = $("log-week");
@@ -49,25 +64,36 @@ const gear = (() => {
       $("log-week-bars").innerHTML = q.week
         .map((d) => `<div class="day${d.today ? " today" : ""}" aria-hidden="true"><span class="bar-n">${d.n}</span><span class="wbar" style="height:${Math.round((d.n / max) * 64)}px"></span><span class="bar-day">${d.label}</span></div>`)
         .join("");
-      $("log-week-bars").setAttribute("aria-label", q.week.map((d) => `${d.label} ${d.n}かい`).join("、"));
+      $("log-week-bars").setAttribute("aria-label", q.week.map((d) => `${d.label} ${d.n}回`).join("、"));
     }
     const max = Math.max(1, ...q.rank.map((r) => r.n));
     $("log-rank").innerHTML = q.rank.length
       ? q.rank
           .slice(0, 10)
-          .map((r) => { const c = CASSETTES.byId(r.id); return `<li><span class="icon" aria-hidden="true">${c ? pixelSvg(CASSETTES.iconOf(c)) : ""}</span><span class="rank-main"><span class="rank-name${/[^\x00-\x7f]/.test(r.name) ? " jp" : ""}">${esc(r.name)}</span><span class="rank-group">${esc(r.group)}</span><span class="rank-bar" style="width:${Math.max(4, Math.round((r.n / max) * 100))}%"></span></span><span class="rank-n">${r.n}<span class="sr-only">かい</span></span></li>`; })
+          .map((r) => { const c = CASSETTES.byId(r.id); return `<li><span class="icon" aria-hidden="true">${c ? pixelSvg(CASSETTES.iconOf(c)) : ""}</span><span class="rank-main"><span class="rank-name${/[^\x00-\x7f]/.test(r.name) ? " jp" : ""}">${esc(r.name)}</span><span class="rank-group">${esc(r.group)}</span><span class="rank-bar" style="width:${Math.max(4, Math.round((r.n / max) * 100))}%"></span></span><span class="rank-n">${r.n}<span class="sr-only">回</span></span></li>`; })
           .join("")
-      : `<li class="log-empty">まだ ${RANGES[range]}の きろくは ありません。<br>リンクを おすと、ここに たまって いきます。</li>`;
+      : `<li class="log-empty">${label}の記録はありません。<br>リンクを押すと、ここにたまっていきます。</li>`;
   }
+  $("log-older").addEventListener("click", () => {
+    back++;
+    renderLog();
+    sound.sfx.hover();
+  });
+  $("log-newer").addEventListener("click", () => {
+    back = Math.max(0, back - 1);
+    renderLog();
+    sound.sfx.hover();
+  });
   panels.log.addEventListener("click", (e) => {
     const b = e.target.closest("[data-range]");
     if (!b) return;
     range = b.dataset.range;
+    back = 0;
     renderLog();
     sound.sfx.hover();
   });
   $("log-clear").addEventListener("click", async () => {
-    if (!(await ask("ワープの きろくを ぜんぶ けしますか？ もとには もどせません。"))) return;
+    if (!(await ask("ワープの記録を全部消しますか？ 元には戻せません。"))) return;
     warpLog.clear();
     renderLog();
   });
@@ -88,7 +114,9 @@ const gear = (() => {
   function renderBgm() {
     const s = settings.state;
     $("bgm-switch").setAttribute("aria-checked", String(s.bgm));
-    $("bgm-switch").textContent = s.bgm ? "BGM ON" : "BGM OFF";
+    $("bgm-switch").textContent = s.bgm ? "ON" : "OFF";
+    $("se-switch").setAttribute("aria-checked", String(s.se));
+    $("se-switch").textContent = s.se ? "ON" : "OFF";
     $("bgm-vol").value = s.bgmVol;
     $("se-vol").value = s.seVol;
     $("bgm-vol-n").textContent = s.bgmVol;
@@ -99,6 +127,12 @@ const gear = (() => {
     if (settings.state.bgm) sound.bgmPlay();
     else sound.bgmStop();
     renderBgm();
+  });
+  // 効果音だけ けせる（v2.1、本人「効果音　オフのボタンも作った方がいい」）
+  $("se-switch").addEventListener("click", () => {
+    settings.set({ se: !settings.state.se });
+    renderBgm();
+    sound.sfx.select();
   });
   $("bgm-vol").addEventListener("input", (e) => {
     settings.set({ bgmVol: Number(e.target.value) });
@@ -157,11 +191,11 @@ const gear = (() => {
     const code = await encode();
     try {
       await navigator.clipboard.writeText(code);
-      say("コードを コピーしました。メモアプリや メールで、あたらしい スマホに わたしてください。");
+      say("コードをコピーしました。メモアプリやメールで、新しいスマホに渡してください。");
     } catch {
       $("move-input").value = code;
       $("move-input").select();
-      say("コピー できなかったので、したの らんに いれました。えらんで コピーしてください。", false);
+      say("コピーできなかったので、下の欄に入れました。選んでコピーしてください。", false);
     }
   });
   $("move-file").addEventListener("click", async () => {
@@ -171,19 +205,19 @@ const gear = (() => {
     a.download = `warpix-link-${ymdOf(today())}.txt`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    say("ファイルに ほぞんしました。");
+    say("ファイルに保存しました。");
   });
   async function take(text) {
     const data = await decode(text);
-    if (!data) return say("コードが ちがうみたいです。さいごまで まるごと はりつけてください。", false);
-    if (!(await ask("いまの グループ・リンク・きろくを、コードの ものに いれかえますか？", "いれかえる"))) return;
+    if (!data) return say("コードが違うようです。最後までまるごと貼り付けてください。", false);
+    if (!(await ask("今のグループ・リンク・記録を、コードのものに入れ替えますか？", "入れ替える"))) return;
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
       for (const [k, v] of Object.entries(data)) localStorage.setItem(k, v);
     } catch {
-      return say("ほぞん できませんでした。ブラウザの せっていを たしかめてください。", false);
+      return say("保存できませんでした。ブラウザの設定を確かめてください。", false);
     }
-    say("うけとりました。よみなおします。");
+    say("受け取りました。読み直します。");
     setTimeout(() => location.reload(), 600);
   }
   $("move-take").addEventListener("click", () => take($("move-input").value));
@@ -196,7 +230,7 @@ const gear = (() => {
 
   // ---------- アプリに ついて ----------
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const kind = () => `${ios ? "iPhone・iPad" : /Android/.test(navigator.userAgent) ? "Android" : "パソコン"}${pocket.standalone() ? "（ホームがめんの アプリ）" : "（ブラウザ）"}`;
+  const kind = () => `${ios ? "iPhone・iPad" : /Android/.test(navigator.userAgent) ? "Android" : "パソコン"}${pocket.standalone() ? "（ホーム画面のアプリ）" : "（ブラウザ）"}`;
   async function version() {
     try {
       return (await (await fetch("sw.js")).text()).match(/warpix-v(\d+\.\d+(?:\.\d+)?)/)?.[1]?.replace(/\.0$/, "") ?? "?";
@@ -207,15 +241,15 @@ const gear = (() => {
   async function renderAbout() {
     const v = await version();
     $("about-version").textContent = `v${v}`;
-    const body = ["ピクセへ", "", "（ここに かいてね）", "", "", "──", `WARPIX LINK v${v}`, kind()].join("\n");
-    $("otegami").href = `mailto:pixe@warpix.app?subject=${encodeURIComponent("ピクセに おてがみ")}&body=${encodeURIComponent(body)}`;
+    const body = ["ピクセへ", "", "（ここに書いてね）", "", "", "──", `WARPIX LINK v${v}`, kind()].join("\n");
+    $("otegami").href = `mailto:pixe@warpix.app?subject=${encodeURIComponent("ピクセにお手紙")}&body=${encodeURIComponent(body)}`;
   }
   $("about-manual").addEventListener("click", () => {
     dialog.close();
     manual.open();
   });
   $("about-reset").addEventListener("click", async () => {
-    if (!(await ask("グループ・リンク・じぶんの リンク・きろく・せっていを ぜんぶ けして、はじめからに しますか？ もとには もどせません。"))) return;
+    if (!(await ask("グループ・リンク・自分のリンク・記録・設定を全部消して、最初からにしますか？ 元には戻せません。"))) return;
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
     } catch {}

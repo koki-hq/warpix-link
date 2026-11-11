@@ -21,9 +21,9 @@ const manual = (() => {
   // ホーム画面の ページは、もう アプリで ひらいて いる 人と パソコンには 出さない
   const homeShown = () => !pocket.standalone() && (ios || android);
   function homeHow() {
-    if (inApp) return "いまはアプリの中のブラウザでひらいています。右上か右下の「…」から「ブラウザでひらく」を選んでから、ブラウザのメニューで「ホーム画面に追加」してね。";
-    if (iosSafari) return "画面の下の共有ボタン（□に↑）から「ホーム画面に追加」。見つからないときは「…」の中にあります。";
-    if (ios) return "共有ボタン（□に↑）から「ホーム画面に追加」。";
+    if (inApp) return "いまはアプリの中のブラウザで開いています。右上か右下の「…」から「ブラウザで開く」を選んでから、ブラウザのメニューで「ホーム画面に追加」してください。";
+    if (iosSafari) return "Safari の共有ボタンから「ホーム画面に追加」。見つからないときは「…」の中にあります。";
+    if (ios) return "共有ボタンから「ホーム画面に追加」。";
     return "ブラウザのメニュー（︙）から「ホーム画面に追加」か「アプリをインストール」。";
   }
 
@@ -33,12 +33,16 @@ const manual = (() => {
     sheets.forEach((s) => (s.hidden = s !== pages[page]));
     pageEl.textContent = `${page + 1}/${pages.length}`;
     const last = page === pages.length - 1;
-    nextBtn.textContent = last ? "はじめる ▶" : "つぎへ ▶";
+    nextBtn.textContent = last ? "はじめる ▶" : "次へ ▶";
     skipBtn.hidden = last;
     backBtn.hidden = page === 0;
     if (pages[page].dataset.sheet === "home") document.getElementById("manual-how").textContent = homeHow();
   }
-  function open() {
+  let onClose = null;
+  // first：はじめての 人。うしろの 画面を まっくらに して、リンクの 画面が 一瞬 見えない ように（v2.1）
+  function open({ first = false, then = null } = {}) {
+    dialog.classList.toggle("first", first);
+    onClose = then;
     pages = sheets.filter((s) => s.dataset.sheet !== "home" || homeShown());
     page = 0;
     show();
@@ -47,8 +51,14 @@ const manual = (() => {
   }
   function close() {
     if (dialog.open) dialog.close();
-    store.set(KEY.manual, true);
   }
+  dialog.addEventListener("close", () => {
+    store.set(KEY.manual, true);
+    dialog.classList.remove("first");
+    const fn = onClose;
+    onClose = null;
+    fn?.();
+  });
   nextBtn.addEventListener("click", () => {
     if (page < pages.length - 1) {
       page++;
@@ -66,19 +76,21 @@ const manual = (() => {
     (backBtn.hidden ? nextBtn : backBtn).focus();
   });
   skipBtn.addEventListener("click", close);
-  dialog.addEventListener("cancel", () => store.set(KEY.manual, true));
 
   return { open, isOpen: () => dialog.open, seen: () => store.get(KEY.manual, false) === true };
 })();
 
 // ---------- はじまり ----------
 (() => {
-  // ピクセの あいさつ。グループが まだ ない 人には つくる ことを すすめる（はじめての 日の じこしょうかいは そのまま）
-  pixe.say(CASSETTES.current() || pixe.firstVisit ? pixe.greeting() : "まだ リンクが ないね。\nいっしょに つくろう！");
+  // ピクセの あいさつ。グループが まだ ない 人には、つくる ところまで 案内する（v2.1 ナビゲーター）
+  const hello = () => pixe.say(CASSETTES.current() ? pixe.greeting() : pixe.guide());
 
-  // はじめての 人には せつめいしょ（?go=manual なら だれでも）。テストは WARPIX_MANUAL = false で とめる
+  // はじめての 人には 説明書（?go=manual なら だれでも）。テストは WARPIX_MANUAL = false で とめる。
+  // 起動して すぐ 出す（v2.0 は 0.4 びょう まって いたので、リンクの 画面が 一瞬 見えた。本人「このラグ無理なんかな」）。
+  // ピクセの あいさつは 説明書を とじてから
   const asked = new URLSearchParams(location.search).get("go") === "manual";
-  if (asked || (window.WARPIX_MANUAL !== false && !manual.seen())) setTimeout(manual.open, reduceMotion ? 0 : 400);
+  if (asked || (window.WARPIX_MANUAL !== false && !manual.seen())) manual.open({ first: !manual.seen(), then: hello });
+  else hello();
 
   // BGM は さいしょに さわった ときから（ブラウザが かってに 音を ださせて くれない）
   const start = () => {

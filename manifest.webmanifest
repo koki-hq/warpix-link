@@ -1,7 +1,7 @@
 {
   "name": "WARPIX LINK",
-  "short_name": "WARPIX",
-  "description": "よく行くリンクを、グループにまとめてひらく。ピクセが まってる、ドットの リンクアプリ。",
+  "short_name": "WARPIX LINK",
+  "description": "よく行くリンクを、グループにまとめて開く。見たいところだけを集めた、自分だけの空間。",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",

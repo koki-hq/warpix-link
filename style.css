@@ -247,6 +247,14 @@ body::after {
   border: 0;
   background: none;
   cursor: pointer;
+  /* タップした ときの 四角い かげを 出さない（v2.1、本人「ピクセ　タッチすると　四角い影が見える」） */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.npc-sprite:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .npc-sprite:focus-visible {
@@ -467,6 +475,7 @@ body::after {
 }
 
 .about-body {
+  position: relative;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
   padding: 8px 20px 20px;
@@ -1546,48 +1555,67 @@ body {
 }
 
 /* ---------- グループが ない とき ---------- */
+/* v2.1：画面の まんなかに かさねる のを やめて、ふつうの ならびに（X の アプリ内ブラウザ など ひくい 画面で セリフと かさなった）。
+   点線の 看板と 点線の リンクで「ここに ならぶ」と 先に 見せる（デザイン案 B） */
 .empty {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  translate: 0 -25%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
-  padding: 0 24px;
+  gap: 18px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 0 10px;
 }
 .empty[hidden] {
   display: none;
 }
 .empty-add {
-  width: 270px;
+  width: 200px;
   max-width: 100%;
-  height: 92px;
+  height: 44px;
   border: 0;
-  background: var(--accent-2);
-  color: var(--bg);
+  outline: 2px dashed var(--gold);
+  outline-offset: -2px;
+  background: rgba(15, 11, 30, 0.6);
+  color: var(--gold);
   font-family: "DotGothic16", monospace;
-  font-size: 22px;
+  font-size: 17px;
   cursor: pointer;
-  box-shadow: 0 -4px 0 0 var(--fg), 0 4px 0 0 var(--fg), -4px 0 0 0 var(--fg), 4px 0 0 0 var(--fg), 8px 8px 0 0 var(--shadow);
+  -webkit-tap-highlight-color: transparent;
 }
 .empty-add:hover,
 .empty-add:focus-visible {
-  background: #7ff1ff;
-  outline: none;
+  outline-style: solid;
+  background: rgba(255, 216, 74, 0.15);
 }
 .empty-add:active {
-  translate: 4px 4px;
-  box-shadow: 0 -4px 0 0 var(--fg), 0 4px 0 0 var(--fg), -4px 0 0 0 var(--fg), 4px 0 0 0 var(--fg);
+  translate: 0 2px;
+}
+.empty-ghost {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  width: 100%;
+}
+.empty-ghost span {
+  height: 52px;
+  outline: 2px dashed rgba(62, 232, 255, 0.28);
+  outline-offset: -2px;
 }
 .empty-note {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.8;
   text-align: center;
   text-shadow: 2px 2px 0 var(--shadow);
+}
+@media (max-height: 600px) {
+  .empty {
+    gap: 12px;
+  }
+  .empty-ghost span {
+    height: 40px;
+  }
 }
 .no-groups .screen .npc {
   flex: 0 0 auto;
@@ -1724,7 +1752,7 @@ body {
   min-height: 0;
   gap: 10px;
   padding: 0 10px;
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.5;
   box-shadow:
     0 calc(var(--px) * -1) 0 0 var(--fg),
@@ -1736,6 +1764,19 @@ body {
 .links .pixel-btn.jp-label {
   font-size: 15px;
 }
+/* ながい なまえ（v2.1） */
+.links .pixel-btn.len-m {
+  font-size: 8px;
+}
+.links .pixel-btn.len-l {
+  font-size: 7px;
+}
+.links .pixel-btn.jp-label.len-m {
+  font-size: 13px;
+}
+.links .pixel-btn.jp-label.len-l {
+  font-size: 11px;
+}
 .links .pixel-btn .icon {
   width: 24px;
   height: 24px;
@@ -1743,6 +1784,8 @@ body {
 .link-label {
   min-width: 0;
   overflow-wrap: anywhere;
+  /* 2 行に なる ときは だいたい 半分ずつ（「ABCDEFGHIJKLMNO／P」に しない。v2.1） */
+  text-wrap: balance;
 }
 .link-add {
   min-width: 0;
@@ -1791,10 +1834,17 @@ body {
 .win .about-body {
   max-height: none;
 }
+/* v2.1：スクロールする 中の 読み上げ用の 文字（.sr-only は absolute）が、まど の 外へ はみだして、
+   まど ごと スクロールできて 下に 大きな 空白が 出た（本人「下の方をスクロールして…でっかい空白ができて」）。
+   中で つつむ ＋ まど 自体は スクロール させない */
 .win-scroll {
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+.win[open] {
+  overflow: hidden;
 }
 .win-form {
   display: flex;
@@ -2474,3 +2524,54 @@ body {
   box-shadow: inset 0 0 0 2px var(--gold);
 }
 
+
+/* はじめての 説明書（v2.1）：うしろの 画面を 見せない */
+.about.manual.first::backdrop {
+  background: var(--bg);
+}
+
+/* 新しい 版の おしらせ（v2.1）：下に うかぶ おび */
+.update-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 10px 12px 10px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "DotGothic16", monospace;
+  font-size: 14px;
+  box-shadow: 0 -2px 0 0 var(--gold), 0 2px 0 0 var(--gold), -2px 0 0 0 var(--gold), 2px 0 0 0 var(--gold), 6px 6px 0 0 var(--shadow);
+}
+.update-bar[hidden] {
+  display: none;
+}
+.update-bar .win-btn {
+  margin: 0;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+/* ログの 前・次（v2.1） */
+.log-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+.log-nav[hidden] {
+  display: none;
+}
+.log-when {
+  margin: 0;
+  font-family: "DotGothic16", monospace;
+  font-size: 15px;
+  color: var(--gold);
+}

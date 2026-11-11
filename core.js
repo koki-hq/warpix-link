@@ -33,6 +33,7 @@ const KEY = {
   manual: "warpix-v2-manual",
   pixe: "warpix-v2-pixe",
   mylinks: "warpix-v2-mylinks",
+  tips: "warpix-v2-tips",
 };
 
 // ---------- 日付 ----------
@@ -192,8 +193,22 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 const pocket = {
   standalone: () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,
 };
+// 新しい 版が とどいたら 画面で 知らせる（v2.1、本人「みんなはそうじゃない　最新のバージョンがあります。…とかいれてもいいよね」）。
+// サービスワーカーが 入れかわった（controllerchange）＝ 新しい ファイルが そろった。もどって きた ときにも 新しい 版を さがす
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller;
+  addEventListener("load", () =>
+    navigator.serviceWorker
+      .register("sw.js")
+      .then((reg) => document.addEventListener("visibilitychange", () => !document.hidden && reg.update().catch(() => {})))
+      .catch(() => {})
+  );
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController) return; // はじめて 来た 人は いま 入った だけ
+    const bar = document.getElementById("update-bar");
+    if (bar) bar.hidden = false;
+  });
+  document.getElementById("update-btn")?.addEventListener("click", () => location.reload());
 }
 
 // ---------- サウンド（Web Audio API で8bit風に鳴らす） ----------
@@ -425,7 +440,7 @@ const sound = (() => {
 // とじても BGM が もどらない（本人「けす　ボタンを押して　キャンセルしたらBGMが消えちゃう」「BGM止まったままだよ」）。
 // アプリの なかの まどに したので 音は とまらない。はい なら true の Promise。
 // テストは window.WARPIX_ASK = true / false で まどを 出さずに こたえる
-function ask(msg, yes = "けす") {
+function ask(msg, yes = "消す") {
   if (typeof window.WARPIX_ASK === "boolean") return Promise.resolve(window.WARPIX_ASK);
   const d = document.getElementById("ask-dialog");
   const y = document.getElementById("ask-yes");
@@ -452,7 +467,7 @@ function ask(msg, yes = "けす") {
 // ---------- せってい（背景の そら・BGM・おおきさ） ----------
 // 背景は じぶんで えらぶ（本人「自動はだめ　やっぱユーザに何かさせないとだめ」）。さいしょは よる（v1 の そら）
 const settings = (() => {
-  const DEFAULTS = { sky: "night", bgm: true, bgmVol: 100, seVol: 100, song: "usual" };
+  const DEFAULTS = { sky: "night", bgm: true, se: true, bgmVol: 100, seVol: 100, song: "usual" };
   const state = { ...DEFAULTS, ...store.get(KEY.settings, null) };
   if (!["day", "evening", "night"].includes(state.sky)) state.sky = "night";
   if (!sound.songs[state.song]) state.song = "usual";
@@ -465,7 +480,7 @@ const settings = (() => {
     subs.forEach((fn) => fn(state));
   }
   function apply() {
-    sound.setVolumes({ bgm: vol(state.bgmVol), se: vol(state.seVol) });
+    sound.setVolumes({ bgm: vol(state.bgmVol), se: state.se === false ? 0 : vol(state.seVol) });
     sound.setSong(state.song);
     document.documentElement.dataset.sky = state.sky;
   }

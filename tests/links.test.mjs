@@ -14,7 +14,7 @@ export default {
     await p.ev(`document.querySelector('.cas-item[data-id="twitter"]').click()`);
     t.eq(await ids(p), ["youtube", "twitter"], "おしても 追加 されない");
     t.ok((await p.ev(`document.getElementById("add-msg").textContent`)).includes("X"), "追加の ことばが でない");
-    t.eq(await p.ev(`document.getElementById("add-count").textContent`), "2 / 12 こ", "かずが かわらない");
+    t.eq(await p.ev(`document.getElementById("add-count").textContent`), "2 / 12", "かずが かわらない");
     await p.ev(`document.querySelector('.cas-item[data-id="youtube"]').click()`);
     t.eq(await ids(p), ["twitter"], "もう いちど おしても とりけせない");
     await p.ev(`document.getElementById("add-done").click()`);
