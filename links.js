@@ -52,8 +52,8 @@ const groups = (() => {
       list
         .map((g, i) =>
           i === at
-            ? `<button type="button" role="tab" class="group-tab on" id="group-sign" aria-selected="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></button>`
-            : `<button type="button" role="tab" class="group-tab" data-i="${i}" aria-selected="false" tabindex="-1">${esc(g.title)}</button>`
+            ? `<button type="button" class="group-tab on" id="group-sign" aria-current="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></button>`
+            : `<button type="button" class="group-tab" data-i="${i}">${esc(g.title)}</button>`
         )
         .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを つくる" aria-haspopup="dialog">＋</button>`;
     const on = $("group-sign");

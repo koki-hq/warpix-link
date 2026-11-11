@@ -1660,7 +1660,7 @@ body {
   padding: 0 12px;
   border: 0;
   background: var(--btn);
-  color: var(--muted);
+  color: #d6d0f2;
   font-family: "DotGothic16", monospace;
   font-size: 15px;
   white-space: nowrap;
