@@ -56,10 +56,18 @@ const groups = (() => {
             : `<button type="button" class="group-tab" data-i="${i}">${esc(g.title)}</button>`
         )
         .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを つくる" aria-haspopup="dialog">＋</button>`;
+    centerTab();
+  }
+  // えらんで いる タブを まんなかへ。文字（ドットの フォント）が あとから とどくと タブの はばが かわるので、とどいた ときと 画面の おおきさが かわった ときにも
+  function centerTab() {
     const on = $("group-sign");
-    const left = on.offsetLeft - (tabsEl.clientWidth - on.offsetWidth) / 2;
+    if (!on) return;
+    const left = on.getBoundingClientRect().left - tabsEl.getBoundingClientRect().left + tabsEl.scrollLeft - (tabsEl.clientWidth - on.offsetWidth) / 2;
     tabsEl.scrollTo({ left: Math.max(0, left), behavior: "instant" });
   }
+  document.fonts?.ready.then(centerTab);
+  document.fonts?.addEventListener?.("loadingdone", centerTab);
+  addEventListener("resize", centerTab);
   tabsEl.addEventListener("click", (e) => {
     const b = e.target.closest(".group-tab");
     if (!b) return;
