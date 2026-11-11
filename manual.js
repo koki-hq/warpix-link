@@ -33,7 +33,7 @@ const manual = (() => {
     sheets.forEach((s) => (s.hidden = s !== pages[page]));
     pageEl.textContent = `${page + 1}/${pages.length}`;
     const last = page === pages.length - 1;
-    nextBtn.textContent = last ? "はじめる ▶" : "次へ ▶";
+    nextBtn.textContent = last ? "はじめる ▶" : "つぎへ ▶";
     skipBtn.hidden = last;
     backBtn.hidden = page === 0;
     if (pages[page].dataset.sheet === "home") document.getElementById("manual-how").textContent = homeHow();

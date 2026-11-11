@@ -390,7 +390,7 @@ const CASSETTES = (() => {
       const host = new URL(href).hostname;
       if (host === "link.warpix.app" || host === location.hostname) return "それはこのアプリのアドレスです。";
       const same = LIST.find((c) => norm(c.url) === norm(href));
-      if (same) return `${same.label} はリストにあります。「リストから選ぶ」から追加してください。`;
+      if (same) return `${same.label} はリストにあります。「リストから えらぶ」から追加してください。`;
       if (mine.some((c) => c.id !== except && norm(c.url) === norm(href))) return "同じリンクがもうあります。";
       return null;
     },

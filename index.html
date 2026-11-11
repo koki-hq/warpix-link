@@ -58,7 +58,7 @@
       <button class="bar-btn" id="menu-btn" type="button" aria-label="メニュー" aria-haspopup="dialog"><span class="glyph" data-glyph="menu"></span><span class="bar-label" aria-hidden="true">MENU</span></button>
       <div class="topbar-right">
         <button class="mail-btn" id="mail-btn" type="button" aria-haspopup="dialog" aria-label="おしらせ"></button>
-        <button class="bar-btn" id="add-group" type="button" aria-label="グループを作る" aria-haspopup="dialog"><span class="glyph plus" data-glyph="plus"></span><span class="bar-label" aria-hidden="true">NEW</span></button>
+        <button class="bar-btn" id="add-group" type="button" aria-label="グループを つくる" aria-haspopup="dialog"><span class="glyph plus" data-glyph="plus"></span><span class="bar-label" aria-hidden="true">NEW</span></button>
       </div>
     </header>
 
@@ -79,9 +79,9 @@
 
     <!-- グループが ない とき：まんなかに おおきく -->
     <section class="empty" id="empty" hidden>
-      <button class="empty-add" id="empty-add" type="button" aria-haspopup="dialog">＋ グループを作る</button>
-      <div class="empty-ghost" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-      <p class="empty-note">YouTube・X・推しの公式サイトなどを<br>まとめて、ワンタップで開けます</p>
+      <p class="empty-head">あなただけの空間を作ろう</p>
+      <button class="empty-add" id="empty-add" type="button" aria-haspopup="dialog">＋ グループを つくる</button>
+      <p class="empty-note">推しのアカウント・YouTube・Spotify などを<br>まとめて、ワンタップで開けます</p>
     </section>
 
     <!-- グループの だん（v2.1 タブ）：ぜんぶの グループが ならぶ。えらんで いる タブを もう いちど おすと 編集。さいごの ＋ で 作る -->
@@ -99,17 +99,17 @@
   <!-- グループを つくる：① なまえ → ② リンクを 追加 -->
   <dialog class="about win" id="group-dialog" aria-labelledby="group-dialog-title">
     <div class="about-top">
-      <h2 id="group-dialog-title">グループを作る</h2>
+      <h2 id="group-dialog-title">グループを つくる</h2>
       <button class="about-close" id="group-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <form class="about-body win-form" id="group-form" novalidate>
-      <p class="win-steps"><span class="on">① 名前</span><span>▶</span><span>② リンクを追加</span></p>
+      <p class="win-steps"><span class="on">① なまえ</span><span>▶</span><span>② リンクを 追加</span></p>
       <label for="group-name">グループの名前（12文字まで）</label>
       <input class="win-input" id="group-name" type="text" maxlength="12" placeholder="例：好きなバンド" autocomplete="off" enterkeyhint="next">
       <p class="win-error" id="group-error" role="alert" hidden>名前を入れてください。</p>
       <div class="win-btns">
         <button class="win-btn" id="group-cancel" type="button">やめる</button>
-        <button class="win-btn cyan" type="submit">次へ：リンクを追加 ▶</button>
+        <button class="win-btn cyan" type="submit">つぎへ：リンクを 追加 ▶</button>
       </div>
     </form>
   </dialog>
@@ -117,14 +117,14 @@
   <!-- リンクを 追加：たなから えらぶ ／ じぶんで つくる。おすと その まま グループの さいごに（もう いちど おすと とりけし） -->
   <dialog class="about win tall" id="add-dialog" aria-labelledby="add-title">
     <div class="about-top">
-      <h2 id="add-title">リンクを追加</h2>
+      <h2 id="add-title">リンクを 追加</h2>
       <button class="about-close" id="add-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <div class="win-head">
       <p class="win-where"><span><span class="gold" id="add-group-name"></span> に追加</span><span class="muted" id="add-count"></span></p>
       <div class="win-tabs" role="tablist" aria-label="リンクの追加のしかた">
-        <button type="button" role="tab" id="add-tab-shelf" aria-controls="add-shelf" aria-selected="true">リストから選ぶ</button>
-        <button type="button" role="tab" id="add-tab-make" aria-controls="add-make" aria-selected="false" tabindex="-1">自分で作る</button>
+        <button type="button" role="tab" id="add-tab-shelf" aria-controls="add-shelf" aria-selected="true">リストから えらぶ</button>
+        <button type="button" role="tab" id="add-tab-make" aria-controls="add-make" aria-selected="false" tabindex="-1">じぶんで つくる</button>
       </div>
     </div>
     <div class="about-body win-scroll" id="add-shelf" role="tabpanel" aria-labelledby="add-tab-shelf">
@@ -147,7 +147,7 @@
     </div>
     <div class="win-foot">
       <p class="win-msg" id="add-msg" aria-live="polite"></p>
-      <button class="win-btn pink" id="add-done" type="button">決定</button>
+      <button class="win-btn pink" id="add-done" type="button">けってい</button>
     </div>
   </dialog>
 
@@ -158,14 +158,14 @@
     </div>
     <div class="win-foot">
       <button class="win-btn" id="ask-no" type="button">やめる</button>
-      <button class="win-btn danger" id="ask-yes" type="button">消す</button>
+      <button class="win-btn danger" id="ask-yes" type="button">けす</button>
     </div>
   </dialog>
 
   <!-- グループを へんしゅう：なまえ・ならべかえ・はずす・グループの じゅんばん・けす -->
   <dialog class="about win tall" id="edit-dialog" aria-labelledby="edit-title">
     <div class="about-top">
-      <h2 id="edit-title">グループを編集</h2>
+      <h2 id="edit-title">グループを へんしゅう</h2>
       <button class="about-close" id="edit-close" type="button" aria-label="閉じる">✕</button>
     </div>
     <div class="about-body win-scroll win-form">
@@ -174,17 +174,17 @@
       <p class="win-error" id="edit-error" role="alert" hidden>名前を入れてください。</p>
       <p class="win-label">リンク <span class="muted" id="edit-count"></span></p>
       <ul class="edit-rows" id="edit-rows"></ul>
-      <button class="win-btn cyan" id="edit-add" type="button">＋ リンクを追加</button>
+      <button class="win-btn cyan" id="edit-add" type="button">＋ リンクを 追加</button>
       <h3>グループの順番</h3>
       <div class="win-btns">
-        <button class="win-btn" id="edit-prev" type="button">◀ 前へ</button>
-        <button class="win-btn" id="edit-next" type="button">後ろへ ▶</button>
+        <button class="win-btn" id="edit-prev" type="button">◀ まえへ</button>
+        <button class="win-btn" id="edit-next" type="button">うしろへ ▶</button>
       </div>
-      <button class="win-btn danger" id="edit-delete" type="button">このグループを消す</button>
+      <button class="win-btn danger" id="edit-delete" type="button">この グループを けす</button>
     </div>
     <div class="win-foot">
       <p class="win-msg" id="edit-msg" aria-live="polite"></p>
-      <button class="win-btn pink" id="edit-done" type="button">決定</button>
+      <button class="win-btn pink" id="edit-done" type="button">けってい</button>
     </div>
   </dialog>
 
@@ -198,7 +198,7 @@
       <ul class="mail-list" id="mail-list"></ul>
       <article class="mail-read" id="mail-read" hidden></article>
       <!-- いちらんへ もどる ボタンは よんだ ものの した（v2.0 の かたち。本人「位置とかも含めてv2.0の方が良かった」） -->
-      <button class="save-btn mail-back" id="mail-back" type="button" hidden>◀ 一覧へ</button>
+      <button class="save-btn mail-back" id="mail-back" type="button" hidden>◀ いちらんへ</button>
     </div>
   </dialog>
 
@@ -210,20 +210,20 @@
     </div>
     <div class="win-head">
       <div class="win-tabs five" role="tablist" aria-label="メニュー">
-        <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="panel-log" aria-selected="true">記録</button>
-        <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="false" tabindex="-1">背景</button>
-        <button type="button" role="tab" id="tab-bgm" data-tab="bgm" aria-controls="panel-bgm" aria-selected="false" tabindex="-1">音</button>
-        <button type="button" role="tab" id="tab-move" data-tab="move" aria-controls="panel-move" aria-selected="false" tabindex="-1">引っ越し</button>
+        <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="panel-log" aria-selected="true">きろく</button>
+        <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="false" tabindex="-1">はいけい</button>
+        <button type="button" role="tab" id="tab-bgm" data-tab="bgm" aria-controls="panel-bgm" aria-selected="false" tabindex="-1">おと</button>
+        <button type="button" role="tab" id="tab-move" data-tab="move" aria-controls="panel-move" aria-selected="false" tabindex="-1">ひっこし</button>
         <button type="button" role="tab" id="tab-about" data-tab="about" aria-controls="panel-about" aria-selected="false" tabindex="-1">アプリ</button>
       </div>
     </div>
     <div class="about-body win-scroll readable">
       <section class="panel" id="panel-log" role="tabpanel" aria-labelledby="tab-log">
         <div class="seg">
-          <button type="button" data-range="today" aria-pressed="false">日</button>
-          <button type="button" data-range="week" aria-pressed="true">週</button>
-          <button type="button" data-range="month" aria-pressed="false">月</button>
-          <button type="button" data-range="all" aria-pressed="false">全部</button>
+          <button type="button" data-range="today" aria-pressed="false">1にち</button>
+          <button type="button" data-range="week" aria-pressed="true">1しゅう</button>
+          <button type="button" data-range="month" aria-pressed="false">1かげつ</button>
+          <button type="button" data-range="all" aria-pressed="false">ぜんぶ</button>
         </div>
         <!-- 前の 日・週・月へ さかのぼる（v2.1） -->
         <div class="log-nav" id="log-nav">
@@ -242,15 +242,15 @@
         <h3>よく行ったリンク</h3>
         <ol class="rank" id="log-rank"></ol>
         <p class="about-note">記録はこのブラウザの中だけに保存され、どこにも送りません。</p>
-        <button class="text-btn danger" id="log-clear" type="button">記録を消す</button>
+        <button class="text-btn danger" id="log-clear" type="button">きろくを けす</button>
       </section>
 
       <section class="panel" id="panel-sky" role="tabpanel" aria-labelledby="tab-sky" hidden>
         <p>好きな空を選んでください。</p>
         <div class="sky-cards">
-          <button type="button" class="sky-card" data-sky="day" aria-pressed="false"><span class="sky-thumb" data-thumb="day"></span><b>昼</b></button>
-          <button type="button" class="sky-card" data-sky="evening" aria-pressed="false"><span class="sky-thumb" data-thumb="evening"></span><b>夕方</b></button>
-          <button type="button" class="sky-card" data-sky="night" aria-pressed="false"><span class="sky-thumb" data-thumb="night"></span><b>夜</b></button>
+          <button type="button" class="sky-card" data-sky="day" aria-pressed="false"><span class="sky-thumb" data-thumb="day"></span><b>ひる</b></button>
+          <button type="button" class="sky-card" data-sky="evening" aria-pressed="false"><span class="sky-thumb" data-thumb="evening"></span><b>ゆうがた</b></button>
+          <button type="button" class="sky-card" data-sky="night" aria-pressed="false"><span class="sky-thumb" data-thumb="night"></span><b>よる</b></button>
         </div>
         <p class="about-note">ピクセの服は、季節やイベントの日に自動で着替えます。</p>
       </section>
@@ -265,13 +265,13 @@
       <section class="panel" id="panel-move" role="tabpanel" aria-labelledby="tab-move" hidden>
         <h3>データの引っ越し</h3>
         <p>スマホを変えたときや、別のブラウザで使うときに。グループ・リンク・自分のリンク・ワープの記録を、まとめて持っていけます。</p>
-        <button class="win-btn cyan" id="move-copy" type="button">引っ越し用のコードをコピー</button>
-        <button class="win-btn cyan" id="move-file" type="button">ファイルに保存</button>
+        <button class="win-btn cyan" id="move-copy" type="button">ひっこしよう の コードを コピー</button>
+        <button class="win-btn cyan" id="move-file" type="button">ファイルに ほぞん</button>
         <label for="move-input">コードを貼り付けて受け取る</label>
         <textarea class="win-input code" id="move-input" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
         <div class="win-btns">
-          <button class="win-btn cyan" id="move-take" type="button">受け取る</button>
-          <button class="win-btn cyan" id="move-open" type="button">ファイルから読む</button>
+          <button class="win-btn cyan" id="move-take" type="button">うけとる</button>
+          <button class="win-btn cyan" id="move-open" type="button">ファイルから よむ</button>
         </div>
         <input type="file" id="move-file-input" accept=".txt,text/plain" hidden>
         <p class="win-msg" id="move-msg" role="status"></p>
@@ -281,12 +281,12 @@
       <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" hidden>
         <h3>このアプリについて</h3>
         <p>よく行くリンクをグループにまとめて、ワンタップで開けるリンクアプリです。推しのアカウントだけ、いつものサイトだけ。見たいところだけを集めた、自分だけの空間を作れます。</p>
-        <button class="win-btn cyan" id="about-manual" type="button">取扱説明書を読む</button>
+        <button class="win-btn cyan" id="about-manual" type="button">とりあつかい せつめいしょを よむ</button>
         <h3>ホーム画面に入れる</h3>
         <p>iPhone：Safari の共有ボタンから「ホーム画面に追加」。見つからないときは「…」の中にあります。<br>Android：Chrome のメニュー（︙）から「ホーム画面に追加」。</p>
         <h3>ピクセにお手紙</h3>
         <p>感想や「ここがわかりにくい」、バグの報告など、なんでもうれしいです。</p>
-        <a class="win-btn cyan" id="otegami" href="mailto:pixe@warpix.app">ピクセにお手紙を書く<span class="sr-only">（メールのアプリが開きます）</span></a>
+        <a class="win-btn cyan" id="otegami" href="mailto:pixe@warpix.app">ピクセに おてがみを かく<span class="sr-only">（メールのアプリが開きます）</span></a>
         <h3>このブラウザに残すもの</h3>
         <p>グループ・リンク・自分のリンク・ワープの記録・設定・読んだおしらせ。<strong>このブラウザの中だけ</strong>に保存して、どこにも送りません。</p>
         <h3>外に送るもの</h3>
@@ -296,7 +296,7 @@
         </ul>
         <p class="about-note">広告・Cookie・一人ずつを追いかける仕組みは使っていません。なお、インターネットの仕組み上、ページや文字を読み込むときには、このページを置いている GitHub Pages や上のサービスに IP アドレスが届きます。</p>
         <h3>記録を消す</h3>
-        <button class="win-btn danger" id="about-reset" type="button">このアプリの記録を全部消す</button>
+        <button class="win-btn danger" id="about-reset" type="button">この アプリの きろくを ぜんぶ けす</button>
         <p class="about-credit"><span id="about-version">v2.0</span>　© 2026 <a href="https://warpix.app/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（新しいタブで開く）</span></a>　All rights reserved.</p>
       </section>
     </div>
@@ -305,7 +305,7 @@
   <!-- 取扱説明書（v1.48 → v2.0 → v2.1）：はじめての 人だけ。起動の いちばん はじめに 出す（リンクの 画面が 一瞬 見えない ように）。メニューの アプリ から いつでも -->
   <dialog class="about manual" id="manual" aria-labelledby="manual-title">
     <div class="about-top">
-      <h2 id="manual-title">取扱説明書</h2>
+      <h2 id="manual-title">とりあつかい せつめいしょ</h2>
       <span class="manual-page" id="manual-page"></span>
     </div>
     <div class="manual-body readable">
@@ -322,7 +322,7 @@
         <h3>使いかた</h3>
         <ol class="manual-steps">
           <li>右上の ＋ でグループを作ります。</li>
-          <li>「＋ リンクを追加」で、リストから選ぶか、アドレスを貼って自分で作ります。</li>
+          <li>「＋ リンクを 追加」で、「リストから えらぶ」か、「じぶんで つくる」でアドレスを貼って追加します。</li>
           <li>選んでいるタブ（✎）をもう一度押すと、名前や並び順を変えられます。</li>
           <li>上のタブか、横にスワイプしてグループを切り替えます。</li>
         </ol>
@@ -335,15 +335,15 @@
     </div>
     <div class="manual-nav">
       <button class="manual-skip" id="manual-skip" type="button">とばす</button>
-      <button class="manual-back" id="manual-back" type="button" hidden>◀ 戻る</button>
-      <button class="manual-next" id="manual-next" type="button">次へ ▶</button>
+      <button class="manual-back" id="manual-back" type="button" hidden>◀ もどる</button>
+      <button class="manual-next" id="manual-next" type="button">つぎへ ▶</button>
     </div>
   </dialog>
 
   <!-- 新しい 版が ある とき（v2.1）：みんなは 開き直す ことを 知らないので、画面で 知らせる -->
   <div class="update-bar" id="update-bar" role="status" hidden>
     <span>新しいバージョンがあります</span>
-    <button type="button" class="win-btn pink" id="update-btn">更新する</button>
+    <button type="button" class="win-btn pink" id="update-btn">こうしん する</button>
   </div>
 
   <script src="config.js"></script>

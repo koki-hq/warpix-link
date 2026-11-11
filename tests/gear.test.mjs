@@ -28,7 +28,7 @@ export default {
     await p.click("#menu-btn");
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("gear").open`), "メニューで ひらかない");
-    t.eq(await p.ev(`[...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent)`), ["記録", "背景", "音", "引っ越し", "アプリ"], "タブが ちがう");
+    t.eq(await p.ev(`[...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent)`), ["きろく", "はいけい", "おと", "ひっこし", "アプリ"], "タブが ちがう");
     const shown = () => p.ev(`[...document.querySelectorAll("#gear .panel")].filter((x) => !x.hidden).map((x) => x.id)`);
     t.eq(await shown(), ["panel-log"], "さいしょは きろく で ない");
     await p.click("#tab-bgm");

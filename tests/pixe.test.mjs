@@ -6,11 +6,11 @@ export default {
     const { server, p } = await openApp(t);
     t.ok((await p.text()).includes("はじめまして"), `じこしょうかい しない：${await p.text()}`);
     await p.goto(await p.ev("location.href"), 400);
-    t.ok((await p.text()).includes("「グループを作る」"), `グループが ない のに すすめない：${await p.text()}`);
+    t.ok((await p.text()).includes("「グループを つくる」"), `グループが ない のに すすめない：${await p.text()}`);
     await p.ev(`CASSETTES.addGroup("A")`);
     await p.goto(await p.ev("location.href"), 400);
     const line = await p.text();
-    t.ok(line && !line.includes("「グループを作る」") && !line.includes("はじめまして"), `あいさつで ない：${line}`);
+    t.ok(line && !line.includes("「グループを つくる」") && !line.includes("はじめまして"), `あいさつで ない：${line}`);
     t.noErrors(p);
     await server.close();
   },

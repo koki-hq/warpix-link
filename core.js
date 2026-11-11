@@ -440,7 +440,7 @@ const sound = (() => {
 // とじても BGM が もどらない（本人「けす　ボタンを押して　キャンセルしたらBGMが消えちゃう」「BGM止まったままだよ」）。
 // アプリの なかの まどに したので 音は とまらない。はい なら true の Promise。
 // テストは window.WARPIX_ASK = true / false で まどを 出さずに こたえる
-function ask(msg, yes = "消す") {
+function ask(msg, yes = "けす") {
   if (typeof window.WARPIX_ASK === "boolean") return Promise.resolve(window.WARPIX_ASK);
   const d = document.getElementById("ask-dialog");
   const y = document.getElementById("ask-yes");

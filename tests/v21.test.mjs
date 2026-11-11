@@ -11,7 +11,8 @@ export default {
       const r = await p.ev(`(() => { const box = (id) => document.getElementById(id).getBoundingClientRect().toJSON(); return { add: box("empty-add"), dialog: box("dialog"), npc: box("npc") }; })()`);
       t.ok(!overlap(r.add, r.dialog) && !overlap(r.add, r.npc), `${height}px で かさなる：${JSON.stringify(r)}`);
       t.ok(r.add.top >= r.dialog.bottom, `${height}px で ボタンが セリフより 上に ある`);
-      t.ok(await p.ev(`document.querySelectorAll(".empty-ghost span").length === 4`), "点線の リンクが ない");
+      t.eq(await p.ev(`document.querySelector(".empty-head")?.textContent`), "あなただけの空間を作ろう", "見出しが ない");
+      t.eq(await p.ev(`document.getElementById("empty-add").textContent`), "＋ グループを つくる", "ボタンが ひらがなで ない");
       t.noErrors(p);
       await server.close();
     }
@@ -21,7 +22,7 @@ export default {
     const { server, p } = await openApp(t);
     await p.ev(`gear.open("bgm")`);
     await sleep(100);
-    t.eq(await p.ev(`document.getElementById("tab-bgm").textContent`), "音", "タブの なまえが 音 で ない");
+    t.eq(await p.ev(`document.getElementById("tab-bgm").textContent`), "おと", "タブの なまえが おと で ない");
     await p.click("#se-switch");
     t.eq(await p.ev(`[settings.state.se, settings.state.bgm, document.getElementById("se-switch").getAttribute("aria-checked"), document.getElementById("se-switch").textContent]`), [false, true, "false", "OFF"], "効果音が オフに ならない");
     t.eq(await p.ev(`sound.volumes().se`), 0, "効果音の 音量が 0 に ならない");
@@ -98,7 +99,7 @@ export default {
 
   async "ピクセの 案内：グループを つくって リンクを 入れたら 1 かいだけ「おすと ワープ」、2 つめの グループで スワイプ"(t) {
     const { server, p } = await openApp(t);
-    t.ok((await p.text()).includes("「グループを作る」"), "グループが ない ときに 案内しない");
+    t.ok((await p.text()).includes("「グループを つくる」"), "グループが ない ときに 案内しない");
     const make = async (name) => {
       await p.click("#add-group");
       await sleep(150);

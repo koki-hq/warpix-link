@@ -210,7 +210,7 @@ const gear = (() => {
   async function take(text) {
     const data = await decode(text);
     if (!data) return say("コードが違うようです。最後までまるごと貼り付けてください。", false);
-    if (!(await ask("今のグループ・リンク・記録を、コードのものに入れ替えますか？", "入れ替える"))) return;
+    if (!(await ask("今のグループ・リンク・記録を、コードのものに入れ替えますか？", "いれかえる"))) return;
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
       for (const [k, v] of Object.entries(data)) localStorage.setItem(k, v);

@@ -37,7 +37,7 @@ const groups = (() => {
       const app = C.appOf(c);
       return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""}><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span><span class="sr-only">（新しいタブで開く）</span></a>`;
     });
-    if (g.ids.length < C.MAX_LINKS) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを追加</button>`);
+    if (g.ids.length < C.MAX_LINKS) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`);
     linksEl.innerHTML = tiles.join("");
     linksEl.setAttribute("aria-label", `${g.title} のリンク`);
   }
@@ -55,7 +55,7 @@ const groups = (() => {
             ? `<button type="button" role="tab" class="group-tab on" id="group-sign" aria-selected="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></button>`
             : `<button type="button" role="tab" class="group-tab" data-i="${i}" aria-selected="false" tabindex="-1">${esc(g.title)}</button>`
         )
-        .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを作る" aria-haspopup="dialog">＋</button>`;
+        .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを つくる" aria-haspopup="dialog">＋</button>`;
     const on = $("group-sign");
     const left = on.offsetLeft - (tabsEl.clientWidth - on.offsetWidth) / 2;
     tabsEl.scrollTo({ left: Math.max(0, left), behavior: "instant" });
@@ -164,7 +164,7 @@ const groups = (() => {
       const items = sh.id === "mine" ? mine : C.LIST.filter((c) => c.shelf === sh.id);
       const body = items.length
         ? items.map((c) => cassette(c, has.has(c.id))).join("")
-        : `<button type="button" class="cas-make" data-make="1"><span aria-hidden="true">＋</span>作る</button>`;
+        : `<button type="button" class="cas-make" data-make="1"><span aria-hidden="true">＋</span>つくる</button>`;
       return `<section class="cas-shelf"><h3>▾ ${esc(sh.name)}${sh.id === "mine" ? ` <small>${mine.length} / ${C.MINE_MAX}</small>` : ""}</h3><div class="cas-grid">${body}</div></section>`;
     }).join("");
     renderCount();
@@ -239,7 +239,7 @@ const groups = (() => {
     if (editing) $("mylink-editing-name").textContent = editing.label;
     const mine = C.mine();
     $("mylink-list").innerHTML = mine.length
-      ? `<h3>作ったリンク</h3>${mine.map((c) => `<div class="mylink-row"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>変える</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">消す</button></div>`).join("")}`
+      ? `<h3>作ったリンク</h3>${mine.map((c) => `<div class="mylink-row"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
       : "";
     renderCount();
   }
@@ -360,7 +360,7 @@ const groups = (() => {
       ? g.ids
           .map((id, i) => {
             const c = C.byId(id);
-            return `<li data-id="${esc(id)}"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="edit-row-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span><button type="button" class="mini" data-act="up" aria-label="${labelHtml(c)} を上へ" ${i === 0 ? "disabled" : ""}>▲</button><button type="button" class="mini" data-act="down" aria-label="${labelHtml(c)} を下へ" ${i === g.ids.length - 1 ? "disabled" : ""}>▼</button><button type="button" class="mini danger" data-act="out" aria-label="${labelHtml(c)} を外す">外す</button></li>`;
+            return `<li data-id="${esc(id)}"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="edit-row-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span><button type="button" class="mini" data-act="up" aria-label="${labelHtml(c)} を上へ" ${i === 0 ? "disabled" : ""}>▲</button><button type="button" class="mini" data-act="down" aria-label="${labelHtml(c)} を下へ" ${i === g.ids.length - 1 ? "disabled" : ""}>▼</button><button type="button" class="mini danger" data-act="out" aria-label="${labelHtml(c)} を外す">はずす</button></li>`;
           })
           .join("")
       : `<li class="edit-empty">まだリンクがありません</li>`;
