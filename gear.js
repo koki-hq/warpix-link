@@ -39,19 +39,39 @@ const gear = (() => {
   const WEEK = ["日", "月", "火", "水", "木", "金", "土"];
   let back = 0;
   const md = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  // 日付も 出す（v2.1.1、本人「今日とか昨日とか日付わかるようにして」）。short は「◯◯のワープ」に、full は ◀ ▶ の あいだに
   function when(q) {
     const s = new Date(`${q.from}T12:00:00`);
-    if (q.range === "today") return back === 0 ? "今日" : back === 1 ? "昨日" : `${md(s)}（${WEEK[s.getDay()]}）`;
-    if (q.range === "week") return back === 0 ? "今週" : back === 1 ? "先週" : `${md(s)}〜${md(new Date(`${q.to}T12:00:00`))}`;
-    if (q.range === "month") return back === 0 ? "今月" : back === 1 ? "先月" : `${s.getFullYear()}年${s.getMonth() + 1}月`;
-    return "全部";
+    const e = new Date(`${q.to}T12:00:00`);
+    const day = (d) => `${md(d)}（${WEEK[d.getDay()]}）`;
+    const ym = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月`;
+    const pick = (now, prev, other) => (back === 0 ? now : back === 1 ? prev : other);
+    if (q.range === "today") {
+      const name = pick("今日", "昨日", null);
+      return { short: name ?? day(s), full: name ? `${name} ${day(s)}` : day(s) };
+    }
+    if (q.range === "week") {
+      const name = pick("今週", "先週", null);
+      const span = `${md(s)}〜${md(e)}`;
+      return { short: name ?? span, full: name ? `${name} ${span}` : span };
+    }
+    if (q.range === "month") {
+      const name = pick("今月", "先月", null);
+      return { short: name ?? ym(s), full: name ? `${name} ${ym(s)}` : ym(s) };
+    }
+    if (q.range === "year") {
+      const name = pick("今年", "去年", null);
+      const y = `${s.getFullYear()}年`;
+      return { short: name ?? y, full: name ? `${name} ${y}` : y };
+    }
+    return { short: "全部", full: "全部" };
   }
   function renderLog() {
     for (const b of panels.log.querySelectorAll("[data-range]")) b.setAttribute("aria-pressed", String(b.dataset.range === range));
     const q = warpLog.query(range, back);
-    const label = when(q);
+    const { short: label, full } = when(q);
     $("log-nav").hidden = range === "all";
-    $("log-when").textContent = label;
+    $("log-when").textContent = full;
     $("log-older").disabled = !q.older;
     $("log-newer").disabled = back === 0;
     $("log-label").textContent = `${label}のワープ`;

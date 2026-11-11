@@ -23,7 +23,7 @@ const warpLog = (() => {
     s.setDate(s.getDate() - ((s.getDay() + 6) % 7));
     return s;
   }
-  // range：today | week | month | all。back：いくつ まえか（0 が いま。v2.1 で 前の 日・週・月へ さかのぼれる ように）
+  // range：today | week | month | year | all。back：いくつ まえか（0 が いま。v2.1 で 前の 日・週・月へ さかのぼれる ように）
   function span(range, back = 0) {
     const now = today();
     if (range === "today") {
@@ -42,6 +42,10 @@ const warpLog = (() => {
       const s = new Date(now.getFullYear(), now.getMonth() - back, 1, 12);
       const e = new Date(s.getFullYear(), s.getMonth() + 1, 0, 12);
       return { from: ymdOf(s), to: ymdOf(e), start: s, end: e };
+    }
+    if (range === "year") {
+      const y = now.getFullYear() - back;
+      return { from: `${y}-01-01`, to: `${y}-12-31`, start: new Date(y, 0, 1, 12) };
     }
     return { from: "0000-00-00", to: "9999-99-99" };
   }

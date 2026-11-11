@@ -59,7 +59,6 @@ const groups = (() => {
     const on = $("group-sign");
     const left = on.offsetLeft - (tabsEl.clientWidth - on.offsetWidth) / 2;
     tabsEl.scrollTo({ left: Math.max(0, left), behavior: "instant" });
-    barEl.classList.toggle("more", tabsEl.scrollWidth > tabsEl.clientWidth + 1);
   }
   tabsEl.addEventListener("click", (e) => {
     const b = e.target.closest(".group-tab");

@@ -1628,22 +1628,16 @@ body {
 .group-bar[hidden] {
   display: none;
 }
-/* まだ つづく ときは 右はしを ぼかす */
-.group-bar.more::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 3px;
-  width: 28px;
-  background: linear-gradient(90deg, transparent, var(--bg));
-  pointer-events: none;
-}
+/* v2.1.1：たてにも ぐらぐら うごいた（本人）→ よこ だけ スクロール。右はしの ぼかしは やめた（本人「もやいらんのでは」）。
+   はしの タブが とちゅうで きれて いれば、つづきが ある ことは つたわる */
 .group-tabs {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  padding: 6px 28px 0 4px;
+  overflow-y: hidden;
+  touch-action: pan-x;
+  overscroll-behavior: contain;
+  padding: 6px 4px 0;
   border-bottom: 3px solid var(--gold);
   scrollbar-width: none;
   overscroll-behavior-x: contain;
@@ -1699,7 +1693,7 @@ body {
   outline-offset: -2px;
 }
 .group-tab:active {
-  translate: 0 2px;
+  filter: brightness(0.85);
 }
 
 /* ---------- リンク：v1 の ボタンを 2 列 × 6 段 ---------- */
@@ -1732,8 +1726,9 @@ body {
     var(--px) 0 0 0 var(--fg),
     6px 6px 0 0 var(--shadow);
 }
+/* v2.1.1：日本語まじりの 名前（「WARPIX公式」など）の 英字が でかかった（本人）→ 15 → 13px */
 .links .pixel-btn.jp-label {
-  font-size: 15px;
+  font-size: 13px;
 }
 /* ながい なまえ（v2.1） */
 .links .pixel-btn.len-m {
@@ -1743,7 +1738,7 @@ body {
   font-size: 7px;
 }
 .links .pixel-btn.jp-label.len-m {
-  font-size: 13px;
+  font-size: 12px;
 }
 .links .pixel-btn.jp-label.len-l {
   font-size: 11px;
@@ -2169,7 +2164,7 @@ body {
 }
 .seg {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
 }
 .seg button {
