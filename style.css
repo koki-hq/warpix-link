@@ -1543,10 +1543,11 @@ body {
 }
 
 /* ---------- ピクセ と ふきだし（v1 の まま） ---------- */
+/* v2.1.2：セリフが 3 行に なると、ふきだしが ロゴと タブに かさなった（本人）。
+   ピクセの だんは ちぢめない（ふきだしの 高さ ぶん かならず とる）。たりない ときは リンクの だんが ちぢむ */
 .screen .npc {
-  flex: 1 1 84px;
+  flex: 0 0 auto;
   min-height: 80px;
-  max-height: 200px;
   align-items: center;
   padding: 4px 4px 0;
 }
@@ -1705,7 +1706,7 @@ body {
   row-gap: 14px;
   flex: 1 1 auto;
   height: 420px;
-  min-height: 276px;
+  min-height: 228px;
   max-height: 420px;
   padding: 4px 10px 10px 4px;
 }
@@ -2493,32 +2494,19 @@ body {
   background: var(--bg);
 }
 
-/* 新しい 版の おしらせ（v2.1）：下に うかぶ おび */
-.update-bar {
-  position: fixed;
-  left: 50%;
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  z-index: 20;
-  translate: -50% 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: max-content;
-  max-width: calc(100vw - 24px);
-  padding: 10px 12px 10px 16px;
-  background: var(--bg);
-  color: var(--fg);
+/* 新しい 版の おしらせ（v2.1.2 まんなかの まど） */
+.update .update-title {
+  margin: 8px 0 4px;
   font-family: "DotGothic16", monospace;
-  font-size: 14px;
-  box-shadow: 0 -2px 0 0 var(--gold), 0 2px 0 0 var(--gold), -2px 0 0 0 var(--gold), 2px 0 0 0 var(--gold), 6px 6px 0 0 var(--shadow);
+  font-size: 18px;
+  color: var(--gold);
 }
-.update-bar[hidden] {
-  display: none;
-}
-.update-bar .win-btn {
+.update .update-text {
   margin: 0;
-  padding: 6px 12px;
-  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+.update .win-foot {
+  justify-content: center;
 }
 
 /* ログの 前・次（v2.1） */

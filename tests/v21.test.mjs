@@ -47,24 +47,24 @@ export default {
     await p.ev(`gear.open("log")`);
     await sleep(100);
     const v = () => p.ev(`({ when: document.getElementById("log-when").textContent, total: document.getElementById("log-total").textContent, older: !document.getElementById("log-older").disabled, newer: !document.getElementById("log-newer").disabled })`);
-    t.eq(await v(), { when: "今週 11/9〜11/15", total: "5", older: true, newer: false }, "今週 が ちがう");
+    t.eq(await v(), { when: "11/9〜11/15", total: "5", older: true, newer: false }, "今週 が ちがう");
     await p.click("#log-older");
-    t.eq(await v(), { when: "先週 11/2〜11/8", total: "5", older: true, newer: true }, "先週 が ちがう");
+    t.eq(await v(), { when: "11/2〜11/8", total: "5", older: true, newer: true }, "先週 が ちがう");
     t.eq(await p.ev(`[...document.querySelectorAll("#log-week-bars .bar-n")].map((x) => x.textContent).join(",")`), "0,0,0,0,0,0,5", "先週の 曜日ごと が ちがう");
     await p.click("#log-older");
     t.eq(await v(), { when: "10/26〜11/1", total: "7", older: false, newer: true }, "2 週 前 が ちがう（ここより 前は ない）");
     await p.click("#log-newer");
     await p.click("#log-newer");
-    t.eq((await v()).when, "今週 11/9〜11/15", "▶ で もどれない");
+    t.eq((await v()).when, "11/9〜11/15", "▶ で もどれない");
     await p.ev(`document.querySelector('[data-range="today"]').click()`);
     await p.click("#log-older");
-    t.eq(await v(), { when: "昨日 11/9（月）", total: "2", older: true, newer: true }, "昨日 が ちがう");
+    t.eq(await v(), { when: "11/9（月）", total: "2", older: true, newer: true }, "昨日 が ちがう");
     await p.ev(`document.querySelector('[data-range="month"]').click()`);
-    t.eq((await v()).when, "今月 2026年11月", "日・週・月を かえたら いまに もどらない");
+    t.eq((await v()).when, "2026年11月", "日・週・月を かえたら いまに もどらない");
     await p.click("#log-older");
-    t.eq(await v(), { when: "先月 2026年10月", total: "7", older: false, newer: true }, "先月 が ちがう");
+    t.eq(await v(), { when: "2026年10月", total: "7", older: false, newer: true }, "先月 が ちがう");
     await p.ev(`document.querySelector('[data-range="year"]').click()`);
-    t.eq(await v(), { when: "今年 2026年", total: "17", older: false, newer: false }, "今年 が ちがう");
+    t.eq(await v(), { when: "2026年", total: "17", older: false, newer: false }, "今年 が ちがう");
     t.eq(await p.ev(`[...document.querySelectorAll(".seg button")].map((b) => b.textContent).join(",")`), "日,週,月,年,ぜんぶ", "ボタンの 名前が ちがう");
     await p.ev(`document.querySelector('[data-range="all"]').click()`);
     t.ok(await p.ev(`document.getElementById("log-nav").hidden`), "全部 で ◀ ▶ が でる");
@@ -129,6 +129,17 @@ export default {
     await p.click("#group-sign");
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("edit-dialog").open`), "えらんで いる タブを おしても 編集が ひらかない");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "v2.1.2：説明書の ホーム画面は iPhone と Android の りょうほう・新しい 版は まんなかの まど（とじる ボタン なし）・はいけいに 服の はなしが ない"(t) {
+    const { server, p } = await openApp(t, { mobile: true });
+    const lines = await p.ev(`manual.homeHow().map((x) => x.split("：")[0])`);
+    t.eq(lines, ["iPhone", "Android"], "説明書の ホーム画面が 片方 だけ");
+    const d = await p.ev(`(() => { const d = document.getElementById("update-dialog"); return { dialog: d?.tagName, close: !!d?.querySelector(".about-close"), btn: document.getElementById("update-btn")?.textContent }; })()`);
+    t.eq(d, { dialog: "DIALOG", close: false, btn: "こうしん する" }, "新しい 版の まどが ちがう");
+    t.ok(!(await p.ev(`document.getElementById("panel-sky").textContent`)).includes("服"), "はいけいに 服の はなしが のこる");
     t.noErrors(p);
     await server.close();
   },

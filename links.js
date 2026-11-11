@@ -330,7 +330,7 @@ const groups = (() => {
     if (backToEdit) return openEdit();
     // はじめての ときだけ、つぎに できる ことを ピクセが ひとこと（v2.1）
     const g = C.current();
-    if (g?.ids.length && !pixe.tip("warp", "リンクを おすと ワープ！\n✎の タブを おすと へんしゅう できるよ。") && C.groups().length >= 2)
+    if (g?.ids.length && !pixe.tip("warp", "リンクを おすと ワープ！\nグループの タブを おすと\nへんしゅう できるよ。") && C.groups().length >= 2)
       pixe.tip("swipe", "よこに スワイプしても\nグループを きりかえられるよ。");
   }
   // けってい：つくる タブで なにか かいて あれば つくってから とじる

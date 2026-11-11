@@ -205,8 +205,12 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   );
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (!hadController) return; // はじめて 来た 人は いま 入った だけ
-    const bar = document.getElementById("update-bar");
-    if (bar) bar.hidden = false;
+    // まんなかの まどで（v2.1.2、本人「ど真ん中に出していいよ　モーダルとして　絶対更新させるように」）。Esc でも とじない
+    const d = document.getElementById("update-dialog");
+    if (!d || d.open) return;
+    for (const o of document.querySelectorAll("dialog[open]")) o.close();
+    d.addEventListener("cancel", (e) => e.preventDefault());
+    d.showModal();
   });
   document.getElementById("update-btn")?.addEventListener("click", () => location.reload());
 }

@@ -253,7 +253,6 @@
           <button type="button" class="sky-card" data-sky="evening" aria-pressed="false"><span class="sky-thumb" data-thumb="evening"></span><b>ゆうがた</b></button>
           <button type="button" class="sky-card" data-sky="night" aria-pressed="false"><span class="sky-thumb" data-thumb="night"></span><b>よる</b></button>
         </div>
-        <p class="about-note">ピクセの服は、季節やイベントの日に自動で着替えます。</p>
       </section>
 
       <section class="panel" id="panel-bgm" role="tabpanel" aria-labelledby="tab-bgm" hidden>
@@ -324,14 +323,14 @@
         <ol class="manual-steps">
           <li>右上の ＋ でグループを作ります。</li>
           <li>「＋ リンクを 追加」で、「リストから えらぶ」か、「じぶんで つくる」でアドレスを貼って追加します。</li>
-          <li>選んでいるタブ（✎）をもう一度押すと、名前や並び順を変えられます。</li>
+          <li>選んでいるグループのタブをもう一度押すと、名前や並び順を変えられます。</li>
           <li>上のタブか、横にスワイプしてグループを切り替えます。</li>
         </ol>
       </section>
       <section class="manual-sheet" data-sheet="home" hidden>
         <h3>ホーム画面に入れよう</h3>
         <p>ホーム画面に入れると、アプリみたいにすぐ開けます。</p>
-        <p class="manual-how" id="manual-how"></p>
+        <div class="manual-how" id="manual-how"></div>
       </section>
     </div>
     <div class="manual-nav">
@@ -341,11 +340,16 @@
     </div>
   </dialog>
 
-  <!-- 新しい 版が ある とき（v2.1）：みんなは 開き直す ことを 知らないので、画面で 知らせる -->
-  <div class="update-bar" id="update-bar" role="status" hidden>
-    <span>新しいバージョンがあります</span>
-    <button type="button" class="win-btn pink" id="update-btn">こうしん する</button>
-  </div>
+  <!-- 新しい 版が ある とき（v2.1 → v2.1.2 で まんなかの まどに）：みんなは 開き直す ことを 知らないので、かならず 更新して もらう。とじる ボタンは なし -->
+  <dialog class="about win update" id="update-dialog" aria-labelledby="update-text">
+    <div class="about-body">
+      <p class="update-title">新しいバージョンがあります</p>
+      <p class="update-text" id="update-text">更新すると、新しい WARPIX LINK になります。グループやリンクはそのまま残ります。</p>
+    </div>
+    <div class="win-foot">
+      <button type="button" class="win-btn pink" id="update-btn">こうしん する</button>
+    </div>
+  </dialog>
 
   <script src="config.js"></script>
   <script src="count.js"></script>

@@ -48,7 +48,7 @@ export default {
     await p.ev(`window.WARPIX_ASK = true; gear.open("log")`);
     await sleep(200);
     let v = await logView(p);
-    t.eq([v.label, v.total, v.top, v.week], ["今週のワープ", "6", "YOUTUBE", true], "こんしゅう が ちがう");
+    t.eq([v.label, v.total, v.top, v.week], ["11/9〜11/15 のワープ", "6", "YOUTUBE", true], "こんしゅう が ちがう");
     t.eq(v.bars, ["2", "4", "0", "0", "0", "0", "0"], "ようびごと が ちがう");
     t.eq(v.rank, ["YOUTUBE:5", "SPOTIFY:1"], "よく行った サイト が ちがう");
     await p.ev(`document.querySelector('[data-range="today"]').click()`);

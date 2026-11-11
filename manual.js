@@ -14,19 +14,19 @@ const manual = (() => {
   const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const android = /Android/.test(ua);
   const inApp = /Instagram|FBAN|FBAV|Line\//.test(ua); // インスタ・Facebook・LINE の なかの ブラウザ
-  const iosSafari = ios && !inApp && !/CriOS|FxiOS|EdgiOS/.test(ua);
 
   for (const el of dialog.querySelectorAll(".ms-pixe")) el.innerHTML = pixe.look();
 
   // ホーム画面の ページは、もう アプリで ひらいて いる 人と パソコンには 出さない
   const homeShown = () => !pocket.standalone() && (ios || android);
+  // iPhone と Android の りょうほうを 出す（v2.1.2、本人「なんで iphoneだけなん」）。いま つかって いる ほうを うえに
   function homeHow() {
-    if (inApp) return "いまはアプリの中のブラウザで開いています。右上か右下の「…」から「ブラウザで開く」を選んでから、ブラウザのメニューで「ホーム画面に追加」してください。";
-    if (iosSafari) return "Safari の共有ボタンから「ホーム画面に追加」。見つからないときは「…」の中にあります。";
-    if (ios) return "共有ボタンから「ホーム画面に追加」。";
-    return "ブラウザのメニュー（︙）から「ホーム画面に追加」か「アプリをインストール」。";
+    const iphone = "iPhone：Safari の共有ボタンから「ホーム画面に追加」。見つからないときは「…」の中にあります。";
+    const droid = "Android：Chrome のメニュー（︙）から「ホーム画面に追加」か「アプリをインストール」。";
+    const lines = android ? [droid, iphone] : [iphone, droid];
+    if (inApp) lines.unshift("いまはアプリの中のブラウザで開いています。右上か右下の「…」から「ブラウザで開く」を選んでから、下のやりかたで追加してください。");
+    return lines;
   }
-
   let pages = [];
   let page = 0;
   function show() {
@@ -36,7 +36,10 @@ const manual = (() => {
     nextBtn.textContent = last ? "はじめる ▶" : "つぎへ ▶";
     skipBtn.hidden = last;
     backBtn.hidden = page === 0;
-    if (pages[page].dataset.sheet === "home") document.getElementById("manual-how").textContent = homeHow();
+    if (pages[page].dataset.sheet === "home") {
+      const how = document.getElementById("manual-how");
+      how.replaceChildren(...homeHow().map((t) => Object.assign(document.createElement("p"), { textContent: t })));
+    }
   }
   let onClose = null;
   // first：はじめての 人。うしろの 画面を まっくらに して、リンクの 画面が 一瞬 見えない ように（v2.1）
@@ -77,7 +80,7 @@ const manual = (() => {
   });
   skipBtn.addEventListener("click", close);
 
-  return { open, isOpen: () => dialog.open, seen: () => store.get(KEY.manual, false) === true };
+  return { open, homeHow, isOpen: () => dialog.open, seen: () => store.get(KEY.manual, false) === true };
 })();
 
 // ---------- はじまり ----------
