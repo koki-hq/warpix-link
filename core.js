@@ -565,13 +565,16 @@ function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = ()
 // とじても BGM が もどらない（本人「けす　ボタンを押して　キャンセルしたらBGMが消えちゃう」「BGM止まったままだよ」）。
 // アプリの なかの まどに したので 音は とまらない。はい なら true の Promise。
 // テストは window.WARPIX_ASK = true / false で まどを 出さずに こたえる
-function ask(msg, yes = "けす") {
+function ask(msg, yes = "けす", { only = false } = {}) {
   if (typeof window.WARPIX_ASK === "boolean") return Promise.resolve(window.WARPIX_ASK);
   const d = document.getElementById("ask-dialog");
   const y = document.getElementById("ask-yes");
   const n = document.getElementById("ask-no");
   document.getElementById("ask-text").textContent = msg;
   y.textContent = yes;
+  n.hidden = only;
+  y.classList.toggle("danger", !only);
+  y.classList.toggle("cyan", only);
   return new Promise((resolve) => {
     const done = (v) => {
       d.close();
@@ -585,8 +588,17 @@ function ask(msg, yes = "けす") {
       done(false);
     };
     d.showModal();
-    n.focus();
+    (only ? y : n).focus();
   });
+}
+
+// しらせる だけの まど（v2.5）：ボタンは「とじる」ひとつ。上限に 達した とき など。とじたら おわる Promise
+function tell(msg) {
+  if (typeof window.WARPIX_ASK === "boolean") {
+    window.WARPIX_TOLD = msg; // テスト用：出した ことばを のこす
+    return Promise.resolve();
+  }
+  return ask(msg, "とじる", { only: true });
 }
 
 // ---------- せってい（背景の そら・BGM・おおきさ） ----------

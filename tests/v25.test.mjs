@@ -128,4 +128,40 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "上限は グループ・自分の リンク とも 99 こ。達したら まんなかの まどで しらせる（ボタンは とじる だけ）"(t) {
+    const many = Array.from({ length: 99 }, (_, i) => [`g${i}`, []]);
+    const mine = Array.from({ length: 99 }, (_, i) => ({ id: `my-${i + 1}`, label: `L${i + 1}`, url: `https://e${i + 1}.example.jp/`, icon: "star" }));
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData(many), "warpix-v2-mylinks": mine } });
+    t.eq(await p.ev(`[CASSETTES.groups().length, CASSETTES.mine().length]`), [99, 99], "99 こ よめない");
+    // タブの ＋：まどが 出て、ふえない
+    await p.click("#group-new");
+    await sleep(150);
+    let v = await p.ev(`({ open: document.getElementById("ask-dialog").open, text: document.getElementById("ask-text").textContent, no: document.getElementById("ask-no").hidden, yes: document.getElementById("ask-yes").textContent, n: CASSETTES.groups().length })`);
+    t.eq(v, { open: true, text: "グループの数が上限（99こ）に達したよ。使わないグループを消すと、また作れるよ。", no: true, yes: "とじる", n: 99 }, "グループの 上限の まどが ちがう");
+    await p.click("#ask-yes");
+    await sleep(100);
+    // 右上の NEW：なまえの まどを ひらかずに しらせる
+    await p.click("#add-group");
+    await sleep(150);
+    t.ok(await p.ev(`document.getElementById("ask-dialog").open && !document.getElementById("group-dialog").open`), "右上で なまえの まどが ひらいた");
+    await p.click("#ask-yes");
+    t.eq(await p.ev(`CASSETTES.addGroup("x")`), null, "100 こめが できる");
+    // 自分の リンク
+    await p.click("#link-add");
+    await sleep(150);
+    t.eq(await p.ev(`document.querySelector("#mylink-list h3 small").textContent`), "99こ", "かずの 出かたが ちがう");
+    await p.ev(`document.getElementById("mylink-name").value = "あたらしい"; document.getElementById("mylink-url").value = "https://new.example.jp/"; document.getElementById("add-done").click()`);
+    await sleep(150);
+    v = await p.ev(`({ open: document.getElementById("ask-dialog").open, text: document.getElementById("ask-text").textContent, no: document.getElementById("ask-no").hidden, n: CASSETTES.mine().length, add: document.getElementById("add-dialog").open })`);
+    t.eq(v, { open: true, text: "自分のリンクの数が上限（99こ）に達したよ。使わないリンクを消すと、また作れるよ。", no: true, n: 99, add: true }, "リンクの 上限の まどが ちがう");
+    await p.click("#ask-yes");
+    // けす ときの まどは もとの まま（やめる・けす）
+    await p.ev(`document.querySelector('#mylink-list [data-del="my-1"]').click()`);
+    await sleep(100);
+    t.ok(await p.ev(`!document.getElementById("ask-no").hidden && document.getElementById("ask-yes").textContent === "けす" && document.getElementById("ask-yes").classList.contains("danger")`), "けす まどが もどらない");
+    await p.click("#ask-no");
+    t.noErrors(p);
+    await server.close();
+  },
 };

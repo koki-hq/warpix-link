@@ -190,7 +190,7 @@ const CASSETTES = (() => {
   // ユーザー登録 なし、この ブラウザの なか だけ（ふっかつの じゅもんで もちはこべる）。おすそわけ なし。
   // アイコンは よういした ドット絵から えらぶ（あいての サイトから とって こない。とると あいてに「だれかが ひらいた」と つたわる）
   const MINE_KEY = KEY.mylinks; // v2.0 から あたらしい キー（v1 の warpix-mylinks は よまない）
-  const MINE_MAX = 18;
+  const MINE_MAX = 99; // v2.5：18 → 99（本人「18は少なすぎる」。容量は 1 こ 100 バイト ほど）
   // なまえは 16 もじまで（v2.1。10 もじでは みじかい と 本人）。ながい なまえは 画面で もじを ちいさく する
   const MINE_LABEL = 16;
   const MINE_ICONS = {
@@ -263,6 +263,7 @@ const CASSETTES = (() => {
   // さいしょは グループも リンクも ない（本人「選べるし　自分でも追加できる」）。おなじ グループに おなじ リンクは 1 つ だけ
   const MAX_LINKS = 12;
   const MAX_TITLE = 12;
+  const MAX_GROUPS = 99; // v2.5：あんぜんの ため（それまでは なし）
   const cut = (s, n) => Array.from(String(s ?? "").trim()).slice(0, n).join("");
   const newId = () => `g-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
   let groups = [];
@@ -333,6 +334,7 @@ const CASSETTES = (() => {
     },
     // なまえは なくても いい（v2.5）。から なら「ぐるーぷN」
     addGroup(title) {
+      if (groups.length >= MAX_GROUPS) return null;
       const t = cut(title, MAX_TITLE) || this.nextName();
       const g = { id: newId(), title: t, ids: [] };
       groups.push(g);
@@ -431,6 +433,7 @@ const CASSETTES = (() => {
     },
     // ---------- じぶんの リンク ----------
     MINE_MAX,
+    MAX_GROUPS,
     MINE_LABEL,
     MINE_ICONS,
     mine: () => [...mine],

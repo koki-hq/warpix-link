@@ -135,7 +135,14 @@ const groups = (() => {
   // ---------- グループを つくる ----------
   const groupDialog = $("group-dialog");
   const groupName = $("group-name");
+  // 上限（v2.5）：まんなかの まどで しらせる。「上限に 達したよ」の あとに どう すれば いいか
+  const groupsFull = () => {
+    if (C.groups().length < C.MAX_GROUPS) return false;
+    tell(`グループの数が上限（${C.MAX_GROUPS}こ）に達したよ。使わないグループを消すと、また作れるよ。`);
+    return true;
+  };
   function openGroup() {
+    if (groupsFull()) return;
     groupName.value = "";
     groupName.placeholder = C.nextName(); // から なら この なまえ（v2.5）
     groupDialog.showModal();
@@ -162,6 +169,7 @@ const groups = (() => {
   // へんしゅう ちゅうは タブを おしても おわらないので、つくったら おわる
   function quickGroup() {
     if (typeof editMode !== "undefined" && editMode.on()) editMode.exit();
+    if (groupsFull()) return;
     const g = C.addGroup("");
     render();
     sound.sfx.coin();
@@ -274,7 +282,7 @@ const groups = (() => {
     const mine = C.mine();
     const has = new Set(C.current()?.ids ?? []);
     $("mylink-list").innerHTML = mine.length
-      ? `<h3>作ったリンク <small>${mine.length} / ${C.MINE_MAX}</small></h3><p class="win-note">押すと追加。もう一度押すと取り消せるよ。</p>${mine.map((c) => `<div class="mylink-row"><button type="button" class="mylink-pick${has.has(c.id) ? " picked" : ""}" data-pick="${esc(c.id)}" aria-pressed="${has.has(c.id)}"><span class="cas-check" aria-hidden="true">${has.has(c.id) ? "✓" : ""}</span><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span></button><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
+      ? `<h3>作ったリンク <small>${mine.length}こ</small></h3><p class="win-note">押すと追加。もう一度押すと取り消せるよ。</p>${mine.map((c) => `<div class="mylink-row"><button type="button" class="mylink-pick${has.has(c.id) ? " picked" : ""}" data-pick="${esc(c.id)}" aria-pressed="${has.has(c.id)}"><span class="cas-check" aria-hidden="true">${has.has(c.id) ? "✓" : ""}</span><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span></button><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
       : "";
     renderCount();
   }
@@ -342,7 +350,10 @@ const groups = (() => {
     if (!name) msg = "名前を入力してね。";
     else msg = C.checkMine(url, editingId);
     if (!editingId) {
-      if (!msg && C.mine().length >= C.MINE_MAX) msg = `自分のリンクは${C.MINE_MAX}こまでです。`;
+      if (!msg && C.mine().length >= C.MINE_MAX) {
+        tell(`自分のリンクの数が上限（${C.MINE_MAX}こ）に達したよ。使わないリンクを消すと、また作れるよ。`);
+        return false;
+      }
       if (!msg && g.ids.length >= C.MAX_LINKS) msg = `このグループはもう${C.MAX_LINKS}こでいっぱいです。`;
     }
     // もう 作った アドレスなら 下の 一覧の その 行を ひからせる（v2.5）
