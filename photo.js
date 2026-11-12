@@ -39,8 +39,27 @@ const photoBg = (() => {
       t.onerror = () => reject(t.error);
     });
   }
-  const getBlob = (id) => tx("readonly", (s) => s.get(id)).catch(() => null);
-  const putBlob = (id, blob) => tx("readwrite", (s) => s.put(blob, id));
+  // v2.4.1：がぞうは Blob の まま でなく 中身（ArrayBuffer）で ほぞん。iPhone の Safari で、読みだした Blob を べつの 名前で ほぞんして
+  // もとを けすと 中身まで きえた（v2.4 の うつしかえで おきた、本人「全部画像は表示されないんだけど、がぞう１、２、３みたいに登録はされてる」）
+  async function getBlob(id) {
+    const v = await tx("readonly", (s) => s.get(id)).catch(() => null);
+    if (!v) return null;
+    if (v instanceof Blob) return v; // v2.3〜v2.4 の ほぞん
+    return v.buf ? new Blob([v.buf], { type: v.type || "image/jpeg" }) : null;
+  }
+  async function putBlob(id, blob) {
+    const buf = await blob.arrayBuffer();
+    return tx("readwrite", (s) => s.put({ type: blob.type, buf }, id));
+  }
+  // 中身まで ちゃんと 読めるか（Safari では こわれた Blob も サイズだけ のこる ことが ある）
+  async function readable(id) {
+    try {
+      const b = await getBlob(id);
+      return !!b && (await b.arrayBuffer()).byteLength > 0;
+    } catch {
+      return false;
+    }
+  }
   const delBlob = (id) => tx("readwrite", (s) => s.delete(id)).catch(() => {});
   let list = (store.get(KEY.photos, []) ?? []).filter(isPhoto).slice(0, MAX);
   const saveList = () => store.set(KEY.photos, list);
@@ -60,19 +79,36 @@ const photoBg = (() => {
     urls.delete(id);
   }
 
-  // v2.3 の グループの がぞう（グループの id で ほぞん）を 一覧へ うつす
+  // v2.3 の グループの がぞう（グループの id で ほぞん）を 一覧へ うつす。中身ごと うつして、読めるのを たしかめてから もとを けす
+  // そのあと、中身の ない がぞう（v2.4 の うつしかえで こわれた もの）を 一覧から はずす。
+  // それを 使って いた グループは スイッチを OFF に（がぞうを 入れた ときに じどうで ON に なって いた）、メニューは よる に
   const migrated = (async () => {
     for (const g of C.groups()) {
       if (!g.bg?.photo) continue;
       const blob = await getBlob(g.id);
+      let id = null;
       if (blob && list.length < MAX) {
-        const id = newId();
-        await putBlob(id, blob).catch(() => {});
-        list.push(id);
-        saveList();
-        C.setBg(g.id, { sky: g.bg.sky === "photo" ? id : g.bg.sky, photo: undefined });
-      } else C.setBg(g.id, { sky: g.bg.sky === "photo" ? "night" : g.bg.sky, photo: undefined });
-      await delBlob(g.id);
+        id = newId();
+        try {
+          await putBlob(id, blob);
+        } catch {}
+        if (await readable(id)) {
+          list.push(id);
+          saveList();
+        } else id = null;
+      }
+      C.setBg(g.id, { sky: g.bg.sky === "photo" ? id ?? "night" : g.bg.sky, photo: undefined });
+      if (id) await delBlob(g.id);
+    }
+    const broken = [];
+    for (const id of list) if (!(await readable(id))) broken.push(id);
+    if (broken.length) {
+      list = list.filter((x) => !broken.includes(x));
+      saveList();
+      for (const id of broken) await delBlob(id);
+      if (broken.includes(settings.state.sky)) settings.set({ sky: "night" });
+      for (const g of C.groups()) if (broken.includes(g.bg?.sky)) C.setBg(g.id, { own: false, sky: "night" });
+      renderAll();
     }
   })().catch(() => {});
 
@@ -84,8 +120,11 @@ const photoBg = (() => {
   };
   let applying = 0;
   async function apply() {
-    const v = chosen();
+    let v = chosen();
     const n = ++applying;
+    // グループの がぞうが 見つからない ときは メニューの はいけいに
+    if (isPhoto(v) && v !== settings.state.sky && !(await urlOf(v))) v = settings.state.sky;
+    if (n !== applying) return;
     if (isPhoto(v)) {
       const u = await urlOf(v);
       if (n !== applying) return;
@@ -98,8 +137,7 @@ const photoBg = (() => {
     }
     root.classList.remove("has-photo");
     skyBg.style.removeProperty("--photo");
-    const g = C.current();
-    settings.showSky(g?.bg?.own && !isPhoto(v) ? v : null);
+    settings.showSky(v !== settings.state.sky && !isPhoto(v) ? v : null);
   }
 
   // ---------- 一覧（メニューと グループの へんしゅうで おなじ もの） ----------

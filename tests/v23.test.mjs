@@ -117,4 +117,35 @@ export default {
     t.noErrors(p);
     await server.close();
   },
+
+  async "v2.4.1：中身の ない がぞうは 一覧から はずし、それを 使って いた グループは スイッチ OFF（メニューの はいけいが 出る）。メニューの はいけいは 全部の グループに"(t) {
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": { at: 0, list: [{ id: "g0", title: "A", ids: ["youtube"] }, { id: "g1", title: "B", ids: ["line"], bg: { own: true, sky: "p-broken1" } }, { id: "g2", title: "C", ids: [], bg: { own: true, sky: "p-broken2" } }] }, "warpix-v2-photos": ["p-broken1", "p-broken2"] } });
+    await p.ev(`photoBg.ready()`);
+    await sleep(200);
+    t.eq(await p.ev(`[photoBg.list().length, CASSETTES.groups().map((g) => g.bg?.own ?? false)]`), [0, [false, false, false]], "こわれた がぞうが のこる・スイッチが ON の まま");
+    await p.ev(`settings.set({ sky: "evening" })`);
+    for (const i of [1, 2, 0]) {
+      await p.click(`#group-tabs [data-i="${i}"]`);
+      t.eq(await p.ev(`document.documentElement.dataset.sky`), "evening", `${i} ばんめの グループに メニューの はいけいが 出ない`);
+    }
+    t.ok((await p.ev(`document.querySelector("#panel-sky .about-note").textContent`)).includes("表示されます"), "メニューの 文が ちがう");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "v2.4.1：がぞうは 中身（ArrayBuffer）で ほぞん。ひらきなおしても 読める"(t) {
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
+    await pickPhoto(p, "menu");
+    await sleep(200);
+    await p.click("#trim-yes");
+    await sleep(500);
+    const id = await p.ev(`settings.state.sky`);
+    const raw = await p.ev(`new Promise((res) => { const r = indexedDB.open("warpix-v2-photos", 1); r.onsuccess = () => { const q = r.result.transaction("photos").objectStore("photos").get(${JSON.stringify(id)}); q.onsuccess = () => { const v = q.result; res({ blob: v instanceof Blob, buf: v?.buf instanceof ArrayBuffer, size: v?.buf?.byteLength ?? 0 }); r.result.close(); }; }; })`);
+    t.ok(!raw.blob && raw.buf && raw.size > 100, `中身で ほぞん されて いない：${JSON.stringify(raw)}`);
+    await p.goto(await p.ev("location.href"), 800);
+    await p.ev(`photoBg.ready()`);
+    t.ok(await p.ev(`document.documentElement.classList.contains("has-photo") && photoBg.list().length === 1`), "ひらきなおすと 読めない");
+    t.noErrors(p);
+    await server.close();
+  },
 };

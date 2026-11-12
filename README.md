@@ -60,7 +60,7 @@ v2.0（2026-11）で、ピクセの へやや ゲームなどの お遊びを �
 ## テストと健康診断
 
 ```sh
-node tests/run.mjs            # ぜんぶの テスト（56 件。あいて いる メモリで 2〜5 つ 同時に）
+node tests/run.mjs            # ぜんぶの テスト（58 件。あいて いる メモリで 2〜5 つ 同時に）
 node tests/run.mjs links      # 名前に links を含むテストだけ
 node tools/health.mjs         # 重さ・スマホでの速さ・待機中の CPU・アクセシビリティ
 node tools/fonts.mjs          # セリフや 文章に あたらしい 文字を つかったら
