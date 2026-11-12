@@ -85,9 +85,9 @@ export default {
     await p.ev(`gear.open("sky")`);
     await sleep(100);
     for (const sky of ["day", "evening"]) {
-      await p.click(`.sky-card[data-sky="${sky}"]`);
+      await p.click(`#menu-lib .bg-card[data-bg="${sky}"]`);
       t.eq(await p.ev(`document.documentElement.dataset.sky`), sky, `${sky} に かわらない`);
-      t.eq(await p.ev(`document.querySelector('.sky-card[data-sky="${sky}"]').getAttribute("aria-pressed")`), "true", `${sky} の しるしが ない`);
+      t.eq(await p.ev(`document.querySelector('#menu-lib .bg-card[data-bg="${sky}"]').getAttribute("aria-checked")`), "true", `${sky} の しるしが ない`);
     }
     const bg = await p.ev(`getComputedStyle(document.querySelector(".sky-bg")).backgroundImage`);
     t.ok(bg.includes("gradient"), "空が かわって いない");
