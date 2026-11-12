@@ -34,7 +34,7 @@ export default {
     await server.close();
   },
 
-  async "メニューで がぞうを ついか（トリミング）→ グループでも おなじ がぞうが えらべる。6 まいで ＋ が きえる。ボタンは がぞうの ときだけ"(t) {
+  async "メニューで がぞうを ついか（トリミング）→ グループでも おなじ がぞうが えらべる。9 まいで ＋ が きえる。ボタンは がぞうの ときだけ"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]], ["B", ["line"]]]) } });
     await p.ev(`gear.open("sky")`);
     await sleep(200);
@@ -59,17 +59,18 @@ export default {
     await sleep(200);
     await p.click("#gbg-switch");
     t.eq(await cards(p, "group-lib"), ["day", "evening", "night", "p", "add"], "グループの 一覧に メニューの がぞうが ない");
-    // 6 まいに すると ＋ が きえる
-    for (let i = 0; i < 5; i++) {
+    // 9 まいに すると ＋ が きえる
+    for (let i = 0; i < 8; i++) {
       await pickPhoto(p, "group");
       await sleep(200);
       await p.click("#trim-yes");
       await sleep(400);
     }
-    t.eq((await cards(p, "group-lib")).filter((x) => x === "p").length, 6, "6 まい はいらない");
-    t.ok(!(await cards(p, "group-lib")).includes("add"), "6 まいでも ＋ が のこる");
+    t.eq((await cards(p, "group-lib")).filter((x) => x === "p").length, 9, "9 まい はいらない");
+    t.eq(await p.ev(`getComputedStyle(document.getElementById("group-lib")).gridTemplateColumns.split(" ").length`), 4, "グループの へんしゅうが 4 れつ で ない");
+    t.ok(!(await cards(p, "group-lib")).includes("add"), "9 まいでも ＋ が のこる");
     await p.goto(await p.ev("location.href"), 800);
-    t.eq(await p.ev(`photoBg.list().length`), 6, "ひらきなおすと がぞうが きえる");
+    t.eq(await p.ev(`photoBg.list().length`), 9, "ひらきなおすと がぞうが きえる");
     t.noErrors(p);
     await server.close();
   },

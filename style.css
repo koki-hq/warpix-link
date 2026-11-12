@@ -2969,3 +2969,15 @@ html.has-photo body {
 .bg-lib-btns[hidden] {
   display: none;
 }
+/* グループの へんしゅうは 4 れつの 小さめの 四角（リンクの 一覧を 下に おしださない） */
+#group-lib {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+#group-lib .bg-card {
+  font-size: 11px;
+}
+#group-lib .sky-thumb,
+#group-lib .bg-photo {
+  aspect-ratio: 1;
+}
