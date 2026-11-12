@@ -38,8 +38,8 @@ export default {
     await sleep(200);
     await pickPhoto(p);
     await sleep(200);
-    const tr = await p.ev(`({ open: document.getElementById("trim-dialog").open, ghosts: document.querySelectorAll("#trim-ghosts span").length, w: document.getElementById("trim-img").getBoundingClientRect().width })`);
-    t.ok(tr.open && tr.ghosts >= 4 && tr.w >= 390, `トリミングが ちがう：${JSON.stringify(tr)}`);
+    const tr = await p.ev(`({ open: document.getElementById("trim-dialog").open, ghosts: document.querySelectorAll("#trim-ghosts span").length, w: document.getElementById("trim-img").getBoundingClientRect().width, box: document.getElementById("trim-stage").getBoundingClientRect().width })`);
+    t.ok(tr.open && tr.ghosts >= 4 && tr.box < 390 && tr.box > 150 && tr.w >= tr.box, `トリミングが ちがう：${JSON.stringify(tr)}`);
     await p.ev(`(() => { const z = document.getElementById("trim-zoom"); z.value = 200; z.dispatchEvent(new Event("input")); })()`);
     t.ok((await p.ev(`document.getElementById("trim-img").getBoundingClientRect().width`)) > tr.w * 1.8, "つまみで 大きく ならない");
     await p.click("#trim-yes");

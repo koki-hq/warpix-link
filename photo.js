@@ -129,18 +129,18 @@ const photoBg = (() => {
   const stage = $("trim-stage");
   const img = $("trim-img");
   const zoomEl = $("trim-zoom");
-  let view = null; // { W, H, iw, ih, s0, z, tx, ty }
+  let view = null; // { W, H（わくの 大きさ）, SW, SH（画面の 大きさ）, k（わく ÷ 画面）, iw, ih, s0, z, tx, ty }
   let trimUrl = null;
 
-  // ボタンや セリフが くる ところ（いまの 画面から はかる）
-  function ghosts() {
+  // ボタンや セリフが くる ところ（いまの 画面から はかって、わくの 大きさに ちぢめる）
+  function ghosts(k) {
     const sel = [".topbar", ".logo-row", ".npc", "#group-bar", "#links"];
     $("trim-ghosts").innerHTML = sel
       .map((q) => document.querySelector(q))
       .filter((el) => el && el.getClientRects().length)
       .map((el) => {
         const r = el.getBoundingClientRect();
-        return `<span style="left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px"></span>`;
+        return `<span style="left:${r.left * k}px;top:${r.top * k}px;width:${r.width * k}px;height:${r.height * k}px"></span>`;
       })
       .join("");
   }
@@ -175,13 +175,19 @@ const photoBg = (() => {
     } catch {
       return ask("この がぞうは 開けなかったよ。べつの がぞうを 選んでね。", "とじる");
     }
-    ghosts();
-    const W = innerWidth;
-    const H = innerHeight;
+    // わくは 画面と おなじ かたちで、まんなかに（上の 題・下の 説明と ボタンの ぶん を あける）
+    const SW = innerWidth;
+    const SH = innerHeight;
+    const k = Math.min((SH - 250) / SH, (SW * 0.78) / SW);
+    const W = Math.round(SW * k);
+    const H = Math.round(SH * k);
+    stage.style.width = `${W}px`;
+    stage.style.height = `${H}px`;
+    ghosts(k);
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
     const s0 = Math.max(W / iw, H / ih);
-    view = { W, H, iw, ih, s0, z: 1, tx: (W - iw * s0) / 2, ty: (H - ih * s0) / 2 };
+    view = { W, H, SW, SH, k, iw, ih, s0, z: 1, tx: (W - iw * s0) / 2, ty: (H - ih * s0) / 2 };
     draw();
     trim.showModal();
     sound.sfx.select();
@@ -189,9 +195,14 @@ const photoBg = (() => {
   // ゆびで うごかす・2 本の ゆびで 大きく
   const ptrs = new Map();
   let pinch = null;
+  // ゆびの いちは わくの なかの いちに なおす
+  const local = (e) => {
+    const r = stage.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
   stage.addEventListener("pointerdown", (e) => {
     stage.setPointerCapture?.(e.pointerId);
-    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    ptrs.set(e.pointerId, local(e));
     if (ptrs.size === 2) {
       const [a, b] = [...ptrs.values()];
       pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: view.z };
@@ -200,15 +211,16 @@ const photoBg = (() => {
   stage.addEventListener("pointermove", (e) => {
     const p = ptrs.get(e.pointerId);
     if (!p || !view) return;
+    const q = local(e);
     if (ptrs.size === 1) {
-      view.tx += e.clientX - p.x;
-      view.ty += e.clientY - p.y;
-      p.x = e.clientX;
-      p.y = e.clientY;
+      view.tx += q.x - p.x;
+      view.ty += q.y - p.y;
+      p.x = q.x;
+      p.y = q.y;
       return draw();
     }
-    p.x = e.clientX;
-    p.y = e.clientY;
+    p.x = q.x;
+    p.y = q.y;
     const [a, b] = [...ptrs.values()];
     if (pinch) zoomTo((pinch.z * Math.hypot(a.x - b.x, a.y - b.y)) / pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2);
   });
@@ -220,7 +232,8 @@ const photoBg = (() => {
   stage.addEventListener("pointercancel", up);
   stage.addEventListener("wheel", (e) => {
     e.preventDefault();
-    zoomTo(view.z * (e.deltaY < 0 ? 1.1 : 0.9), e.clientX, e.clientY);
+    const q = local(e);
+    zoomTo(view.z * (e.deltaY < 0 ? 1.1 : 0.9), q.x, q.y);
   }, { passive: false });
   zoomEl.addEventListener("input", () => zoomTo(Number(zoomEl.value) / 100));
   function closeTrim() {
@@ -233,15 +246,15 @@ const photoBg = (() => {
     e.preventDefault();
     closeTrim();
   });
-  // けってい：見えて いる ところを 画面の 大きさで 切りだして ほぞん（はば 900 まで、JPEG）
+  // けってい：わくに 見えて いる ところを、画面の 大きさで 切りだして ほぞん（はば 900 まで、JPEG）
   $("trim-yes").addEventListener("click", async () => {
     const g = C.current();
     if (!g || !view) return closeTrim();
     const s = view.s0 * view.z;
-    const k = Math.min(Math.min(devicePixelRatio || 1, 2), 900 / view.W);
+    const k = Math.min(Math.min(devicePixelRatio || 1, 2), 900 / view.SW);
     const cv = document.createElement("canvas");
-    cv.width = Math.round(view.W * k);
-    cv.height = Math.round(view.H * k);
+    cv.width = Math.round(view.SW * k);
+    cv.height = Math.round(view.SH * k);
     cv.getContext("2d").drawImage(img, -view.tx / s, -view.ty / s, view.W / s, view.H / s, 0, 0, cv.width, cv.height);
     const blob = await new Promise((r) => cv.toBlob(r, "image/jpeg", 0.82));
     closeTrim();

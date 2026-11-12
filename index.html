@@ -324,20 +324,18 @@
     </div>
   </dialog>
 
-  <!-- がぞうの トリミング（v2.3、デザイン案 A）：画面いっぱいに 写真、ボタンや セリフが くる ところを 点線で。ゆびで うごかす・2 本の ゆびか つまみで 大きく -->
+  <!-- がぞうの トリミング（v2.3、デザイン案 B、本人「２はBで」）：まんなかに スマホの かたちの わく。ボタンや セリフが くる ところを 点線で。ゆびで うごかす・2 本の ゆびか つまみで 大きく -->
   <dialog class="trim" id="trim-dialog" aria-labelledby="trim-title">
-    <div class="trim-stage" id="trim-stage">
+    <h2 id="trim-title">どこを 見せる？</h2>
+    <div class="trim-box" id="trim-stage">
       <img id="trim-img" alt="" draggable="false">
       <div class="trim-ghosts" id="trim-ghosts" aria-hidden="true"></div>
     </div>
-    <div class="trim-top"><h2 id="trim-title">見せたいところに あわせてね</h2><span>2本の ゆびで 大きく</span></div>
-    <div class="trim-bot">
-      <p>点線は ボタンが くる ところ。</p>
-      <label class="trim-zoom"><span aria-hidden="true">－</span><input type="range" id="trim-zoom" min="100" max="400" step="1" value="100" aria-label="大きさ"><span aria-hidden="true">＋</span></label>
-      <div class="trim-btns">
-        <button type="button" class="win-btn" id="trim-no">やめる</button>
-        <button type="button" class="win-btn pink" id="trim-yes">けってい</button>
-      </div>
+    <p class="trim-note">ゆびで動かして、2本のゆびで大きくしてね。点線はボタンがくるところ。</p>
+    <label class="trim-zoom"><span aria-hidden="true">－</span><input type="range" id="trim-zoom" min="100" max="400" step="1" value="100" aria-label="大きさ"><span aria-hidden="true">＋</span></label>
+    <div class="trim-btns">
+      <button type="button" class="win-btn" id="trim-no">やめる</button>
+      <button type="button" class="win-btn pink" id="trim-yes">けってい</button>
     </div>
   </dialog>
 
