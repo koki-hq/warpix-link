@@ -1,6 +1,6 @@
 // ---------- サービスワーカー：オフラインでもピクセに会えるように ----------
 // 公開するたびに VERSION を上げると、新しいファイルを取り直す
-const VERSION = "warpix-v2.1.6";
+const VERSION = "warpix-v2.2.0";
 const FONT_CACHE = "warpix-fonts";
 const FILES = [
   "./",
@@ -18,6 +18,7 @@ const FILES = [
   "links.js",
   "mail.js",
   "gear.js",
+  "edit.js",
   "manual.js",
   "manifest.webmanifest",
   "icons/icon-192.png",

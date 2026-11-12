@@ -43,11 +43,11 @@ const manual = (() => {
   }
   let onClose = null;
   // first：はじめての 人。うしろの 画面を まっくらに して、リンクの 画面が 一瞬 見えない ように（v2.1）
-  function open({ first = false, then = null } = {}) {
+  function open({ first = false, then = null, at = null } = {}) {
     dialog.classList.toggle("first", first);
     onClose = then;
     pages = sheets.filter((s) => s.dataset.sheet !== "home" || homeShown());
-    page = 0;
+    page = Math.max(0, pages.findIndex((s) => s.dataset.sheet === at));
     show();
     if (!dialog.open) dialog.showModal();
     nextBtn.focus();
@@ -80,7 +80,47 @@ const manual = (() => {
   });
   skipBtn.addEventListener("click", close);
 
-  return { open, homeHow, isOpen: () => dialog.open, seen: () => store.get(KEY.manual, false) === true };
+  return { open, homeHow, phone: () => ios || android, isOpen: () => dialog.open, seen: () => store.get(KEY.manual, false) === true };
+})();
+
+// ---------- ホーム画面への さそい（v2.2）----------
+// 本人「ホーム画面に追加しないで使われるのこっちも嫌なんよね」「ブラウザで見てる人には定期的に入れたい」「回数でいい気がする」。
+// ブラウザで ひらいて いる スマホの 人だけ。はじめて リンクを 入れた とき に 1 かい、そのあとは 5 かい ひらく ごとに。
+// 「もう出さない」は おかない（あとで だけ）。テストは window.WARPIX_INVITE = true / false で 出す・出さないを きめる
+const invite = (() => {
+  const EVERY = 5;
+  const d = document.getElementById("invite-dialog");
+  document.getElementById("invite-pixe").innerHTML = pixe.look();
+  const st = { first: false, opens: 0, ...store.get(KEY.invite, null) };
+  const save = () => store.set(KEY.invite, st);
+  const can = () => (typeof window.WARPIX_INVITE === "boolean" ? window.WARPIX_INVITE : !pocket.standalone() && manual.phone());
+  function show() {
+    if (d.open || document.querySelector("dialog[open]")) return false;
+    d.showModal();
+    sound.sfx.select();
+    return true;
+  }
+  // はじめて グループに リンクを 入れた とき
+  function first() {
+    if (!can() || st.first) return false;
+    st.first = true;
+    save();
+    return show();
+  }
+  // ひらいた とき（はじめての さそいの あと、5 かいに 1 かい）
+  function boot() {
+    if (!can() || !st.first) return false;
+    st.opens += 1;
+    save();
+    return st.opens % EVERY === 0 && show();
+  }
+  document.getElementById("invite-later").addEventListener("click", () => d.close());
+  document.getElementById("invite-how").addEventListener("click", () => {
+    d.close();
+    manual.open({ at: "home" });
+  });
+  d.addEventListener("click", (e) => e.target === d && d.close());
+  return { first, boot, state: () => ({ ...st }), EVERY };
 })();
 
 // ---------- はじまり ----------
@@ -93,7 +133,10 @@ const manual = (() => {
   // ピクセの あいさつは 説明書を とじてから
   const asked = new URLSearchParams(location.search).get("go") === "manual";
   if (asked || (window.WARPIX_MANUAL !== false && !manual.seen())) manual.open({ first: !manual.seen(), then: hello });
-  else hello();
+  else {
+    hello();
+    invite.boot();
+  }
 
   // BGM は さいしょに さわった ときから（ブラウザが かってに 音を ださせて くれない）
   const start = () => {

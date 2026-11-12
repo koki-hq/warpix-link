@@ -8,7 +8,11 @@ export default {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
     await p.click("#link-add");
     await sleep(200);
-    t.ok(await p.ev(`document.getElementById("add-dialog").open && !document.getElementById("add-shelf").hidden`), "たなが ひらかない");
+    // v2.2：さきに 出るのは「じぶんで つくる」
+    t.ok(await p.ev(`document.getElementById("add-dialog").open && !document.getElementById("add-make").hidden && document.getElementById("add-tab-make").getAttribute("aria-selected") === "true"`), "じぶんで つくる が さきに 出ない");
+    t.ok(await p.ev(`document.querySelector(".copy-how")?.textContent.includes("共有ボタン")`), "コピーの しかたが ない");
+    await p.click("#add-tab-shelf");
+    t.ok(await p.ev(`!document.getElementById("add-shelf").hidden`), "たなが ひらかない");
     t.eq(await p.ev(`document.querySelectorAll(".cas-item").length`), 49, "たなの リンクの かずが ちがう");
     t.eq(await p.ev(`document.querySelector('.cas-item[data-id="youtube"]').getAttribute("aria-pressed")`), "true", "もう はいって いる ものに しるしが ない");
     await p.ev(`document.querySelector('.cas-item[data-id="twitter"]').click()`);
@@ -28,6 +32,7 @@ export default {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", BAND.slice(0, 11)]]) } });
     await p.click("#link-add");
     await sleep(100);
+    await p.click("#add-tab-shelf");
     await p.ev(`document.querySelector('.cas-item[data-id="netflix"]').click()`);
     t.eq((await ids(p)).length, 12, "12 こめが はいらない");
     await p.ev(`document.querySelector('.cas-item[data-id="hulu"]').click()`);
@@ -60,6 +65,7 @@ export default {
     // たなの「じぶんの リンク」にも でる → けす
     await p.click("#link-add");
     await sleep(100);
+    await p.click("#add-tab-shelf");
     t.ok(await p.ev(`!!document.querySelector('.cas-item[data-id="my-1"]')`), "じぶんの リンクの たなに でない");
     await p.click("#add-tab-make");
     // かえる（v2.0.2）：いまの なまえ・アドレス・アイコンが はいり、けってい で かわる。グループの なかも かわる

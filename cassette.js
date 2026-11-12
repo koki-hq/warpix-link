@@ -352,6 +352,16 @@ const CASSETTES = (() => {
       save();
       return true;
     },
+    // ドラッグで ならべかえた じゅんばんを そのまま（v2.2）。いま えらんで いる グループは そのまま えらんだ まま
+    setGroupOrder(gids) {
+      const cur = groups[at]?.id;
+      const next = gids.map((id) => find(id)).filter(Boolean);
+      if (next.length !== groups.length || new Set(next).size !== groups.length) return false;
+      groups = next;
+      at = Math.max(0, groups.findIndex((g) => g.id === cur));
+      save();
+      return true;
+    },
     // リンクを 追加（さいごに）・はずす・ならべかえ
     addLink(gid, id) {
       const g = find(gid);
@@ -364,6 +374,16 @@ const CASSETTES = (() => {
       const g = find(gid);
       if (!g || !g.ids.includes(id)) return false;
       g.ids = g.ids.filter((x) => x !== id);
+      save();
+      return true;
+    },
+    setLinkOrder(gid, ids) {
+      const g = find(gid);
+      if (!g) return false;
+      const has = new Set(g.ids);
+      const next = [...new Set(ids)].filter((id) => has.has(id));
+      if (next.length !== g.ids.length) return false;
+      g.ids = next;
       save();
       return true;
     },

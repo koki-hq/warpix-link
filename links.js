@@ -32,12 +32,13 @@ const groups = (() => {
       return;
     }
     renderTabs(list);
+    const editing = document.body.classList.contains("editing");
     const tiles = g.ids.map((id) => {
       const c = C.byId(id);
       const app = C.appOf(c);
-      return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""}><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span><span class="sr-only">（新しいタブで開く）</span></a>`;
+      return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""}><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span>${editing ? `<span class="tile-x" aria-hidden="true">✕</span>` : ""}<span class="sr-only">${editing ? "（押すと編集）" : "（新しいタブで開く）"}</span></a>`;
     });
-    if (g.ids.length < C.MAX_LINKS) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`);
+    if (g.ids.length < C.MAX_LINKS && !editing) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`);
     linksEl.innerHTML = tiles.join("");
     linksEl.setAttribute("aria-label", `${g.title} のリンク`);
   }
@@ -88,7 +89,7 @@ const groups = (() => {
   let touch = null;
   linksEl.addEventListener("touchstart", (e) => (touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null), { passive: true });
   linksEl.addEventListener("touchend", (e) => {
-    if (!touch) return;
+    if (!touch || document.body.classList.contains("editing")) return (touch = null);
     const dx = e.changedTouches[0].clientX - touch.x;
     const dy = e.changedTouches[0].clientY - touch.y;
     touch = null;
@@ -150,7 +151,7 @@ const groups = (() => {
   const addDialog = $("add-dialog");
   const shelvesEl = $("add-shelves");
   const addMsg = $("add-msg");
-  let addTab = "shelf";
+  let addTab = "make";
   let backToEdit = false;
   let pickedIcon = "star";
   let editingId = null; // つくった リンクを かえて いる ときの id（したの「かえる」）
@@ -188,7 +189,8 @@ const groups = (() => {
     if (tab === "make") renderMake();
     else renderShelves();
   }
-  function openAdd({ fromEdit = false, tab = "shelf" } = {}) {
+  // v2.2：「じぶんで つくる」が さき（本人「じぶんでつくる方を押したいから」）
+  function openAdd({ fromEdit = false, tab = "make" } = {}) {
     if (!C.current()) return;
     backToEdit = fromEdit;
     editingId = null;
@@ -340,6 +342,7 @@ const groups = (() => {
     const g = C.current();
     if (g?.ids.length && !pixe.tip("warp", "リンクを おすと ワープ！\nグループの タブを おすと\nへんしゅう できるよ。") && C.groups().length >= 2)
       pixe.tip("swipe", "よこに スワイプしても\nグループを きりかえられるよ。");
+    if (g?.ids.length) setTimeout(() => invite.first(), 1600);
   }
   // けってい：つくる タブで なにか かいて あれば つくってから とじる
   $("add-done").addEventListener("click", () => {
@@ -367,15 +370,56 @@ const groups = (() => {
       ? g.ids
           .map((id, i) => {
             const c = C.byId(id);
-            return `<li data-id="${esc(id)}"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="edit-row-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span><button type="button" class="mini" data-act="up" aria-label="${labelHtml(c)} を上へ" ${i === 0 ? "disabled" : ""}>▲</button><button type="button" class="mini" data-act="down" aria-label="${labelHtml(c)} を下へ" ${i === g.ids.length - 1 ? "disabled" : ""}>▼</button><button type="button" class="mini danger" data-act="out" aria-label="${labelHtml(c)} を外す">はずす</button></li>`;
+            return `<li data-id="${esc(id)}"><button type="button" class="grip" aria-label="${labelHtml(c)} の順番（↑↓キーでも動かせます）">≡</button><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="edit-row-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span><button type="button" class="mini danger" data-act="out" aria-label="${labelHtml(c)} を外す">はずす</button></li>`;
           })
           .join("")
       : `<li class="edit-empty">まだリンクがありません</li>`;
     $("edit-add").hidden = g.ids.length >= C.MAX_LINKS;
-    const n = C.groups().length;
-    $("edit-prev").disabled = C.at() === 0;
-    $("edit-next").disabled = C.at() === n - 1;
+    const cur = g.id;
+    $("group-rows").innerHTML = C.groups()
+      .map((x) => `<li data-id="${esc(x.id)}"${x.id === cur ? ' class="on"' : ""}><button type="button" class="grip" aria-label="${esc(x.title)} の順番（↑↓キーでも動かせます）">≡</button><span class="edit-row-name jp">${esc(x.title)}</span></li>`)
+      .join("");
   }
+  // ≡ を つかんで ならべかえ（v2.2、本人「前へ　とか　後ろへ　とかも　こっちが頭で想像しなきゃいけない」）。キーボードは ↑ ↓
+  makeSortable(rowsEl, {
+    item: "li[data-id]",
+    handle: ".grip",
+    onEnd: (ids) => {
+      C.setLinkOrder(C.current().id, ids);
+      renderEdit();
+      render();
+    },
+  });
+  makeSortable($("group-rows"), {
+    item: "li[data-id]",
+    handle: ".grip",
+    onEnd: (ids) => {
+      C.setGroupOrder(ids);
+      renderEdit();
+      render();
+    },
+  });
+  function gripKeys(listEl, move) {
+    listEl.addEventListener("keydown", (e) => {
+      const b = e.target.closest(".grip");
+      if (!b || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+      e.preventDefault();
+      const id = b.closest("li").dataset.id;
+      move(id, e.key === "ArrowUp" ? -1 : 1);
+      renderEdit();
+      render();
+      listEl.querySelector(`li[data-id="${CSS.escape(id)}"] .grip`)?.focus();
+    });
+  }
+  gripKeys(rowsEl, (id, d) => C.moveLink(C.current().id, id, d));
+  gripKeys($("group-rows"), (id, d) => {
+    const list = C.groups().map((x) => x.id);
+    const i = list.indexOf(id);
+    const j = i + d;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    C.setGroupOrder(list);
+  });
   function openEdit() {
     const g = C.current();
     if (!g) return;
@@ -392,7 +436,6 @@ const groups = (() => {
     const g = C.current();
     const id = b.closest("li").dataset.id;
     const act = b.dataset.act;
-    if (act === "up" || act === "down") C.moveLink(g.id, id, act === "up" ? -1 : 1);
     if (act === "out") {
       C.removeLink(g.id, id);
       $("edit-msg").textContent = `「${C.byId(id).label}」を外しました`;
@@ -402,16 +445,6 @@ const groups = (() => {
     rowsEl.querySelector(`li[data-id="${CSS.escape(id)}"] [data-act="${act}"]:not(:disabled)`)?.focus();
   });
   $("edit-add").addEventListener("click", () => openAdd({ fromEdit: true }));
-  $("edit-prev").addEventListener("click", () => {
-    C.moveGroup(C.current().id, -1);
-    renderEdit();
-    render();
-  });
-  $("edit-next").addEventListener("click", () => {
-    C.moveGroup(C.current().id, 1);
-    renderEdit();
-    render();
-  });
   $("edit-delete").addEventListener("click", async () => {
     const g = C.current();
     if (!(await ask(`グループ「${g.title}」を消しますか？`))) return;
@@ -439,5 +472,5 @@ const groups = (() => {
   closeOnBackdrop(editDialog);
 
   render();
-  return { render, openGroup, openAdd, openEdit };
+  return { render, openGroup, openAdd, openEdit, iconHtml };
 })();

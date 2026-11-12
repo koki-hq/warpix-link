@@ -108,7 +108,7 @@ export default {
       await sleep(150);
       await p.ev(`document.getElementById("group-name").value = ${JSON.stringify(name)}; document.getElementById("group-form").requestSubmit()`);
       await sleep(200);
-      await p.ev(`document.querySelector('.cas-item[data-id="youtube"]').click(); document.getElementById("add-done").click()`);
+      await p.ev(`document.getElementById("add-tab-shelf").click(); document.querySelector('.cas-item[data-id="youtube"]').click(); document.getElementById("add-done").click()`);
     };
     await make("A");
     t.ok((await p.text()).includes("おすと ワープ"), "リンクを 入れた あとの 案内が ない");

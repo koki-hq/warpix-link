@@ -67,11 +67,12 @@ export default {
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("edit-dialog").open`), "かんばんを おしても へんしゅうが ひらかない");
     t.eq(await p.ev(`document.getElementById("edit-name").value`), "A", "いまの なまえが はいって いない");
-    await p.ev(`document.querySelector('#edit-rows li [data-act="down"]').click()`);
-    t.eq((await view(p)).links, ["spotify", "youtube", "twitter"], "▼ で したへ うごかない");
+    // v2.2：▲▼ の かわりに ≡（キーボードの ↓ でも うごく。ドラッグは v22 の テスト）
+    await p.ev(`document.querySelector('#edit-rows li .grip').dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }))`);
+    t.eq((await view(p)).links, ["spotify", "youtube", "twitter"], "≡ の ↓ で したへ うごかない");
     await p.ev(`document.querySelectorAll('#edit-rows li [data-act="out"]')[2].click()`);
     t.eq((await view(p)).links, ["spotify", "youtube"], "はずせない");
-    await p.click("#edit-next");
+    await p.ev(`document.querySelector('#group-rows li.on .grip').dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }))`);
     let v = await view(p);
     t.eq([v.saved, v.title, v.on], [["B", "A"], "A", 1], "グループの じゅんばんが かわらない");
     // なまえ：から は だめ、けってい で ほぞんして とじる

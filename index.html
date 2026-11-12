@@ -62,6 +62,12 @@
       </div>
     </header>
 
+    <!-- へんしゅう ちゅう（v2.2）：リンクを 長押しで はいる。ゆらゆら・✕ で はずす・ドラッグで ならべかえ・おすと へんしゅう -->
+    <div class="edit-band" id="edit-band" hidden>
+      <span>へんしゅう ちゅう</span>
+      <button type="button" id="edit-end">おわる</button>
+    </div>
+
     <div class="logo-row">
       <h1 class="title"><span class="sr-only">WARPIX LINK</span><span aria-hidden="true">WARPIX<span class="title-dash">-</span>LINK</span></h1>
       <p class="subtitle">PRESS A LINK TO WARP<span class="cursor">_</span></p>
@@ -123,8 +129,8 @@
     <div class="win-head">
       <p class="win-where"><span><span class="gold" id="add-group-name"></span> に追加</span><span class="muted" id="add-count"></span></p>
       <div class="win-tabs" role="tablist" aria-label="リンクの追加のしかた">
-        <button type="button" role="tab" id="add-tab-shelf" aria-controls="add-shelf" aria-selected="true">リストから えらぶ</button>
-        <button type="button" role="tab" id="add-tab-make" aria-controls="add-make" aria-selected="false" tabindex="-1">じぶんで つくる</button>
+        <button type="button" role="tab" id="add-tab-make" aria-controls="add-make" aria-selected="true">じぶんで つくる</button>
+        <button type="button" role="tab" id="add-tab-shelf" aria-controls="add-shelf" aria-selected="false" tabindex="-1">リストから えらぶ</button>
       </div>
     </div>
     <div class="about-body win-scroll" id="add-shelf" role="tabpanel" aria-labelledby="add-tab-shelf">
@@ -133,6 +139,7 @@
     </div>
     <div class="about-body win-scroll" id="add-make" role="tabpanel" aria-labelledby="add-tab-make" hidden>
       <form class="win-form" id="mylink-form" novalidate>
+      <p class="win-note copy-how">多くのアプリは、共有ボタンか「…」の中に「リンクをコピー」があります。コピーしたら、下のアドレスの欄に貼りつけてください。</p>
       <p class="mylink-editing" id="mylink-editing" hidden><span>「<b id="mylink-editing-name"></b>」を変更中</span><button class="mini" id="mylink-stop" type="button">やめる</button></p>
       <label for="mylink-name">名前（16文字まで）</label>
       <input class="win-input" id="mylink-name" type="text" maxlength="16" autocomplete="off">
@@ -176,10 +183,8 @@
       <ul class="edit-rows" id="edit-rows"></ul>
       <button class="win-btn cyan" id="edit-add" type="button">＋ リンクを 追加</button>
       <h3>グループの順番</h3>
-      <div class="win-btns">
-        <button class="win-btn" id="edit-prev" type="button">◀ まえへ</button>
-        <button class="win-btn" id="edit-next" type="button">うしろへ ▶</button>
-      </div>
+      <p class="win-note">≡ をつかんで動かすと、並び順を変えられます。</p>
+      <ul class="edit-rows group-rows" id="group-rows"></ul>
       <button class="win-btn danger" id="edit-delete" type="button">この グループを けす</button>
     </div>
     <div class="win-foot">
@@ -194,7 +199,7 @@
       <h2 id="mail-title">おしらせ</h2>
       <button class="about-close" id="mail-close" type="button" aria-label="閉じる">✕</button>
     </div>
-    <div class="about-body readable">
+    <div class="about-body">
       <ul class="mail-list" id="mail-list"></ul>
       <article class="mail-read" id="mail-read" hidden></article>
       <!-- いちらんへ もどる ボタンは よんだ ものの した（v2.0 の かたち。本人「位置とかも含めてv2.0の方が良かった」） -->
@@ -302,6 +307,43 @@
     </div>
   </dialog>
 
+  <!-- リンクの へんしゅう（v2.2）：へんしゅう ちゅうに リンクを おすと 下から。じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは はずす だけ -->
+  <dialog class="about win sheet" id="link-sheet" aria-labelledby="sheet-title">
+    <div class="about-top">
+      <h2 id="sheet-title">リンクを へんしゅう</h2>
+      <button class="about-close" id="sheet-close" type="button" aria-label="閉じる">✕</button>
+    </div>
+    <form class="about-body win-form readable" id="sheet-form" novalidate>
+      <div class="win-form" id="sheet-mine">
+        <label for="sheet-name">名前（16文字まで）</label>
+        <input class="win-input" id="sheet-name" type="text" maxlength="16" autocomplete="off">
+        <label for="sheet-url">アドレス（https:// で始まるもの）</label>
+        <input class="win-input" id="sheet-url" type="url" inputmode="url" autocomplete="off" spellcheck="false">
+        <p class="mylink-label" id="sheet-icon-label">アイコン</p>
+        <div class="mylink-icons" id="sheet-icons" role="radiogroup" aria-labelledby="sheet-icon-label"></div>
+        <p class="win-error" id="sheet-error" role="alert" hidden></p>
+      </div>
+      <p class="win-note" id="sheet-shelf">リストのリンクは、名前とアドレスを変えられません。</p>
+    </form>
+    <div class="win-foot">
+      <button class="win-btn danger" id="sheet-out" type="button">はずす</button>
+      <button class="win-btn pink" id="sheet-save" type="button">けってい</button>
+    </div>
+  </dialog>
+
+  <!-- ホーム画面への さそい（v2.2）：ブラウザで ひらいて いる スマホの 人に。はじめて リンクを 入れた とき と、5 かい ひらく ごと -->
+  <dialog class="about win invite" id="invite-dialog" aria-labelledby="invite-title">
+    <div class="about-body readable">
+      <span class="invite-pixe" id="invite-pixe" aria-hidden="true"></span>
+      <h3 id="invite-title">ホーム画面に入れよう</h3>
+      <p>ホーム画面に入れると、アプリみたいにすぐ開けます。ブラウザのままだと、しばらく開かないとグループが消えてしまうことがあります。</p>
+    </div>
+    <div class="win-foot">
+      <button class="win-btn" id="invite-later" type="button">あとで</button>
+      <button class="win-btn pink" id="invite-how" type="button">やりかたを みる</button>
+    </div>
+  </dialog>
+
   <!-- 取扱説明書（v1.48 → v2.0 → v2.1）：はじめての 人だけ。起動の いちばん はじめに 出す（リンクの 画面が 一瞬 見えない ように）。メニューの アプリ から いつでも -->
   <dialog class="about manual" id="manual" aria-labelledby="manual-title">
     <div class="about-top">
@@ -373,6 +415,7 @@
   <script src="links.js"></script>
   <script src="mail.js"></script>
   <script src="gear.js"></script>
+  <script src="edit.js"></script>
   <script src="manual.js"></script>
 </body>
 </html>

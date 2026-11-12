@@ -34,6 +34,7 @@ const KEY = {
   pixe: "warpix-v2-pixe",
   mylinks: "warpix-v2-mylinks",
   tips: "warpix-v2-tips",
+  invite: "warpix-v2-invite",
 };
 
 // ---------- 日付 ----------
@@ -439,6 +440,71 @@ const sound = (() => {
     position: () => (timer ? lastPlayed : -1),
   };
 })();
+
+// ---------- ドラッグで ならべかえ（v2.2）----------
+// 本人「ドラッグ&ドロップで並び順とか変えたり」。外の ライブラリは つかわない（ポインターの イベントだけ）。
+// box の なかの item を つかんで（handle が あれば そこだけ）、8px うごいたら ドラッグ。ゆびの 下の ものと その場で 入れかわる。
+// はなすと onEnd(あたらしい じゅんばんの data-id)。canStart() が false なら ドラッグに しない（スクロールや スワイプに まかせる）
+function makeSortable(box, { item, handle = null, onEnd, canStart = () => true }) {
+  let drag = null;
+  box.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    const it = e.target.closest(item);
+    if (!it || !box.contains(it) || (handle && !e.target.closest(handle))) return;
+    drag = { it, id: e.pointerId, x: e.clientX, y: e.clientY, on: false };
+  });
+  addEventListener(
+    "pointermove",
+    (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      if (!drag.on) {
+        if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+        if (!canStart(drag.it)) return (drag = null);
+        drag.on = true;
+        drag.it.classList.add("dragging");
+        box.classList.add("sorting");
+        sound.sfx.hover();
+      }
+      e.preventDefault();
+      drag.it.style.translate = `${e.clientX - drag.x}px ${e.clientY - drag.y}px`;
+      drag.it.style.pointerEvents = "none";
+      const under = document.elementFromPoint(e.clientX, e.clientY)?.closest(item);
+      drag.it.style.pointerEvents = "";
+      if (!under || under === drag.it || !box.contains(under)) return;
+      const list = [...box.querySelectorAll(item)];
+      const before = drag.it.getBoundingClientRect();
+      under[list.indexOf(drag.it) < list.indexOf(under) ? "after" : "before"](drag.it);
+      const after = drag.it.getBoundingClientRect();
+      // いれかわった ぶん 起点を ずらす（ゆびの 下に いた ままに）
+      drag.x += after.left - before.left;
+      drag.y += after.top - before.top;
+      drag.it.style.translate = `${e.clientX - drag.x}px ${e.clientY - drag.y}px`;
+      sound.sfx.hover();
+    },
+    { passive: false }
+  );
+  const end = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag;
+    drag = null;
+    if (!d.on) return;
+    d.it.classList.remove("dragging");
+    box.classList.remove("sorting");
+    d.it.style.translate = "";
+    // ドラッグの あとの click（リンクを ひらく・まどを ひらく）は むし
+    const stop = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+    };
+    addEventListener("click", stop, { capture: true, once: true });
+    setTimeout(() => removeEventListener("click", stop, { capture: true }), 0);
+    sound.sfx.select();
+    onEnd([...box.querySelectorAll(item)].map((x) => x.dataset.id));
+  };
+  addEventListener("pointerup", end);
+  addEventListener("pointercancel", end);
+  return { active: () => !!drag?.on };
+}
 
 // けす まえに たしかめる まど（v2.0.2）。ブラウザの confirm() は iPhone で 出て いる あいだ 音を とめ、
 // とじても BGM が もどらない（本人「けす　ボタンを押して　キャンセルしたらBGMが消えちゃう」「BGM止まったままだよ」）。
