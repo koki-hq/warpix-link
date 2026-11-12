@@ -1,16 +1,24 @@
-// ---------- グループだけの はいけい（v2.3）：ひる・ゆうがた・よる・じぶんの がぞう ----------
-// 本人「自分だけの画像とかアップロードして追加とかもできるようにできたりする？」。
-// メニューの「はいけい」は 全部の グループ 共通の まま。グループの へんしゅうの スイッチ「この グループだけの はいけい」を ON に すると、
-// そのグループだけ べつの 空か じぶんの がぞう（デザイン案、本人「はいけいでいいよ　そらだとわかりにくい」）。
-// がぞうは この ブラウザの なか だけ（IndexedDB）。どこにも おくらない。トリミング（どこを 見せるか）して、画面の 大きさで ほぞん。
-// 見せかたは そのまま すこし くらく（読める ように）。ます目は かさねない（本人「写真すっきり見せたい」）。月・ほし・くもは うえに のこる
+// ---------- はいけい（v2.3 → v2.4）：ひる・ゆうがた・よる＋じぶんの がぞう 6 まいまで ----------
+// 本人「自分だけの画像とかアップロードして追加とかもできるようにできたりする？」（v2.3）、
+// 「合計９個でいいか　だから自分の画像は６個まで追加できる感じにしようか」「３つ横に並ぶ前提で９にした」（v2.4）。
+// がぞうは メニューと グループで おなじ 一覧（グループで 入れた がぞうも メニューや ほかの グループで えらべる）。
+// メニューの「はいけい」は 全部の グループ 共通。グループの へんしゅうの スイッチ「この グループだけの はいけい」が ON なら そちら。
+// がぞうは この ブラウザの なか だけ（IndexedDB）。どこにも おくらない。トリミング（まんなかの わく、デザイン案 B）して 画面の 大きさで ほぞん。
+// 見せかたは そのまま すこし くらく。ます目は かさねない（本人「写真すっきり見せたい」）。月・ほし・くもは うえに のこる
 const photoBg = (() => {
   const C = CASSETTES;
   const $ = (id) => document.getElementById(id);
   const root = document.documentElement;
   const skyBg = document.querySelector(".sky-bg");
+  const MAX = 6;
+  const PRESETS = [
+    ["day", "ひる"],
+    ["evening", "ゆうがた"],
+    ["night", "よる"],
+  ];
+  const isPhoto = (v) => /^p-[a-z0-9]+$/.test(v ?? "");
 
-  // ---------- ほぞん（IndexedDB：グループの id → がぞう（Blob）） ----------
+  // ---------- ほぞん（IndexedDB：がぞうの id → Blob、ならびは localStorage） ----------
   const DB = "warpix-v2-photos";
   let dbp = null;
   function db() {
@@ -31,32 +39,55 @@ const photoBg = (() => {
       t.onerror = () => reject(t.error);
     });
   }
-  const getPhoto = (gid) => tx("readonly", (s) => s.get(gid)).catch(() => null);
-  const putPhoto = (gid, blob) => tx("readwrite", (s) => s.put(blob, gid));
-  const delPhoto = (gid) => tx("readwrite", (s) => s.delete(gid)).catch(() => {});
-  const urls = new Map(); // gid → object URL
-  async function urlOf(gid) {
-    if (urls.has(gid)) return urls.get(gid);
-    const blob = await getPhoto(gid);
+  const getBlob = (id) => tx("readonly", (s) => s.get(id)).catch(() => null);
+  const putBlob = (id, blob) => tx("readwrite", (s) => s.put(blob, id));
+  const delBlob = (id) => tx("readwrite", (s) => s.delete(id)).catch(() => {});
+  let list = (store.get(KEY.photos, []) ?? []).filter(isPhoto).slice(0, MAX);
+  const saveList = () => store.set(KEY.photos, list);
+  const newId = () => `p-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+  const urls = new Map(); // id → object URL
+  async function urlOf(id) {
+    if (urls.has(id)) return urls.get(id);
+    const blob = await getBlob(id);
     if (!blob) return null;
     const u = URL.createObjectURL(blob);
-    urls.set(gid, u);
+    urls.set(id, u);
     return u;
   }
-  function dropUrl(gid) {
-    const u = urls.get(gid);
+  function dropUrl(id) {
+    const u = urls.get(id);
     if (u) URL.revokeObjectURL(u);
-    urls.delete(gid);
+    urls.delete(id);
   }
 
-  // ---------- いまの グループの はいけいを 画面に ----------
+  // v2.3 の グループの がぞう（グループの id で ほぞん）を 一覧へ うつす
+  const migrated = (async () => {
+    for (const g of C.groups()) {
+      if (!g.bg?.photo) continue;
+      const blob = await getBlob(g.id);
+      if (blob && list.length < MAX) {
+        const id = newId();
+        await putBlob(id, blob).catch(() => {});
+        list.push(id);
+        saveList();
+        C.setBg(g.id, { sky: g.bg.sky === "photo" ? id : g.bg.sky, photo: undefined });
+      } else C.setBg(g.id, { sky: g.bg.sky === "photo" ? "night" : g.bg.sky, photo: undefined });
+      await delBlob(g.id);
+    }
+  })().catch(() => {});
+
+  // ---------- いま 見せる はいけい ----------
+  // グループだけの はいけいが ON なら そちら、OFF なら メニューの はいけい
+  const chosen = () => {
+    const g = C.current();
+    return g?.bg?.own ? g.bg.sky : settings.state.sky;
+  };
   let applying = 0;
   async function apply() {
-    const g = C.current();
-    const bg = g?.bg?.own ? g.bg : null;
+    const v = chosen();
     const n = ++applying;
-    if (bg?.sky === "photo" && bg.photo) {
-      const u = await urlOf(g.id);
+    if (isPhoto(v)) {
+      const u = await urlOf(v);
       if (n !== applying) return;
       if (u) {
         settings.showSky("night"); // 月・くもの いろは よるの もの
@@ -67,26 +98,88 @@ const photoBg = (() => {
     }
     root.classList.remove("has-photo");
     skyBg.style.removeProperty("--photo");
-    settings.showSky(bg && bg.sky !== "photo" ? bg.sky : null);
+    const g = C.current();
+    settings.showSky(g?.bg?.own && !isPhoto(v) ? v : null);
   }
 
-  // ---------- グループの へんしゅうの「はいけい」 ----------
+  // ---------- 一覧（メニューと グループの へんしゅうで おなじ もの） ----------
+  // where：menu か group。選んで いるのが がぞうの ときだけ［かえる］［けす］（本人「デフォルトの３つ選択してる時は出ないようにしたほうが誤解がないかも」）
+  const libs = { menu: { grid: $("menu-lib"), btns: $("menu-lib-btns") }, group: { grid: $("group-lib"), btns: $("group-lib-btns") } };
+  const selectedOf = (where) => (where === "menu" ? settings.state.sky : C.current()?.bg?.sky ?? "night");
+  async function renderLib(where) {
+    const { grid, btns } = libs[where];
+    const sel = selectedOf(where);
+    const cards = PRESETS.map(([k, name]) => `<button type="button" role="radio" class="bg-card" data-bg="${k}" aria-checked="${sel === k}"><span class="sky-thumb" data-thumb="${k}"></span><b>${name}</b></button>`);
+    for (const [i, id] of list.entries()) {
+      const u = await urlOf(id);
+      cards.push(`<button type="button" role="radio" class="bg-card" data-bg="${id}" aria-checked="${sel === id}"><span class="bg-photo" style="${u ? `background-image:url('${u}')` : ""}"></span><b>がぞう ${i + 1}</b></button>`);
+    }
+    if (list.length < MAX) cards.push(`<button type="button" class="bg-card bg-add" data-bg="add" aria-label="がぞうを ついか"><span class="bg-photo"><span aria-hidden="true">＋</span></span><b>ついか</b></button>`);
+    grid.innerHTML = cards.join("");
+    btns.hidden = !isPhoto(sel) || !list.includes(sel);
+  }
+  function choose(where, v) {
+    if (where === "menu") settings.set({ sky: v });
+    else if (C.current()) C.setBg(C.current().id, { sky: v });
+    sound.sfx.select();
+    renderAll();
+    apply();
+  }
+  function renderAll() {
+    renderLib("menu");
+    if (C.current()) renderEdit();
+  }
+  let pickFor = null; // { where, replace }
+  for (const where of ["menu", "group"]) {
+    libs[where].grid.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-bg]");
+      if (!b) return;
+      if (b.dataset.bg === "add") {
+        pickFor = { where, replace: null };
+        return $("gbg-file").click();
+      }
+      choose(where, b.dataset.bg);
+    });
+    libs[where].btns.addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-lib-act]");
+      const id = selectedOf(where);
+      if (!b || !isPhoto(id)) return;
+      if (b.dataset.libAct === "change") {
+        pickFor = { where, replace: id };
+        return $("gbg-file").click();
+      }
+      if (!(await ask("この がぞうを 消しますか？ 使っている はいけいは よる に もどるよ。"))) return;
+      await remove(id);
+    });
+  }
+  // がぞうを けす：使って いる メニューと グループは よる に もどす
+  async function remove(id) {
+    list = list.filter((x) => x !== id);
+    saveList();
+    await delBlob(id);
+    dropUrl(id);
+    if (settings.state.sky === id) settings.set({ sky: "night" });
+    for (const g of C.groups()) if (g.bg?.sky === id) C.setBg(g.id, { sky: "night" });
+    renderAll();
+    apply();
+  }
+  $("gbg-file").addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) openTrim(f);
+  });
+
+  // ---------- グループの へんしゅう ----------
   const sw = $("gbg-switch");
-  const box = $("gbg");
-  const thumb = $("gbg-thumb");
   async function renderEdit() {
     const g = C.current();
     if (!g) return;
-    const bg = g.bg ?? { own: false, sky: "night", photo: false };
-    sw.setAttribute("aria-checked", String(bg.own));
-    sw.textContent = bg.own ? "ON" : "OFF";
-    $("gbg-off").hidden = bg.own;
-    box.hidden = !bg.own;
-    for (const b of box.querySelectorAll("[data-gbg]")) b.setAttribute("aria-checked", String(b.dataset.gbg === bg.sky));
-    $("gbg-photo-btns").hidden = !bg.photo;
-    const u = bg.photo ? await urlOf(g.id) : null;
-    thumb.style.backgroundImage = u ? `url("${u}")` : "";
-    thumb.classList.toggle("has", !!u);
+    const own = !!g.bg?.own;
+    sw.setAttribute("aria-checked", String(own));
+    sw.textContent = own ? "ON" : "OFF";
+    $("gbg-off").hidden = own;
+    $("gbg").hidden = !own;
+    if (own) await renderLib("group");
   }
   sw.addEventListener("click", () => {
     const g = C.current();
@@ -96,42 +189,14 @@ const photoBg = (() => {
     renderEdit();
     apply();
   });
-  box.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-gbg]");
-    const g = C.current();
-    if (!b || !g) return;
-    // がぞうが まだ なければ、えらぶ ところから
-    if (b.dataset.gbg === "photo" && !g.bg?.photo) return $("gbg-file").click();
-    C.setBg(g.id, { sky: b.dataset.gbg });
-    sound.sfx.select();
-    renderEdit();
-    apply();
-  });
-  $("gbg-pick").addEventListener("click", () => $("gbg-file").click());
-  $("gbg-file").addEventListener("change", (e) => {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (f) openTrim(f);
-  });
-  // けす：がぞうを けして、よるに もどす（スイッチは ON の まま）
-  $("gbg-del").addEventListener("click", async () => {
-    const g = C.current();
-    if (!g || !(await ask("この グループの はいけいの がぞうを 消しますか？"))) return;
-    await delPhoto(g.id);
-    dropUrl(g.id);
-    C.setBg(g.id, { photo: false, sky: g.bg?.sky === "photo" ? "night" : g.bg?.sky });
-    renderEdit();
-    apply();
-  });
 
-  // ---------- トリミング ----------
+  // ---------- トリミング（デザイン案 B：まんなかに 画面と おなじ かたちの わく） ----------
   const trim = $("trim-dialog");
   const stage = $("trim-stage");
   const img = $("trim-img");
   const zoomEl = $("trim-zoom");
-  let view = null; // { W, H（わくの 大きさ）, SW, SH（画面の 大きさ）, k（わく ÷ 画面）, iw, ih, s0, z, tx, ty }
+  let view = null; // { W, H（わく）, SW, SH（画面）, iw, ih, s0, z, tx, ty }
   let trimUrl = null;
-
   // ボタンや セリフが くる ところ（いまの 画面から はかって、わくの 大きさに ちぢめる）
   function ghosts(k) {
     const sel = [".topbar", ".logo-row", ".npc", "#group-bar", "#links"];
@@ -157,7 +222,6 @@ const photoBg = (() => {
     img.style.transform = `translate(${view.tx}px, ${view.ty}px)`;
     zoomEl.value = Math.round(view.z * 100);
   }
-  // cx, cy を まんなかに して 大きさを かえる
   function zoomTo(z, cx = view.W / 2, cy = view.H / 2) {
     const s1 = view.s0 * view.z;
     view.z = Math.max(1, Math.min(4, z));
@@ -166,7 +230,8 @@ const photoBg = (() => {
     view.ty = cy - ((cy - view.ty) * s2) / s1;
     draw();
   }
-  async function openTrim(file) {
+  async function openTrim(file, target = pickFor ?? { where: C.current()?.bg?.own ? "group" : "menu", replace: null }) {
+    pickFor = target;
     if (trimUrl) URL.revokeObjectURL(trimUrl);
     trimUrl = URL.createObjectURL(file);
     img.src = trimUrl;
@@ -175,10 +240,9 @@ const photoBg = (() => {
     } catch {
       return ask("この がぞうは 開けなかったよ。べつの がぞうを 選んでね。", "とじる");
     }
-    // わくは 画面と おなじ かたちで、まんなかに（上の 題・下の 説明と ボタンの ぶん を あける）
     const SW = innerWidth;
     const SH = innerHeight;
-    const k = Math.min((SH - 250) / SH, (SW * 0.78) / SW);
+    const k = Math.min((SH - 250) / SH, 0.78);
     const W = Math.round(SW * k);
     const H = Math.round(SH * k);
     stage.style.width = `${W}px`;
@@ -187,15 +251,13 @@ const photoBg = (() => {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
     const s0 = Math.max(W / iw, H / ih);
-    view = { W, H, SW, SH, k, iw, ih, s0, z: 1, tx: (W - iw * s0) / 2, ty: (H - ih * s0) / 2 };
+    view = { W, H, SW, SH, iw, ih, s0, z: 1, tx: (W - iw * s0) / 2, ty: (H - ih * s0) / 2 };
     draw();
     trim.showModal();
     sound.sfx.select();
   }
-  // ゆびで うごかす・2 本の ゆびで 大きく
   const ptrs = new Map();
   let pinch = null;
-  // ゆびの いちは わくの なかの いちに なおす
   const local = (e) => {
     const r = stage.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -230,26 +292,32 @@ const photoBg = (() => {
   };
   stage.addEventListener("pointerup", up);
   stage.addEventListener("pointercancel", up);
-  stage.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const q = local(e);
-    zoomTo(view.z * (e.deltaY < 0 ? 1.1 : 0.9), q.x, q.y);
-  }, { passive: false });
+  stage.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      const q = local(e);
+      zoomTo(view.z * (e.deltaY < 0 ? 1.1 : 0.9), q.x, q.y);
+    },
+    { passive: false }
+  );
   zoomEl.addEventListener("input", () => zoomTo(Number(zoomEl.value) / 100));
   function closeTrim() {
     trim.close();
     if (trimUrl) URL.revokeObjectURL(trimUrl);
     trimUrl = null;
+    pickFor = null;
   }
   $("trim-no").addEventListener("click", closeTrim);
   trim.addEventListener("cancel", (e) => {
     e.preventDefault();
     closeTrim();
   });
-  // けってい：わくに 見えて いる ところを、画面の 大きさで 切りだして ほぞん（はば 900 まで、JPEG）
+  // けってい：わくに 見えて いる ところを 画面の 大きさで 切りだして ほぞん（はば 900 まで、JPEG）。
+  // あたらしい がぞうは 一覧の さいごに 足して、その場（メニュー か グループ）で えらぶ
   $("trim-yes").addEventListener("click", async () => {
-    const g = C.current();
-    if (!g || !view) return closeTrim();
+    const target = pickFor;
+    if (!view || !target) return closeTrim();
     const s = view.s0 * view.z;
     const k = Math.min(Math.min(devicePixelRatio || 1, 2), 900 / view.SW);
     const cv = document.createElement("canvas");
@@ -258,23 +326,22 @@ const photoBg = (() => {
     cv.getContext("2d").drawImage(img, -view.tx / s, -view.ty / s, view.W / s, view.H / s, 0, 0, cv.width, cv.height);
     const blob = await new Promise((r) => cv.toBlob(r, "image/jpeg", 0.82));
     closeTrim();
+    const id = target.replace ?? newId();
     try {
-      await putPhoto(g.id, blob);
+      await putBlob(id, blob);
     } catch {
       return ask("がぞうを 保存できなかったよ。ブラウザの 設定を 確かめてね。", "とじる");
     }
-    dropUrl(g.id);
-    C.setBg(g.id, { own: true, sky: "photo", photo: true });
+    dropUrl(id);
+    if (!list.includes(id)) {
+      if (list.length >= MAX) return;
+      list.push(id);
+      saveList();
+    }
     sound.sfx.coin();
-    await renderEdit();
-    apply();
+    choose(target.where, id);
   });
 
-  // グループを けしたら がぞうも けす
-  async function forget(gid) {
-    await delPhoto(gid);
-    dropUrl(gid);
-  }
   // ぜんぶ けす（アプリの きろくを ぜんぶ けす）
   function clearAll() {
     try {
@@ -282,6 +349,7 @@ const photoBg = (() => {
     } catch {}
   }
 
+  migrated.then(apply);
   apply();
-  return { apply, renderEdit, forget, clearAll, openTrim, urlOf };
+  return { apply, renderEdit, renderMenu: () => renderLib("menu"), clearAll, openTrim, urlOf, list: () => [...list], remove, MAX, ready: () => migrated };
 })();

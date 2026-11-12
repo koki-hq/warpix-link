@@ -282,10 +282,13 @@ const CASSETTES = (() => {
   };
   const find = (gid) => groups.find((g) => g.id === gid);
   // グループだけの はいけい（v2.3）：{ own: ON か, sky: day|evening|night|photo, photo: がぞうが あるか }。がぞう そのものは photo.js（IndexedDB）
+  // v2.4：sky は ひる・ゆうがた・よる か じぶんの がぞうの id（p-…）。v2.3 の { sky: "photo", photo: true } は photo.js が うつしかえる
   function cleanBg(bg) {
     if (!bg || typeof bg !== "object") return null;
-    const sky = ["day", "evening", "night", "photo"].includes(bg.sky) ? bg.sky : "night";
-    return { own: bg.own === true, sky, photo: bg.photo === true };
+    const ok = ["day", "evening", "night", "photo"].includes(bg.sky) || /^p-[a-z0-9]+$/.test(bg.sky);
+    const out = { own: bg.own === true, sky: ok ? bg.sky : "night" };
+    if (bg.photo === true) out.photo = true;
+    return out;
   }
 
   // アプリで ひらく（v1.64）：ウェブの アドレスだと Gmail は アプリに いかず、TikTok は ログイン して いない まどが ひらいた（本人）。
@@ -386,7 +389,7 @@ const CASSETTES = (() => {
     setBg(gid, patch) {
       const g = find(gid);
       if (!g) return false;
-      g.bg = cleanBg({ own: false, sky: "night", photo: false, ...g.bg, ...patch });
+      g.bg = cleanBg({ own: false, sky: "night", ...g.bg, ...patch });
       save();
       return true;
     },

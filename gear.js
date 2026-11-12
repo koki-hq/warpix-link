@@ -102,16 +102,8 @@ const gear = (() => {
   });
 
   // ---------- 背景 ----------
-  function renderSky() {
-    for (const b of panels.sky.querySelectorAll("[data-sky]")) b.setAttribute("aria-pressed", String(b.dataset.sky === settings.state.sky));
-  }
-  panels.sky.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-sky]");
-    if (!b) return;
-    settings.set({ sky: b.dataset.sky });
-    renderSky();
-    sound.sfx.select();
-  });
+  // はいけい（v2.4）：中身は photo.js（ひる・ゆうがた・よる＋じぶんの がぞう）
+  const renderSky = () => photoBg.renderMenu();
 
   // ---------- BGM ----------
   function renderBgm() {

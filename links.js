@@ -459,7 +459,6 @@ const groups = (() => {
     if (!g || !(await ask(`グループ「${g.title}」を消しますか？`))) return;
     const wasCurrent = C.current()?.id === gid;
     C.removeGroup(gid);
-    photoBg.forget(gid);
     render();
     if (wasCurrent || !C.current()) {
       editDialog.close();

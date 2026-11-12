@@ -35,6 +35,7 @@ const KEY = {
   mylinks: "warpix-v2-mylinks",
   tips: "warpix-v2-tips",
   invite: "warpix-v2-invite",
+  photos: "warpix-v2-photos",
 };
 
 // ---------- 日付 ----------
@@ -560,7 +561,8 @@ function ask(msg, yes = "けす") {
 const settings = (() => {
   const DEFAULTS = { sky: "night", bgm: true, se: true, bgmVol: 100, seVol: 100, song: "usual" };
   const state = { ...DEFAULTS, ...store.get(KEY.settings, null) };
-  if (!["day", "evening", "night"].includes(state.sky)) state.sky = "night";
+  // sky は ひる・ゆうがた・よる か じぶんの がぞう の id（p-…、v2.4）
+  if (!["day", "evening", "night"].includes(state.sky) && !/^p-[a-z0-9]+$/.test(state.sky)) state.sky = "night";
   if (!sound.songs[state.song]) state.song = "usual";
   const subs = [];
   const vol = (n) => Math.max(0, Math.min(100, Number(n) || 0)) / 100;
@@ -572,7 +574,8 @@ const settings = (() => {
   }
   // いま 見せて いる 空（v2.3）：グループだけの はいけいが あれば そちら。メニューの「はいけい」（state.sky）は かえない
   let shown = null;
-  const sky = () => shown ?? state.sky;
+  // 月・くもの いろに つかう 空（がぞうの ときは よる）
+  const sky = () => shown ?? (["day", "evening", "night"].includes(state.sky) ? state.sky : "night");
   function showSky(s) {
     shown = ["day", "evening", "night"].includes(s) ? s : null;
     document.documentElement.dataset.sky = sky();
