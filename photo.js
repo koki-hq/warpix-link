@@ -161,7 +161,7 @@ const photoBg = (() => {
     else if (C.current()) C.setBg(C.current().id, { sky: v });
     sound.sfx.select();
     renderAll();
-    apply();
+    return apply();
   }
   function renderAll() {
     renderLib("menu");
@@ -268,13 +268,36 @@ const photoBg = (() => {
     view.ty = cy - ((cy - view.ty) * s2) / s1;
     draw();
   }
+  // まって いる あいだの ピクセ（v2.5、本人「画像を読み込み中... みたいな文字と　ピクセがぴょんぴょんしてるの」）。
+  // かかる 時間は さきに わからないので、0.3 びょう たっても おわって いなければ 出す。出したら 0.6 びょうは 出して おく（チラッと 出て きえない ように）
+  const busyDialog = $("busy-dialog");
+  busyDialog.addEventListener("cancel", (e) => e.preventDefault());
+  async function busy(text, fn) {
+    let shownAt = 0;
+    const t = setTimeout(() => {
+      $("busy-text").textContent = text;
+      $("busy-pixe").innerHTML = pixe.look();
+      busyDialog.showModal();
+      shownAt = performance.now();
+    }, 300);
+    try {
+      return await fn();
+    } finally {
+      clearTimeout(t);
+      if (shownAt) {
+        const rest = 600 - (performance.now() - shownAt);
+        if (rest > 0) await new Promise((r) => setTimeout(r, rest));
+        busyDialog.close();
+      }
+    }
+  }
   async function openTrim(file, target = pickFor ?? { where: C.current()?.bg?.own ? "group" : "menu", replace: null }) {
     pickFor = target;
     if (trimUrl) URL.revokeObjectURL(trimUrl);
     trimUrl = URL.createObjectURL(file);
     img.src = trimUrl;
     try {
-      await img.decode();
+      await busy("画像を読み込み中…", () => img.decode());
     } catch {
       return ask("この がぞうは 開けなかったよ。べつの がぞうを 選んでね。", "とじる");
     }
@@ -353,7 +376,8 @@ const photoBg = (() => {
   });
   // けってい：わくに 見えて いる ところを 画面の 大きさで 切りだして ほぞん（はば 900 まで、JPEG）。
   // あたらしい がぞうは 一覧の さいごに 足して、その場（メニュー か グループ）で えらぶ
-  $("trim-yes").addEventListener("click", async () => {
+  $("trim-yes").addEventListener("click", () => busy("保存中…", saveTrim));
+  async function saveTrim() {
     const target = pickFor;
     if (!view || !target) return closeTrim();
     const s = view.s0 * view.z;
@@ -377,8 +401,8 @@ const photoBg = (() => {
       saveList();
     }
     sound.sfx.coin();
-    choose(target.where, id);
-  });
+    await choose(target.where, id);
+  }
 
   // ぜんぶ けす（アプリの きろくを ぜんぶ けす）
   function clearAll() {

@@ -448,8 +448,36 @@ const sound = (() => {
 // はなすと onEnd(あたらしい じゅんばんの data-id)。canStart() が false なら ドラッグに しない（スクロールや スワイプに まかせる）
 // hold（ミリ秒）：handle の そと（行の どこでも）は 長押ししてから つかむ（v2.2.1、本人「タイトルも含めてそのブロックを長押ししたら」）。
 // 長押しの まえに うごいたら スクロールに まかせる。つかんだら 画面は スクロールさせない
-function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = () => true }) {
+// edge（v2.5）：{ flip(dir, it) }。つかんだ まま 画面の 左右の はしで 0.5 びょう とまると flip(-1 か 1) を よぶ（iPhone の ホーム画面の ページ めくり）。
+// flip は box の なかみを かえて よい（it は けさない こと）。true なら めくれた。はしに いる あいだは 0.5 びょう ごとに つづけて めくる。
+// onEnd の 2 つめは つかんで いた もの
+function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = () => true, edge = null }) {
   let drag = null;
+  const EDGE = 36; // はしの はば（px）
+  const EDGE_HOLD = 500;
+  let edgeTimer = null;
+  const place = () => (drag.it.style.translate = `${drag.px - drag.x}px ${drag.py - drag.y}px`);
+  function edgeCheck() {
+    if (!edge || !drag?.on) return;
+    const dir = drag.px < EDGE ? -1 : drag.px > innerWidth - EDGE ? 1 : 0;
+    if (dir !== drag.edgeDir) {
+      clearTimeout(edgeTimer);
+      edgeTimer = null;
+      drag.edgeDir = dir;
+    }
+    if (dir && !edgeTimer) edgeTimer = setTimeout(flipNow, EDGE_HOLD);
+  }
+  function flipNow() {
+    edgeTimer = null;
+    if (!drag?.on || !drag.edgeDir) return;
+    const before = drag.it.getBoundingClientRect();
+    if (!edge.flip(drag.edgeDir, drag.it)) return;
+    const after = drag.it.getBoundingClientRect();
+    drag.x += after.left - before.left;
+    drag.y += after.top - before.top;
+    place();
+    edgeCheck();
+  }
   box.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
     const it = e.target.closest(item);
@@ -486,7 +514,10 @@ function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = ()
         sound.sfx.hover();
       }
       e.preventDefault();
-      drag.it.style.translate = `${e.clientX - drag.x}px ${e.clientY - drag.y}px`;
+      drag.px = e.clientX;
+      drag.py = e.clientY;
+      place();
+      edgeCheck();
       drag.it.style.pointerEvents = "none";
       const under = document.elementFromPoint(e.clientX, e.clientY)?.closest(item);
       drag.it.style.pointerEvents = "";
@@ -508,6 +539,8 @@ function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = ()
     const d = drag;
     drag = null;
     clearTimeout(d.timer);
+    clearTimeout(edgeTimer);
+    edgeTimer = null;
     d.it.classList.remove("lifted");
     if (!d.on) return;
     d.it.classList.remove("dragging");
@@ -521,7 +554,7 @@ function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = ()
     addEventListener("click", stop, { capture: true, once: true });
     setTimeout(() => removeEventListener("click", stop, { capture: true }), 0);
     sound.sfx.select();
-    onEnd([...box.querySelectorAll(item)].map((x) => x.dataset.id));
+    onEnd([...box.querySelectorAll(item)].map((x) => x.dataset.id), d.it);
   };
   addEventListener("pointerup", end);
   addEventListener("pointercancel", end);

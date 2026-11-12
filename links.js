@@ -20,7 +20,14 @@ const groups = (() => {
   const iconHtml = (c) => pixelSvg(C.iconOf(c));
 
   // ---------- 画面 ----------
-  function render() {
+  const tileHtml = (id, editing) => {
+    const c = C.byId(id);
+    const app = C.appOf(c);
+    return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""}><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span>${editing ? `<span class="tile-x" aria-hidden="true">✕</span>` : ""}<span class="sr-only">${editing ? "（押すと編集）" : "（新しいタブで開く）"}</span></a>`;
+  };
+  // keep（v2.5）：ドラッグ ちゅうの リンクは けさずに、まわりだけ その グループの リンクに かえる（ゆびが はなれない ように）。
+  // その グループに おなじ リンクが あれば その ばしょ、なければ さいごに
+  function render({ keep = null } = {}) {
     const g = C.current();
     const list = C.groups();
     document.body.classList.toggle("no-groups", !g);
@@ -34,11 +41,18 @@ const groups = (() => {
     }
     renderTabs(list);
     const editing = document.body.classList.contains("editing");
-    const tiles = g.ids.map((id) => {
-      const c = C.byId(id);
-      const app = C.appOf(c);
-      return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""}><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span>${editing ? `<span class="tile-x" aria-hidden="true">✕</span>` : ""}<span class="sr-only">${editing ? "（押すと編集）" : "（新しいタブで開く）"}</span></a>`;
-    });
+    if (keep && linksEl.contains(keep)) {
+      for (const ch of [...linksEl.children]) if (ch !== keep) ch.remove();
+      const i = g.ids.indexOf(keep.dataset.id);
+      const before = i < 0 ? g.ids : g.ids.slice(0, i);
+      const after = i < 0 ? [] : g.ids.slice(i + 1);
+      keep.insertAdjacentHTML("beforebegin", before.map((id) => tileHtml(id, editing)).join(""));
+      keep.insertAdjacentHTML("afterend", after.map((id) => tileHtml(id, editing)).join(""));
+      if (typeof photoBg !== "undefined") photoBg.apply();
+      linksEl.setAttribute("aria-label", `${g.title} のリンク`);
+      return;
+    }
+    const tiles = g.ids.map((id) => tileHtml(id, editing));
     if (g.ids.length < C.MAX_LINKS && !editing) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`);
     linksEl.innerHTML = tiles.join("");
     if (typeof photoBg !== "undefined") photoBg.apply();
@@ -58,7 +72,7 @@ const groups = (() => {
             ? `<button type="button" class="group-tab on" id="group-sign" aria-current="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></button>`
             : `<button type="button" class="group-tab" data-i="${i}">${esc(g.title)}</button>`
         )
-        .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを つくる" aria-haspopup="dialog">＋</button>`;
+        .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを つくる">＋</button>`;
     centerTab();
   }
   // えらんで いる タブを まんなかへ。文字（ドットの フォント）が あとから とどくと タブの はばが かわるので、とどいた ときと 画面の おおきさが かわった ときにも
@@ -75,7 +89,7 @@ const groups = (() => {
     const b = e.target.closest(".group-tab");
     if (!b) return;
     if (b.id === "group-sign") return openEdit();
-    if (b.id === "group-new") return openGroup();
+    if (b.id === "group-new") return quickGroup();
     C.switchTo(Number(b.dataset.i));
     render();
     sound.sfx.hover();
@@ -123,22 +137,17 @@ const groups = (() => {
   const groupName = $("group-name");
   function openGroup() {
     groupName.value = "";
-    $("group-error").hidden = true;
+    groupName.placeholder = C.nextName(); // から なら この なまえ（v2.5）
     groupDialog.showModal();
     sound.sfx.select();
     groupName.focus();
   }
   $("add-group").addEventListener("click", openGroup);
   $("empty-add").addEventListener("click", openGroup);
-  groupName.addEventListener("input", () => ($("group-error").hidden = true));
   $("group-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const g = C.addGroup(groupName.value);
-    if (!g) {
-      $("group-error").hidden = false;
-      groupName.focus();
-      return;
-    }
+    if (!g) return;
     groupDialog.close();
     render();
     sound.sfx.coin();
@@ -148,6 +157,16 @@ const groups = (() => {
   $("group-cancel").addEventListener("click", () => groupDialog.close());
   $("group-close").addEventListener("click", () => groupDialog.close());
   closeOnBackdrop(groupDialog);
+
+  // タブの となりの ＋ は ワンタップで すぐ できる（v2.5、本人「ワンタップでグループ作れる感じ」）。リンクの まどは ひらかない。
+  // へんしゅう ちゅうは タブを おしても おわらないので、つくったら おわる
+  function quickGroup() {
+    if (typeof editMode !== "undefined" && editMode.on()) editMode.exit();
+    const g = C.addGroup("");
+    render();
+    sound.sfx.coin();
+    pixe.say(`「${g.title}」が できたよ！`);
+  }
 
   // ---------- リンクを 追加 ----------
   const addDialog = $("add-dialog");
@@ -169,13 +188,10 @@ const groups = (() => {
   function renderShelves() {
     const g = C.current();
     const has = new Set(g?.ids ?? []);
-    const mine = C.mine();
-    shelvesEl.innerHTML = C.SHELVES.map((sh) => {
-      const items = sh.id === "mine" ? mine : C.LIST.filter((c) => c.shelf === sh.id);
-      const body = items.length
-        ? items.map((c) => cassette(c, has.has(c.id))).join("")
-        : `<button type="button" class="cas-make" data-make="1"><span aria-hidden="true">＋</span>つくる</button>`;
-      return `<section class="cas-shelf"><h3>▾ ${esc(sh.name)}${sh.id === "mine" ? ` <small>${mine.length} / ${C.MINE_MAX}</small>` : ""}</h3><div class="cas-grid">${body}</div></section>`;
+    // リストは こちらで よういした もの だけ（v2.5：自分の リンクは「じぶんで つくる」の 一覧へ）
+    shelvesEl.innerHTML = C.SHELVES.filter((sh) => sh.id !== "mine").map((sh) => {
+      const items = C.LIST.filter((c) => c.shelf === sh.id);
+      return `<section class="cas-shelf"><h3>▾ ${esc(sh.name)}</h3><div class="cas-grid">${items.map((c) => cassette(c, has.has(c.id))).join("")}</div></section>`;
     }).join("");
     renderCount();
   }
@@ -213,29 +229,34 @@ const groups = (() => {
       $(addTab === "shelf" ? "add-tab-shelf" : "add-tab-make").focus();
     });
   }
-  shelvesEl.addEventListener("click", (e) => {
-    if (e.target.closest("[data-make]")) return selectTab("make");
-    const b = e.target.closest(".cas-item[data-id]");
+  // おすと 追加、もう いちど おすと とりけし（リスト・作った リンク おなじ）
+  function toggle(c) {
     const g = C.current();
-    if (!b || !g) return;
-    const c = C.byId(b.dataset.id);
+    if (!c || !g) return false;
     if (g.ids.includes(c.id)) {
       C.removeLink(g.id, c.id);
       addMsg.textContent = `「${c.label}」を取り消しました`;
       sound.sfx.hover();
     } else if (g.ids.length >= C.MAX_LINKS) {
       addMsg.textContent = `いっぱいです。1つのグループに${C.MAX_LINKS}こまでです`;
-      return;
+      return false;
     } else {
       C.addLink(g.id, c.id);
       addMsg.textContent = `「${c.label}」を追加しました`;
       sound.sfx.select();
     }
+    render();
+    return true;
+  }
+  shelvesEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".cas-item[data-id]");
+    if (!b) return;
+    const c = C.byId(b.dataset.id);
+    if (!toggle(c)) return;
     const y = $("add-shelf").scrollTop;
     renderShelves();
     $("add-shelf").scrollTop = y;
     shelvesEl.querySelector(`.cas-item[data-id="${CSS.escape(c.id)}"]`)?.focus();
-    render();
   });
 
   // じぶんで つくる（v1.61 じぶんの リンク：なまえ・アドレス・アイコン）
@@ -248,9 +269,12 @@ const groups = (() => {
     const editing = editingId && C.byId(editingId);
     $("mylink-editing").hidden = !editing;
     if (editing) $("mylink-editing-name").textContent = editing.label;
+    // 作った リンク（v2.5）：おすと いまの グループに 追加。べつの グループにも 入れやすく（本人「リストから選ぶの中にあるの気づかなくて」）。
+    // あたらしく つくる が うえ、一覧は した（本人「リンク増えるから」）
     const mine = C.mine();
+    const has = new Set(C.current()?.ids ?? []);
     $("mylink-list").innerHTML = mine.length
-      ? `<h3>作ったリンク</h3>${mine.map((c) => `<div class="mylink-row"><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
+      ? `<h3>作ったリンク <small>${mine.length} / ${C.MINE_MAX}</small></h3><p class="win-note">押すと追加。もう一度押すと取り消せるよ。</p>${mine.map((c) => `<div class="mylink-row"><button type="button" class="mylink-pick${has.has(c.id) ? " picked" : ""}" data-pick="${esc(c.id)}" aria-pressed="${has.has(c.id)}"><span class="cas-check" aria-hidden="true">${has.has(c.id) ? "✓" : ""}</span><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span></button><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
       : "";
     renderCount();
   }
@@ -282,6 +306,17 @@ const groups = (() => {
     $("mylink-name").focus();
   });
   $("mylink-list").addEventListener("click", async (e) => {
+    const pk = e.target.closest("[data-pick]");
+    if (pk) {
+      const id = pk.dataset.pick;
+      if (toggle(C.byId(id))) {
+        const y = $("add-make").scrollTop;
+        renderMake();
+        $("add-make").scrollTop = y;
+        $("mylink-list").querySelector(`[data-pick="${CSS.escape(id)}"]`)?.focus();
+      }
+      return;
+    }
     const ed = e.target.closest("[data-edit]");
     if (ed) {
       const c = C.byId(ed.dataset.edit);
@@ -310,9 +345,22 @@ const groups = (() => {
       if (!msg && C.mine().length >= C.MINE_MAX) msg = `自分のリンクは${C.MINE_MAX}こまでです。`;
       if (!msg && g.ids.length >= C.MAX_LINKS) msg = `このグループはもう${C.MAX_LINKS}こでいっぱいです。`;
     }
+    // もう 作った アドレスなら 下の 一覧の その 行を ひからせる（v2.5）
+    const norm = (u) => (C.cleanUrl(u) ?? "").replace(/\/+$/, "").toLowerCase();
+    const twin = msg && C.mine().find((c) => c.id !== editingId && norm(c.url) === norm(url));
+    if (twin) msg = "もう作ってあるよ。下の一覧から押してね。";
     if (msg) {
       err.textContent = msg;
       err.hidden = false;
+      if (twin) {
+        const row = $("mylink-list").querySelector(`[data-pick="${CSS.escape(twin.id)}"]`)?.closest(".mylink-row");
+        if (row) {
+          row.classList.remove("flash");
+          void row.offsetWidth;
+          row.classList.add("flash");
+          row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      }
       return false;
     }
     if (editingId) {

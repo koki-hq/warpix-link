@@ -62,11 +62,11 @@ export default {
     t.eq(await p.ev(`CASSETTES.mine().map((c) => [c.label, c.url, c.iconKey])`), [["<b>こう</b>", "https://band.example.jp/", "music"]], "じぶんの リンクが できない");
     t.eq(await p.ev(`document.querySelector(".links .pixel-btn .link-label").textContent`), "<b>こう</b>", "なまえが タグに なった・はいって いない");
     t.ok(await p.ev(`!document.querySelector(".links b")`), "なまえが タグに なった");
-    // たなの「じぶんの リンク」にも でる → けす
+    // じぶんの リンクは「じぶんで つくる」の 一覧（v2.5）。リストには でない
     await p.click("#link-add");
     await sleep(100);
     await p.click("#add-tab-shelf");
-    t.ok(await p.ev(`!!document.querySelector('.cas-item[data-id="my-1"]')`), "じぶんの リンクの たなに でない");
+    t.ok(await p.ev(`!document.querySelector('.cas-item[data-id="my-1"]')`), "リストに じぶんの リンクが でる");
     await p.click("#add-tab-make");
     // かえる（v2.0.2）：いまの なまえ・アドレス・アイコンが はいり、けってい で かわる。グループの なかも かわる
     await p.ev(`document.querySelector('#mylink-list [data-edit="my-1"]').click()`);

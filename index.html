@@ -112,7 +112,6 @@
       <p class="win-steps"><span class="on">① なまえ</span><span>▶</span><span>② リンクを 追加</span></p>
       <label for="group-name">グループの名前（12文字まで）</label>
       <input class="win-input" id="group-name" type="text" maxlength="12" placeholder="例：好きなバンド" autocomplete="off" enterkeyhint="next">
-      <p class="win-error" id="group-error" role="alert" hidden>名前を入力してね。</p>
       <div class="win-btns">
         <button class="win-btn" id="group-cancel" type="button">やめる</button>
         <button class="win-btn cyan" type="submit">つぎへ：リンクを 追加 ▶</button>
@@ -148,7 +147,7 @@
       <p class="mylink-label" id="mylink-icon-label">アイコン</p>
       <div class="mylink-icons" id="mylink-icons" role="radiogroup" aria-labelledby="mylink-icon-label"></div>
       <p class="win-error" id="mylink-error" role="alert" hidden></p>
-      <p class="win-note">作ったリンクは、リストの「自分のリンク」にも残ります。保存はこのブラウザの中だけです。</p>
+      <p class="win-note">作ったリンクは下の一覧に残るので、ほかのグループにも追加できます。保存はこのブラウザの中だけです。</p>
       <div class="mylink-list" id="mylink-list"></div>
       </form>
     </div>
@@ -167,6 +166,12 @@
       <button class="win-btn" id="ask-no" type="button">やめる</button>
       <button class="win-btn danger" id="ask-yes" type="button">けす</button>
     </div>
+  </dialog>
+
+  <!-- 画像の 読みこみ・保存ちゅう（v2.5）：0.3 びょう より かかった ときだけ。出したら 0.6 びょうは 出して おく -->
+  <dialog class="busy" id="busy-dialog" aria-labelledby="busy-text">
+    <span class="busy-pixe" id="busy-pixe" aria-hidden="true"></span>
+    <p class="busy-text" id="busy-text" role="status"></p>
   </dialog>
 
   <!-- グループを へんしゅう：なまえ・ならべかえ・はずす・グループの じゅんばん・けす -->

@@ -325,9 +325,15 @@ const CASSETTES = (() => {
       save();
       return true;
     },
+    // なまえが ない ときの なまえ（v2.5、本人「名前はぐるーぷ1とかで」）。あいて いる いちばん ちいさい ばんごう
+    nextName() {
+      let n = 1;
+      while (groups.some((g) => g.title === `ぐるーぷ${n}`)) n++;
+      return `ぐるーぷ${n}`;
+    },
+    // なまえは なくても いい（v2.5）。から なら「ぐるーぷN」
     addGroup(title) {
-      const t = cut(title, MAX_TITLE);
-      if (!t) return null;
+      const t = cut(title, MAX_TITLE) || this.nextName();
       const g = { id: newId(), title: t, ids: [] };
       groups.push(g);
       at = groups.length - 1;
@@ -400,6 +406,17 @@ const CASSETTES = (() => {
       const next = [...new Set(ids)].filter((id) => has.has(id));
       if (next.length !== g.ids.length) return false;
       g.ids = next;
+      save();
+      return true;
+    },
+    // べつの グループへ うつす（v2.5 へんしゅう ちゅうに 画面の はしで となりへ）。index は うつした さきの なんばんめ。
+    // うつした さきに もう ある・いっぱい なら うつさない
+    moveLinkTo(fromGid, toGid, id, index) {
+      const a = find(fromGid);
+      const b = find(toGid);
+      if (!a || !b || a === b || !a.ids.includes(id) || b.ids.includes(id) || b.ids.length >= MAX_LINKS) return false;
+      a.ids = a.ids.filter((x) => x !== id);
+      b.ids.splice(Math.max(0, Math.min(index, b.ids.length)), 0, id);
       save();
       return true;
     },

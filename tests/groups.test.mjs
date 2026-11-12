@@ -12,13 +12,12 @@ const view = (p) => p.ev(`({
 })`);
 
 export default {
-  async "まんなかの「グループを つくる」→ なまえ（から だと エラー・12 もじ）→ つぎは リンクを 追加の まど"(t) {
+  async "まんなかの「グループを つくる」→ なまえ（12 もじ・から でも いい v2.5）→ つぎは リンクを 追加の まど"(t) {
     const { server, p } = await openApp(t);
     await p.click("#empty-add");
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("group-dialog").open && document.activeElement.id === "group-name"`), "グループの まどが ひらかない");
-    await p.ev(`document.getElementById("group-form").requestSubmit()`);
-    t.ok(await p.ev(`!document.getElementById("group-error").hidden && document.getElementById("group-dialog").open`), "から でも つくれて しまう");
+    t.eq(await p.ev(`document.getElementById("group-name").placeholder`), "ぐるーぷ1", "から の ときの なまえが うすく 出ない");
     t.eq(await p.ev(`document.getElementById("group-name").maxLength`), 12, "12 もじの せいげんが ない");
     await p.ev(`document.getElementById("group-name").value = "すきなバンド"; document.getElementById("group-form").requestSubmit()`);
     await sleep(300);
@@ -47,10 +46,11 @@ export default {
     await p.goto(await p.ev("location.href"), 500);
     t.eq((await view(p)).title, "C", "ひらきなおすと えらんだ グループが もどる");
     t.ok(await p.ev(`!!document.querySelector("#group-sign .pen svg")`), "えらんで いる タブに ✎ が ない");
+    // タブの ＋ は ワンタップで すぐ できる（v2.5）。まどは ひらかない
     await p.click("#group-new");
     await sleep(200);
-    t.ok(await p.ev(`document.getElementById("group-dialog").open`), "タブの ＋ で グループの まどが ひらかない");
-    await p.ev(`document.getElementById("group-dialog").close()`);
+    t.ok(await p.ev(`!document.getElementById("group-dialog").open && !document.getElementById("add-dialog").open`), "タブの ＋ で まどが ひらいた");
+    t.eq([(await view(p)).title, (await view(p)).dots], ["ぐるーぷ1", 4], "タブの ＋ で すぐ できない");
     const r = await p.ev(`(() => { const s = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height)]; }; return { menu: s("menu-btn"), add: s("add-group") }; })()`);
     t.eq(r.menu, r.add, "メニューと ＋ の おおきさが ちがう");
     await p.click("#add-group");

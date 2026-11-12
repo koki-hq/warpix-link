@@ -108,12 +108,43 @@ const editMode = (() => {
   );
 
   // つかんで ならべかえ（へんしゅう ちゅう だけ。長押しの まま うごかしても そのまま ドラッグに なる）
+  // つかんだ まま 画面の はしで とまると となりの グループへ（v2.5、本人「iosのアプリを隣のページに移す感じ」）。
+  // はなした グループへ うつす（もとからは はずれる）。はしの グループより さきには いかない（グループは ふやさない）。
+  // うつした さきが いっぱい・もう ある なら もとの グループに もどす
+  let origin = null; // つかんだ ときの グループの id
   makeSortable(linksEl, {
     item: "a.pixel-btn",
     canStart: () => on,
-    onEnd: (ids) => {
-      C.setLinkOrder(C.current().id, ids);
+    edge: {
+      flip(dir, it) {
+        const i = C.at() + dir;
+        if (i < 0 || i >= C.groups().length) return false;
+        origin ??= C.current().id;
+        C.switchTo(i);
+        groups.render({ keep: it });
+        sound.sfx.hover();
+        navigator.vibrate?.(10);
+        return true;
+      },
+    },
+    onEnd: (ids, it) => {
+      const from = origin;
+      origin = null;
+      const g = C.current();
+      if (!from || from === g.id) {
+        C.setLinkOrder(g.id, ids);
+        return groups.render();
+      }
+      const id = it.dataset.id;
+      const index = ids.indexOf(id);
+      if (C.moveLinkTo(from, g.id, id, index)) {
+        sound.sfx.coin();
+        return groups.render();
+      }
+      const line = g.ids.includes(id) ? `「${g.title}」には\nもう はいってるよ。` : `「${g.title}」は\nもう いっぱい だよ。`;
+      C.switchTo(C.groups().findIndex((x) => x.id === from));
       groups.render();
+      pixe.say(line);
     },
   });
 
