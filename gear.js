@@ -194,11 +194,11 @@ const gear = (() => {
     const code = await encode();
     try {
       await navigator.clipboard.writeText(code);
-      say("コードをコピーしました。メモアプリやメールで、新しいスマホに渡してください。");
+      say("コードをコピーしたよ。メモアプリやメールで、新しいスマホに渡してね。");
     } catch {
       $("move-input").value = code;
       $("move-input").select();
-      say("コピーできなかったので、下の欄に入れました。選んでコピーしてください。", false);
+      say("コピーできなかったので、下の欄に入れたよ。選んでコピーしてね。", false);
     }
   });
   $("move-file").addEventListener("click", async () => {
@@ -212,13 +212,13 @@ const gear = (() => {
   });
   async function take(text) {
     const data = await decode(text);
-    if (!data) return say("コードが違うようです。最後までまるごと貼り付けてください。", false);
+    if (!data) return say("コードが違うみたい。最後までまるごと貼り付けてね。", false);
     if (!(await ask("今のグループ・リンク・記録を、コードのものに入れ替えますか？", "いれかえる"))) return;
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
       for (const [k, v] of Object.entries(data)) localStorage.setItem(k, v);
     } catch {
-      return say("保存できませんでした。ブラウザの設定を確かめてください。", false);
+      return say("保存できなかったよ。ブラウザの設定を確かめてね。", false);
     }
     say("受け取りました。読み直します。");
     setTimeout(() => location.reload(), 600);

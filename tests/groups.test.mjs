@@ -89,11 +89,11 @@ export default {
     await p.ev(`document.getElementById("add-done").click()`);
     t.ok(await p.ev(`document.getElementById("edit-dialog").open`), "追加の あと へんしゅうに もどらない");
     // けす：のこりは B、ぜんぶ けすと まんなかの「グループを つくる」
-    await p.ev(`document.getElementById("edit-delete").click()`);
+    await p.ev(`document.querySelector("#group-rows li.on [data-del-group]").click()`);
     t.eq((await view(p)).saved, ["B"], "グループが きえない");
     await p.click("#group-sign");
     await sleep(100);
-    await p.ev(`document.getElementById("edit-delete").click()`);
+    await p.ev(`document.querySelector("#group-rows li.on [data-del-group]").click()`);
     v = await view(p);
     t.ok(v.empty && !v.bar, "ぜんぶ けしても「グループを つくる」に もどらない");
     t.noErrors(p);
@@ -106,14 +106,14 @@ export default {
     await p.ev(`window.confirm = () => { throw new Error("confirm を つかった"); }`);
     await p.click("#group-sign");
     await sleep(100);
-    await p.ev(`document.getElementById("edit-delete").click()`);
+    await p.ev(`document.querySelector("#group-rows li.on [data-del-group]").click()`);
     await sleep(100);
     t.ok(await p.ev(`document.getElementById("ask-dialog").open && document.getElementById("ask-text").textContent.includes("A")`), "たしかめる まどが でない");
     await p.click("#ask-no");
     await sleep(100);
     t.eq((await view(p)).saved, ["A"], "やめる なのに けした");
     t.ok(await p.ev(`!document.getElementById("ask-dialog").open && document.getElementById("edit-dialog").open`), "やめる で へんしゅうに もどらない");
-    await p.ev(`document.getElementById("edit-delete").click()`);
+    await p.ev(`document.querySelector("#group-rows li.on [data-del-group]").click()`);
     await sleep(100);
     await p.click("#ask-yes");
     await sleep(100);

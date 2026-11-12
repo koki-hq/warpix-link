@@ -20,7 +20,8 @@ const editMode = (() => {
     for (const a of linksEl.querySelectorAll("a.pixel-btn")) if (!a.querySelector(".tile-x")) a.insertAdjacentHTML("beforeend", `<span class="tile-x" aria-hidden="true">✕</span>`);
     sound.sfx.select();
     navigator.vibrate?.(15);
-    pixe.tip("edit", "ドラッグで ならびかえ、\nおすと へんしゅう できるよ。");
+    // ピクセも へんしゅうの はなしを（長押しで リンクの しょうかいが 出て しまって いた。v2.2.1）。2 かいめ から みじかく
+    if (!pixe.tip("edit", "ドラッグで ならびかえ、\nおすと へんしゅう できるよ。")) pixe.say("へんしゅう ちゅう！");
   }
   function exit() {
     if (!on) return;
@@ -31,6 +32,16 @@ const editMode = (() => {
     sound.sfx.select();
   }
   $("edit-end").addEventListener("click", exit);
+  // リンクの そと（はいけい・メニュー・＋ など）を おしても おわる（v2.2.1、本人「背景とか…メニューとかタップしたりしたら解除されるように」）。
+  // タブ（グループの きりかえ）と まどの なかは おわらない
+  document.addEventListener(
+    "pointerdown",
+    (e) => {
+      if (!on || e.target.closest(".links .pixel-btn, #edit-band, dialog, .group-tabs")) return;
+      exit();
+    },
+    true
+  );
   addEventListener("keydown", (e) => e.key === "Escape" && on && !document.querySelector("dialog[open]") && exit());
 
   // 長押しで はいる（うごいたら スクロールや スワイプなので やめる）
@@ -143,7 +154,7 @@ const editMode = (() => {
     if (!c?.mine) return sheet.close();
     const name = $("sheet-name").value.trim();
     const url = $("sheet-url").value.trim();
-    const msg = !name ? "名前を入れてください。" : C.checkMine(url, c.id);
+    const msg = !name ? "名前を入力してね。" : C.checkMine(url, c.id);
     if (msg) {
       $("sheet-error").textContent = msg;
       $("sheet-error").hidden = false;

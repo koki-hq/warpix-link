@@ -302,7 +302,7 @@ const groups = (() => {
     const url = $("mylink-url").value.trim();
     const g = C.current();
     let msg = null;
-    if (!name) msg = "名前を入れてください。";
+    if (!name) msg = "名前を入力してね。";
     else msg = C.checkMine(url, editingId);
     if (!editingId) {
       if (!msg && C.mine().length >= C.MINE_MAX) msg = `自分のリンクは${C.MINE_MAX}こまでです。`;
@@ -377,13 +377,14 @@ const groups = (() => {
     $("edit-add").hidden = g.ids.length >= C.MAX_LINKS;
     const cur = g.id;
     $("group-rows").innerHTML = C.groups()
-      .map((x) => `<li data-id="${esc(x.id)}"${x.id === cur ? ' class="on"' : ""}><button type="button" class="grip" aria-label="${esc(x.title)} の順番（↑↓キーでも動かせます）">≡</button><span class="edit-row-name jp">${esc(x.title)}</span></li>`)
+      .map((x) => `<li data-id="${esc(x.id)}"${x.id === cur ? ' class="on"' : ""}><button type="button" class="grip" aria-label="${esc(x.title)} の順番（↑↓キーでも動かせます）">≡</button><span class="edit-row-name jp">${esc(x.title)}</span><button type="button" class="mini danger" data-del-group="${esc(x.id)}" aria-label="グループ「${esc(x.title)}」を消す">けす</button></li>`)
       .join("");
   }
   // ≡ を つかんで ならべかえ（v2.2、本人「前へ　とか　後ろへ　とかも　こっちが頭で想像しなきゃいけない」）。キーボードは ↑ ↓
   makeSortable(rowsEl, {
     item: "li[data-id]",
     handle: ".grip",
+    hold: 400,
     onEnd: (ids) => {
       C.setLinkOrder(C.current().id, ids);
       renderEdit();
@@ -393,6 +394,7 @@ const groups = (() => {
   makeSortable($("group-rows"), {
     item: "li[data-id]",
     handle: ".grip",
+    hold: 400,
     onEnd: (ids) => {
       C.setGroupOrder(ids);
       renderEdit();
@@ -445,13 +447,22 @@ const groups = (() => {
     rowsEl.querySelector(`li[data-id="${CSS.escape(id)}"] [data-act="${act}"]:not(:disabled)`)?.focus();
   });
   $("edit-add").addEventListener("click", () => openAdd({ fromEdit: true }));
-  $("edit-delete").addEventListener("click", async () => {
-    const g = C.current();
-    if (!(await ask(`グループ「${g.title}」を消しますか？`))) return;
-    C.removeGroup(g.id);
-    editDialog.close();
+  // グループを けす：一覧の 行ごとに（v2.2.1、本人「複数のグループけせるようにすれば？リンクとかと同じく」）。いま ひらいて いる グループを けしたら まどを とじる
+  $("group-rows").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-del-group]");
+    if (!b) return;
+    const gid = b.dataset.delGroup;
+    const g = C.groups().find((x) => x.id === gid);
+    if (!g || !(await ask(`グループ「${g.title}」を消しますか？`))) return;
+    const wasCurrent = C.current()?.id === gid;
+    C.removeGroup(gid);
     render();
-    if (!C.current()) pixe.say(pixe.guide());
+    if (wasCurrent || !C.current()) {
+      editDialog.close();
+      if (!C.current()) pixe.say(pixe.guide());
+      return;
+    }
+    renderEdit();
   });
   // けってい：なまえを ほぞんして とじる（から なら とじない）
   function saveEdit() {

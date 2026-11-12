@@ -445,20 +445,39 @@ const sound = (() => {
 // 本人「ドラッグ&ドロップで並び順とか変えたり」。外の ライブラリは つかわない（ポインターの イベントだけ）。
 // box の なかの item を つかんで（handle が あれば そこだけ）、8px うごいたら ドラッグ。ゆびの 下の ものと その場で 入れかわる。
 // はなすと onEnd(あたらしい じゅんばんの data-id)。canStart() が false なら ドラッグに しない（スクロールや スワイプに まかせる）
-function makeSortable(box, { item, handle = null, onEnd, canStart = () => true }) {
+// hold（ミリ秒）：handle の そと（行の どこでも）は 長押ししてから つかむ（v2.2.1、本人「タイトルも含めてそのブロックを長押ししたら」）。
+// 長押しの まえに うごいたら スクロールに まかせる。つかんだら 画面は スクロールさせない
+function makeSortable(box, { item, handle = null, hold = 0, onEnd, canStart = () => true }) {
   let drag = null;
   box.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
     const it = e.target.closest(item);
-    if (!it || !box.contains(it) || (handle && !e.target.closest(handle))) return;
-    drag = { it, id: e.pointerId, x: e.clientX, y: e.clientY, on: false };
+    if (!it || !box.contains(it)) return;
+    const onHandle = !handle || !!e.target.closest(handle);
+    if (!onHandle && !hold) return;
+    if (!onHandle && e.target.closest("button:not(.grip), a, input")) return; // 行の なかの ボタン（はずす など）は ふつうに
+    drag = { it, id: e.pointerId, x: e.clientX, y: e.clientY, on: false, armed: onHandle };
+    if (!onHandle)
+      drag.timer = setTimeout(() => {
+        if (!drag || drag.it !== it) return;
+        drag.armed = true;
+        it.classList.add("lifted");
+        navigator.vibrate?.(10);
+        sound.sfx.hover();
+      }, hold);
   });
+  box.addEventListener("touchmove", (e) => drag?.armed && e.cancelable && e.preventDefault(), { passive: false });
+  box.addEventListener("contextmenu", (e) => drag && e.preventDefault());
   addEventListener(
     "pointermove",
     (e) => {
       if (!drag || e.pointerId !== drag.id) return;
       if (!drag.on) {
         if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+        if (!drag.armed) {
+          clearTimeout(drag.timer);
+          return (drag = null);
+        }
         if (!canStart(drag.it)) return (drag = null);
         drag.on = true;
         drag.it.classList.add("dragging");
@@ -487,6 +506,8 @@ function makeSortable(box, { item, handle = null, onEnd, canStart = () => true }
     if (!drag || e.pointerId !== drag.id) return;
     const d = drag;
     drag = null;
+    clearTimeout(d.timer);
+    d.it.classList.remove("lifted");
     if (!d.on) return;
     d.it.classList.remove("dragging");
     box.classList.remove("sorting");

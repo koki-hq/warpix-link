@@ -2551,8 +2551,10 @@ body {
   font-size: 0.7em;
   color: var(--accent-2);
 }
-.manual-close {
+/* しめの 3 行は ドットの 文字（v2.2.1） */
+.manual .manual-close {
   color: var(--gold);
+  font-family: "DotGothic16", monospace;
   line-height: 1.9;
 }
 .manual-steps li + li {
@@ -2732,4 +2734,18 @@ body {
 }
 .editing .link-add {
   display: none;
+}
+
+/* 長押しで 文字えらびに しない（v2.2.1） */
+.edit-rows li {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.edit-rows li.lifted {
+  background: var(--btn);
+  box-shadow: 0 0 0 2px var(--gold);
+}
+.group-rows .mini {
+  margin-left: auto;
 }

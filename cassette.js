@@ -405,12 +405,12 @@ const CASSETTES = (() => {
     // つくれない アドレスなら ピクセの ひとこと（v1.62）：WARPIX LINK じしん・たなと まったく おなじ・じぶんの リンク どうしの かさなり
     checkMine(url, except = null) {
       const href = cleanUrl(url);
-      if (!href) return "https:// で始まるアドレスを入れてください。";
+      if (!href) return "https:// で始まるアドレスを入れてね。";
       const norm = (u) => u.replace(/\/+$/, "").toLowerCase();
       const host = new URL(href).hostname;
       if (host === "link.warpix.app" || host === location.hostname) return "それはこのアプリのアドレスです。";
       const same = LIST.find((c) => norm(c.url) === norm(href));
-      if (same) return `${same.label} はリストにあります。「リストから えらぶ」から追加してください。`;
+      if (same) return `${same.label} はリストにあります。「リストから えらぶ」から追加してね。`;
       if (mine.some((c) => c.id !== except && norm(c.url) === norm(href))) return "同じリンクがもうあります。";
       return null;
     },

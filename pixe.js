@@ -244,7 +244,7 @@ const pixe = (() => {
   const hi = (e) => {
     const a = e.target.closest?.(".pixel-btn[data-id]");
     const c = a && CASSETTES.byId(a.dataset.id);
-    if (!c || c.id === lastHi || away || typing) return;
+    if (!c || c.id === lastHi || away || typing || document.body.classList.contains("editing")) return;
     lastHi = c.id;
     if (c.hi) say(c.hi);
   };

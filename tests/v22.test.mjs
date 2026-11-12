@@ -103,6 +103,45 @@ export default {
     await server.close();
   },
 
+  async "v2.2.1：はいけい・メニューを おすと へんしゅう おわり（タブでは おわらない）。ピクセは へんしゅうの はなし"(t) {
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]], ["B", ["line"]]]) } });
+    await p.ev(`editMode.enter()`);
+    t.ok((await p.text()).includes("ならびかえ"), "ピクセが へんしゅうの はなしを しない");
+    await p.click('#group-tabs [data-i="1"]');
+    t.ok(await p.ev(`editMode.on() && document.querySelectorAll(".links .tile-x").length === 1`), "タブで へんしゅうが おわった");
+    await mouse(p, "mouseMoved", 200, 600);
+    await mouse(p, "mousePressed", 200, 600);
+    await mouse(p, "mouseReleased", 200, 600);
+    t.ok(await p.ev(`!editMode.on()`), "はいけいを おしても おわらない");
+    await p.ev(`editMode.enter()`);
+    await p.click("#menu-btn");
+    await sleep(150);
+    t.ok(await p.ev(`!editMode.on() && document.getElementById("gear").open`), "メニューで おわらない・メニューが ひらかない");
+    t.noErrors(p);
+    await server.close();
+  },
+
+  async "v2.2.1：グループの へんしゅうは 行を 長押しで ドラッグ（すぐ うごかすと ドラッグに ならない）。グループは 行ごとに けせる"(t) {
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube", "spotify", "twitter"]], ["B", ["line"]], ["C", []]]) } });
+    await p.ev(`window.WARPIX_ASK = true`);
+    await p.click("#group-sign");
+    await sleep(200);
+    const name = (id) => center(p, `#edit-rows li[data-id="${id}"] .edit-row-name`);
+    await drag(p, await name("youtube"), await name("twitter"));
+    t.eq(await ids(p), ["youtube", "spotify", "twitter"], "長押し しないで うごいた");
+    await drag(p, await name("youtube"), await name("twitter"), { hold: 550 });
+    t.eq(await ids(p), ["spotify", "twitter", "youtube"], "行を 長押しで ドラッグ できない");
+    t.eq(await p.ev(`getComputedStyle(document.querySelector("#edit-rows li")).userSelect`), "none", "長押しで 文字えらびに なる");
+    await p.ev(`document.querySelector('#group-rows li[data-id="g1"] [data-del-group]').click()`);
+    await sleep(100);
+    t.eq(await p.ev(`[CASSETTES.groups().map((g) => g.title), document.getElementById("edit-dialog").open]`), [["A", "C"], true], "ほかの グループを けせない（まどが とじた）");
+    await p.ev(`document.querySelector('#group-rows li[data-id="g0"] [data-del-group]').click()`);
+    await sleep(100);
+    t.eq(await p.ev(`[CASSETTES.groups().map((g) => g.title), document.getElementById("edit-dialog").open]`), [["C"], false], "ひらいて いる グループを けしたら とじない");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ホーム画面への さそい：はじめて リンクを 入れたら 1 かい、そのあと 5 かい ひらく ごと。やりかたを みる で 説明書"(t) {
     const { server, p } = await openApp(t);
     await p.send("Page.addScriptToEvaluateOnNewDocument", { source: "window.WARPIX_INVITE = true;" });

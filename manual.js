@@ -24,7 +24,7 @@ const manual = (() => {
     const iphone = "iPhone：Safari の共有ボタンから「ホーム画面に追加」。見つからないときは「…」の中にあります。";
     const droid = "Android：Chrome のメニュー（︙）から「ホーム画面に追加」か「アプリをインストール」。";
     const lines = android ? [droid, iphone] : [iphone, droid];
-    if (inApp) lines.unshift("いまはアプリの中のブラウザで開いています。右上か右下の「…」から「ブラウザで開く」を選んでから、下のやりかたで追加してください。");
+    if (inApp) lines.unshift("いまはアプリの中のブラウザで開いています。右上か右下の「…」から「ブラウザで開く」を選んでから、下のやりかたで追加してね。");
     return lines;
   }
   let pages = [];
