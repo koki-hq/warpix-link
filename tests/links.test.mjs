@@ -10,7 +10,7 @@ export default {
     await sleep(200);
     // v2.2：さきに 出るのは「じぶんで つくる」
     t.ok(await p.ev(`document.getElementById("add-dialog").open && !document.getElementById("add-make").hidden && document.getElementById("add-tab-make").getAttribute("aria-selected") === "true"`), "じぶんで つくる が さきに 出ない");
-    t.ok(await p.ev(`document.querySelector(".copy-how")?.textContent.includes("共有ボタン")`), "コピーの しかたが ない");
+    t.ok(await p.ev(`document.querySelector(".copy-how")?.textContent.includes("共有ボタン") && document.querySelector(".copy-how").textContent.includes("貼り付けてね")`), "コピーの しかたが ない");
     await p.click("#add-tab-shelf");
     t.ok(await p.ev(`!document.getElementById("add-shelf").hidden`), "たなが ひらかない");
     t.eq(await p.ev(`document.querySelectorAll(".cas-item").length`), 49, "たなの リンクの かずが ちがう");

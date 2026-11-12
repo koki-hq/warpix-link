@@ -167,6 +167,19 @@ export default {
     await server.close();
   },
 
+  async "v2.2.1：タブ・ブックマークの アイコンは ピクセ（まばたき、ワープ中は かげ）"(t) {
+    const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
+    const a = await p.ev(`document.getElementById("favicon").href`);
+    t.ok(a.startsWith("data:image/png") && a.length > 200, `アイコンが ない：${a.slice(0, 40)}`);
+    await p.ev(`pixe.setAway(true)`);
+    const b = await p.ev(`document.getElementById("favicon").href`);
+    t.ok(b !== a, "ワープ中に かげに ならない");
+    await p.ev(`pixe.setAway(false)`);
+    t.eq(await p.ev(`document.getElementById("favicon").href`), a, "もどらない");
+    t.noErrors(p);
+    await server.close();
+  },
+
   async "ホーム画面の アプリ（と パソコン）には さそわない。おしらせは ドットの 文字"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]), "warpix-v2-invite": { first: true, opens: 4 } } });
     t.ok(await p.ev(`!document.getElementById("invite-dialog").open`), "パソコンで さそった");

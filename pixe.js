@@ -127,7 +127,7 @@ const pixe = (() => {
   };
   // グループが まだ ない とき（v2.1 ナビゲーター、本人「一応ナビゲーターとして　仕事してもらおうかな」）
   function guide() {
-    if (firstVisit) return "はじめまして！ ぼくは ピクセ。\nしたの「グループを つくる」を\nおして、ばしょを つくろう！";
+    if (firstVisit) return "はじめまして！ ぼくは ピクセ。\nしたの「グループを つくる」から\nはじめよう！";
     return "まだ グループが ないね。\nしたの「グループを つくる」を\nおしてみて！";
   }
   // いちどだけの 案内（おなじ ことは 2 かい いわない。なれた 人ほど みじかく）
@@ -206,6 +206,7 @@ const pixe = (() => {
   function setAway(v) {
     away = v;
     sprite.classList.toggle("away", v);
+    favicon?.refresh();
   }
 
   // ---------- UFO：ときどき よこぎる。タップで うちおとせる（実績は なし） ----------
@@ -250,6 +251,45 @@ const pixe = (() => {
   };
   links.addEventListener("mouseover", hi);
   links.addEventListener("focusin", hi);
+
+  // ---------- 生きている ファビコン（v1 の まま。v2.2.1 で もどした、本人「PCのブックマークバーのアイコン消したでしょ！かわいいんだから」）----------
+  // タブ・ブックマークバーの アイコンでも ピクセが まばたき。ワープで いない あいだは かげ だけ。季節の 衣装も きる
+  const favicon = (() => {
+    const link = document.getElementById("favicon");
+    const cv = document.createElement("canvas");
+    cv.width = 16;
+    cv.height = 16;
+    const cx = cv.getContext("2d");
+    let lastHref = "";
+    function draw(rows) {
+      const css = getComputedStyle(document.documentElement);
+      const v = (name) => css.getPropertyValue(name).trim();
+      const colors = { ...PALETTE, w: v("--fg") || PALETTE.w, p: v("--accent") || PALETTE.p, c: v("--accent-2") || PALETTE.c, y: v("--gold") || PALETTE.y, m: v("--muted") || "#8a80b8" };
+      delete colors["#"];
+      cx.clearRect(0, 0, 16, 16);
+      const ox = Math.floor((16 - rows[0].length) / 2);
+      const oy = Math.floor((16 - rows.length) / 2);
+      rows.forEach((row, y) =>
+        [...row].forEach((ch, x) => {
+          if (!colors[ch]) return;
+          cx.fillStyle = colors[ch];
+          cx.fillRect(x + ox, y + oy, 1, 1);
+        })
+      );
+      const href = cv.toDataURL("image/png");
+      if (href !== lastHref) link.href = lastHref = href;
+    }
+    const idle = () => (away ? draw(FRAME.idle.map((r) => r.replace(/[^.]/g, "m"))) : draw(dress(FRAME.idle)));
+    if (link) {
+      idle();
+      setInterval(() => {
+        if (document.hidden || away) return idle();
+        draw(dress(FRAME.blink));
+        setTimeout(idle, 150);
+      }, 3200);
+    }
+    return { refresh: () => link && idle() };
+  })();
 
   return {
     say,
