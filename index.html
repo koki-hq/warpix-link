@@ -179,6 +179,23 @@
       <label for="edit-name">名前（12文字まで）</label>
       <input class="win-input gold" id="edit-name" type="text" maxlength="12" autocomplete="off">
       <p class="win-error" id="edit-error" role="alert" hidden>名前を入力してね。</p>
+      <!-- グループだけの はいけい（v2.3）：OFF は メニューの「はいけい」の まま。ON で ひる・ゆうがた・よる・じぶんの がぞう -->
+      <p class="win-label">はいけい</p>
+      <div class="switch-row"><span id="gbg-label">この グループだけの はいけい</span><button type="button" class="bgm-switch" id="gbg-switch" role="switch" aria-checked="false" aria-labelledby="gbg-label">OFF</button></div>
+      <p class="win-note" id="gbg-off">OFF のときは、メニューの「はいけい」で選んだ空になるよ。</p>
+      <div class="gbg" id="gbg" hidden>
+        <div class="gbg-cards" role="radiogroup" aria-label="この グループの はいけい">
+          <button type="button" role="radio" class="gbg-card" data-gbg="day" aria-checked="false"><span class="sky-thumb" data-thumb="day"></span><b>ひる</b></button>
+          <button type="button" role="radio" class="gbg-card" data-gbg="evening" aria-checked="false"><span class="sky-thumb" data-thumb="evening"></span><b>ゆうがた</b></button>
+          <button type="button" role="radio" class="gbg-card" data-gbg="night" aria-checked="false"><span class="sky-thumb" data-thumb="night"></span><b>よる</b></button>
+          <button type="button" role="radio" class="gbg-card" data-gbg="photo" aria-checked="false"><span class="gbg-photo" id="gbg-thumb"><span aria-hidden="true">＋</span></span><b>じぶんの がぞう</b></button>
+        </div>
+        <div class="win-btns" id="gbg-photo-btns" hidden>
+          <button type="button" class="win-btn" id="gbg-pick">がぞうを かえる</button>
+          <button type="button" class="win-btn danger" id="gbg-del">がぞうを けす</button>
+        </div>
+        <input type="file" id="gbg-file" accept="image/*" hidden>
+      </div>
       <p class="win-label">リンク <span class="muted" id="edit-count"></span></p>
       <p class="win-note">長押しで並び順を変えられるよ。</p>
       <ul class="edit-rows" id="edit-rows"></ul>
@@ -280,7 +297,7 @@
         </div>
         <input type="file" id="move-file-input" accept=".txt,text/plain" hidden>
         <p class="win-msg" id="move-msg" role="status"></p>
-        <p class="about-note">コードはこのブラウザの中で作り、どこにも送りません。iPhone では、ホーム画面のアプリと Safari でデータが別々です。</p>
+        <p class="about-note">コードはこのブラウザの中で作り、どこにも送りません。グループの背景の画像は大きいので、コードには入らないよ（引っ越したあとに選び直してね）。iPhone では、ホーム画面のアプリと Safari でデータが別々です。</p>
       </section>
 
       <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" hidden>
@@ -293,7 +310,7 @@
         <p>感想や「ここがわかりにくい」、バグの報告など、なんでもうれしいです。</p>
         <a class="win-btn cyan" id="otegami" href="mailto:pixe@warpix.app">ピクセに おてがみを かく<span class="sr-only">（メールのアプリが開きます）</span></a>
         <h3>このブラウザに残すもの</h3>
-        <p>グループ・リンク・自分のリンク・ワープの記録・設定・読んだおしらせ・ピクセの案内を聞いたかどうか。<strong>このブラウザの中だけ</strong>に保存して、どこにも送りません。</p>
+        <p>グループ・リンク・自分のリンク・ワープの記録・設定・読んだおしらせ・ピクセの案内を聞いたかどうか・グループの背景の画像。<strong>このブラウザの中だけ</strong>に保存して、どこにも送りません。</p>
         <h3>外に送るもの</h3>
         <ul>
           <li><b>来た人の数</b>：何人・何回来たかだけを、Cloudflare で数えています。誰かはわかりません。</li>
@@ -304,6 +321,23 @@
         <button class="win-btn danger" id="about-reset" type="button">この アプリの きろくを ぜんぶ けす</button>
         <p class="about-credit"><span id="about-version">v2.0</span>　© 2026 <a href="https://warpix.app/" target="_blank" rel="noopener">WARPIX製作所<span class="sr-only">（新しいタブで開く）</span></a>　All rights reserved.</p>
       </section>
+    </div>
+  </dialog>
+
+  <!-- がぞうの トリミング（v2.3、デザイン案 A）：画面いっぱいに 写真、ボタンや セリフが くる ところを 点線で。ゆびで うごかす・2 本の ゆびか つまみで 大きく -->
+  <dialog class="trim" id="trim-dialog" aria-labelledby="trim-title">
+    <div class="trim-stage" id="trim-stage">
+      <img id="trim-img" alt="" draggable="false">
+      <div class="trim-ghosts" id="trim-ghosts" aria-hidden="true"></div>
+    </div>
+    <div class="trim-top"><h2 id="trim-title">見せたいところに あわせてね</h2><span>2本の ゆびで 大きく</span></div>
+    <div class="trim-bot">
+      <p>点線は ボタンが くる ところ。</p>
+      <label class="trim-zoom"><span aria-hidden="true">－</span><input type="range" id="trim-zoom" min="100" max="400" step="1" value="100" aria-label="大きさ"><span aria-hidden="true">＋</span></label>
+      <div class="trim-btns">
+        <button type="button" class="win-btn" id="trim-no">やめる</button>
+        <button type="button" class="win-btn pink" id="trim-yes">けってい</button>
+      </div>
     </div>
   </dialog>
 
@@ -415,6 +449,7 @@
   <script src="links.js"></script>
   <script src="mail.js"></script>
   <script src="gear.js"></script>
+  <script src="photo.js"></script>
   <script src="edit.js"></script>
   <script src="manual.js"></script>
 </body>

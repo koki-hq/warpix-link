@@ -96,6 +96,7 @@ export default {
     t.ok(await p.ev(`!document.getElementById("edit-prev") && !document.querySelector('#edit-rows [data-act="up"]')`), "まえへ・▲ が のこる");
     await drag(p, await center(p, '#edit-rows li[data-id="youtube"] .grip'), await center(p, '#edit-rows li[data-id="twitter"] .grip'));
     t.eq(await ids(p), ["spotify", "twitter", "youtube"], "リンクを ドラッグで ならべかえ られない");
+    await p.ev(`document.querySelector("#edit-dialog .win-scroll").scrollTop = 9999`);
     await drag(p, await center(p, '#group-rows li[data-id="g0"] .grip'), await center(p, '#group-rows li[data-id="g2"] .grip'));
     const v = await p.ev(`({ order: CASSETTES.groups().map((g) => g.title), cur: CASSETTES.current().title })`);
     t.eq(v, { order: ["B", "C", "A"], cur: "A" }, "グループを ドラッグで ならべかえ られない（えらんで いる グループが かわった）");

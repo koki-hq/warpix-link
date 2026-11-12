@@ -272,7 +272,7 @@ const CASSETTES = (() => {
     if (Array.isArray(saved?.list))
       groups = saved.list
         .filter((g) => g && typeof g.id === "string" && cut(g.title, MAX_TITLE))
-        .map((g) => ({ id: g.id, title: cut(g.title, MAX_TITLE), ids: [...new Set((Array.isArray(g.ids) ? g.ids : []).filter((id) => byId(id)))].slice(0, MAX_LINKS) }));
+        .map((g) => ({ id: g.id, title: cut(g.title, MAX_TITLE), ids: [...new Set((Array.isArray(g.ids) ? g.ids : []).filter((id) => byId(id)))].slice(0, MAX_LINKS), ...(cleanBg(g.bg) ? { bg: cleanBg(g.bg) } : {}) }));
     at = Number.isInteger(saved?.at) && saved.at >= 0 && saved.at < groups.length ? saved.at : 0;
   } catch {}
   const save = () => {
@@ -281,6 +281,12 @@ const CASSETTES = (() => {
     } catch {}
   };
   const find = (gid) => groups.find((g) => g.id === gid);
+  // グループだけの はいけい（v2.3）：{ own: ON か, sky: day|evening|night|photo, photo: がぞうが あるか }。がぞう そのものは photo.js（IndexedDB）
+  function cleanBg(bg) {
+    if (!bg || typeof bg !== "object") return null;
+    const sky = ["day", "evening", "night", "photo"].includes(bg.sky) ? bg.sky : "night";
+    return { own: bg.own === true, sky, photo: bg.photo === true };
+  }
 
   // アプリで ひらく（v1.64）：ウェブの アドレスだと Gmail は アプリに いかず、TikTok は ログイン して いない まどが ひらいた（本人）。
   // iPhone では アプリの アドレスへ。2.5 びょう たっても この ページが みえた まま なら、アプリが ない ので ウェブへ
@@ -374,6 +380,13 @@ const CASSETTES = (() => {
       const g = find(gid);
       if (!g || !g.ids.includes(id)) return false;
       g.ids = g.ids.filter((x) => x !== id);
+      save();
+      return true;
+    },
+    setBg(gid, patch) {
+      const g = find(gid);
+      if (!g) return false;
+      g.bg = cleanBg({ own: false, sky: "night", photo: false, ...g.bg, ...patch });
       save();
       return true;
     },

@@ -2749,3 +2749,176 @@ body {
 .group-rows .mini {
   margin-left: auto;
 }
+
+/* =====================================================================
+   v2.3：グループだけの はいけい・トリミング
+   ===================================================================== */
+/* じぶんの がぞう：そのまま すこし くらく（読める ように）。ます目は かさねない。月・ほし・くもは うえ */
+html.has-photo .sky-bg {
+  background: linear-gradient(rgba(15, 11, 30, 0.5), rgba(15, 11, 30, 0.6)), var(--photo) center / cover no-repeat;
+}
+html.has-photo body {
+  background-image: none;
+}
+.gbg {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gbg[hidden] {
+  display: none;
+}
+.gbg-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.gbg-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: "DotGothic16", monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+.gbg-card b {
+  font-weight: normal;
+}
+.gbg-card .sky-thumb,
+.gbg-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  max-width: 100%;
+  box-shadow: 0 0 0 2px var(--btn);
+}
+.gbg-photo {
+  display: grid;
+  place-items: center;
+  outline: 2px dashed var(--accent-2);
+  outline-offset: -2px;
+  box-shadow: none;
+  color: var(--accent-2);
+  font-size: 20px;
+  background: center / cover no-repeat;
+}
+.gbg-photo.has {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--btn);
+}
+.gbg-photo.has span {
+  display: none;
+}
+.gbg-card[aria-checked="true"] {
+  color: var(--gold);
+}
+.gbg-card[aria-checked="true"] .sky-thumb,
+.gbg-card[aria-checked="true"] .gbg-photo {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--gold);
+}
+
+/* トリミング：画面いっぱい */
+.trim {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #000;
+  color: var(--fg);
+  overflow: hidden;
+}
+.trim::backdrop {
+  background: #000;
+}
+.trim-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+.trim-stage img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  transform-origin: 0 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+.trim-ghosts span {
+  position: absolute;
+  outline: 2px dashed rgba(255, 255, 255, 0.75);
+  outline-offset: -2px;
+  background: rgba(15, 11, 30, 0.3);
+  pointer-events: none;
+}
+.trim-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 10px;
+  background: rgba(15, 11, 30, 0.85);
+  font-family: "DotGothic16", monospace;
+}
+.trim-top h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: normal;
+}
+.trim-top span {
+  color: var(--accent-2);
+  font-size: 12px;
+}
+.trim-bot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: rgba(15, 11, 30, 0.9);
+}
+.trim-bot p {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #d6d0f2;
+}
+.trim-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "DotGothic16", monospace;
+}
+.trim-zoom input {
+  flex: 1;
+}
+.trim-btns {
+  display: flex;
+  gap: 10px;
+}
+.trim-btns .win-btn {
+  flex: 1;
+  margin: 0;
+}

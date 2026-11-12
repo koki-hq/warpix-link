@@ -256,6 +256,7 @@ const gear = (() => {
     try {
       Object.keys(localStorage).filter((k) => k.startsWith("warpix-v2-")).forEach((k) => localStorage.removeItem(k));
     } catch {}
+    photoBg.clearAll();
     location.reload();
   });
 

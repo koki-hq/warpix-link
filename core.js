@@ -570,11 +570,19 @@ const settings = (() => {
     apply();
     subs.forEach((fn) => fn(state));
   }
+  // いま 見せて いる 空（v2.3）：グループだけの はいけいが あれば そちら。メニューの「はいけい」（state.sky）は かえない
+  let shown = null;
+  const sky = () => shown ?? state.sky;
+  function showSky(s) {
+    shown = ["day", "evening", "night"].includes(s) ? s : null;
+    document.documentElement.dataset.sky = sky();
+    subs.forEach((fn) => fn(state));
+  }
   function apply() {
     sound.setVolumes({ bgm: vol(state.bgmVol), se: state.se === false ? 0 : vol(state.seVol) });
     sound.setSong(state.song);
-    document.documentElement.dataset.sky = state.sky;
+    document.documentElement.dataset.sky = sky();
   }
   apply();
-  return { state, set, onChange: (fn) => subs.push(fn), DEFAULTS };
+  return { state, set, sky, showSky, onChange: (fn) => subs.push(fn), DEFAULTS };
 })();

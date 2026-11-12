@@ -137,7 +137,7 @@ const clouds = (() => {
   }
   function draw() {
     c.clearRect(0, 0, canvas.width, canvas.height);
-    const col = COLOR[settings.state.sky] ?? COLOR.night;
+    const col = COLOR[settings.sky()] ?? COLOR.night;
     for (const cl of list) {
       CLOUD.forEach((row, y) =>
         [...row].forEach((ch, x) => {
@@ -200,7 +200,7 @@ const moon = (() => {
   };
   const el = document.getElementById("moon");
   function draw() {
-    el.innerHTML = pixelSvg(rows(age() / SYN), COLOR[settings.state.sky] ?? COLOR.night);
+    el.innerHTML = pixelSvg(rows(age() / SYN), COLOR[settings.sky()] ?? COLOR.night);
   }
   draw();
   settings.onChange(draw);

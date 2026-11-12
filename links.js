@@ -29,6 +29,7 @@ const groups = (() => {
     linksEl.hidden = !g;
     if (!g) {
       linksEl.innerHTML = "";
+      if (typeof photoBg !== "undefined") photoBg.apply();
       return;
     }
     renderTabs(list);
@@ -40,6 +41,7 @@ const groups = (() => {
     });
     if (g.ids.length < C.MAX_LINKS && !editing) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`);
     linksEl.innerHTML = tiles.join("");
+    if (typeof photoBg !== "undefined") photoBg.apply();
     linksEl.setAttribute("aria-label", `${g.title} のリンク`);
   }
 
@@ -429,6 +431,7 @@ const groups = (() => {
     $("edit-error").hidden = true;
     $("edit-msg").textContent = "";
     renderEdit();
+    photoBg.renderEdit();
     if (!editDialog.open) editDialog.showModal();
     sound.sfx.select();
   }
@@ -456,6 +459,7 @@ const groups = (() => {
     if (!g || !(await ask(`グループ「${g.title}」を消しますか？`))) return;
     const wasCurrent = C.current()?.id === gid;
     C.removeGroup(gid);
+    photoBg.forget(gid);
     render();
     if (wasCurrent || !C.current()) {
       editDialog.close();
