@@ -192,6 +192,11 @@ const pixe = (() => {
       if (document.hidden || away) return;
       body.innerHTML = look("blink");
       setTimeout(() => (body.innerHTML = look()), 160);
+      // v2.9.1：すわって いる ときも まばたき（本人：まがおで つったって いると あつを かんじる）
+      if (rest === "sit") {
+        seatBlink("blink");
+        setTimeout(() => rest === "sit" && seatBlink("idle"), 160);
+      }
     }, 4200);
   }
 
@@ -252,15 +257,30 @@ const pixe = (() => {
 
   // ---------- ひとやすみ（v2.9）：しばらく さわらないと ちへいせんの やね・おかに すわる、もっと たつと ねむる ----------
   // 本人「可愛い　いいね」。20 びょうで すわる・さらに 1 ぷんで ねむる（本人「案のでいいとおもう」）。
-  // ふきだしは のこす（本人「消したらどうやってセリフ見せるの」）。なにか さわると うえに もどる
-  const [SIT_MS, SLEEP_MS] = window.WARPIX_IDLE ?? [20000, 60000];
+  // ふきだしは のこす（本人「消したらどうやってセリフ見せるの」）。
+  // v2.10：ちいさく 30px（とおくに いる かんじ）・まばたき・z は 3 つ。画面を さわっても すぐには もどらない（ぼうけん）。
+  //   画面を さわると よびかけ、ピクセを さわると「もうすこし したら もどるね〜」で 5 びょう あとに もどる。
+  //   リンクを おす・アプリを はなれる と すぐ もどる。ときどき となりの やねへ おさんぽ・ひとりごと
+  const [SIT_MS, SLEEP_MS, WALK_MS = 30000, BACK_MS = 5000] = window.WARPIX_IDLE ?? [20000, 60000];
   const seatEl = document.createElement("div");
   seatEl.className = "pixe-seat";
   seatEl.setAttribute("aria-hidden", "true");
   seatEl.hidden = true;
   document.body.append(seatEl);
   let rest = null; // null・"sit"・"sleep"
+  // z は 3 つ（本人「Zは定番の３つの方がいい」）。ちいさい じゅんに ななめ うえへ、じゅんばんに うかぶ
+  const ZZZ = `<span class="pixe-z"><i>z</i><i>z</i><i>z</i></span>`;
+  const seatBlink = (frame) => {
+    const svg = seatEl.querySelector("svg");
+    if (svg) svg.outerHTML = look(frame);
+  };
   let idleAt = performance.now();
+  let fx = 0.72; // いま すわって いる ばしょ（画面の よこの わりあい）
+  let nextWalk = 0;
+  let calledAt = -Infinity;
+  let backTimer = null;
+  const SPOTS = [0.16, 0.32, 0.5, 0.72, 0.86];
+  const MURMUR = ["ここから みると、\nそらが ひろい。", "かぜが きもちいい〜"];
   function sitLine() {
     const s = typeof seasonOf === "function" ? seasonOf() : null;
     if (settings.state.horizon === "hills") return "おかの うえ、\nかぜが きもちいい。";
@@ -271,40 +291,129 @@ const pixe = (() => {
   function canRest() {
     return !away && !document.hidden && !document.querySelector("dialog[open]") && !document.body.classList.contains("editing") && !document.body.classList.contains("no-groups") && typeof horizon !== "undefined";
   }
-  function sit() {
-    const at = horizon.seat(settings.state.horizon === "hills" ? 0.5 : 0.72);
-    if (!at) return false;
-    seatEl.innerHTML = look() + `<span class="pixe-z">z z</span>`;
+  function place(at) {
     seatEl.style.left = `${Math.round(at.x)}px`;
     seatEl.style.top = `${Math.round(at.y)}px`;
+  }
+  function sit() {
+    fx = settings.state.horizon === "hills" ? 0.5 : 0.72;
+    const at = horizon.seat(fx);
+    if (!at) return false;
+    seatEl.innerHTML = look() + ZZZ;
+    place(at);
     seatEl.hidden = false;
     seatEl.classList.remove("sleep");
     sprite.classList.add("down");
     rest = "sit";
+    nextWalk = performance.now() + WALK_MS;
     say(sitLine());
     return true;
   }
   function sleep() {
     rest = "sleep";
-    seatEl.innerHTML = look("blink") + `<span class="pixe-z">z z</span>`;
+    seatEl.innerHTML = look("blink") + ZZZ;
     seatEl.classList.add("sleep");
     say("……すやすや。");
   }
-  function wake() {
+  // おきる（ねて いる とき だけ）。すわった まま
+  function rouse(line) {
+    if (rest !== "sleep") return;
+    rest = "sit";
+    seatEl.innerHTML = look() + ZZZ;
+    seatEl.classList.remove("sleep");
+    if (line) say(line);
+  }
+  // うえに もどる
+  function comeBack(line = null) {
+    clearTimeout(backTimer);
+    backTimer = null;
     idleAt = performance.now();
     if (!rest) return;
     rest = null;
     seatEl.hidden = true;
+    seatEl.classList.remove("hop");
     sprite.classList.remove("down");
+    if (line) {
+      sprite.classList.remove("jump");
+      void sprite.offsetWidth;
+      sprite.classList.add("jump");
+      say(line);
+    }
   }
-  for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) addEventListener(ev, wake, { capture: true, passive: true });
-  document.addEventListener("visibilitychange", wake);
-  addEventListener("resize", wake);
+  // となりの やねへ おさんぽ（0.8 びょうの ジャンプ）
+  function walk() {
+    const others = SPOTS.filter((x) => Math.abs(x - fx) > 0.1);
+    const to = others[Math.floor(Math.random() * others.length)];
+    const from = horizon.seat(fx);
+    const at = horizon.seat(to);
+    if (!from || !at) return;
+    say(Math.random() < 0.5 ? "となりの やねまで\nいってみよう。" : "よいしょっと。");
+    fx = to;
+    if (reduceMotion) return place(at);
+    const t0 = performance.now();
+    const step = (now) => {
+      if (rest !== "sit") return;
+      const k = Math.min(1, (now - t0) / 800);
+      place({ x: from.x + (at.x - from.x) * k, y: from.y + (at.y - from.y) * k - Math.sin(Math.PI * k) * 40 });
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  // さわった とき
+  addEventListener(
+    "pointerdown",
+    (e) => {
+      idleAt = performance.now();
+      if (!rest) return;
+      // ピクセを さわる：もうすこし したら もどる（本人「もう少ししたら戻るね〜とか入れるか」→ A）
+      if (e.target.closest?.(".pixe-seat")) {
+        if (backTimer) return;
+        const sleeping = rest === "sleep";
+        rouse();
+        seatEl.classList.remove("hop");
+        void seatEl.offsetWidth;
+        seatEl.classList.add("hop");
+        say(sleeping ? "……ん？ ねてないよ。" : "もうすこし したら\nもどるね〜");
+        backTimer = setTimeout(() => comeBack("ただいま〜"), BACK_MS);
+        return;
+      }
+      // リンクを おす：いっしょに ワープ するので すぐ もどる
+      if (e.target.closest?.(".links a.pixel-btn")) return comeBack();
+      // ほかの ところ：よびかけ（なんども いわない）
+      if (rest === "sleep") return rouse("……ん？ ねてないよ。");
+      if (!backTimer && performance.now() - calledAt > 8000 && !e.target.closest?.("dialog")) {
+        calledAt = performance.now();
+        say("おーい、ここだよ ここ。\nした みてみて〜");
+      }
+    },
+    { capture: true, passive: true }
+  );
+  for (const ev of ["keydown", "wheel"]) addEventListener(ev, () => (idleAt = performance.now()), { capture: true, passive: true });
+  document.addEventListener("visibilitychange", () => comeBack());
+  addEventListener("resize", () => {
+    if (!rest) return;
+    const at = horizon.seat(fx);
+    if (at) place(at);
+    else comeBack();
+  });
   setInterval(() => {
-    const idle = performance.now() - idleAt;
+    const now = performance.now();
+    const idle = now - idleAt;
     if (!rest && idle >= SIT_MS) {
-      if (!canRest() || !sit()) idleAt = performance.now();
-    } else if (rest === "sit" && idle >= SIT_MS + SLEEP_MS) sleep();
+      if (!canRest() || !sit()) idleAt = now;
+      return;
+    }
+    if (rest !== "sit" || backTimer) return;
+    if (idle >= SIT_MS + SLEEP_MS) return sleep();
+    // ときどき おさんぽ か ひとりごと
+    if (now >= nextWalk) {
+      nextWalk = now + WALK_MS * (0.7 + Math.random() * 0.6);
+      if (Math.random() < 0.5) walk();
+      else {
+        const lines = settings.state.horizon === "city" ? [...MURMUR, "まちの あかり、\nちかくで みると きれい。"] : MURMUR;
+        say(lines[Math.floor(Math.random() * lines.length)]);
+      }
+    }
   }, 1000);
 
   // ---------- UFO：ときどき よこぎる。タップで うちおとせる（実績は なし） ----------

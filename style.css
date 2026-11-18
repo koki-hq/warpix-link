@@ -3359,11 +3359,15 @@ html[data-tiles="neon"] .links .pixel-btn:active {
 .pixe-seat {
   position: fixed;
   z-index: 1;
-  width: 40px;
-  height: 40px;
-  margin: -33px 0 0 -20px; /* あしもとを やねに */
-  pointer-events: none;
+  width: 30px; /* v2.10：とおくに いる かんじ（本人「３０でいいか」） */
+  height: 30px;
+  margin: -25px 0 0 -15px; /* あしもとを やねに */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   animation: seat-in 0.3s steps(3);
+}
+.pixe-seat.hop {
+  animation: jump 0.3s steps(3);
 }
 .pixe-seat[hidden] {
   display: none;
@@ -3375,31 +3379,59 @@ html[data-tiles="neon"] .links .pixel-btn:active {
 }
 .pixe-z {
   position: absolute;
-  left: 30px;
-  top: -14px;
+  left: 24px;
+  top: -8px;
   display: none;
   color: var(--fg);
   font-family: "Press Start 2P", monospace;
-  font-size: 10px;
-  letter-spacing: 4px;
-  white-space: nowrap;
+  pointer-events: none;
+}
+.pixe-z i {
+  position: absolute;
+  font-style: normal;
+  opacity: 0;
+}
+.pixe-z i:nth-child(1) {
+  left: 0;
+  top: 0;
+  font-size: 7px;
+}
+.pixe-z i:nth-child(2) {
+  left: 8px;
+  top: -10px;
+  font-size: 9px;
+}
+.pixe-z i:nth-child(3) {
+  left: 18px;
+  top: -22px;
+  font-size: 12px;
 }
 .pixe-seat.sleep .pixe-z {
   display: block;
-  animation: zz 1.6s steps(4) infinite;
+}
+.pixe-seat.sleep .pixe-z i {
+  animation: zz 2.4s steps(1) infinite;
+}
+.pixe-seat.sleep .pixe-z i:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.pixe-seat.sleep .pixe-z i:nth-child(3) {
+  animation-delay: 0.8s;
 }
 @keyframes seat-in {
   0% { translate: 0 -24px; }
   100% { translate: 0 0; }
 }
 @keyframes zz {
-  0% { translate: 0 0; opacity: 0.4; }
-  50% { translate: 2px -4px; opacity: 1; }
-  100% { translate: 4px -8px; opacity: 0.4; }
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pixe-seat,
-  .pixe-seat.sleep .pixe-z {
+  .pixe-seat.sleep .pixe-z i {
     animation: none;
+    opacity: 1;
   }
 }
