@@ -2677,14 +2677,7 @@ body {
   font-size: 15px;
 }
 
-/* リンクの へんしゅう：下から でる まど */
-.about.sheet {
-  margin: auto auto 0;
-  width: min(480px, 100vw);
-  max-width: 100vw;
-  max-height: 88dvh;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
+/* リンクの へんしゅう：v2.6 から ほかの まどと おなじ まんなか（v2.2〜v2.5 は 下から でて いた） */
 .sheet .win-foot {
   gap: 10px;
 }

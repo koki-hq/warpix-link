@@ -159,21 +159,16 @@ const editMode = (() => {
       .map(([k, v]) => `<button type="button" role="radio" class="mylink-icon" data-icon="${k}" aria-checked="${k === icon}" aria-label="${esc(v.name)}">${pixelSvg(v.rows)}</button>`)
       .join("");
   }
+  // v2.6：リストの リンクは かえられる ものが ない ので しらせる だけ（はずすは 左上の ✕）
   function openSheet(c) {
+    if (!c.mine) return tell("リストのリンクは、名前とアドレスを変えられないよ。");
     editing = c;
     $("sheet-title").textContent = `「${c.label}」を へんしゅう`;
-    $("sheet-mine").hidden = !c.mine;
-    $("sheet-shelf").hidden = !!c.mine;
-    $("sheet-save").hidden = !c.mine;
-    $("sheet-out").hidden = !c.mine;
-    $("sheet-ok").hidden = !!c.mine;
     $("sheet-error").hidden = true;
-    if (c.mine) {
-      $("sheet-name").value = c.label;
-      $("sheet-url").value = c.url;
-      icon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
-      renderIcons();
-    }
+    $("sheet-name").value = c.label;
+    $("sheet-url").value = c.url;
+    icon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
+    renderIcons();
     sheet.showModal();
     sound.sfx.select();
   }
@@ -213,7 +208,6 @@ const editMode = (() => {
     if (!C.current()?.ids.length) exit();
   });
   $("sheet-close").addEventListener("click", () => sheet.close());
-  $("sheet-ok").addEventListener("click", () => sheet.close());
   sheet.addEventListener("click", (e) => e.target === sheet && sheet.close());
 
   return { enter, exit, on: () => on, openSheet };

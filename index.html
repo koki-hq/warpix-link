@@ -344,7 +344,8 @@
     </div>
   </dialog>
 
-  <!-- リンクの へんしゅう（v2.2）：へんしゅう ちゅうに リンクを おすと 下から。じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは はずす だけ -->
+  <!-- リンクの へんしゅう（v2.2）：へんしゅう ちゅうに じぶんの リンクを おすと。なまえ・アドレス・アイコン。
+       v2.6：ほかの まどと おなじ まんなかに。リストの リンクは この まどでは なく しらせる まど（edit.js） -->
   <dialog class="about win sheet" id="link-sheet" aria-labelledby="sheet-title">
     <div class="about-top">
       <h2 id="sheet-title">リンクを へんしゅう</h2>
@@ -360,13 +361,10 @@
         <div class="mylink-icons" id="sheet-icons" role="radiogroup" aria-labelledby="sheet-icon-label"></div>
         <p class="win-error" id="sheet-error" role="alert" hidden></p>
       </div>
-      <p class="win-note" id="sheet-shelf">リストのリンクは、名前とアドレスを変えられません。</p>
     </form>
     <div class="win-foot">
       <button class="win-btn danger" id="sheet-out" type="button">はずす</button>
       <button class="win-btn pink" id="sheet-save" type="button">けってい</button>
-      <!-- v2.6：リストの リンクは かえられる ものが ない ので「とじる」だけ（はずすは 左上の ✕ と おなじ） -->
-      <button class="win-btn cyan" id="sheet-ok" type="button" hidden>とじる</button>
     </div>
   </dialog>
 

@@ -75,7 +75,7 @@ export default {
     await server.close();
   },
 
-  async "へんしゅう ちゅうに リンクを おすと 下から まど：じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは とじる だけ（v2.6）"(t) {
+  async "へんしゅう ちゅうに リンクを おすと 下から まど：じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは しらせる まど（v2.6）"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
     await noNavigate(p);
     await p.ev(`(() => { const c = CASSETTES.addMine({ label: "バンド", url: "https://example.com/band", icon: "heart" }); CASSETTES.addLink(CASSETTES.current().id, c.id); groups.render(); editMode.enter(); })()`);
@@ -89,14 +89,16 @@ export default {
     t.eq(await p.ev(`[CASSETTES.byId("my-1").label, CASSETTES.byId("my-1").url, document.getElementById("link-sheet").open]`), ["バンドの公式", "https://example.com/official", false], "かわらない");
     await p.click('.links .pixel-btn[data-id="youtube"]');
     await sleep(150);
-    v = await p.ev(`({ mine: !document.getElementById("sheet-mine").hidden, save: !document.getElementById("sheet-save").hidden, out: !document.getElementById("sheet-out").hidden, ok: !document.getElementById("sheet-ok").hidden })`);
-    t.eq(v, { mine: false, save: false, out: false, ok: true }, "リストの リンクは「とじる」だけ に ならない");
-    await p.click("#sheet-ok");
-    await sleep(100);
-    t.eq([await ids(p), await p.ev(`document.getElementById("link-sheet").open`)], [["youtube", "my-1"], false], "とじる で とじない・はずれた");
+    v = await p.ev(`({ sheet: document.getElementById("link-sheet").open, ask: document.getElementById("ask-dialog").open, text: document.getElementById("ask-text").textContent, no: document.getElementById("ask-no").hidden })`);
+    t.eq(v, { sheet: false, ask: true, text: "リストのリンクは、名前とアドレスを変えられないよ。", no: true }, "リストの リンクは しらせる まど（とじる だけ）に ならない");
+    await p.click("#ask-yes");
+    await sleep(150);
+    t.eq([await ids(p), await p.ev(`document.getElementById("ask-dialog").open`), await p.ev(`editMode.on()`)], [["youtube", "my-1"], false, true], "とじる で とじない・はずれた・へんしゅうが おわった");
+    // じぶんの リンクの まどは まんなか（v2.6、下から でない）
     await p.click('.links .pixel-btn[data-id="my-1"]');
     await sleep(150);
-    t.eq(await p.ev(`[!document.getElementById("sheet-out").hidden, !document.getElementById("sheet-save").hidden, document.getElementById("sheet-ok").hidden]`), [true, true, true], "じぶんの リンクに はずす・けってい が ない");
+    const r = await p.ev(`(() => { const b = document.getElementById("link-sheet").getBoundingClientRect(); return Math.abs((b.top + b.bottom) / 2 - innerHeight / 2) < 40; })()`);
+    t.ok(r, "じぶんの リンクの まどが まんなかに ない");
     await p.ev(`document.getElementById("sheet-out").click()`);
     t.eq(await ids(p), ["youtube"], "はずす で はずれない");
     t.noErrors(p);
