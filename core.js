@@ -317,6 +317,17 @@ const sound = (() => {
       noise(t, 0.4, 0.15, sfxGain);
       tone({ freq: 220, start: t, dur: 0.4, type: "triangle", vol: 0.2, slideTo: 40 });
     },
+    // ワープゲート（v2.11）：すいこまれる ヒュッ・とびだす ポン。リンクの ワープより ちいさく みじかく（本人「いき４、つく３」）
+    gateIn() {
+      if (!ensure()) return;
+      tone({ freq: 1400, start: ctx.currentTime, dur: 0.25, vol: 0.03, slideTo: 300 });
+    },
+    gateOut() {
+      if (!ensure()) return;
+      const t = ctx.currentTime;
+      tone({ freq: midi(76), start: t, dur: 0.06, vol: 0.035 });
+      tone({ freq: midi(88), start: t + 0.06, dur: 0.14, vol: 0.035 });
+    },
     // パワーアップ（駆け上がるアルペジオ）
     powerup() {
       if (!ensure()) return;

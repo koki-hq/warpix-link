@@ -202,7 +202,8 @@ const pixe = (() => {
 
   let typing = null;
   let full = "";
-  function say(line) {
+  // quiet：もじおくりの おとを ならさない（v2.11、ほうって おいて いる あいだの ひとこと）
+  function say(line, { quiet = false } = {}) {
     clearInterval(typing);
     full = line;
     if (reduceMotion) {
@@ -214,7 +215,7 @@ const pixe = (() => {
     typing = setInterval(() => {
       shown++;
       bubble.textContent = full.slice(0, shown);
-      if (shown % 2) sound.sfx.text();
+      if (shown % 2 && !quiet) sound.sfx.text();
       if (shown >= full.length) {
         clearInterval(typing);
         typing = null;
@@ -261,13 +262,19 @@ const pixe = (() => {
   // v2.10：ちいさく 30px（とおくに いる かんじ）・まばたき・z は 3 つ。画面を さわっても すぐには もどらない（ぼうけん）。
   //   画面を さわると よびかけ、ピクセを さわると「もうすこし したら もどるね〜」で 5 びょう あとに もどる。
   //   リンクを おす・アプリを はなれる と すぐ もどる。ときどき となりの やねへ おさんぽ・ひとりごと
+  // v2.11：しゅんかん いどう を やめて ワープゲート（本人「ワープゲートに入る感じが良かった」）。でる まえに ひとこと、
+  //   ついて 2.5 びょう は だまって けしきを みる（本人：ついて すぐ しゃべるのは びみょう）。ほしの えんしゅつは なし
+  //   （本人：まいかい だと やりすぎ）。おとは いく とき ヒュッ・つく とき ポン（本人「いき４、つく３」）。
+  //   ほうって おいて いる あいだの ひとことは もじおくりの おとを ならさない
   const [SIT_MS, SLEEP_MS, WALK_MS = 30000, BACK_MS = 5000] = window.WARPIX_IDLE ?? [20000, 60000];
+  const T = { announce: 1500, sink: 500, gap: 500, pop: 450, look: 2500 };
+  const HOLE = ["....cccccc....", "..ccppppppcc..", ".cpoooooooopc.", ".cpoooooooopc.", "..ccppppppcc..", "....cccccc...."];
   const seatEl = document.createElement("div");
   seatEl.className = "pixe-seat";
   seatEl.setAttribute("aria-hidden", "true");
   seatEl.hidden = true;
   document.body.append(seatEl);
-  let rest = null; // null・"sit"・"sleep"
+  let rest = null; // null・"go"（ゲートで いどう ちゅう）・"sit"・"sleep"
   // z は 3 つ（本人「Zは定番の３つの方がいい」）。ちいさい じゅんに ななめ うえへ、じゅんばんに うかぶ
   const ZZZ = `<span class="pixe-z"><i>z</i><i>z</i><i>z</i></span>`;
   const seatBlink = (frame) => {
@@ -279,8 +286,11 @@ const pixe = (() => {
   let nextWalk = 0;
   let calledAt = -Infinity;
   let backTimer = null;
+  let trip = 0; // いどうの ばんごう（とちゅうで やめた ものを すすめない）
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const SPOTS = [0.16, 0.32, 0.5, 0.72, 0.86];
   const MURMUR = ["ここから みると、\nそらが ひろい。", "かぜが きもちいい〜"];
+  const hush = (line) => say(line, { quiet: true });
   function sitLine() {
     const s = typeof seasonOf === "function" ? seasonOf() : null;
     if (settings.state.horizon === "hills") return "おかの うえ、\nかぜが きもちいい。";
@@ -295,25 +305,122 @@ const pixe = (() => {
     seatEl.style.left = `${Math.round(at.x)}px`;
     seatEl.style.top = `${Math.round(at.y)}px`;
   }
-  function sit() {
+  // うえの ピクセの あしもと
+  const topSpot = () => {
+    const r = body.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.bottom, size: r.width };
+  };
+
+  // ---------- ワープゲート：あな（うしろ と まえの ふち）と とんで いる ピクセ ----------
+  function gate(x, y, w) {
+    const h = (w * 6) / 14;
+    const mk = (cls) => {
+      const el = document.createElement("div");
+      el.className = `pixe-hole ${cls}`;
+      el.setAttribute("aria-hidden", "true");
+      el.innerHTML = pixelSvg(HOLE);
+      Object.assign(el.style, { left: `${x - w / 2}px`, top: `${y - h / 2}px`, width: `${w}px`, height: `${h}px` });
+      document.body.append(el);
+      return el;
+    };
+    const els = [mk("back"), mk("front")];
+    const run = (frames) => Promise.all(els.map((el) => el.animate(frames, { duration: 180, easing: "steps(3)", fill: "forwards" }).finished.catch(() => {})));
+    return {
+      open: () => run([{ transform: "scale(0, 0)" }, { transform: "scale(1.2, 0.6)" }, { transform: "scale(1, 1)" }]),
+      close: () => run([{ transform: "scale(1, 1)" }, { transform: "scale(0, 0)" }]).then(() => els.forEach((el) => el.remove())),
+      remove: () => els.forEach((el) => el.remove()),
+    };
+  }
+  function flyer(x, y, size) {
+    const el = document.createElement("div");
+    el.className = "pixe-fly";
+    el.setAttribute("aria-hidden", "true");
+    el.innerHTML = look();
+    Object.assign(el.style, { left: `${x - size / 2}px`, top: `${y - size * 0.84}px`, width: `${size}px`, height: `${size}px` });
+    document.body.append(el);
+    return el;
+  }
+  // あなに すいこまれる（すこし はねて から あしから）
+  function sink(el, size) {
+    const d = size * 0.84 + 4;
+    return el.animate(
+      [
+        { translate: "0 0", clipPath: "inset(0 0 0 0)" },
+        { translate: "0 -10px", clipPath: "inset(0 0 0 0)", offset: 0.3 },
+        { translate: `0 ${d}px`, clipPath: `inset(0 0 ${d}px 0)` },
+      ],
+      { duration: T.sink, easing: "steps(8)", fill: "forwards" }
+    ).finished.catch(() => {});
+  }
+  // あなから とびだす
+  function pop(el, size) {
+    const d = size * 0.84 + 4;
+    return el.animate(
+      [
+        { translate: `0 ${d}px`, clipPath: `inset(0 0 ${d}px 0)` },
+        { translate: "0 -10px", clipPath: "inset(0 0 0 0)", offset: 0.6 },
+        { translate: "0 0", clipPath: "inset(0 0 0 0)" },
+      ],
+      { duration: T.pop, easing: "steps(8)", fill: "forwards" }
+    ).finished.catch(() => {});
+  }
+  // a（x, y, size）から b へ ゲートで いく。reduceMotion では すぐ
+  async function travel(a, b, n, onHide) {
+    if (reduceMotion) return onHide(), true;
+    const g1 = gate(a.x, a.y - 2, Math.max(28, a.size));
+    await g1.open();
+    if (n !== trip) return g1.remove(), false;
+    const f1 = flyer(a.x, a.y, a.size);
+    onHide();
+    sound.sfx.gateIn();
+    await sink(f1, a.size);
+    f1.remove();
+    await g1.close();
+    await wait(T.gap);
+    if (n !== trip) return false;
+    const g2 = gate(b.x, b.y - 2, Math.max(28, b.size));
+    await g2.open();
+    const f2 = flyer(b.x, b.y, b.size);
+    sound.sfx.gateOut();
+    await pop(f2, b.size);
+    f2.remove();
+    g2.close();
+    return n === trip;
+  }
+
+  // すわりに いく：ひとこと → ゲート → やね → だまって けしきを みて から ひとこと
+  async function sit() {
     fx = settings.state.horizon === "hills" ? 0.5 : 0.72;
     const at = horizon.seat(fx);
     if (!at) return false;
+    const n = ++trip;
+    rest = "go";
+    hush("ちょっと おさんぽ\nしてくるね。");
+    await wait(T.announce);
+    if (n !== trip) return true;
+    const to = horizon.seat(fx) ?? at;
+    const ok = await travel(topSpot(), { ...to, size: 30 }, n, () => {
+      sprite.classList.add("down");
+      bubble.textContent = "";
+      clearInterval(typing);
+    });
+    if (!ok) return true;
     seatEl.innerHTML = look() + ZZZ;
-    place(at);
+    place(to);
     seatEl.hidden = false;
-    seatEl.classList.remove("sleep");
-    sprite.classList.add("down");
+    seatEl.classList.remove("sleep", "hop");
     rest = "sit";
+    idleAt = performance.now() - SIT_MS; // ねむるまでの じかんは ここから
     nextWalk = performance.now() + WALK_MS;
-    say(sitLine());
+    await wait(T.look);
+    if (n === trip && rest === "sit") hush(sitLine());
     return true;
   }
   function sleep() {
     rest = "sleep";
     seatEl.innerHTML = look("blink") + ZZZ;
     seatEl.classList.add("sleep");
-    say("……すやすや。");
+    hush("……すやすや。");
   }
   // おきる（ねて いる とき だけ）。すわった まま
   function rouse(line) {
@@ -323,22 +430,33 @@ const pixe = (() => {
     seatEl.classList.remove("sleep");
     if (line) say(line);
   }
-  // うえに もどる
-  function comeBack(line = null) {
+  // すぐ もどる（リンクを おした・アプリを はなれた）。いどう ちゅう なら やめる
+  function comeBack() {
     clearTimeout(backTimer);
     backTimer = null;
+    trip++;
     idleAt = performance.now();
     if (!rest) return;
     rest = null;
     seatEl.hidden = true;
     seatEl.classList.remove("hop");
     sprite.classList.remove("down");
-    if (line) {
-      sprite.classList.remove("jump");
-      void sprite.offsetWidth;
-      sprite.classList.add("jump");
-      say(line);
-    }
+    document.querySelectorAll(".pixe-hole, .pixe-fly").forEach((el) => el.remove());
+  }
+  // ゲートで もどる（ピクセを さわって すこし した とき）
+  async function goHome(line) {
+    backTimer = null;
+    if (rest !== "sit" && rest !== "sleep") return;
+    const n = ++trip;
+    rest = "go";
+    const r = seatEl.getBoundingClientRect();
+    const from = { x: r.left + r.width / 2, y: parseFloat(seatEl.style.top), size: 30 };
+    const ok = await travel(from, topSpot(), n, () => (seatEl.hidden = true));
+    if (!ok && n !== trip) return;
+    rest = null;
+    idleAt = performance.now();
+    sprite.classList.remove("down");
+    if (line) say(line);
   }
   // となりの やねへ おさんぽ（0.8 びょうの ジャンプ）
   function walk() {
@@ -347,7 +465,7 @@ const pixe = (() => {
     const from = horizon.seat(fx);
     const at = horizon.seat(to);
     if (!from || !at) return;
-    say(Math.random() < 0.5 ? "となりの やねまで\nいってみよう。" : "よいしょっと。");
+    hush(Math.random() < 0.5 ? "となりの やねまで\nいってみよう。" : "よいしょっと。");
     fx = to;
     if (reduceMotion) return place(at);
     const t0 = performance.now();
@@ -365,6 +483,11 @@ const pixe = (() => {
     (e) => {
       idleAt = performance.now();
       if (!rest) return;
+      // でる まえ（ひとことの あいだ）に さわったら やめる
+      if (rest === "go" && !sprite.classList.contains("down")) return comeBack();
+      // リンクを おす：いっしょに ワープ するので すぐ もどる
+      if (e.target.closest?.(".links a.pixel-btn")) return comeBack();
+      if (rest === "go") return;
       // ピクセを さわる：もうすこし したら もどる（本人「もう少ししたら戻るね〜とか入れるか」→ A）
       if (e.target.closest?.(".pixe-seat")) {
         if (backTimer) return;
@@ -374,11 +497,9 @@ const pixe = (() => {
         void seatEl.offsetWidth;
         seatEl.classList.add("hop");
         say(sleeping ? "……ん？ ねてないよ。" : "もうすこし したら\nもどるね〜");
-        backTimer = setTimeout(() => comeBack("ただいま〜"), BACK_MS);
+        backTimer = setTimeout(() => goHome("ただいま〜"), BACK_MS);
         return;
       }
-      // リンクを おす：いっしょに ワープ するので すぐ もどる
-      if (e.target.closest?.(".links a.pixel-btn")) return comeBack();
       // ほかの ところ：よびかけ（なんども いわない）
       if (rest === "sleep") return rouse("……ん？ ねてないよ。");
       if (!backTimer && performance.now() - calledAt > 8000 && !e.target.closest?.("dialog")) {
@@ -390,17 +511,21 @@ const pixe = (() => {
   );
   for (const ev of ["keydown", "wheel"]) addEventListener(ev, () => (idleAt = performance.now()), { capture: true, passive: true });
   document.addEventListener("visibilitychange", () => comeBack());
-  addEventListener("resize", () => {
-    if (!rest) return;
+  // 画面の おおきさ・ちへいせんが かわったら すわる ばしょを なおす（ちへいせんが なく なったら もどる）
+  const refit = () => {
+    if (rest !== "sit" && rest !== "sleep") return;
     const at = horizon.seat(fx);
     if (at) place(at);
     else comeBack();
-  });
+  };
+  addEventListener("resize", refit);
+  settings.onChange(refit);
   setInterval(() => {
     const now = performance.now();
     const idle = now - idleAt;
     if (!rest && idle >= SIT_MS) {
-      if (!canRest() || !sit()) idleAt = now;
+      if (!canRest()) idleAt = now;
+      else sit().then((ok) => ok || (idleAt = performance.now()));
       return;
     }
     if (rest !== "sit" || backTimer) return;
@@ -411,7 +536,7 @@ const pixe = (() => {
       if (Math.random() < 0.5) walk();
       else {
         const lines = settings.state.horizon === "city" ? [...MURMUR, "まちの あかり、\nちかくで みると きれい。"] : MURMUR;
-        say(lines[Math.floor(Math.random() * lines.length)]);
+        hush(lines[Math.floor(Math.random() * lines.length)]);
       }
     }
   }, 1000);
