@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>WARPIX LINK</title>
-  <meta name="description" content="よく行くリンクを、グループにまとめて開く。推しのアカウントだけ、いつものサイトだけ。見たいところだけを集めた、自分だけの空間。">
+  <!-- v2.6：けんさくの なふだ。説明文は WARPIX（ワーピックス）から（共有カードの og:description は いまの まま）。
+       まちがえやすい 読みを 別名に、WARPIX の 一部・作って いるのは WARPIX製作所 と つたえる -->
+  <meta name="description" content="WARPIX（ワーピックス）の WARPIX LINK（ワーピックス・リンク）は、よく行くリンクをグループにまとめて開けるアプリ。推しのアカウントだけ、いつものサイトだけ。見たいところだけを集めた、自分だけの空間。">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "WARPIX LINK", "alternateName": ["ワーピックス・リンク", "ワーピックスリンク", "わーぴっくすりんく", "ワーピクス リンク", "わーぴくすりんく", "WARPIXLINK", "warpix link", "ワーピックス"], "url": "https://link.warpix.app/", "inLanguage": "ja", "description": "ドット絵のナビゲーター「ピクセ」がいる、よく行くリンクをグループにまとめて開けるアプリ。", "isPartOf": {"@type": "WebSite", "name": "WARPIX", "alternateName": "ワーピックス", "url": "https://warpix.app/"}, "publisher": {"@type": "Organization", "name": "WARPIX製作所", "alternateName": "ワーピックス製作所", "url": "https://warpix.app/"}}</script>
 
   <!-- リンクを共有したときのカード（X・Discord・LINE など）。画像の元は tools/og-card.html -->
   <meta property="og:type" content="website">
@@ -22,7 +25,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- 英字の ドット文字だけ Google Fonts から。日本語の ドット文字は fonts/ に おいた（style.css の @font-face、v1.38） -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="icon" id="favicon" href="data:,">
+  <!-- v2.6：けんさくで 出る アイコン（Google は プログラムで かいた ものを ひろわない）。ひらいた あとは pixe.js が まばたきする ピクセに かえる -->
+  <link rel="icon" href="icons/icon-192.png" id="favicon">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -114,7 +118,7 @@
       <input class="win-input" id="group-name" type="text" maxlength="12" placeholder="例：好きなバンド" autocomplete="off" enterkeyhint="next">
       <div class="win-btns">
         <button class="win-btn" id="group-cancel" type="button">やめる</button>
-        <button class="win-btn cyan" type="submit">つぎへ：リンクを 追加 ▶</button>
+        <button class="win-btn cyan" type="submit">つぎへ ▶</button>
       </div>
     </form>
   </dialog>
@@ -231,15 +235,16 @@
     </div>
     <div class="win-head">
       <div class="win-tabs five" role="tablist" aria-label="メニュー">
-        <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="panel-log" aria-selected="true">きろく</button>
-        <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="false" tabindex="-1">はいけい</button>
+        <!-- v2.6：はいけいを 先頭に（あけると まず はいけい。はじめての 人に からっぽの きろくを 見せない） -->
+        <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="true">はいけい</button>
         <button type="button" role="tab" id="tab-bgm" data-tab="bgm" aria-controls="panel-bgm" aria-selected="false" tabindex="-1">おと</button>
+        <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="panel-log" aria-selected="false" tabindex="-1">きろく</button>
         <button type="button" role="tab" id="tab-move" data-tab="move" aria-controls="panel-move" aria-selected="false" tabindex="-1">ひっこし</button>
         <button type="button" role="tab" id="tab-about" data-tab="about" aria-controls="panel-about" aria-selected="false" tabindex="-1">アプリ</button>
       </div>
     </div>
     <div class="about-body win-scroll readable">
-      <section class="panel" id="panel-log" role="tabpanel" aria-labelledby="tab-log">
+      <section class="panel" id="panel-log" role="tabpanel" aria-labelledby="tab-log" hidden>
         <div class="seg">
           <button type="button" data-range="today" aria-pressed="false">日</button>
           <button type="button" data-range="week" aria-pressed="true">週</button>
@@ -267,7 +272,7 @@
         <button class="text-btn danger" id="log-clear" type="button">きろくを けす</button>
       </section>
 
-      <section class="panel" id="panel-sky" role="tabpanel" aria-labelledby="tab-sky" hidden>
+      <section class="panel" id="panel-sky" role="tabpanel" aria-labelledby="tab-sky">
         <!-- v2.4：ひる・ゆうがた・よる＋じぶんの がぞう 9 まいまで（3 れつ × 4 だん）。がぞうは グループと おなじ 一覧 -->
         <div class="bg-lib" id="menu-lib" role="radiogroup" aria-label="はいけい"></div>
         <div class="win-btns bg-lib-btns" id="menu-lib-btns" hidden>
@@ -360,6 +365,8 @@
     <div class="win-foot">
       <button class="win-btn danger" id="sheet-out" type="button">はずす</button>
       <button class="win-btn pink" id="sheet-save" type="button">けってい</button>
+      <!-- v2.6：リストの リンクは かえられる ものが ない ので「とじる」だけ（はずすは 左上の ✕ と おなじ） -->
+      <button class="win-btn cyan" id="sheet-ok" type="button" hidden>とじる</button>
     </div>
   </dialog>
 

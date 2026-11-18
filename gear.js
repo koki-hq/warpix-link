@@ -7,7 +7,7 @@ const gear = (() => {
   const dialog = $("gear");
   const tabs = [...dialog.querySelectorAll("[role=tab]")];
   const panels = Object.fromEntries(tabs.map((t) => [t.dataset.tab, $(`panel-${t.dataset.tab}`)]));
-  let tab = "log";
+  let tab = "sky"; // v2.6：あけると まず はいけい
   let range = "week";
 
   function select(id, focus = false) {

@@ -25,7 +25,15 @@ export default {
     await mouse(p, "mouseReleased", c.x, c.y);
     await sleep(150);
     const v = await p.ev(`({ on: editMode.on(), band: !document.getElementById("edit-band").hidden, x: document.querySelectorAll(".links .tile-x").length, add: !!document.getElementById("link-add")?.getClientRects().length, anim: getComputedStyle(document.querySelector(".links .pixel-btn")).animationName, log: localStorage.getItem("warpix-v2-log") })`);
-    t.eq(v, { on: true, band: true, x: 3, add: false, anim: "wobble", log: null }, "へんしゅう ちゅうに ならない・長押しで ワープして しまう");
+    t.eq(v, { on: true, band: true, x: 3, add: true, anim: "wobble", log: null }, "へんしゅう ちゅうに ならない・長押しで ワープして しまう");
+    // v2.6：へんしゅう ちゅうも「＋ リンクを 追加」は のこる（ゆれない）。おすと 追加の まど、とじても へんしゅう ちゅうの まま
+    t.eq(await p.ev(`getComputedStyle(document.getElementById("link-add")).animationName`), "none", "追加の わくが ゆれる");
+    await p.click("#link-add");
+    await sleep(150);
+    t.eq(await p.ev(`[document.getElementById("add-dialog").open, editMode.on()]`), [true, true], "へんしゅう ちゅうに 追加の まどが ひらかない");
+    await p.click("#add-close");
+    await sleep(150);
+    t.eq(await p.ev(`[editMode.on(), document.querySelectorAll(".links .tile-x").length, !!document.getElementById("link-add")]`), [true, 3, true], "追加の まどを とじたら へんしゅう ちゅうが おわった");
     // ✕ で はずす（たしかめなし）
     await p.click('.links .pixel-btn[data-id="twitter"] .tile-x');
     t.eq(await ids(p), ["youtube", "spotify"], "✕ で はずれない");
@@ -67,7 +75,7 @@ export default {
     await server.close();
   },
 
-  async "へんしゅう ちゅうに リンクを おすと 下から まど：じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは はずす だけ"(t) {
+  async "へんしゅう ちゅうに リンクを おすと 下から まど：じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは とじる だけ（v2.6）"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
     await noNavigate(p);
     await p.ev(`(() => { const c = CASSETTES.addMine({ label: "バンド", url: "https://example.com/band", icon: "heart" }); CASSETTES.addLink(CASSETTES.current().id, c.id); groups.render(); editMode.enter(); })()`);
@@ -81,10 +89,16 @@ export default {
     t.eq(await p.ev(`[CASSETTES.byId("my-1").label, CASSETTES.byId("my-1").url, document.getElementById("link-sheet").open]`), ["バンドの公式", "https://example.com/official", false], "かわらない");
     await p.click('.links .pixel-btn[data-id="youtube"]');
     await sleep(150);
-    v = await p.ev(`({ mine: !document.getElementById("sheet-mine").hidden, save: !document.getElementById("sheet-save").hidden })`);
-    t.eq(v, { mine: false, save: false }, "リストの リンクで なまえが かえられる");
+    v = await p.ev(`({ mine: !document.getElementById("sheet-mine").hidden, save: !document.getElementById("sheet-save").hidden, out: !document.getElementById("sheet-out").hidden, ok: !document.getElementById("sheet-ok").hidden })`);
+    t.eq(v, { mine: false, save: false, out: false, ok: true }, "リストの リンクは「とじる」だけ に ならない");
+    await p.click("#sheet-ok");
+    await sleep(100);
+    t.eq([await ids(p), await p.ev(`document.getElementById("link-sheet").open`)], [["youtube", "my-1"], false], "とじる で とじない・はずれた");
+    await p.click('.links .pixel-btn[data-id="my-1"]');
+    await sleep(150);
+    t.eq(await p.ev(`[!document.getElementById("sheet-out").hidden, !document.getElementById("sheet-save").hidden, document.getElementById("sheet-ok").hidden]`), [true, true, true], "じぶんの リンクに はずす・けってい が ない");
     await p.ev(`document.getElementById("sheet-out").click()`);
-    t.eq(await ids(p), ["my-1"], "はずす で はずれない");
+    t.eq(await ids(p), ["youtube"], "はずす で はずれない");
     t.noErrors(p);
     await server.close();
   },

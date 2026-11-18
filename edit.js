@@ -33,11 +33,11 @@ const editMode = (() => {
   }
   $("edit-end").addEventListener("click", exit);
   // リンクの そと（はいけい・メニュー・＋ など）を おしても おわる（v2.2.1、本人「背景とか…メニューとかタップしたりしたら解除されるように」）。
-  // タブ（グループの きりかえ）と まどの なかは おわらない
+  // タブ（グループの きりかえ）と まどの なかは おわらない。「＋ リンクを 追加」も おわらない（v2.6、たして もどると へんしゅう ちゅうの まま）
   document.addEventListener(
     "pointerdown",
     (e) => {
-      if (!on || e.target.closest(".links .pixel-btn, #edit-band, dialog, .group-tabs")) return;
+      if (!on || e.target.closest(".links .pixel-btn, #link-add, #edit-band, dialog, .group-tabs")) return;
       exit();
     },
     true
@@ -89,6 +89,7 @@ const editMode = (() => {
         return;
       }
       if (!on) return;
+      if (e.target.closest("#link-add")) return; // v2.6：へんしゅう ちゅうも 追加の まどを ひらく（links.js）
       e.preventDefault();
       e.stopPropagation();
       if (!a) return;
@@ -164,6 +165,8 @@ const editMode = (() => {
     $("sheet-mine").hidden = !c.mine;
     $("sheet-shelf").hidden = !!c.mine;
     $("sheet-save").hidden = !c.mine;
+    $("sheet-out").hidden = !c.mine;
+    $("sheet-ok").hidden = !!c.mine;
     $("sheet-error").hidden = true;
     if (c.mine) {
       $("sheet-name").value = c.label;
@@ -210,6 +213,7 @@ const editMode = (() => {
     if (!C.current()?.ids.length) exit();
   });
   $("sheet-close").addEventListener("click", () => sheet.close());
+  $("sheet-ok").addEventListener("click", () => sheet.close());
   sheet.addEventListener("click", (e) => e.target === sheet && sheet.close());
 
   return { enter, exit, on: () => on, openSheet };

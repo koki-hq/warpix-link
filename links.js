@@ -27,6 +27,7 @@ const groups = (() => {
   };
   // keep（v2.5）：ドラッグ ちゅうの リンクは けさずに、まわりだけ その グループの リンクに かえる（ゆびが はなれない ように）。
   // その グループに おなじ リンクが あれば その ばしょ、なければ さいごに
+  const ADD_TILE = `<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`;
   function render({ keep = null } = {}) {
     const g = C.current();
     const list = C.groups();
@@ -48,12 +49,14 @@ const groups = (() => {
       const after = i < 0 ? [] : g.ids.slice(i + 1);
       keep.insertAdjacentHTML("beforebegin", before.map((id) => tileHtml(id, editing)).join(""));
       keep.insertAdjacentHTML("afterend", after.map((id) => tileHtml(id, editing)).join(""));
+      if (g.ids.length < C.MAX_LINKS) linksEl.insertAdjacentHTML("beforeend", ADD_TILE);
       if (typeof photoBg !== "undefined") photoBg.apply();
       linksEl.setAttribute("aria-label", `${g.title} のリンク`);
       return;
     }
     const tiles = g.ids.map((id) => tileHtml(id, editing));
-    if (g.ids.length < C.MAX_LINKS && !editing) tiles.push(`<button class="link-add" id="link-add" type="button" aria-haspopup="dialog">＋ リンクを 追加</button>`);
+    // v2.6：へんしゅう ちゅうも のこす（ならべかえの とちゅうで たしたく なったら そのまま）。ゆれない・つかめない
+    if (g.ids.length < C.MAX_LINKS) tiles.push(ADD_TILE);
     linksEl.innerHTML = tiles.join("");
     if (typeof photoBg !== "undefined") photoBg.apply();
     linksEl.setAttribute("aria-label", `${g.title} のリンク`);
@@ -184,6 +187,9 @@ const groups = (() => {
   let backToEdit = false;
   let pickedIcon = "star";
   let editingId = null; // つくった リンクを かえて いる ときの id（したの「かえる」）
+  // v2.6：かきかけ。✕・まどの そと・もどる で とじても、つぎに ひらくと もどる（コピーしに いって もどって きた とき など）。
+  // ページを よみなおすと きえる。つくれたら から に なる
+  let draft = null; // { name, url, icon }
 
   function renderCount() {
     const g = C.current();
@@ -220,8 +226,9 @@ const groups = (() => {
     if (!C.current()) return;
     backToEdit = fromEdit;
     editingId = null;
-    $("mylink-name").value = "";
-    $("mylink-url").value = "";
+    $("mylink-name").value = draft?.name ?? "";
+    $("mylink-url").value = draft?.url ?? "";
+    if (draft) pickedIcon = draft.icon;
     if (editDialog.open) editDialog.close();
     selectTab(tab);
     addDialog.showModal();
@@ -396,6 +403,12 @@ const groups = (() => {
     if (makeLink()) closeAdd();
   });
   function closeAdd() {
+    // かえて いる とちゅう（したの「かえる」）は かきかけに しない
+    if (!editingId) {
+      const name = $("mylink-name").value;
+      const url = $("mylink-url").value;
+      draft = name.trim() || url.trim() ? { name, url, icon: pickedIcon } : null;
+    }
     addDialog.close();
     render();
     if (backToEdit) return openEdit();

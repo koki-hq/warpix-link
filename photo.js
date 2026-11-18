@@ -299,7 +299,7 @@ const photoBg = (() => {
     try {
       await busy("画像を読み込み中…", () => img.decode());
     } catch {
-      return ask("この がぞうは 開けなかったよ。べつの がぞうを 選んでね。", "とじる");
+      return tell("この がぞうは 開けなかったよ。べつの がぞうを 選んでね。"); // v2.6：しらせる だけ なので「とじる」ひとつ
     }
     const SW = innerWidth;
     const SH = innerHeight;
@@ -392,7 +392,7 @@ const photoBg = (() => {
     try {
       await putBlob(id, blob);
     } catch {
-      return ask("がぞうを 保存できなかったよ。ブラウザの 設定を 確かめてね。", "とじる");
+      return tell("がぞうを 保存できなかったよ。ブラウザの 設定を 確かめてね。"); // v2.6：しらせる だけ なので「とじる」ひとつ
     }
     dropUrl(id);
     if (!list.includes(id)) {

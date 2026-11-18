@@ -23,20 +23,20 @@ const logView = (p) => p.ev(`({
 })`);
 
 export default {
-  async "左上の メニューで ひらく。5 つの タブ（きろく・はいけい・BGM・ひっこし・アプリ）、キーの ← → でも うごく"(t) {
+  async "左上の メニューで ひらく。5 つの タブ（はいけい・BGM・きろく・ひっこし・アプリ、v2.6）、キーの ← → でも うごく"(t) {
     const { server, p } = await openApp(t);
     await p.click("#menu-btn");
     await sleep(200);
     t.ok(await p.ev(`document.getElementById("gear").open`), "メニューで ひらかない");
-    t.eq(await p.ev(`[...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent)`), ["きろく", "はいけい", "おと", "ひっこし", "アプリ"], "タブが ちがう");
+    t.eq(await p.ev(`[...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent)`), ["はいけい", "おと", "きろく", "ひっこし", "アプリ"], "タブが ちがう");
     const shown = () => p.ev(`[...document.querySelectorAll("#gear .panel")].filter((x) => !x.hidden).map((x) => x.id)`);
-    t.eq(await shown(), ["panel-log"], "さいしょは きろく で ない");
+    t.eq(await shown(), ["panel-sky"], "さいしょは はいけい で ない");
     await p.click("#tab-bgm");
     t.eq(await shown(), ["panel-bgm"], "タブで きりかわらない");
     t.eq(await p.ev(`document.getElementById("tab-bgm").getAttribute("aria-selected")`), "true", "えらんだ タブの しるしが ない");
     await p.ev(`document.getElementById("tab-bgm").focus()`);
     await p.key("ArrowRight");
-    t.eq(await shown(), ["panel-move"], "→ キーで つぎの タブへ いかない");
+    t.eq(await shown(), ["panel-log"], "→ キーで つぎの タブへ いかない");
     await p.click("#gear-close");
     t.ok(await p.ev(`!document.getElementById("gear").open`), "✕ で とじない");
     t.noErrors(p);
