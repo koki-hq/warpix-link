@@ -65,7 +65,7 @@ export default {
     t.eq(await v(), { when: "2026年10月", total: "7", older: false, newer: true }, "先月 が ちがう");
     await p.ev(`document.querySelector('[data-range="year"]').click()`);
     t.eq(await v(), { when: "2026年", total: "17", older: false, newer: false }, "今年 が ちがう");
-    t.eq(await p.ev(`[...document.querySelectorAll(".seg button")].map((b) => b.textContent).join(",")`), "日,週,月,年,ぜんぶ", "ボタンの 名前が ちがう");
+    t.eq(await p.ev(`[...document.querySelectorAll("#panel-log .seg button")].map((b) => b.textContent).join(",")`), "日,週,月,年,ぜんぶ", "ボタンの 名前が ちがう");
     await p.ev(`document.querySelector('[data-range="all"]').click()`);
     t.ok(await p.ev(`document.getElementById("log-nav").hidden`), "全部 で ◀ ▶ が でる");
     t.noErrors(p);
