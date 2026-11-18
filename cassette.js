@@ -253,6 +253,34 @@ const CASSETTES = (() => {
   };
 
   const byId = (id) => LIST.find((c) => c.id === id) ?? mine.find((c) => c.id === id);
+  // ---------- アイコンの いろ（v2.7）：リストの リンクも じぶんの リンクも、いろ だけ かえられる ----------
+  // 本人「アイコンのいろ　変えれるようにしよう　リストのやつも色だけは変えれればいい」。いろは 5 つ、さいしょは みずいろ
+  const COLORS = {
+    cyan: { name: "みずいろ", hex: "#3ee8ff" },
+    pink: { name: "ピンク", hex: "#ff4fa3" },
+    gold: { name: "きいろ", hex: "#ffd84a" },
+    green: { name: "みどり", hex: "#7dff8a" },
+    white: { name: "しろ", hex: "#f4f4f4" },
+  };
+  let colors = {};
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY.colors) ?? "{}");
+    if (saved && typeof saved === "object") for (const [id, k] of Object.entries(saved)) if (COLORS[k] && k !== "cyan" && typeof id === "string" && id.length <= 40) colors[id] = k;
+  } catch {}
+  const saveColors = () => {
+    try {
+      if (Object.keys(colors).length) localStorage.setItem(KEY.colors, JSON.stringify(colors));
+      else localStorage.removeItem(KEY.colors);
+    } catch {}
+  };
+  const colorOf = (id) => colors[id] ?? "cyan";
+  function setColor(id, k) {
+    if (!COLORS[k]) return false;
+    if (k === "cyan") delete colors[id];
+    else colors[id] = k;
+    saveColors();
+    return true;
+  }
   // にほんごの なまえ（ニコニコ動画 など）は ドットの ゴシックで すこし おおきく
   const jp = (c) => /[^\x00-\x7f]/.test(c.label);
   // たなの アイコンも ICONS に のせる（さいしょの 6 こ は core.js）
@@ -431,6 +459,9 @@ const CASSETTES = (() => {
       save();
       return true;
     },
+    COLORS,
+    colorOf,
+    setColor,
     // ---------- じぶんの リンク ----------
     MINE_MAX,
     MAX_GROUPS,
@@ -484,6 +515,10 @@ const CASSETTES = (() => {
       for (const g of groups) g.ids = g.ids.filter((x) => x !== id);
       mine.splice(i, 1);
       delete ICONS[id];
+      if (colors[id]) {
+        delete colors[id];
+        saveColors();
+      }
       saveMine();
       save();
       return true;

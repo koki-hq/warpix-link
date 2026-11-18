@@ -36,6 +36,7 @@ const KEY = {
   tips: "warpix-v2-tips",
   invite: "warpix-v2-invite",
   photos: "warpix-v2-photos",
+  colors: "warpix-v2-colors", // v2.7：リンクの アイコンの いろ（id → いろの なまえ）
 };
 
 // ---------- 日付 ----------
@@ -601,14 +602,36 @@ function tell(msg) {
   return ask(msg, "とじる", { only: true });
 }
 
+// ---------- アイコンの いろを えらぶ ならび（v2.7）：じぶんで つくる・リンクの へんしゅうで つかう ----------
+// el に 5 この いろを ならべ、えらぶと onPick(いろの なまえ)。アイコンの ならび（icons）の いろも その いろに する
+function colorPicks(el, picked, onPick, icons = null) {
+  const paint = (k) => {
+    for (const b of el.querySelectorAll("[data-color]")) b.setAttribute("aria-checked", String(b.dataset.color === k));
+    icons?.style.setProperty("--c", CASSETTES.COLORS[k].hex);
+  };
+  el.innerHTML = Object.entries(CASSETTES.COLORS)
+    .map(([k, v]) => `<button type="button" role="radio" class="color-pick" data-color="${k}" aria-checked="false" aria-label="${v.name}" style="--sw: ${v.hex}"></button>`)
+    .join("");
+  paint(picked);
+  el.onclick = (e) => {
+    const b = e.target.closest("[data-color]");
+    if (!b) return;
+    paint(b.dataset.color);
+    onPick(b.dataset.color);
+  };
+}
+
 // ---------- せってい（背景の そら・BGM・おおきさ） ----------
 // 背景は じぶんで えらぶ（本人「自動はだめ　やっぱユーザに何かさせないとだめ」）。さいしょは よる（v1 の そら）
 const settings = (() => {
-  const DEFAULTS = { sky: "night", bgm: true, se: true, bgmVol: 100, seVol: 100, song: "usual" };
+  // v2.7：horizon（ちへいせん：まち・おか・なし）と tiles（リンクの がら：ブロック・ネオン）。さいしょは まち と ブロック
+  const DEFAULTS = { sky: "night", horizon: "city", tiles: "block", bgm: true, se: true, bgmVol: 100, seVol: 100, song: "usual" };
   const state = { ...DEFAULTS, ...store.get(KEY.settings, null) };
   // sky は ひる・ゆうがた・よる か じぶんの がぞう の id（p-…、v2.4）
   if (!["day", "evening", "night"].includes(state.sky) && !/^p-[a-z0-9]+$/.test(state.sky)) state.sky = "night";
   if (!sound.songs[state.song]) state.song = "usual";
+  if (!["city", "hills", "none"].includes(state.horizon)) state.horizon = "city";
+  if (!["block", "neon"].includes(state.tiles)) state.tiles = "block";
   const subs = [];
   const vol = (n) => Math.max(0, Math.min(100, Number(n) || 0)) / 100;
   function set(patch) {
@@ -630,6 +653,8 @@ const settings = (() => {
     sound.setVolumes({ bgm: vol(state.bgmVol), se: state.se === false ? 0 : vol(state.seVol) });
     sound.setSong(state.song);
     document.documentElement.dataset.sky = sky();
+    document.documentElement.dataset.tiles = state.tiles;
+    document.documentElement.dataset.horizon = state.horizon;
   }
   apply();
   return { state, set, sky, showSky, onChange: (fn) => subs.push(fn), DEFAULTS };

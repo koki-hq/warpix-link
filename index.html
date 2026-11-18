@@ -55,6 +55,9 @@
   <div class="sky-bg" aria-hidden="true"></div>
   <canvas class="stars" id="stars" aria-hidden="true"></canvas>
   <canvas class="clouds" id="clouds" aria-hidden="true"></canvas>
+  <!-- v2.7：ちへいせん（まち・おか、きせかえ で えらぶ）と きせつの そら（ゆき・はなびら・はなび・おちば） -->
+  <canvas class="horizon" id="horizon" aria-hidden="true"></canvas>
+  <canvas class="season" id="season" aria-hidden="true"></canvas>
 
   <main class="screen">
     <!-- うえの だん：メニュー（左）・おしらせ ＋ グループを つくる（右） -->
@@ -100,6 +103,7 @@
     </div>
 
     <nav class="links" id="links" hidden></nav>
+    <div class="group-dots" id="group-dots" aria-hidden="true" hidden></div>
 
     <p class="footer-maker">© 2026 WARPIX製作所</p>
   </main>
@@ -142,14 +146,20 @@
     </div>
     <div class="about-body win-scroll" id="add-make" role="tabpanel" aria-labelledby="add-tab-make" hidden>
       <form class="win-form" id="mylink-form" novalidate>
-      <p class="win-note copy-how">追加したいサイトやアプリ、アカウントのリンクを入れてね。共有ボタンか「…」の中に「リンクをコピー」があるよ。コピーしたら、下のアドレスの欄に貼り付けてね。</p>
+      <p class="win-note copy-how">追加したいサイトやアプリ、アカウントのリンクを入れてね。共有ボタンか「…」の中に「リンクをコピー」があるよ。コピーしたら「はりつける」を押してね。名前とアイコンも入るよ。</p>
       <p class="mylink-editing" id="mylink-editing" hidden><span>「<b id="mylink-editing-name"></b>」を変更中</span><button class="mini" id="mylink-stop" type="button">やめる</button></p>
       <label for="mylink-name">名前（16文字まで）</label>
       <input class="win-input" id="mylink-name" type="text" maxlength="16" autocomplete="off">
       <label for="mylink-url">アドレス（https:// で始まるもの）</label>
-      <input class="win-input" id="mylink-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://">
+      <!-- v2.7：はりつける（コピーした アドレスを 1 かいで。なまえと アイコンも アドレスから きめる） -->
+      <div class="url-row">
+        <input class="win-input" id="mylink-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://">
+        <button class="win-btn cyan" id="mylink-paste" type="button">はりつける</button>
+      </div>
       <p class="mylink-label" id="mylink-icon-label">アイコン</p>
       <div class="mylink-icons" id="mylink-icons" role="radiogroup" aria-labelledby="mylink-icon-label"></div>
+      <p class="mylink-label" id="mylink-color-label">いろ</p>
+      <div class="color-picks" id="mylink-colors" role="radiogroup" aria-labelledby="mylink-color-label"></div>
       <p class="win-error" id="mylink-error" role="alert" hidden></p>
       <p class="win-note">作ったリンクは下の一覧に残るので、ほかのグループにも追加できます。保存はこのブラウザの中だけです。</p>
       <div class="mylink-list" id="mylink-list"></div>
@@ -236,7 +246,7 @@
     <div class="win-head">
       <div class="win-tabs five" role="tablist" aria-label="メニュー">
         <!-- v2.6：はいけいを 先頭に（あけると まず はいけい。はじめての 人に からっぽの きろくを 見せない） -->
-        <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="true">はいけい</button>
+        <button type="button" role="tab" id="tab-sky" data-tab="sky" aria-controls="panel-sky" aria-selected="true">きせかえ</button>
         <button type="button" role="tab" id="tab-bgm" data-tab="bgm" aria-controls="panel-bgm" aria-selected="false" tabindex="-1">おと</button>
         <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="panel-log" aria-selected="false" tabindex="-1">きろく</button>
         <button type="button" role="tab" id="tab-move" data-tab="move" aria-controls="panel-move" aria-selected="false" tabindex="-1">ひっこし</button>
@@ -273,13 +283,26 @@
       </section>
 
       <section class="panel" id="panel-sky" role="tabpanel" aria-labelledby="tab-sky">
+        <!-- v2.7：はいけい → きせかえ（本人「きせかえでいいよ」）。そら・ちへいせん・リンクの がら -->
+        <h3>そら</h3>
         <!-- v2.4：ひる・ゆうがた・よる＋じぶんの がぞう 9 まいまで（3 れつ × 4 だん）。がぞうは グループと おなじ 一覧 -->
-        <div class="bg-lib" id="menu-lib" role="radiogroup" aria-label="はいけい"></div>
+        <div class="bg-lib" id="menu-lib" role="radiogroup" aria-label="そら"></div>
         <div class="win-btns bg-lib-btns" id="menu-lib-btns" hidden>
           <button type="button" class="win-btn" data-lib-act="change">がぞうを かえる</button>
           <button type="button" class="win-btn danger" data-lib-act="delete">がぞうを けす</button>
         </div>
         <p class="about-note">自分の画像は9枚まで追加できます。グループだけのはいけいがONのグループは、そのグループのはいけいが表示されます。</p>
+        <h3>ちへいせん</h3>
+        <div class="seg seg3" id="horizon-pick" role="group" aria-label="ちへいせん">
+          <button type="button" data-horizon="city" aria-pressed="true">まち</button>
+          <button type="button" data-horizon="hills" aria-pressed="false">おか</button>
+          <button type="button" data-horizon="none" aria-pressed="false">なし</button>
+        </div>
+        <h3>リンクの がら</h3>
+        <div class="seg seg2" id="tiles-pick" role="group" aria-label="リンクの がら">
+          <button type="button" data-tiles="block" aria-pressed="true">ブロック</button>
+          <button type="button" data-tiles="neon" aria-pressed="false">ネオン</button>
+        </div>
       </section>
 
       <section class="panel" id="panel-bgm" role="tabpanel" aria-labelledby="tab-bgm" hidden>
@@ -315,7 +338,7 @@
         <p>感想や「ここがわかりにくい」、バグの報告など、なんでもうれしいです。</p>
         <a class="win-btn cyan" id="otegami" href="mailto:pixe@warpix.app">ピクセに おてがみを かく<span class="sr-only">（メールのアプリが開きます）</span></a>
         <h3>このブラウザに残すもの</h3>
-        <p>グループ・リンク・自分のリンク・ワープの記録・設定・読んだおしらせ・ピクセの案内を聞いたかどうか・グループの背景の画像。<strong>このブラウザの中だけ</strong>に保存して、どこにも送りません。</p>
+        <p>グループ・リンク・自分のリンク・リンクの色・ワープの記録・設定・読んだおしらせ・ピクセの案内を聞いたかどうか・グループの背景の画像。<strong>このブラウザの中だけ</strong>に保存して、どこにも送りません。</p>
         <h3>外に送るもの</h3>
         <ul>
           <li><b>来た人の数</b>：何人・何回来たかだけを、Cloudflare で数えています。誰かはわかりません。</li>
@@ -344,8 +367,8 @@
     </div>
   </dialog>
 
-  <!-- リンクの へんしゅう（v2.2）：へんしゅう ちゅうに じぶんの リンクを おすと。なまえ・アドレス・アイコン。
-       v2.6：ほかの まどと おなじ まんなかに。リストの リンクは この まどでは なく しらせる まど（edit.js） -->
+  <!-- リンクの へんしゅう（v2.2）：へんしゅう ちゅうに リンクを おすと。じぶんの リンクは なまえ・アドレス・アイコン・いろ。
+       v2.6：ほかの まどと おなじ まんなかに。v2.7：リストの リンクも いろ だけ かえられる -->
   <dialog class="about win sheet" id="link-sheet" aria-labelledby="sheet-title">
     <div class="about-top">
       <h2 id="sheet-title">リンクを へんしゅう</h2>
@@ -361,6 +384,9 @@
         <div class="mylink-icons" id="sheet-icons" role="radiogroup" aria-labelledby="sheet-icon-label"></div>
         <p class="win-error" id="sheet-error" role="alert" hidden></p>
       </div>
+      <p class="win-note" id="sheet-shelf" hidden>リストのリンクは、色だけ変えられるよ。</p>
+      <p class="mylink-label" id="sheet-color-label">いろ</p>
+      <div class="color-picks" id="sheet-colors" role="radiogroup" aria-labelledby="sheet-color-label"></div>
     </form>
     <div class="win-foot">
       <button class="win-btn danger" id="sheet-out" type="button">はずす</button>

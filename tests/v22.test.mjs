@@ -75,7 +75,7 @@ export default {
     await server.close();
   },
 
-  async "へんしゅう ちゅうに リンクを おすと 下から まど：じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは しらせる まど（v2.6）"(t) {
+  async "へんしゅう ちゅうに リンクを おすと 下から まど：じぶんの リンクは なまえ・アドレス・アイコン、リストの リンクは いろ だけ（v2.7）"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": groupsData([["A", ["youtube"]]]) } });
     await noNavigate(p);
     await p.ev(`(() => { const c = CASSETTES.addMine({ label: "バンド", url: "https://example.com/band", icon: "heart" }); CASSETTES.addLink(CASSETTES.current().id, c.id); groups.render(); editMode.enter(); })()`);
@@ -89,11 +89,14 @@ export default {
     t.eq(await p.ev(`[CASSETTES.byId("my-1").label, CASSETTES.byId("my-1").url, document.getElementById("link-sheet").open]`), ["バンドの公式", "https://example.com/official", false], "かわらない");
     await p.click('.links .pixel-btn[data-id="youtube"]');
     await sleep(150);
-    v = await p.ev(`({ sheet: document.getElementById("link-sheet").open, ask: document.getElementById("ask-dialog").open, text: document.getElementById("ask-text").textContent, no: document.getElementById("ask-no").hidden })`);
-    t.eq(v, { sheet: false, ask: true, text: "リストのリンクは、名前とアドレスを変えられないよ。", no: true }, "リストの リンクは しらせる まど（とじる だけ）に ならない");
-    await p.click("#ask-yes");
+    // v2.7：リストの リンクは いろ だけ（なまえ・アドレス・アイコン・はずす は ない）
+    v = await p.ev(`({ sheet: document.getElementById("link-sheet").open, mine: !document.getElementById("sheet-mine").hidden, note: !document.getElementById("sheet-shelf").hidden, out: !document.getElementById("sheet-out").hidden, colors: document.querySelectorAll("#sheet-colors [data-color]").length })`);
+    t.eq(v, { sheet: true, mine: false, note: true, out: false, colors: 5 }, "リストの リンクの まどが ちがう");
+    await p.click('#sheet-colors [data-color="pink"]');
+    await p.click("#sheet-save");
     await sleep(150);
-    t.eq([await ids(p), await p.ev(`document.getElementById("ask-dialog").open`), await p.ev(`editMode.on()`)], [["youtube", "my-1"], false, true], "とじる で とじない・はずれた・へんしゅうが おわった");
+    t.eq([await ids(p), await p.ev(`document.getElementById("link-sheet").open`), await p.ev(`editMode.on()`), await p.ev(`CASSETTES.colorOf("youtube")`), await p.ev(`JSON.parse(localStorage.getItem("warpix-v2-colors"))`)], [["youtube", "my-1"], false, true, "pink", { youtube: "pink" }], "いろが かわらない・はずれた・へんしゅうが おわった");
+    t.eq(await p.ev(`document.querySelector('.links .pixel-btn[data-id="youtube"]').style.getPropertyValue("--c").trim()`), "#ff4fa3", "タイルの いろが かわらない");
     // じぶんの リンクの まどは まんなか（v2.6、下から でない）
     await p.click('.links .pixel-btn[data-id="my-1"]');
     await sleep(150);

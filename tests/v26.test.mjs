@@ -12,7 +12,7 @@ export default {
     await p.click("#menu-btn");
     await sleep(200);
     const v = await p.ev(`({ order: [...document.querySelectorAll("#gear [role=tab]")].map((b) => b.textContent), tab: gear.tab(), sky: !document.getElementById("panel-sky").hidden, log: document.getElementById("panel-log").hidden })`);
-    t.eq(v, { order: ["はいけい", "おと", "きろく", "ひっこし", "アプリ"], tab: "sky", sky: true, log: true }, "メニューの ならび・さいしょの タブ");
+    t.eq(v, { order: ["きせかえ", "おと", "きろく", "ひっこし", "アプリ"], tab: "sky", sky: true, log: true }, "メニューの ならび・さいしょの タブ");
     t.noErrors(p);
     await server.close();
   },

@@ -23,7 +23,8 @@ const groups = (() => {
   const tileHtml = (id, editing) => {
     const c = C.byId(id);
     const app = C.appOf(c);
-    return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""}><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span>${editing ? `<span class="tile-x" aria-hidden="true">✕</span>` : ""}<span class="sr-only">${editing ? "（押すと編集）" : "（新しいタブで開く）"}</span></a>`;
+    // v2.7：アイコンの いろ（--c）。ネオンの がらでは ふちの ひかりも この いろ
+    return `<a class="pixel-btn${C.jp(c) ? " jp-label" : ""}${sizeClass(c)}" href="${esc(c.url)}" target="_blank" rel="noopener" data-id="${esc(c.id)}"${app ? ` data-app="${esc(app)}"` : ""} style="--c: ${C.COLORS[C.colorOf(c.id)].hex}"><span class="icon" aria-hidden="true" style="color: ${C.COLORS[C.colorOf(c.id)].hex}">${iconHtml(c)}</span><span class="link-label">${labelHtml(c)}</span>${editing ? `<span class="tile-x" aria-hidden="true">✕</span>` : ""}<span class="sr-only">${editing ? "（押すと編集）" : "（新しいタブで開く）"}</span></a>`;
   };
   // keep（v2.5）：ドラッグ ちゅうの リンクは けさずに、まわりだけ その グループの リンクに かえる（ゆびが はなれない ように）。
   // その グループに おなじ リンクが あれば その ばしょ、なければ さいごに
@@ -66,17 +67,34 @@ const groups = (() => {
   // 本人「塗りつぶしの方がわかりやすい」。えらんで いる タブには ✎（ペン先は 左下）。おおい ときは よこに スクロール、えらんだ タブを まんなかへ
   const PEN = ["......##.", ".....####", "....####.", "...####..", "..####...", ".####....", ".###.....", "##.......", "#........"];
   const tabsEl = $("group-tabs");
+  // v2.7：下の すきまに グループの てんてん。よこに うごかせる ことが わかる ように（本人「横ニスワイプできるのがわかりにくい」）。
+  // グループが 1 つ・リンクと かさなる・へんしゅう ちゅうは 出さない
+  const dotsEl = $("group-dots");
+  function renderDots(n, at) {
+    dotsEl.innerHTML = n > 1 ? Array.from({ length: n }, (_, i) => `<span${i === at ? ' class="on"' : ""}></span>`).join("") : "";
+    dotsEl.hidden = n < 2;
+    requestAnimationFrame(fitDots);
+  }
+  function fitDots() {
+    if (!dotsEl.innerHTML) return;
+    dotsEl.style.visibility = "";
+    const d = dotsEl.getBoundingClientRect();
+    const last = linksEl.lastElementChild?.getBoundingClientRect();
+    if (document.body.classList.contains("editing") || (last && last.bottom + 16 > d.top)) dotsEl.style.visibility = "hidden";
+  }
+  addEventListener("resize", () => requestAnimationFrame(fitDots));
   function renderTabs(list) {
     const at = C.at();
     tabsEl.innerHTML =
       list
         .map((g, i) =>
           i === at
-            ? `<button type="button" class="group-tab on" id="group-sign" aria-current="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></button>`
-            : `<button type="button" class="group-tab" data-i="${i}">${esc(g.title)}</button>`
+            ? `<button type="button" class="group-tab on" id="group-sign" aria-current="true" aria-haspopup="dialog" aria-label="グループ「${esc(g.title)}」を編集"><span class="cas-in"><span class="group-title" id="group-title">${esc(g.title)}</span><span class="pen" aria-hidden="true">${pixelSvg(PEN)}</span></span></button>`
+            : `<button type="button" class="group-tab" data-i="${i}"><span class="cas-in">${esc(g.title)}</span></button>`
         )
         .join("") + `<button type="button" class="group-tab plus" id="group-new" aria-label="グループを つくる">＋</button>`;
     centerTab();
+    renderDots(list.length, at);
   }
   // えらんで いる タブを まんなかへ。文字（ドットの フォント）が あとから とどくと タブの はばが かわるので、とどいた ときと 画面の おおきさが かわった ときにも
   function centerTab() {
@@ -104,10 +122,11 @@ const groups = (() => {
     render();
     sound.sfx.hover();
   }
-  // よこに スワイプでも きりかえ
+  // よこに スワイプでも きりかえ。v2.7：リンクの うえ だけで なく 下の すきまでも（本人の ことば：下の すきまでも そうさ できる ように）。
+  // タブ（よこに スクロール）・まど・上の ボタンの うえでは しない
   let touch = null;
-  linksEl.addEventListener("touchstart", (e) => (touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null), { passive: true });
-  linksEl.addEventListener("touchend", (e) => {
+  document.addEventListener("touchstart", (e) => (touch = e.touches.length === 1 && C.current() && !e.target.closest?.(".group-tabs, dialog, .topbar, .edit-band, .npc, input, textarea") ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null), { passive: true });
+  document.addEventListener("touchend", (e) => {
     if (!touch || document.body.classList.contains("editing")) return (touch = null);
     const dx = e.changedTouches[0].clientX - touch.x;
     const dy = e.changedTouches[0].clientY - touch.y;
@@ -186,10 +205,11 @@ const groups = (() => {
   let addTab = "make";
   let backToEdit = false;
   let pickedIcon = "star";
+  let pickedColor = "cyan"; // v2.7：アイコンの いろ
   let editingId = null; // つくった リンクを かえて いる ときの id（したの「かえる」）
   // v2.6：かきかけ。✕・まどの そと・もどる で とじても、つぎに ひらくと もどる（コピーしに いって もどって きた とき など）。
   // ページを よみなおすと きえる。つくれたら から に なる
-  let draft = null; // { name, url, icon }
+  let draft = null; // { name, url, icon, color }
 
   function renderCount() {
     const g = C.current();
@@ -197,7 +217,7 @@ const groups = (() => {
     $("add-count").textContent = g ? `${g.ids.length} / ${C.MAX_LINKS}` : "";
   }
   function cassette(c, inGroup) {
-    return `<button type="button" class="cas-item${inGroup ? " picked" : ""}" data-id="${esc(c.id)}" aria-pressed="${inGroup}"><span class="cas-check" aria-hidden="true">${inGroup ? "✓" : ""}</span><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="cas-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span></button>`;
+    return `<button type="button" class="cas-item${inGroup ? " picked" : ""}" data-id="${esc(c.id)}" aria-pressed="${inGroup}"><span class="cas-check" aria-hidden="true">${inGroup ? "✓" : ""}</span><span class="icon" aria-hidden="true" style="color: ${C.COLORS[C.colorOf(c.id)].hex}">${iconHtml(c)}</span><span class="cas-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span></button>`;
   }
   function renderShelves() {
     const g = C.current();
@@ -229,6 +249,7 @@ const groups = (() => {
     $("mylink-name").value = draft?.name ?? "";
     $("mylink-url").value = draft?.url ?? "";
     if (draft) pickedIcon = draft.icon;
+    pickedColor = draft?.color ?? "cyan";
     if (editDialog.open) editDialog.close();
     selectTab(tab);
     addDialog.showModal();
@@ -280,6 +301,7 @@ const groups = (() => {
     iconsEl.innerHTML = Object.entries(C.MINE_ICONS)
       .map(([k, v]) => `<button type="button" role="radio" class="mylink-icon" data-icon="${k}" aria-checked="${k === pickedIcon}" aria-label="${esc(v.name)}">${pixelSvg(v.rows)}</button>`)
       .join("");
+    colorPicks($("mylink-colors"), pickedColor, (k) => (pickedColor = k), iconsEl);
     $("mylink-error").hidden = true;
     const editing = editingId && C.byId(editingId);
     $("mylink-editing").hidden = !editing;
@@ -289,7 +311,7 @@ const groups = (() => {
     const mine = C.mine();
     const has = new Set(C.current()?.ids ?? []);
     $("mylink-list").innerHTML = mine.length
-      ? `<h3>作ったリンク <small>${mine.length}こ</small></h3><p class="win-note">押すと追加。もう一度押すと取り消せるよ。</p>${mine.map((c) => `<div class="mylink-row"><button type="button" class="mylink-pick${has.has(c.id) ? " picked" : ""}" data-pick="${esc(c.id)}" aria-pressed="${has.has(c.id)}"><span class="cas-check" aria-hidden="true">${has.has(c.id) ? "✓" : ""}</span><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span></button><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
+      ? `<h3>作ったリンク <small>${mine.length}こ</small></h3><p class="win-note">押すと追加。もう一度押すと取り消せるよ。</p>${mine.map((c) => `<div class="mylink-row"><button type="button" class="mylink-pick${has.has(c.id) ? " picked" : ""}" data-pick="${esc(c.id)}" aria-pressed="${has.has(c.id)}"><span class="cas-check" aria-hidden="true">${has.has(c.id) ? "✓" : ""}</span><span class="icon" aria-hidden="true" style="color: ${C.COLORS[C.colorOf(c.id)].hex}">${iconHtml(c)}</span><span class="mylink-row-name">${esc(c.label)}</span></button><button type="button" class="mini" data-edit="${esc(c.id)}" aria-label="${esc(c.label)} を変える"${c.id === editingId ? ' aria-pressed="true"' : ""}>かえる</button><button type="button" class="mini danger" data-del="${esc(c.id)}" aria-label="${esc(c.label)} を消す">けす</button></div>`).join("")}`
       : "";
     renderCount();
   }
@@ -306,12 +328,14 @@ const groups = (() => {
     $("mylink-name").value = c.label;
     $("mylink-url").value = c.url;
     pickedIcon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
+    pickedColor = C.colorOf(c.id);
     renderMake();
     $("mylink-name").focus();
     $("add-make").scrollTop = 0;
   }
   function stopEdit() {
     editingId = null;
+    pickedColor = "cyan";
     $("mylink-name").value = "";
     $("mylink-url").value = "";
     renderMake();
@@ -347,6 +371,54 @@ const groups = (() => {
     renderMake();
     render();
   });
+  // ---------- はりつける（v2.7、デザイン案 A）：コピーした アドレスを 1 かいで。なまえと アイコンも アドレスから きめる ----------
+  // リストに ある サイト（youtube.com など）なら その なまえと たなに あう アイコン、ほかは サイトの なまえ（ドメイン）と ほし。あとから なおせる
+  const SHELF_ICON = { sns: "chat", music: "music", video: "film", play: "game", shop: "cart", manga: "book", study: "book", life: "home" };
+  const hostOf = (u) => {
+    try {
+      return new URL(u).hostname.replace(/^(www|m|mobile)\./, "");
+    } catch {
+      return "";
+    }
+  };
+  function guess(url) {
+    const host = hostOf(url);
+    if (!host) return null;
+    const same = C.LIST.find((c) => hostOf(c.url) === host);
+    if (same) return { name: same.label, icon: SHELF_ICON[same.shelf] ?? "star" };
+    return { name: Array.from(host.split(".")[0]).slice(0, C.MINE_LABEL).join(""), icon: "star" };
+  }
+  // なまえが から の ときだけ うめる（じぶんで 書いた なまえは けさない）
+  function fillFrom(url) {
+    if ($("mylink-name").value.trim() || editingId) return;
+    const g = guess(url);
+    if (!g) return;
+    $("mylink-name").value = g.name;
+    pickedIcon = g.icon;
+    for (const x of iconsEl.querySelectorAll("[data-icon]")) x.setAttribute("aria-checked", String(x.dataset.icon === pickedIcon));
+  }
+  $("mylink-paste").addEventListener("click", async () => {
+    const err = $("mylink-error");
+    let text = "";
+    try {
+      text = (await navigator.clipboard.readText()) ?? "";
+    } catch {}
+    const url = text.match(/https:\/\/[^\s"'<>]+/)?.[0];
+    if (!url) {
+      err.textContent = "コピーしたアドレスが見つからなかったよ。下の欄に貼り付けてね。";
+      err.hidden = false;
+      $("mylink-url").focus();
+      return;
+    }
+    err.hidden = true;
+    $("mylink-url").value = url;
+    fillFrom(url);
+    sound.sfx.select();
+  });
+  // じぶんで 欄に 貼り付けた ときも なまえを うめる
+  $("mylink-url").addEventListener("change", (e) => fillFrom(e.target.value.trim()));
+  $("mylink-url").addEventListener("paste", () => setTimeout(() => fillFrom($("mylink-url").value.trim()), 0));
+
   // じぶんの リンクを つくって、いまの グループに 追加する（かえて いる ときは ほぞん）。できたら true
   function makeLink() {
     const err = $("mylink-error");
@@ -384,6 +456,7 @@ const groups = (() => {
     if (editingId) {
       const c = C.updateMine(editingId, { label: name, url, icon: pickedIcon });
       if (!c) return false;
+      C.setColor(c.id, pickedColor);
       stopEdit();
       sound.sfx.coin();
       pixe.say(`「${c.label}」、かえたよ！`);
@@ -391,6 +464,7 @@ const groups = (() => {
     }
     const c = C.addMine({ label: name, url, icon: pickedIcon });
     if (!c) return false;
+    C.setColor(c.id, pickedColor);
     C.addLink(g.id, c.id);
     $("mylink-name").value = "";
     $("mylink-url").value = "";
@@ -407,7 +481,7 @@ const groups = (() => {
     if (!editingId) {
       const name = $("mylink-name").value;
       const url = $("mylink-url").value;
-      draft = name.trim() || url.trim() ? { name, url, icon: pickedIcon } : null;
+      draft = name.trim() || url.trim() ? { name, url, icon: pickedIcon, color: pickedColor } : null;
     }
     addDialog.close();
     render();
@@ -444,7 +518,7 @@ const groups = (() => {
       ? g.ids
           .map((id, i) => {
             const c = C.byId(id);
-            return `<li data-id="${esc(id)}"><button type="button" class="grip" aria-label="${labelHtml(c)} の順番（↑↓キーでも動かせます）">≡</button><span class="icon" aria-hidden="true">${iconHtml(c)}</span><span class="edit-row-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span><button type="button" class="mini danger" data-act="out" aria-label="${labelHtml(c)} を外す">はずす</button></li>`;
+            return `<li data-id="${esc(id)}"><button type="button" class="grip" aria-label="${labelHtml(c)} の順番（↑↓キーでも動かせます）">≡</button><span class="icon" aria-hidden="true" style="color: ${C.COLORS[C.colorOf(c.id)].hex}">${iconHtml(c)}</span><span class="edit-row-name${C.jp(c) ? " jp" : ""}">${labelHtml(c)}</span><button type="button" class="mini danger" data-act="out" aria-label="${labelHtml(c)} を外す">はずす</button></li>`;
           })
           .join("")
       : `<li class="edit-empty">まだリンクがありません</li>`;

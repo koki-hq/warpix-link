@@ -103,7 +103,26 @@ const gear = (() => {
 
   // ---------- 背景 ----------
   // はいけい（v2.4）：中身は photo.js（ひる・ゆうがた・よる＋じぶんの がぞう）
-  const renderSky = () => photoBg.renderMenu();
+  // v2.7：きせかえ（そら・ちへいせん・リンクの がら）
+  const renderSky = () => {
+    photoBg.renderMenu();
+    for (const b of $("horizon-pick").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.horizon === settings.state.horizon));
+    for (const b of $("tiles-pick").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.tiles === settings.state.tiles));
+  };
+  $("horizon-pick").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-horizon]");
+    if (!b || b.dataset.horizon === settings.state.horizon) return;
+    settings.set({ horizon: b.dataset.horizon });
+    renderSky();
+    sound.sfx.select();
+  });
+  $("tiles-pick").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tiles]");
+    if (!b || b.dataset.tiles === settings.state.tiles) return;
+    settings.set({ tiles: b.dataset.tiles });
+    renderSky();
+    sound.sfx.select();
+  });
 
   // ---------- BGM ----------
   function renderBgm() {

@@ -3050,3 +3050,308 @@ html.has-photo body {
 @media (prefers-reduced-motion: reduce) {
   .busy-pixe { animation: none; }
 }
+
+/* =====================================================================
+   v2.7：きせかえ（ちへいせん・きせつ・リンクの がら・アイコンの いろ）と 立体の 部品
+   本人「タブに合わせて　他のボタンもクオリティ上げる必要があるな　全体的に」。
+   押す ものは 出っぱり（左上に ひかり・右下に かげ）、まだ なにも ない ところは へこみ（さしこみぐち）
+   ===================================================================== */
+:root {
+  --raise: inset 3px 3px 0 rgba(255, 255, 255, 0.18), inset -3px -3px 0 rgba(0, 0, 0, 0.45);
+  --sink: inset 4px 4px 0 rgba(0, 0, 0, 0.6), inset -3px -3px 0 rgba(255, 255, 255, 0.1);
+  --c: var(--accent-2); /* リンクの アイコンの いろ（タイルごとに style で かわる） */
+}
+
+/* ---------- ちへいせん・きせつ ---------- */
+.horizon {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 100%;
+  height: 144px;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+html[data-horizon="none"] .horizon,
+html.has-photo .horizon {
+  display: none;
+}
+.season {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+/* ---------- 上の ボタン（白い わくは のこして 出っぱり） ---------- */
+.bar-btn,
+.mail-btn {
+  box-shadow: var(--raise), 0 -2px 0 0 var(--fg), 0 2px 0 0 var(--fg), -2px 0 0 0 var(--fg), 2px 0 0 0 var(--fg), 4px 4px 0 0 var(--shadow);
+}
+.bar-btn:active,
+.mail-btn:active {
+  translate: 2px 2px;
+  box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.45), 0 -2px 0 0 var(--fg), 0 2px 0 0 var(--fg), -2px 0 0 0 var(--fg), 2px 0 0 0 var(--fg), 2px 2px 0 0 var(--shadow);
+}
+
+/* ---------- グループの タブ：カセット（v2.7、デザイン案 5b） ----------
+   下の りょうかどを ななめに きった かたち・上に ラベル（なまえ）・えらんで いる ものは 金で 背が たかく リールの まど */
+.group-tabs {
+  align-items: flex-end;
+  gap: 6px;
+  padding: 6px 4px 0;
+}
+.group-tab:not(.plus) {
+  position: relative;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0;
+  height: 40px;
+  padding: 5px 6px 0;
+  background: var(--btn);
+  color: var(--bg);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
+  box-shadow: var(--raise);
+}
+.group-tab:not(.plus)::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 5px;
+  height: 22px;
+  background: #d6d0f2;
+  box-shadow: inset 0 3px 0 var(--accent), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+/* リールの あな（えらんで いない もの） */
+.group-tab:not(.plus)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 24px;
+  height: 6px;
+  margin-left: -12px;
+  background: radial-gradient(circle at 5px 3px, var(--btn-hover) 0 2px, transparent 2px), radial-gradient(circle at 19px 3px, var(--btn-hover) 0 2px, transparent 2px), #120e26;
+}
+.group-tab .cas-in {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+.group-tab:not(.plus):hover,
+.group-tab:not(.plus):focus-visible {
+  color: var(--bg);
+}
+.group-tab:not(.plus):focus-visible .cas-in {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -2px;
+}
+.group-tab.on {
+  height: 52px;
+  background: var(--gold);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.5), inset -3px -3px 0 rgba(120, 90, 0, 0.55);
+}
+.group-tab.on::before {
+  background: #fff8dc;
+  box-shadow: inset 0 3px 0 var(--accent-2), inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+.group-tab.on::after {
+  bottom: 6px;
+  width: 40px;
+  height: 14px;
+  margin-left: -20px;
+  background: radial-gradient(circle at 10px 7px, #f4f4f4 0 3px, var(--bg) 3px 5px, transparent 5px), radial-gradient(circle at 30px 7px, #f4f4f4 0 3px, var(--bg) 3px 5px, transparent 5px), #3a2f10;
+  box-shadow: 0 0 0 2px #7a5f10;
+}
+.group-tab.on:focus-visible {
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.5), inset -3px -3px 0 rgba(120, 90, 0, 0.55);
+}
+.group-tab:not(.plus):active {
+  filter: brightness(0.9);
+  translate: 0 2px;
+}
+
+/* ---------- まだ なにも ない ところ：へこんだ さしこみぐち ---------- */
+.link-add,
+.group-tab.plus,
+.empty-add {
+  background: rgba(8, 6, 18, 0.78);
+  box-shadow: var(--sink);
+  outline-offset: -6px;
+}
+.group-tab.plus {
+  height: 32px;
+  margin-bottom: 2px;
+  padding: 0 12px;
+}
+
+/* ---------- リンク：ブロック（はじめ）と ネオン を きせかえ で えらぶ ----------
+   本人「b、cいい感じ　この二つで柄を選べるようにしようかな」。しろい わくを はずして あつみで 立体に */
+.links .pixel-btn .icon {
+  box-sizing: content-box;
+  padding: 5px;
+  color: var(--c);
+  background: #120e26;
+  box-shadow: var(--sink);
+}
+html[data-tiles="block"] .links .pixel-btn {
+  background: #322766;
+  box-shadow:
+    inset 4px 4px 0 rgba(255, 255, 255, 0.2),
+    inset -4px -4px 0 rgba(0, 0, 0, 0.28),
+    1px 1px 0 #181036, 2px 2px 0 #181036, 3px 3px 0 #181036, 4px 4px 0 #181036,
+    5px 5px 0 #181036, 6px 6px 0 #181036, 7px 7px 0 #181036, 8px 8px 0 #181036,
+    9px 9px 0 #000;
+}
+html[data-tiles="block"] .links .pixel-btn:hover,
+html[data-tiles="block"] .links .pixel-btn:focus-visible {
+  background: #3a2e76;
+}
+html[data-tiles="block"] .links .pixel-btn:active {
+  translate: 7px 7px;
+  background: #40338a;
+  box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.3), 1px 1px 0 #181036, 0 0 18px color-mix(in srgb, var(--c) 60%, transparent);
+}
+html[data-tiles="neon"] .links .pixel-btn {
+  background: rgba(18, 12, 44, 0.72);
+  box-shadow:
+    0 0 0 2px var(--c),
+    0 0 14px color-mix(in srgb, var(--c) 45%, transparent),
+    inset 0 0 18px color-mix(in srgb, var(--c) 14%, transparent),
+    inset 0 3px 0 rgba(255, 255, 255, 0.12);
+}
+html[data-tiles="neon"] .links .pixel-btn .icon {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--c) 80%, transparent));
+}
+html[data-tiles="neon"] .links .pixel-btn .link-label {
+  text-shadow: 0 0 6px color-mix(in srgb, var(--c) 60%, transparent);
+}
+html[data-tiles="neon"] .links .pixel-btn:hover,
+html[data-tiles="neon"] .links .pixel-btn:focus-visible,
+html[data-tiles="neon"] .links .pixel-btn:active {
+  background: color-mix(in srgb, var(--c) 32%, rgba(18, 12, 44, 0.72));
+  box-shadow: 0 0 0 3px var(--c), 0 0 26px color-mix(in srgb, var(--c) 80%, transparent), inset 0 0 22px color-mix(in srgb, var(--c) 40%, transparent);
+}
+/* つかんで いる ものは どちらの がらでも 金の わく */
+.links .pixel-btn.dragging {
+  box-shadow: 0 0 0 3px var(--gold), 10px 10px 0 0 rgba(0, 0, 0, 0.5) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-tiles="block"] .links .pixel-btn:active {
+    translate: none;
+  }
+}
+
+/* ---------- まどの なかの ボタン・タブ・きりかえ ---------- */
+.win-btn {
+  box-shadow: var(--raise), 3px 3px 0 #000;
+}
+.win-btn:active {
+  translate: 2px 2px;
+  box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.45), 1px 1px 0 #000;
+}
+.win-btn.danger {
+  box-shadow: 0 0 0 2px var(--accent), 3px 3px 0 #000;
+}
+.win-tabs [role="tab"],
+.seg button {
+  box-shadow: var(--raise);
+}
+.win-tabs [role="tab"][aria-selected="true"],
+.seg button[aria-pressed="true"] {
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.35), inset -3px -3px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- グループの てんてん（下の すきま）：いくつ あって いま どこか ---------- */
+.group-dots {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 156px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+}
+html[data-horizon="none"] .group-dots,
+html.has-photo .group-dots {
+  bottom: 64px;
+}
+.group-dots[hidden] {
+  display: none;
+}
+.group-dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--muted);
+}
+.group-dots span.on {
+  background: var(--gold);
+  box-shadow: 0 0 0 2px rgba(255, 216, 74, 0.25);
+}
+.no-groups .group-dots,
+.editing .group-dots {
+  display: none;
+}
+.seg.seg3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.seg.seg2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#panel-sky h3 {
+  margin: 18px 0 10px;
+}
+#panel-sky h3:first-child {
+  margin-top: 0;
+}
+
+/* ---------- アイコンの いろ（v2.7）：5 この いろ ---------- */
+.color-picks {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.color-pick {
+  height: 34px;
+  border: 0;
+  background: var(--sw);
+  box-shadow: var(--raise);
+  cursor: pointer;
+}
+.color-pick[aria-checked="true"] {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.mylink-icons .mylink-icon {
+  color: var(--c, var(--accent-2));
+}
+
+/* ---------- はりつける（v2.7） ---------- */
+.url-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.url-row .win-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.url-row .win-btn {
+  flex: none;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 14px;
+}

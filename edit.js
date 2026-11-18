@@ -154,21 +154,29 @@ const editMode = (() => {
   const iconsEl = $("sheet-icons");
   let editing = null;
   let icon = "star";
+  let color = "cyan"; // v2.7
   function renderIcons() {
     iconsEl.innerHTML = Object.entries(C.MINE_ICONS)
       .map(([k, v]) => `<button type="button" role="radio" class="mylink-icon" data-icon="${k}" aria-checked="${k === icon}" aria-label="${esc(v.name)}">${pixelSvg(v.rows)}</button>`)
       .join("");
   }
-  // v2.6：リストの リンクは かえられる ものが ない ので しらせる だけ（はずすは 左上の ✕）
+  // v2.7：リストの リンクは いろ だけ（なまえ・アドレス・アイコンは かえられない。はずすは 左上の ✕）。
+  // じぶんの リンクは なまえ・アドレス・アイコン・いろ と「はずす」
   function openSheet(c) {
-    if (!c.mine) return tell("リストのリンクは、名前とアドレスを変えられないよ。");
     editing = c;
     $("sheet-title").textContent = `「${c.label}」を へんしゅう`;
     $("sheet-error").hidden = true;
-    $("sheet-name").value = c.label;
-    $("sheet-url").value = c.url;
-    icon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
-    renderIcons();
+    $("sheet-mine").hidden = !c.mine;
+    $("sheet-shelf").hidden = !!c.mine;
+    $("sheet-out").hidden = !c.mine;
+    color = C.colorOf(c.id);
+    if (c.mine) {
+      $("sheet-name").value = c.label;
+      $("sheet-url").value = c.url;
+      icon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
+      renderIcons();
+    }
+    colorPicks($("sheet-colors"), color, (k) => (color = k), iconsEl);
     sheet.showModal();
     sound.sfx.select();
   }
@@ -180,7 +188,14 @@ const editMode = (() => {
   });
   function save() {
     const c = editing;
-    if (!c?.mine) return sheet.close();
+    if (!c) return sheet.close();
+    if (!c.mine) {
+      C.setColor(c.id, color);
+      sheet.close();
+      groups.render();
+      sound.sfx.coin();
+      return;
+    }
     const name = $("sheet-name").value.trim();
     const url = $("sheet-url").value.trim();
     const msg = !name ? "名前を入力してね。" : C.checkMine(url, c.id);
@@ -190,6 +205,7 @@ const editMode = (() => {
       return;
     }
     C.updateMine(c.id, { label: name, url, icon });
+    C.setColor(c.id, color);
     sheet.close();
     groups.render();
     sound.sfx.coin();
