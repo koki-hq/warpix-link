@@ -3277,16 +3277,12 @@ html[data-tiles="neon"] .links .pixel-btn:active {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 156px;
+  top: 0; /* links.js が リンクの ならぶ ばしょの すぐ 下に */
   z-index: 1;
   display: flex;
   justify-content: center;
   gap: 12px;
   pointer-events: none;
-}
-html[data-horizon="none"] .group-dots,
-html.has-photo .group-dots {
-  bottom: 64px;
 }
 .group-dots[hidden] {
   display: none;

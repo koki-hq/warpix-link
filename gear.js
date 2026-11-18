@@ -114,6 +114,7 @@ const gear = (() => {
     if (!b || b.dataset.horizon === settings.state.horizon) return;
     settings.set({ horizon: b.dataset.horizon });
     renderSky();
+    if (b.dataset.horizon !== "none") pixe.tip("dress-horizon", "けしき、かわった！"); // v2.8
     sound.sfx.select();
   });
   $("tiles-pick").addEventListener("click", (e) => {
@@ -121,6 +122,8 @@ const gear = (() => {
     if (!b || b.dataset.tiles === settings.state.tiles) return;
     settings.set({ tiles: b.dataset.tiles });
     renderSky();
+    if (b.dataset.tiles === "neon") pixe.tip("dress-neon", "わ、まぶしい！\nネオン、にあってる。");
+    else pixe.tip("dress-block", "ブロック、\nおしたくなる かたち だね。");
     sound.sfx.select();
   });
 

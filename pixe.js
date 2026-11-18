@@ -88,14 +88,14 @@ const pixe = (() => {
     warm: {
       late: ["こんな じかんに……\nもしかして よふかし？", "しーっ。\nみんな ねてる じかん だよ。"],
       morning: ["おはよう！\nきょうも いい そら。", "おはよう！\nよく ねむれた？", "おはよう！\nきょうは どこへ ワープする？"],
-      day: ["あ、きてくれた！", "きょうは どこへ\nワープする？"],
+      day: ["あ、きてくれた！", "きょうは どこへ\nワープする？", "あ、きみだ！", "おひるは もう たべた？"],
       evening: ["あ、ほしが\nでてきた。", "きょうも\nおつかれさま。", "よるの そら、\nきれい だよ。"],
     },
     // あって 7 日から（なかよし）。みじかく
     close: {
       late: ["……ふあ。\nきみも ねむれないの？", "よふかし なかま だね。"],
       morning: ["おはよ！", "あ、おはよう。\nまってたよ。", "おはよー。\nきょうも いこっか。"],
-      day: ["や！", "きたきた！", "おっ、きみか。"],
+      day: ["や！", "きたきた！", "おっ、きみか。", "ちょっと ひとやすみ？"],
       evening: ["おつかれ。\nまってたよ。", "おかえり、\nきょうは どうだった？"],
     },
   };
@@ -114,7 +114,33 @@ const pixe = (() => {
     "ぼくを つついても\nワープは しないよ。",
     "UFO、きょうは くるかな。",
     "えへへ。",
+    // v2.8（本人と えらんだ もの）
+    "くすぐったいよ〜",
+    "ぼく、ちょっと ねむい。",
+    "なにか いいこと あった？",
+    "ここ、おちつくね。",
+    "……ぼーっと してた。",
   ];
+  // v2.8：きせつ・けしき・ようび の ひとこと
+  const SEASON = {
+    snow: ["ゆきだ！\nやねが まっしろ。", "さむいね。\nぼくの アンテナも ひえひえ。"],
+    petal: ["はなびら、\nつかまえられた？"],
+    firework: ["あ、はなび！\nいま おおきいの あがったよ。"],
+    leaf: ["はっぱが ひらひら。\nどこまで とんでいくのかな。"],
+  };
+  const WEEK = { 1: "げつようび。\nゆっくり いこうね。", 5: "きんようび だ！\nあと ちょっと。", 6: "おやすみの ひ だね。", 0: "おやすみの ひ だね。" };
+  // つついた とき、いまの けしきに あう もの（ちへいせん・そら）
+  function sceneLines() {
+    const h = settings.state.horizon;
+    const sky = settings.sky();
+    if (document.documentElement.classList.contains("has-photo")) return [];
+    const out = [];
+    if (h === "city" && sky !== "day") out.push("あの まどの あかり、\nいま きえた。");
+    if (h === "city" && sky === "night") out.push("まちの ひと、もう ねたかな。");
+    if (h === "city" && sky === "evening") out.push("ゆうやけの まち、\nちょっと すき。");
+    if (h === "hills") out.push("おかの うえの いえ、\nだれが すんでるんだろう。");
+    return out;
+  }
   // ワープから もどった ときの おみやげばなし は たなの カセットが もつ（cassette.js の back）。ない ときは これ
   const BACK = ["ただいま！ むこうの せかいも\nたのしかったよ。"];
 
@@ -144,6 +170,12 @@ const pixe = (() => {
     if (firstToday && costume) return EVENT[costume.id];
     if (firstToday && gapDays >= 7) return pick(LONG_TIME, "warpix-v2-greet");
     if (!firstToday) return pick(AGAIN, "warpix-v2-greet");
+    // v2.8：その 日 はじめての ときに ときどき きせつ か ようび の ひとこと
+    const season = typeof seasonOf === "function" ? seasonOf() : null;
+    const roll = Math.random();
+    if (season && roll < 0.35) return pick(SEASON[season], "warpix-v2-greet");
+    const week = WEEK[today().getDay()];
+    if (week && roll < 0.55) return week;
     return pick(HELLO[met.days >= 7 ? "close" : "warm"][TIME], "warpix-v2-greet");
   }
 
@@ -185,7 +217,7 @@ const pixe = (() => {
     }, 40);
   }
 
-  let lastChatter = -1;
+  let lastChatter = null;
   // つつくと ジャンプ＋コインの 音（v1 の さわりごこち。本人「ピクセタッチした時に感触変えた？前の方が良かった」）。
   // +10 の かずは コインゲームと いっしょに なくした
   sprite.addEventListener("click", () => {
@@ -194,12 +226,21 @@ const pixe = (() => {
     sprite.classList.remove("jump");
     void sprite.offsetWidth;
     sprite.classList.add("jump");
+    // v2.8：つづけて なんかいも つつくと（3 びょうに 5 かい）
+    const now = performance.now();
+    taps = taps.filter((x) => now - x < 3000).concat(now);
+    if (taps.length >= 5) {
+      taps = [];
+      return say("もう、\nわかった わかった。");
+    }
+    const pool = [...CHATTER, ...sceneLines()];
     let i;
-    do i = Math.floor(Math.random() * CHATTER.length);
-    while (i === lastChatter && CHATTER.length > 1);
-    lastChatter = i;
-    say(CHATTER[i]);
+    do i = Math.floor(Math.random() * pool.length);
+    while (pool[i] === lastChatter && pool.length > 1);
+    lastChatter = pool[i];
+    say(pool[i]);
   });
+  let taps = [];
 
   // ワープで いなく なって いる あいだ
   let away = false;

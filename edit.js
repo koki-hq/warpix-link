@@ -176,7 +176,10 @@ const editMode = (() => {
       icon = C.MINE_ICONS[c.iconKey] ? c.iconKey : "star";
       renderIcons();
     }
-    colorPicks($("sheet-colors"), color, (k) => (color = k), iconsEl);
+    colorPicks($("sheet-colors"), color, (k) => {
+      color = k;
+      pixe.tip("dress-color", "その いろ、いいね。");
+    }, iconsEl);
     sheet.showModal();
     sound.sfx.select();
   }

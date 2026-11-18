@@ -68,7 +68,8 @@ const groups = (() => {
   const PEN = ["......##.", ".....####", "....####.", "...####..", "..####...", ".####....", ".###.....", "##.......", "#........"];
   const tabsEl = $("group-tabs");
   // v2.7：下の すきまに グループの てんてん。よこに うごかせる ことが わかる ように（本人「横ニスワイプできるのがわかりにくい」）。
-  // グループが 1 つ・リンクと かさなる・へんしゅう ちゅうは 出さない
+  // v2.8：リンクの ならぶ ばしょ（リンクの かずに かかわらず おなじ おおきさ）の すぐ 下に。画面の 下から はかると
+  // ちへいせん・はいけい・きしゅで うごいたり きえたり して いた（本人「バラバラなんだけど」）。グループが 1 つ・へんしゅう ちゅうは 出さない
   const dotsEl = $("group-dots");
   function renderDots(n, at) {
     dotsEl.innerHTML = n > 1 ? Array.from({ length: n }, (_, i) => `<span${i === at ? ' class="on"' : ""}></span>`).join("") : "";
@@ -76,13 +77,16 @@ const groups = (() => {
     requestAnimationFrame(fitDots);
   }
   function fitDots() {
-    if (!dotsEl.innerHTML) return;
-    dotsEl.style.visibility = "";
-    const d = dotsEl.getBoundingClientRect();
-    const last = linksEl.lastElementChild?.getBoundingClientRect();
-    if (document.body.classList.contains("editing") || (last && last.bottom + 16 > d.top)) dotsEl.style.visibility = "hidden";
+    if (!dotsEl.innerHTML || linksEl.hidden) return;
+    dotsEl.style.top = `${Math.round(linksEl.getBoundingClientRect().bottom + 2)}px`;
   }
   addEventListener("resize", () => requestAnimationFrame(fitDots));
+  document.fonts?.ready.then(() => requestAnimationFrame(fitDots));
+  // うえの もの（ふきだし・タブ）の たかさが かわると リンクの ばしょも うごくので、そのたびに あわせる
+  if (typeof ResizeObserver !== "undefined") {
+    const ro = new ResizeObserver(() => fitDots());
+    for (const el of linksEl.parentElement.children) ro.observe(el);
+  }
   function renderTabs(list) {
     const at = C.at();
     tabsEl.innerHTML =
@@ -301,7 +305,10 @@ const groups = (() => {
     iconsEl.innerHTML = Object.entries(C.MINE_ICONS)
       .map(([k, v]) => `<button type="button" role="radio" class="mylink-icon" data-icon="${k}" aria-checked="${k === pickedIcon}" aria-label="${esc(v.name)}">${pixelSvg(v.rows)}</button>`)
       .join("");
-    colorPicks($("mylink-colors"), pickedColor, (k) => (pickedColor = k), iconsEl);
+    colorPicks($("mylink-colors"), pickedColor, (k) => {
+      pickedColor = k;
+      pixe.tip("dress-color", "その いろ、いいね。");
+    }, iconsEl);
     $("mylink-error").hidden = true;
     const editing = editingId && C.byId(editingId);
     $("mylink-editing").hidden = !editing;
@@ -414,6 +421,7 @@ const groups = (() => {
     $("mylink-url").value = url;
     fillFrom(url);
     sound.sfx.select();
+    pixe.say("ぺたっ。\nアドレス、はいったよ。");
   });
   // じぶんで 欄に 貼り付けた ときも なまえを うめる
   $("mylink-url").addEventListener("change", (e) => fillFrom(e.target.value.trim()));

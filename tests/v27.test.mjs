@@ -68,7 +68,7 @@ export default {
     await server.close();
   },
 
-  async "タブは カセット、下の すきまに グループの てんてん（いま いる ところが 金）"(t) {
+  async "タブは カセット、リンクの すぐ 下に グループの てんてん（いま いる ところが 金・いちは いつも おなじ、v2.8）"(t) {
     const { server, p } = await openApp(t, { storage: { "warpix-v2-groups": G } });
     t.eq(await p.ev(`[...document.querySelectorAll(".group-tab:not(.plus) .cas-in")].map((x) => x.textContent)`), ["推し", "しごと", "ライブ"], "タブの ラベル");
     const tall = await p.ev(`[document.getElementById("group-sign").offsetHeight, document.querySelector(".group-tab[data-i]").offsetHeight]`);
@@ -77,6 +77,17 @@ export default {
     t.eq(await dots(), [false, 3, 0], "てんてん");
     await p.click('.group-tab[data-i="2"]');
     t.eq(await dots(), [false, 3, 2], "きりかえても かわらない");
+    // v2.8：いつも リンクの ならぶ ばしょの すぐ 下（リンクの かず・ちへいせんに かかわらない）
+    const gap = async () => {
+      await sleep(100);
+      return p.ev(`Math.round(document.getElementById("group-dots").getBoundingClientRect().top - document.getElementById("links").getBoundingClientRect().bottom) || 0`);
+    };
+    const top = () => p.ev(`Math.round(document.getElementById("group-dots").getBoundingClientRect().top)`);
+    const at2 = [await gap(), await top()];
+    await p.click('.group-tab[data-i="0"]');
+    await p.ev(`settings.set({ horizon: "none" })`);
+    t.eq([await gap(), await top()], at2, "グループや ちへいせんで いちが かわる");
+    t.ok(at2[0] >= 1 && at2[0] <= 3, `リンクの すぐ 下に ない（${at2[0]}）`);
     t.noErrors(p);
     await server.close();
   },
