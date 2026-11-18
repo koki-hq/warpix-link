@@ -250,6 +250,63 @@ const pixe = (() => {
     favicon?.refresh();
   }
 
+  // ---------- ひとやすみ（v2.9）：しばらく さわらないと ちへいせんの やね・おかに すわる、もっと たつと ねむる ----------
+  // 本人「可愛い　いいね」。20 びょうで すわる・さらに 1 ぷんで ねむる（本人「案のでいいとおもう」）。
+  // ふきだしは のこす（本人「消したらどうやってセリフ見せるの」）。なにか さわると うえに もどる
+  const [SIT_MS, SLEEP_MS] = window.WARPIX_IDLE ?? [20000, 60000];
+  const seatEl = document.createElement("div");
+  seatEl.className = "pixe-seat";
+  seatEl.setAttribute("aria-hidden", "true");
+  seatEl.hidden = true;
+  document.body.append(seatEl);
+  let rest = null; // null・"sit"・"sleep"
+  let idleAt = performance.now();
+  function sitLine() {
+    const s = typeof seasonOf === "function" ? seasonOf() : null;
+    if (settings.state.horizon === "hills") return "おかの うえ、\nかぜが きもちいい。";
+    if (s === "snow") return "ゆきの やね、\nつめたい！";
+    if (settings.sky() === "evening") return "ゆうやけ、\nここから だと よく みえる。";
+    return "やねの うえ、\nきもちいい〜";
+  }
+  function canRest() {
+    return !away && !document.hidden && !document.querySelector("dialog[open]") && !document.body.classList.contains("editing") && !document.body.classList.contains("no-groups") && typeof horizon !== "undefined";
+  }
+  function sit() {
+    const at = horizon.seat(settings.state.horizon === "hills" ? 0.5 : 0.72);
+    if (!at) return false;
+    seatEl.innerHTML = look() + `<span class="pixe-z">z z</span>`;
+    seatEl.style.left = `${Math.round(at.x)}px`;
+    seatEl.style.top = `${Math.round(at.y)}px`;
+    seatEl.hidden = false;
+    seatEl.classList.remove("sleep");
+    sprite.classList.add("down");
+    rest = "sit";
+    say(sitLine());
+    return true;
+  }
+  function sleep() {
+    rest = "sleep";
+    seatEl.innerHTML = look("blink") + `<span class="pixe-z">z z</span>`;
+    seatEl.classList.add("sleep");
+    say("……すやすや。");
+  }
+  function wake() {
+    idleAt = performance.now();
+    if (!rest) return;
+    rest = null;
+    seatEl.hidden = true;
+    sprite.classList.remove("down");
+  }
+  for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) addEventListener(ev, wake, { capture: true, passive: true });
+  document.addEventListener("visibilitychange", wake);
+  addEventListener("resize", wake);
+  setInterval(() => {
+    const idle = performance.now() - idleAt;
+    if (!rest && idle >= SIT_MS) {
+      if (!canRest() || !sit()) idleAt = performance.now();
+    } else if (rest === "sit" && idle >= SIT_MS + SLEEP_MS) sleep();
+  }, 1000);
+
   // ---------- UFO：ときどき よこぎる。タップで うちおとせる（実績は なし） ----------
   const UFO = ["....cccc....", "...cccccc...", ".wwwwwwwwww.", "wpwwpwwpwwpw", ".wwwwwwwwww.", "...w....w..."];
   const BOOM = [".....pp.....", ".p...pp...p.", "..p..ww..p..", "...p.ww.p...", "....wwww....", "ppwwwwwwwwpp", "ppwwwwwwwwpp", "....wwww....", "...p.ww.p...", "..p..ww..p..", ".p...pp...p.", ".....pp....."];
@@ -333,6 +390,7 @@ const pixe = (() => {
   })();
 
   return {
+    rest: () => rest,
     say,
     greeting,
     guide,

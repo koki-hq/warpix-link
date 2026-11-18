@@ -340,7 +340,23 @@ const horizon = (() => {
   draw();
   if (!reduceMotion) setInterval(twinkle, 4000);
   settings.onChange(draw);
-  return { draw, pause: () => (paused = true), resume: () => (paused = false), kind: () => settings.state.horizon };
+  // v2.9：ピクセが すわる ばしょ（画面の ざひょう）。fx の あたりで いちばん たかい やね・おかの てっぺん。ちへいせんが ない ときは null
+  function seat(fx) {
+    if (settings.state.horizon === "none" || document.documentElement.classList.contains("has-photo") || !cols) return null;
+    const r = canvas.getBoundingClientRect();
+    const data = c.getImageData(0, 0, cols, ROWS).data;
+    const mid = Math.floor(cols * fx);
+    let best = null;
+    for (let x = Math.max(0, mid - 6); x <= Math.min(cols - 1, mid + 6); x++)
+      for (let y = 0; y < ROWS; y++)
+        if (data[(y * cols + x) * 4 + 3] > 0) {
+          if (!best || y < best.y) best = { x, y };
+          break;
+        }
+    if (!best) return null;
+    return { x: r.left + (best.x + 0.5) * (r.width / cols), y: r.top + best.y * (r.height / ROWS) };
+  }
+  return { draw, seat, pause: () => (paused = true), resume: () => (paused = false), kind: () => settings.state.horizon };
 })();
 
 // ---------- きせつの そら（v2.7）：ドットの つぶが ゆっくり ふる。1 びょうに 10 かい だけ かく（でんち） ----------
