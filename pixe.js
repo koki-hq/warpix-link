@@ -265,7 +265,6 @@ const pixe = (() => {
   // v2.11：しゅんかん いどう を やめて ワープゲート（本人「ワープゲートに入る感じが良かった」）。でる まえに ひとこと、
   //   ついて 2.5 びょう は だまって けしきを みる（本人：ついて すぐ しゃべるのは びみょう）。ほしの えんしゅつは なし
   //   （本人：まいかい だと やりすぎ）。おとは いく とき ヒュッ・つく とき ポン（本人「いき４、つく３」）。
-  //   ほうって おいて いる あいだの ひとことは もじおくりの おとを ならさない
   // v2.11：でかけるまで 20 → 45 びょう（本人：20 びょう だと はやい、1 ぷん だと おそい）
   const [SIT_MS, SLEEP_MS, WALK_MS = 30000, BACK_MS = 5000] = window.WARPIX_IDLE ?? [45000, 60000];
   const T = { announce: 1500, sink: 500, gap: 500, pop: 450, look: 2500 };
@@ -291,7 +290,8 @@ const pixe = (() => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const SPOTS = [0.16, 0.32, 0.5, 0.72, 0.86];
   const MURMUR = ["ここから みると、\nそらが ひろい。", "かぜが きもちいい〜"];
-  const hush = (line) => say(line, { quiet: true });
+  // v2.11.1：ほうって おいて いる あいだの ひとことも もじおくりの おとを ならす（本人：おとが ないと しゃべった かんじが しない）
+  const hush = (line) => say(line);
   function sitLine() {
     const s = typeof seasonOf === "function" ? seasonOf() : null;
     if (settings.state.horizon === "hills") return "おかの うえ、\nかぜが きもちいい。";
