@@ -266,7 +266,8 @@ const pixe = (() => {
   //   ついて 2.5 びょう は だまって けしきを みる（本人：ついて すぐ しゃべるのは びみょう）。ほしの えんしゅつは なし
   //   （本人：まいかい だと やりすぎ）。おとは いく とき ヒュッ・つく とき ポン（本人「いき４、つく３」）。
   //   ほうって おいて いる あいだの ひとことは もじおくりの おとを ならさない
-  const [SIT_MS, SLEEP_MS, WALK_MS = 30000, BACK_MS = 5000] = window.WARPIX_IDLE ?? [20000, 60000];
+  // v2.11：でかけるまで 20 → 45 びょう（本人：20 びょう だと はやい、1 ぷん だと おそい）
+  const [SIT_MS, SLEEP_MS, WALK_MS = 30000, BACK_MS = 5000] = window.WARPIX_IDLE ?? [45000, 60000];
   const T = { announce: 1500, sink: 500, gap: 500, pop: 450, look: 2500 };
   const HOLE = ["....cccccc....", "..ccppppppcc..", ".cpoooooooopc.", ".cpoooooooopc.", "..ccppppppcc..", "....cccccc...."];
   const seatEl = document.createElement("div");
