@@ -9,6 +9,7 @@ const lds = (html) => [...html.matchAll(/<script type="application\/ld\+json">([
 export default {
   async "トップは canonical、入口（x ig tt yt）は noindex で かぞえる しくみは そのまま"(t) {
     t.ok(read("index.html").includes('<link rel="canonical" href="https://link.warpix.app/">'), "トップに canonical が ない");
+    t.ok(read("index.html").includes("<p>無料・登録なしで使えます。</p>"), "この アプリについて に 無料・登録なし が ない（よくある しつもんの こたえと そろえる）");
     for (const d of ["x", "ig", "tt", "yt"]) {
       const h = read(`${d}/index.html`);
       t.ok(h.includes('<meta name="robots" content="noindex">'), `${d} に noindex が ない`);
