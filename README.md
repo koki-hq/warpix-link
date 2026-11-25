@@ -47,8 +47,8 @@ v2.0（2026-11）で、ピクセの へやや ゲームなどの お遊びを �
 | `manual.js` | とりあつかい せつめいしょ・はじまり |
 | `count.js` / `config.js` | きた ひとの かず（Cloudflare Web Analytics） |
 | `sw.js` / `manifest.webmanifest` | オフライン・ホーム画面 |
-| `robots.txt` / `sitemap.xml` | けんさくエンジン むけ（`index.html` の なふだ：別名と WARPIX の 一部） |
-| `x/` `ig/` `tt/` `yt/` | SNS の プロフィールからの 入口（かぞえて 本体へ） |
+| `robots.txt` / `sitemap.xml` / `llms.txt` | けんさくエンジン・AI むけ（`index.html` の なふだ：canonical・別名・WARPIX の 一部・アプリ（無料）・よくある しつもん。sitemap の lastmod は 公開の 日に） |
+| `x/` `ig/` `tt/` `yt/` | SNS の プロフィールからの 入口（かぞえて 本体へ。けんさくには ださない noindex） |
 | `fonts/` | 日本語の ドット文字（使う 文字 だけに した DotGothic16） |
 | `tests/` / `tools/` | テスト・健康診断・フォントづくり |
 
@@ -62,7 +62,7 @@ v2.0（2026-11）で、ピクセの へやや ゲームなどの お遊びを �
 ## テストと健康診断
 
 ```sh
-node tests/run.mjs            # ぜんぶの テスト（82 件。あいて いる メモリで 2〜5 つ 同時に）
+node tests/run.mjs            # ぜんぶの テスト（85 件。あいて いる メモリで 2〜5 つ 同時に）
 node tests/run.mjs links      # 名前に links を含むテストだけ
 node tools/health.mjs         # 重さ・スマホでの速さ・待機中の CPU・アクセシビリティ
 node tools/fonts.mjs          # セリフや 文章に あたらしい 文字を つかったら
